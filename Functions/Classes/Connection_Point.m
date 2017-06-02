@@ -158,11 +158,15 @@ classdef Connection_Point < handle
 			for i = 1:numel(obj)
 				voltage = zeros(1,3);
 				LFNodeResultLoad = obj(i).Node_Obj.Result('ULFNodeResult', 0);
-				voltage(1,1) = LFNodeResultLoad.get('Item','U1');
-				voltage(1,2) = LFNodeResultLoad.get('Item','U2');
-				voltage(1,3) = LFNodeResultLoad.get('Item','U3');
-				voltage = voltage*1000; % Umrechnen von kV in V
-				obj(i).Voltage = voltage;
+                if ~isempty(LFNodeResultLoad)
+                    voltage(1,1) = LFNodeResultLoad.get('Item','U1');
+                    voltage(1,2) = LFNodeResultLoad.get('Item','U2');
+                    voltage(1,3) = LFNodeResultLoad.get('Item','U3');
+                    voltage = voltage*1000; % Umrechnen von kV in V
+                    obj(i).Voltage = voltage;
+                else
+                    % Fehlerbehandlung?!?
+                end
 			end
 		end
 		

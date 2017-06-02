@@ -6,13 +6,11 @@ function str = sec2str(t)
 %    der Zahlendarstellung angepasst.
 
 % Erstellt von:            Franz Zeilinger - 11.08.2010
-% Letzte Änderung durch:   Franz Zeilinger - 11.07.2012
+% Letzte Änderung durch:   Franz Zeilinger - 27.02.2013
 
 sec_lin = datenum('1900-01-01 00:00:01')-datenum('1900-01-01 00:00:00');
 date = datenum('1900-01-01 00:00:00')+t*sec_lin;
-h = hour(date);
-min = minute(date);
-sec = second(date);
+[~,~,~,h,min,sec] = datevec(date);
 if (h > 0)
 	str = [num2str(h),'h ',...
 		num2str(min),' min ',num2str(floor(sec)),' sec'];

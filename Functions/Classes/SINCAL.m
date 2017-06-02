@@ -7,27 +7,39 @@ classdef SINCAL < handle
 	%    SINCAL relevanten Variablen und Methoden zusammenzufassen.
 	
 	% Erstellt von:            Franz Zeilinger - 30.10.2012
-	% Letzte Änderung durch:   Franz Zeilinger - 28.01.2013
+	% Letzte Änderung durch:   Franz Zeilinger - 29.01.2013
 	
 	properties
-		Settings                % Struktur mit den aktuellen Einstellungen
-		Valid_Database = false  % Ist eine gültige Verbindung zu einer Datenbank
-		%                             aktiv?
-		Tables                  % Struktur mit den bisher ausgelesenen Tabellen
+		Settings                
+	%        Struktur mit den aktuellen Einstellungen
+		Valid_Database = false  
+	%        Ist eine gültige Verbindung zu einer Datenbank aktiv?
+		Valid_Document = false  
+	%        Ist das aktuelle Netz in der SINCAL-Oberfläche aktiv?	
+		Tables                  
+	%        Struktur mit den bisher ausgelesenen Tabellen
 	end
 	
 	properties (Hidden)
-		Database                % aktuelle Datenbank
-		Constants               % Sammlung von notwendigen Konstanten
-		new_database_path = 0   % Neuer Datenbankpfad wurde gesetzt.
-		new_database_name = 0   % Neuer Datenbankname wurde gesetzt.
-		SimulationSrv = [];     % COM-Objekt eines SINCAL-Simulationsservers
-		%                             (eigener Prozess)
-		Simulation = [];        % COM-Objekt einer SINCAL-Berechnung (eigentliches
-		%                             Objekt, über das Lastflussrechnung gesteuert
-		%                             wird.
-		NetworkDataSource = []; % COM-Objekt für Zugriff auf virtuelle Datenbank des
-		%                             aktuellen Netzes
+		Constants               
+	%        Sammlung von notwendigen Konstanten
+		Database                
+	%        aktuelle Datenbank
+		new_database_path = 0   
+	%        Neuer Datenbankpfad wurde gesetzt.
+		new_database_name = 0   
+	%        Neuer Datenbankname wurde gesetzt.
+		SimulationSrv = [];     
+	%        COM-Objekt eines SINCAL-Simulationsservers (eigener Prozess)
+		Simulation = [];        
+	%        COM-Objekt einer SINCAL-Berechnung (eigentliches Objekt, über das
+	%        Lastflussrechnung gesteuert wird.
+		NetworkDataSource = []; 
+	%        COM-Objekt für Zugriff auf virtuelle Datenbank des aktuellen Netzes.
+		Application = []; 
+	%        COM-Objekt für Zugriff auf SINCAL Anwendung (GUI).	
+		Document = []; 
+	%        COM-Objekt für Zugriff Dokument in SINCAL-Oberfläche.		
 	end
 	
 	methods
@@ -51,6 +63,15 @@ classdef SINCAL < handle
 			obj.Constants.Input_Mask.Short_Circiut   = '00000002'; %Daten für Kurzschluss vorhanden
 			obj.Constants.Input_Mask.Unsym_Loadflow  = '00000400'; %Unsymmetrischer Lastfluss
 			
+			obj.Constants.Application.AutoSelResetAll  = 0;
+			obj.Constants.Application.AutoSelUpdateAll = 1;
+			obj.Constants.Application.AutoSelNode      = 2;
+			obj.Constants.Application.AutoSelElement   = 3;
+			
+			obj.Constants.Application.AutoUpdateResults    = 2;
+			obj.Constants.Application.AutoUpdateRedrawView = 4;
+			obj.Constants.Application.AutoCalcLF           = 38;
+			
 			% Default-Einstellungen:
 			obj.Settings.Calculation_method = 'LF_USYM';
 			obj.Settings.Batch_mode  = 4;
@@ -67,6 +88,12 @@ classdef SINCAL < handle
 			%OPEN_DATABASE     erzeugt SINCAL Simulationsobjekt u. lädt die Datenbank
 			%    genaue Beschreibung fehlt!
 			
+			% Falls bereits eine Datenbank geöffnet ist, diese zuvor schließen:
+			if obj.Valid_Database
+				obj.close_database;
+			end
+			
+			% Überprüfen, ob eine Datenbank angegeben wurde:
 			if isempty(obj.Database)
 				exception = MException(...
 					'SINCAL:OpenDataBase:NoDatabaseSpecified',...
@@ -89,7 +116,9 @@ classdef SINCAL < handle
 				% SINCAL-Simulationsobjekt als "in process server" erzeugt werden,
 				% d.h. innerhalb des MATLAB-Prozesses (Vorteil: Nutzung des
 				% gemeinsamen Arbeitsspeicherbereichs --> schnellerer
-				% Datenaustausch).
+                % Datenaustausch).
+%                 obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
+%                 obj.Simulation = obj.SimulationSrv.GetSimulation;
 				obj.Simulation = actxserver('Sincal.Simulation');
 			else
 				exception = MException(...
@@ -161,6 +190,54 @@ classdef SINCAL < handle
 					'SINCAL:OpenDataBase:LoadVirtualDataBaseFailed',...
 					'Loading of the virtual database failed!');
 				throw(exception);
+			end
+		end
+		
+		function open_application_and_file(obj)
+			reopen = false;
+			if obj.Valid_Database
+				obj.close_database;
+				reopen = true;
+			end
+			
+			obj.Application = actxserver('SIASincal.Application');
+			if isempty(obj.Application)
+				exception = MException('SINCAL:OpenApplication:Failed',...
+					'The opening of the SINCAL Application failed!');
+				throw(exception);
+			end
+			% Das Netz in der SINCAL-Oberfläche öffnen:
+			obj.Document = obj.Application.OpenDocument(obj.Database.SINfilename);
+			if isempty(obj.Document)
+				exception = MException('SINCAL:OpenDocument:Failed',...
+					'The opening of the specified SINCAL document failed!');
+				throw(exception);
+			end
+			
+			if reopen
+				obj.open_database
+			end
+			
+			obj.Valid_Document = true;
+		end
+		
+		function gui_select_element(obj, el_id)
+			if obj.Valid_Document
+				obj.Document.SelectNetworkObject(...
+					obj.Constants.Application.AutoSelResetAll, 0);
+				obj.Document.SelectNetworkObject(...
+					obj.Constants.Application.AutoSelElement, ...
+					el_id);
+				obj.Document.SelectNetworkObject(...
+					obj.Constants.Application.AutoSelUpdateAll, 0);
+			end
+		end
+		
+		function close_file(obj)
+			if obj.Valid_Document
+				obj.Document = [];
+				obj.Application.CloseDocument(obj.Database.SINfilename);
+				obj.Valid_Document = false;
 			end
 		end
 		
@@ -297,6 +374,7 @@ classdef SINCAL < handle
 				throw(exception);
 			end
 		end
+		
 	end
 	
 	methods (Hidden)
@@ -341,12 +419,10 @@ classdef SINCAL < handle
 					obj.Settings.Grid_path = path;
 					obj.new_database_path = 0;
 					obj.new_database_name = 0;
-					if obj.Valid_Database
-						% Falls alte Datenbank bereits geöffnet war, diese schließen
-						% und die neue öffnen:
-						obj.close_database;
-						obj.open_database;
-					end
+					
+					% die neue Datenbank öffnen:
+					obj.open_database;
+
 				catch ME
 					% Wenn nicht --> Fehlermeldung
 					exception = MException('SINCAL:Database:FilesDontExist',...
