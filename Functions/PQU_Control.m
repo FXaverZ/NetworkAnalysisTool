@@ -1,4 +1,4 @@
-classdef U_Control < SG_Controller
+classdef PQU_Control < SG_Controller
 	%U_CONTROL     Klasse der simplen Spannungsregler mit P-&Q-Injektion
 	%    Detailierte Beschreibung fehlt!
 	%
@@ -89,10 +89,30 @@ classdef U_Control < SG_Controller
 	%        [MW/V]
 	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
 	%        Controllers.		
+		dQmax_dStep = Inf;
+	%        [MVAr/Rechenschritt]
+	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
+	%        Controllers.
+		Q_max = Inf;
+	%        [MVAr]
+	%        maximal mögliche Gesamt-Leistungsänderung (Lasterhöhung) dieses
+	%        Controllers.
+		Q_min =-Inf;
+	%        [MVAr]
+	%        maximal mögliche Gesamt-Leistungsänderung (Einspeisung) dieses
+	%        Controllers.
+		dQ_min =Inf;
+	%        [MVAr]
+	%        minimale Leistungsänderung des Controllers. Verändert sich die Leistung
+	%        nur mehr unterhalb dieses Grenzwertes, ist der Regler eingeschwungen.
+		dQ_dV = 1;
+	%        [MVAr/V]
+	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
+	%        Controllers.	
 	end
 	
 	methods
-		function obj = U_Control (varargin)
+		function obj = PQU_Control (varargin)
 			obj = obj@SG_Controller(varargin{:});
 		end
 		
@@ -101,26 +121,45 @@ classdef U_Control < SG_Controller
 			for i=1:numel(obj)
 				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:) = zeros(1,6);
 				obj(i).Connection_Point.powers_changed = true;
-				obj(i).Values_Last_Step = [];
+				obj.Values_Last_Step = [];
 			end
 		end
 		
 		function regulate(obj)
+			%REGULATE    Regelungsberechnungen ausführen
+			
 			for i=1:numel(obj)
 				obj(i).check_success;
+				
 				% Werte des letzten Schrittes speichern:
 				obj(i).Values_Last_Step = ...
 					obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:);
+				
+				% Regelungsberechnungen, zuerst Q einstellen:
+				dQ_tot = obj(i).Values_Last_Step(2:2:6);
+				d_Q = obj(i).dQ_dV .* (obj(i).Connection_Point.Voltage ...
+					- obj(i).Setpoint);
+				d_Q(d_Q > obj(i).dQmax_dStep) = obj(i).dQmax_dStep;
+				dQ_tot = dQ_tot + d_Q;
+				dQ_tot(dQ_tot > obj(i).Q_max) = obj(i).Q_max;
+				dQ_tot(dQ_tot < obj(i).Q_min) = obj(i).Q_min;
+				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,2:2:6) = dQ_tot;
+				obj(i).Connection_Point.powers_changed = true;
+				
+				% Wo ist Blindleistungsregelung in Begrenzung?
+				idx = (dQ_tot == obj(i).Q_max | dQ_tot == obj(i).Q_min);
 				dP_tot = obj(i).Values_Last_Step(1:2:6);
-				volt_act = obj(i).Connection_Point.Voltage;
-				d_P = obj(i).dP_dV .* (volt_act - obj(i).Setpoint);
+				d_P = obj(i).dP_dV .* (obj(i).Connection_Point.Voltage ...
+					- obj(i).Setpoint);
 				d_P(d_P > obj(i).dPmax_dStep) = obj(i).dPmax_dStep;
 				% Neue Leistungswerte in P_Q_Array schreiben:
 				dP_tot = dP_tot + d_P;
 				dP_tot(dP_tot > obj(i).P_max) = obj(i).P_max;
 				dP_tot(dP_tot < obj(i).P_min) = obj(i).P_min;
+				% Nur in jenem Zweig regeln, in dem Blindleistung in Begrenzung:
+				dP_tot(~idx) = 0;
 				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,1:2:6) = dP_tot;
-				obj(i).Connection_Point.powers_changed = true;
+		
 			end
 		end
 		
@@ -137,7 +176,7 @@ classdef U_Control < SG_Controller
 			% Finden nur mehr kleine Leistungsänderungen statt?
 			diff = obj.Values_Last_Step - ...
 				obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
-			if all(abs(diff(1:2:6)) < obj.dP_min)
+			if all([abs(diff(1:2:6)) < obj.dP_min, abs(diff(2:2:6)) < obj.dQ_min])
 				success = true;
 				obj.Connection_Point.controller_finished = ...
 					obj.Connection_Point.controller_finished & true;
@@ -255,6 +294,61 @@ classdef U_Control < SG_Controller
 						throw(exception);
 					end
 				case 'dP_min'
+					% Muss eine Zahl sein
+					if isnumeric (input)
+						obj.(parameter_name) = input;
+					else
+						exception = MException(...
+							'U_CONTROL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
+				case 'dQmax_dStep'
+					% Muss eine Zahl sein
+					if isnumeric (input)
+						obj.(parameter_name) = input;
+					else
+						exception = MException(...
+							'U_CONTROL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
+				case 'dQ_dV'
+					% Muss eine Zahl sein
+					if isnumeric (input)
+						obj.(parameter_name) = input;
+					else
+						exception = MException(...
+							'U_CONTROL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
+				case 'Q_max'
+					% Muss eine Zahl sein
+					if isnumeric (input)
+						obj.(parameter_name) = input;
+					else
+						exception = MException(...
+							'U_CONTROL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
+				case 'Q_min'
+					% Muss eine Zahl sein
+					if isnumeric (input)
+						obj.(parameter_name) = input;
+					else
+						exception = MException(...
+							'U_CONTROL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
+				case 'dQ_min'
 					% Muss eine Zahl sein
 					if isnumeric (input)
 						obj.(parameter_name) = input;

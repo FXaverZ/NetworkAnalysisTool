@@ -1,0 +1,15 @@
+Ohne Zwischenausgaben (1200 Zeitpunkte, Sekunden-Profil):
+----
+Starte Simulation ohne Regelung...
+Berechnungen beendet nach 1 min 22 sec
+----
+Starte Simulation mit Regelung...
+Berechnungen beendet nach 3 min 16 sec
+
+mit Zwischenausgaben (1200 Zeitpunkte, Sekunden-Profil):
+----
+Starte Simulation ohne Regelung...
+Berechnungen beendet nach 1 min 45 sec
+----
+Starte Simulation mit Regelung...
+Berechnungen beendet nach 3 min 46 sec
