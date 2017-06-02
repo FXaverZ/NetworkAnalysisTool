@@ -137,19 +137,28 @@ classdef Connection_Point < handle
 		function p_q = update_power(obj)
 			% Auswahl aller Objekte, für die eine Änderung in der Leistungsaufnahme
 			% vorliegt:
-			obj_s = obj([obj.powers_changed]);
+% 			obj_s = obj([obj.powers_changed]);
+            obj_s = obj;
 			% Über diese Elemente iterieren, das Berechnungsobjekt "Last"
 			% aktualisieren sowie dies in OBJ.POWERS_CHANGED festhalten:
 			for i=1:numel(obj_s)
 				p_q = obj_s(i).P_Q_Act;
-				p_q = sum(p_q,1);
+				p_q = sum(p_q,1);           
+                 
 				obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));
 				obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
 				obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
 				obj_s(i).P_Q_Obj.set('Item','Q2',p_q(4));
 				obj_s(i).P_Q_Obj.set('Item','P3',p_q(5));
 				obj_s(i).P_Q_Obj.set('Item','Q3',p_q(6));
-				obj_s(i).powers_changed = false;
+                
+                % -- changelog v1.1b ##### (start) // 20130415
+				obj_s(i).P_Q_Obj.set('Item','P',p_q(1)+p_q(3)+p_q(5));
+				obj_s(i).P_Q_Obj.set('Item','Q',p_q(2)+p_q(4)+p_q(6));
+                % -- changelog v1.1b ##### (end) // 20130415
+                
+                
+                obj_s(i).powers_changed = false;
 			end
 		end
 		

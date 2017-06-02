@@ -122,11 +122,14 @@ for k=1:Current_Settings.Simulation.Timepoints
 	% within the NAT_Data-object, on which this function has access, no
 	% return value is neccesary:
     
-% -- changelog v1.1b ##### (start) // 20130411
-	on_line_voltage_analysis(handles); %%CH_MA
- % -- changelog v1.1b ##### (end) // 20130411
+    % -- changelog v1.1b ##### (start) // 20130411
+	online_voltage_analysis(handles); %%CH_MA
+    % -- changelog v1.1b ##### (end) // 20130411
 
-	
+    % -- changelog v1.1b ##### (start) // 20130415
+    online_branch_violation_analysis(handles);
+    % -- changelog v1.1b ##### (end) // 20130415
+
 	% alle Last-Knoten-Spannungen auslesen:
 	d.Grid.P_Q_Node.Points.update_voltage_node_LF_USYM;
 	d.Result.Grid.Load.node_voltage(:,:,k) = vertcat(d.Grid.P_Q_Node.Points.Voltage);
@@ -148,7 +151,6 @@ fprintf('\t\t--> erledigt!\n');
 fprintf(['\tBerechnungen beendet nach ',sec2str(t)]);
 
 handles.Current_Settings = Current_Settings;
-
 handles = adopt_data_for_display(handles);
 
 end

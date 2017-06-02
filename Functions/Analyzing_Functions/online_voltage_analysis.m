@@ -1,8 +1,9 @@
-function handles = analyzing_function_1(handles)
-%ANALYZING_FUNCTION_1    dummy of an analyzing function
+function handles = online_voltage_analysis(handles)
+%ON_LINE_VOLTAGE_ANALAYSIS - voltage_analysis
+%exANALYZING_FUNCTION_1    dummy of an analyzing function
 %    This function represents the body of an anlayzing function for
 %    "on-line" analyzing simulation results within the NAT.
-%
+
 %    This function has to know:
 %      -  the current timepoint, which is simulated (e.g. time of day)
 %      -  the used "set" of input values
@@ -11,6 +12,22 @@ function handles = analyzing_function_1(handles)
 %         MATLAB) in order to allow a mapping of the results. The Mapping
 %         is done automatically, if the objects of the MATLAB Grid
 %         representation (Structure "Grid") are used (see examples below) 
+
+%    d.Result.Grid.(cg).Voltages (cd,ct,:,:)
+%      -  Node voltages that can be stored in V or in percentages. 
+%      -  1st dim. is dataset used, 2nd dim. is current timepoint, 3rd
+%      -  dimension is node (row), 4th dimension is phase value (column)
+%      %%%To be defined if we want to store voltages in this function or use a seperate function?
+% 
+%    d.Result.Grid.(cg).Voltage_Violation(cd,ct,:)
+%      - Voltage limit exceeded condition array (on-line check)
+%      - Values are either 0 (node voltage does not exceed limit), 1 (node
+%      - voltage exceeds first limit) or 2 (node voltages exceed the second
+%      - voltage limit). If both voltage limits are the same, values can
+%      - either be 0 or 1
+%      -  1st dim. is dataset used, 2nd dim. is current timepoint, 3rd
+%      -  dimension is nodal condition value (row)
+
 
 % Getting access to the data-object
 d = handles.NAT_Data;
@@ -25,6 +42,11 @@ cg = d.Simulation.Grid_act;
 % current active dataset (also as integers?):
 cd = d.Simulation.Input_Data_act;
 
+%---- temporary (to define later)
+save_voltage_values = 1; % save voltage values in V
+% % save_voltage_values = 2; % save voltage values in % (norm. on Urated)
+% % save_voltage_values = 0; % do not save the values of node voltages
+%---------
 
 % Voltage_Violation_analysis value is used for preallocating the
 % on-line result array
@@ -32,9 +54,10 @@ if ~isfield(d.Simulation, 'Voltage_Violation_analysis')
 	d.Simulation.Voltage_Violation_analysis = 0;   
     % Voltage_Violation_analysis value is used for preallocating the
     % on-line result array
-        % 0 ... no voltage violation analysis performed,
+        % 0 ... no voltage violation analysis yet performed,
         % first preallocation for first active dataset
 end
+
 if ~isfield(d.Simulation, 'Voltage_Violation_limits')
     d.Simulation.Voltage_Violation_limits = 0;
     % Voltage_Violation_limits value is used to determine whether two
@@ -58,6 +81,14 @@ if strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_USYM') % Unsymet
         d.Result.Grid.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
             handles.Current_Settings.Simulation.Timepoints,...
             numel(d.Grid.All_Node.Points));        
+
+        if save_voltage_values > 0 
+            % If voltages will be saved preallocation of arrays are
+            % performed
+            d.Result.Grid.(cg).Voltages(cd,:,:,:) = zeros(1,...
+                handles.Current_Settings.Simulation.Timepoints,...
+                numel(d.Grid.All_Node.Points),3);  % Three phase values                  
+        end    
         
     elseif d.Simulation.Voltage_Violation_analysis == 1 & ...
             size(d.Result.Grid.(cg).Voltage_Violation,1) < cd
@@ -66,18 +97,30 @@ if strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_USYM') % Unsymet
         % preallocation is performed (size(...,1))
         d.Result.Grid.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
             handles.Current_Settings.Simulation.Timepoints,...
-            numel(d.Grid.All_Node.Points));        
+            numel(d.Grid.All_Node.Points));    
+        % This elseif condition is used so first dataset values are not 
+        % overwritten at preallocation step
+        
+        if save_voltage_values > 0 
+            % If voltages will be saved preallocation of arrays are
+            % performed
+            d.Result.Grid.(cg).Voltages(cd,:,:,:) = zeros(1,...
+                handles.Current_Settings.Simulation.Timepoints,...
+                numel(d.Grid.All_Node.Points),3);  % Three phase values                  
+        end  
+        
     end
 
     % Update voltages at all nodes for unsymmetrical loadflow
     d.Grid.All_Node.Points.update_voltage_node_LF_USYM;
     node_voltages = vertcat(d.Grid.All_Node.Points.Voltage);
     
-    % d.Grid.All_Node.Points.define_voltage_limits;
+    % d.Grid.All_Node.Points.define_voltage_limits; % <---------
         % This can be accessed during on-line calculations or at the
         % network_load start. If voltage limits will be changed during the
         % calculation phase, it is sensible to recheck the values, otherwise we
         % can only check the voltage limits once.  
+        
      node_rated_voltages = vertcat(d.Grid.All_Node.Points.Rated_Voltage_phase_earth);
      
      node_voltages_pu = node_voltages ./ node_rated_voltages;
@@ -124,29 +167,68 @@ if strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_USYM') % Unsymet
          % exceeded) and 2 (both voltage limits exceeded)!         
      end
      
-%      d.Result.Grid.(cg).Voltages(cd,ct,:,:) = 
+     if save_voltage_values == 1
+         d.Result.Grid.(cg).Voltages(cd,ct,:,:) = node_voltages;
+         % Voltages saved in V values
+     elseif save_voltage_values == 2
+         d.Result.Grid.(cg).Voltages(cd,ct,:,:) = 100*node_voltages_pu;
+         % Voltages saved in % values
+     end
+  
      
-     
-   
+elseif strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_NR') % Unsymetric load flow
+    % Symmetrical loadflow calculation
+    
+    if d.Simulation.Voltage_Violation_analysis == 0  
+        
+        % d.Simulation.Voltage_Violation_analysis value is set to 1, i.e.
+        % the first preallocation has been performed for the first active
+        % dataset
+        d.Simulation.Voltage_Violation_analysis = 1;   
+        
+        % If voltage violation array does not exist yet for this topology
+        % model and for this Input_Data_act, preallocation of the array is performed 
+        d.Result.Grid.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
+            handles.Current_Settings.Simulation.Timepoints,...
+            numel(d.Grid.All_Node.Points));        
+
+        if save_voltage_values > 0 
+            % If voltages will be saved preallocation of arrays are
+            % performed
+            d.Result.Grid.(cg).Voltages(cd,:,:,:) = zeros(1,...
+                handles.Current_Settings.Simulation.Timepoints,...
+                numel(d.Grid.All_Node.Points),1);  % One! phase values                  
+        end    
+        
+    elseif d.Simulation.Voltage_Violation_analysis == 1 & ...
+            size(d.Result.Grid.(cg).Voltage_Violation,1) < cd
+        
+        % If more than one active dataset is used, additional 1st dimension
+        % preallocation is performed (size(...,1))
+        d.Result.Grid.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
+            handles.Current_Settings.Simulation.Timepoints,...
+            numel(d.Grid.All_Node.Points));    
+        % This elseif condition is used so first dataset values are not 
+        % overwritten at preallocation step
+        
+        if save_voltage_values > 0 
+            % If voltages will be saved preallocation of arrays are
+            % performed
+            d.Result.Grid.(cg).Voltages(cd,:,:,:) = zeros(1,...
+                handles.Current_Settings.Simulation.Timepoints,...
+                numel(d.Grid.All_Node.Points),1);  % One! phase values                  
+        end  
+        
+    end
+    
+    disp('Not defined for NR loadflow yet!')
+    
+    
+    
+    
+    
 end
         
-     
 
-        
-
-
-% also the Tables of the SINCAL-Object are accessable to write own
-% functions:
-% % % handles.sin.Tables.Element;
-% as well as all other object of the SINCAL-automatization.
-
-
-% The Results are stored in the structure "Grid" within the "Result"-Structure:
-% % % d.Result.Grid.Grid_act = [];
-% I would propose an array like this
-% % % d.Result.Grid.(cg)(cd,ct,:,:) = load_node_voltages;% = "payload"
-% The payload is also as a 2D-Array, where the rows are mapped to the
-% elements, which are investigated (e.g. branches), the columns are the data of
-% interest (e.g. rating of overcurrent).
 end
 

@@ -36,19 +36,24 @@ data_o.Grid.P_Q_Node.ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Load',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
-data_o.Grid.Branches.ids = cell2mat(sin.Tables.Element(...
+% -- changelog v1.1b ##### (start) // 20130415
+data_o.Grid.Branches.line_ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Line',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
+
+data_o.Grid.Branches.tran_ids = cell2mat(sin.Tables.Element(...
+	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'TwoWindingTrans',15),...
+	strcmp(sin.Tables.Element(1,:),'Element_ID')...
+	));
+% -- changelog v1.1b ##### (end) // 20130415
+
 
 % -- changelog v1.1b ##### (start) // 20130411
 data_o.Grid.All_Node.ids = cell2mat(sin.Tables.Node(2:end,...
 	strcmp(sin.Tables.Node(1,:),'Node_ID')...
 	)); 
 % -- changelog v1.1b ##### (end) // 20130411
-
-
-
 
 %------------------------------------------------------------------------------------
 % Verbindungspunkte anlegen (jede Last im SINCAL-Netz entspricht einem Knoten, an dem
@@ -67,19 +72,38 @@ end
 data_o.Grid.All_Node.Points.define_voltage_limits;
 % -- changelog v1.1b ##### (end) // 20130411
 
-data_o.Grid.Branches.Lines = Branch.empty(numel(data_o.Grid.Branches.ids),0);
-for i=1:numel(data_o.Grid.Branches.ids)
-    data_o.Grid.Branches.Lines(i) = Branch(sin, data_o.Grid.Branches.ids(i));
+% -- changelog v1.1b ##### (start) // 20130415
+% Define lines!
+data_o.Grid.Branches.Lines = Branch.empty(numel(data_o.Grid.Branches.line_ids),0);
+for i=1:numel(data_o.Grid.Branches.line_ids)
+    data_o.Grid.Branches.Lines(i) = Branch(sin, data_o.Grid.Branches.line_ids(i));
 end
+% Define branch-line limits
+data_o.Grid.Branches.Lines.define_branch_limits;
+
+% Define transformers
+data_o.Grid.Branches.Transf = Branch.empty(numel(data_o.Grid.Branches.tran_ids),0);
+for i=1:numel(data_o.Grid.Branches.tran_ids)
+    data_o.Grid.Branches.Transf(i) = Branch(sin, data_o.Grid.Branches.tran_ids(i));
+end
+% Define  branch-transf limits
+data_o.Grid.Branches.Transf.define_branch_limits;
+% -- changelog v1.1b ##### (end) // 20130415
 
 % Sortieren der Namen:
 [~, IX] = sort({data_o.Grid.P_Q_Node.Points.P_Q_Name});
 data_o.Grid.P_Q_Node.Points = data_o.Grid.P_Q_Node.Points(IX);
 data_o.Grid.P_Q_Node.ids = data_o.Grid.P_Q_Node.ids(IX);
 
+% -- changelog v1.1b ##### (start) // 20130415
 [~, IX] = sort({data_o.Grid.Branches.Lines.Branch_Name});
 data_o.Grid.Branches.Lines = data_o.Grid.Branches.Lines(IX);
-data_o.Grid.Branches.ids = data_o.Grid.Branches.ids(IX);
+data_o.Grid.Branches.line_ids = data_o.Grid.Branches.line_ids(IX);
+
+[~, IX] = sort({data_o.Grid.Branches.Transf.Branch_Name});
+data_o.Grid.Branches.Transf = data_o.Grid.Branches.Transf(IX);
+data_o.Grid.Branches.tran_ids = data_o.Grid.Branches.tran_ids(IX);
+% -- changelog v1.1b ##### (end) // 20130415
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;

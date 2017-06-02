@@ -371,7 +371,7 @@ classdef SINCAL < handle
 				% ausgeben:
 				obj.disp_messages('all', 1);
 				exception = MException('SINCAL:SimulationFailed',...
-					'SINCAL Calculation failded!');
+					'SINCAL Calculation failed!');
 				throw(exception);
 			end
 		end

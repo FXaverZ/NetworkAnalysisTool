@@ -1,6 +1,3 @@
-# NetworkAnalysisTool
-
-##Changelog
 **Changelog documentation in NAT,** v1.1b, date of changes: **11/04/2013**
 
 All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 20130411&quot; and ended by &quot;% -- changelog v1.1b ##### (end) // 20130411&quot;
@@ -46,3 +43,56 @@ All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 2013041
 
 - --File changed to properly call the on-line voltage violation check function.
   - Line 126: on\_line\_voltage\_analysis(handles); %%CH\_MA
+
+
+
+**Changelog documentation in NAT,** v1.1b, date of changes: **15/04/2013**
+
+All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 20130415&quot; and ended by &quot;% -- changelog v1.1b ##### (end) // 20130415&quot;
+
+**File changed:**  **network\_load.m**
+
+- --Added transformers into analysis in order to test if they are overloaded
+- --Changed NAT-data structure with the following changes:
+  - data\_o.Grid.Branches.id is now separated into transformer and line data: data\_o.Grid.Branches.line\_ids and data\_o.Grid.Branches\_tran\_ids
+  - Objects for lines and transformers are separated in the data\_o.Grid.Branches.Lines and data\_o.Grid.Branches.Transf
+- --Added two lines where branch limits (lines, two-winding transformers) are defined. Used a function within branch.m class (define\_branch\_limits).
+  - All above changes in lines 75-92 and line 98-106
+
+**File changed:**  **branch.m**
+
+- --Defined Rated\_Voltage1\_phase\_phase and Rated\_Voltage1\_phase\_earth (from node), Rated\_Voltage2\_phase\_phase and Rated\_Voltage2\_phase\_earth, Current\_Limits, App\_Power\_Limits
+- --Modified Branch function to read rated voltages for lines and transformers
+  - function obj = Branch(sin\_ext, branch\_id\_ext)
+- --Added function to define branch limits (current and apparent power limits) for lines and transformers. The function checks for all possible limit values from SINCAL
+  - function current\_limits = define\_branch\_limits (obj)
+- --Added function that reads active, reactive and apparent power load-flow results for unsymmetrical calculations
+  - function power = update\_power\_branch\_LF\_USYM (obj)
+- --All above changes in lines 1-304
+
+**File changed:**  **Connection\_Point.m**
+
+- --Modified the way load values are saved into SINCAL model (bug? Where L123 loads are not updated with single phase values) – the fix I used is to sum all phases and write the value into &#39;P&#39; and &#39;Q&#39; field.
+  - Possibility of adding a subfunction that checks the load type
+  - Line 156: obj\_s(i).P\_Q\_Obj.set(&#39;Item&#39;,&#39;P&#39;,p\_q(1)+p\_q(3)+p\_q(5));
+  - Line 157: obj\_s(i).P\_Q\_Obj.set(&#39;Item&#39;,&#39;Q&#39;,p\_q(2)+p\_q(4)+p\_q(6));
+
+**File changed:**  **Connection\_All\_Point.m**
+
+- --Fixed a bug where voltage level search did not work due to untrimmed node names
+- --Bug fix in lines 73-86
+
+**Changed name of on-line function**  **on\_line\_voltage\_analysis.m**  **to**  **online\_voltage\_analysis.m**
+
+**Added on-line function**  **online\_branch\_violation\_analysis.m**
+
+- --The function checks branch (line, two winding transformers) limit violations. SINCAL offers 4 limit values per element, so the function is capable of checking all limits
+- --I added several possible operating conditions:
+  - If the model will experience on-line thermal limit changes (smart grids), the function can recheck the branch limits for each branch at every iteration.
+    - Currently this is disabled, it only checks the values once.
+  - All branch currents/apparent power is compared to the maximum/thermal limits
+    - If more than one branch limit is defined, all branch limits are checked, if only one limit is defined, only one is checked (for increased speed of calculation?).
+    - The results return conditional values of 0 (branch limits not exceeded), 1 (branch limits exceeded at base level), 2 (branch limits exceeded at first thermal/maximum limit), 3 (branch limits exceeded at second thermal/maximum limit) and 4 (branch limits exceeded at third thermal/maximum limit)
+  - Branch values can also be stored as SI units for each phase or not at all (to be discussed). The result of the branch values are given in a n x 16 array (P,Q,S,I) for L1,L2,L3 and LE.
+- --Currently, the NR symmetrical load flow branch violation checking is not working, as I have yet to convince the program to use LF\_NR setting for the calculation method.
+  - Line 130 of network calculation.m: nline\_branch\_violation\_analysis(handles)
