@@ -43,7 +43,6 @@ dspl = [];
 
 if isfield(Result,'Grid');
 	for i=1:numel(handles.Grid.P_Q_Node.Points)
-		
 		crv_cnt = crv_cnt + 1;
 		crv_nam = ['Curve_',num2str(crv_cnt)];
 		dspl.(crv_nam).Title = ['Spannungen am Knoten von ',...
@@ -55,6 +54,21 @@ if isfield(Result,'Grid');
 		dspl.(crv_nam).Unit = 'V';
 		dspl.(crv_nam).Legend = {'U_{L1}','U_{L2}','U_{L3}'};
 		dspl.(crv_nam).Y_Label = 'Knotenspannung [V]';
+		dspl.(crv_nam).Time = 'Time_Mean';
+	end
+	
+		for i=1:numel(handles.Grid.Branches.Lines)
+		crv_cnt = crv_cnt + 1;
+		crv_nam = ['Curve_',num2str(crv_cnt)];
+		dspl.(crv_nam).Title = ['Ströme durch ',...
+			handles.Grid.Branches.Lines(i).Branch_Name];
+% 		dspl.(crv_nam).Pop_up_Title = ['P Ges. Haushalte (',...
+% 			data_typs{i,2},')'];
+		dspl.(crv_nam).Data_fun = @get_branch_current_A;
+		dspl.(crv_nam).Data_fun_args = {'Grid',i};
+		dspl.(crv_nam).Unit = 'A';
+		dspl.(crv_nam).Legend = {'I_{L1}','I_{L2}','I_{L3}','I_{E}'};
+		dspl.(crv_nam).Y_Label = 'Leiterströme [A]';
 		dspl.(crv_nam).Time = 'Time_Mean';
 	end
 end
@@ -704,5 +718,11 @@ end
 function output_data = get_node_voltages_V(res_struct, node_id)
 
 output_data = squeeze(res_struct.Load.node_voltage(node_id,:,:))';
+
+end
+
+function output_data = get_branch_current_A(res_struct, node_id)
+
+output_data = squeeze(res_struct.Lines.currents(node_id,:,:))';
 
 end

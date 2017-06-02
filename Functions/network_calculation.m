@@ -12,7 +12,7 @@ Result = handles.Result;
 Current_Settings = handles.Current_Settings;
 
 %------------------------------------------------------------------------------------
-% laden der EDLEM-Lastdaten für die Versuche:
+% Übernehmen der akutell geladen Daten:
 %------------------------------------------------------------------------------------
 if Current_Settings.Data_Extract.get_Max_Value
 	Grid.Load.Data = Result.Households.Data_Max;
@@ -31,13 +31,13 @@ end
 Grid.Load.Data = Grid.Load.Data/1e6;
 % Grid.Gena.Data = Grid.Gena.Data/-1e6;
 % Wieviele Zeitpunkte werden berechnet?
-Current_Settings.Timepoints = size(Grid.Load.Data,1);
+Current_Settings.Simulation.Timepoints = size(Grid.Load.Data,1);
 
 %------------------------------------------------------------------------------------
 % Lasten ins Netz einfügen:
 %------------------------------------------------------------------------------------
 Grid.Load.Loads = Unit_Time_Dependent.empty(0,numel(Grid.P_Q_Node.ids));
-hhs = Current_Settings.Households;
+hhs = Current_Settings.Data_Extract.Households;
 for i=1:numel(Grid.P_Q_Node.ids)
 	% Welcher Haushaltstyp soll angeschlossen werden?
 	hh_typ = Table_Data{i,3};
@@ -58,9 +58,11 @@ end
 
 fprintf('\nStarte Simulation ohne Regelung...\n');
 Result.Grid.Load.node_voltage = zeros(...
-	size(Grid.P_Q_Node.Points,2),3,Current_Settings.Timepoints);
+	size(Grid.P_Q_Node.Points,2),3,Current_Settings.Simulation.Timepoints);
+Result.Grid.Lines.currents = zeros(...
+    numel(Grid.Branches.Lines),4,Current_Settings.Simulation.Timepoints);
 tic; %Zeitmessung start
-for k=1:Current_Settings.Timepoints
+for k=1:Current_Settings.Simulation.Timepoints
 	
 	% Last- und Einspeisedaten aktualisieren:
 	Grid.Load.Loads.update_power(k);
@@ -75,13 +77,15 @@ for k=1:Current_Settings.Timepoints
 	% alle Last-Knoten-Spannungen auslesen:
 	Grid.P_Q_Node.Points.update_voltage_node_LF_USYM;
 	Result.Grid.Load.node_voltage(:,:,k) = vertcat(Grid.P_Q_Node.Points.Voltage);
+    Grid.Branches.Lines.update_current_branch_LF_USYM;
+    Result.Grid.Lines.currents(:,:,k) = vertcat(Grid.Branches.Lines.Current);
 	
 	% Statusinfo zum Gesamtfortschritt an User:
 	t = toc;
-	progress = k/Current_Settings.Timepoints;
+	progress = k/Current_Settings.Simulation.Timepoints;
 	time_elapsed = t/progress - t;
 	fprintf(['\t\t\tLastfluss Nr. ',num2str(k),' von ',...
-		num2str(Current_Settings.Timepoints),' abgeschlossen. Laufzeit: ',...
+		num2str(Current_Settings.Simulation.Timepoints),' abgeschlossen. Laufzeit: ',...
 		sec2str(t),...
 		'. Verbleibende Zeit: ',...
 		sec2str(time_elapsed),'\n']);

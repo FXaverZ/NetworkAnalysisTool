@@ -7,14 +7,14 @@ function handles = refresh_display_NAT_main_gui(handles)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Worstcases eintragen:
 set(handles.popup_hh_worstcase, ...
-	'Value', handles.Current_Settings.Worstcase_Housholds);
+	'Value', handles.Current_Settings.Data_Extract.Worstcase_Housholds);
 
 % Einstellungen der Wochentage und Jahreszeiten anpassen:
 for i=1:3
 	set(handles.(['radio_season_',num2str(i)]),...
-		'Value',handles.Current_Settings.Season(i));
+		'Value',handles.Current_Settings.Data_Extract.Season(i));
 	set(handles.(['radio_weekday_',num2str(i)]),...
-		'Value',handles.Current_Settings.Weekday(i));
+		'Value',handles.Current_Settings.Data_Extract.Weekday(i));
 	% Bei Zeitreihen Eingaben einschränken:
 	if handles.Current_Settings.Data_Extract.get_Time_Series
 		set(handles.(['radio_weekday_',num2str(i)]),...
@@ -99,10 +99,10 @@ else
 		'Title', 'Kein Netzknoten ausgewählt');
 end
 
-if ~isempty(handles.Current_Settings.Grid.Name)
-	str = [handles.Current_Settings.Grid.Path,filesep,...
-		handles.Current_Settings.Grid.Name,...
-		handles.Current_Settings.Grid.Exte];
+if ~isempty(handles.Current_Settings.Files.Grid.Name)
+	str = [handles.Current_Settings.Files.Grid.Path,filesep,...
+		handles.Current_Settings.Files.Grid.Name,...
+		handles.Current_Settings.Files.Grid.Exte];
 	if length(str) > 85
 		idx = strfind(str, '\');
 		if numel(idx) > 4

@@ -3,7 +3,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.02.2013
 
-% Last Modified by GUIDE v2.5 27-Feb-2013 12:05:38
+% Last Modified by GUIDE v2.5 08-Mar-2013 16:03:34
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -123,6 +123,32 @@ function check_pqnode_active_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+function menue_data_load_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik menue_data_load (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren:
+guidata(hObject, handles);
+
+function menue_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik menue_data_save (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles = save_simulation_data(handles);
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren:
+guidata(hObject, handles);
+
 function menue_file_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_close (siehe GCBO)
 % eventdata	 nicht benötigt (MATLAB spezifisch)
@@ -134,7 +160,7 @@ function NAT_main_gui_CloseRequestFcn(hObject, ~, handles) %#ok<INUSL>
 % hObject    Link zur Grafik NAT_main_gui (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-try
+
 user_response = questdlg(['Soll das Programm beendet und die aktuellen',...
 	' Eintellungen gespeichert werden?'],'Beenden?',...
 	'Speichern & Beenden', 'Beenden', 'Abbrechen', 'Abbrechen');
@@ -152,7 +178,7 @@ switch user_response
 		% Konfiguration speichern:
 		Current_Settings = handles.Current_Settings;
 		System = handles.System; %#ok<NASGU>
-		file = Current_Settings.Last_Conf;
+		file = Current_Settings.Files.Last_Conf;
 		% Falls Pfad der Konfigurationsdatei nicht vorhanden ist, Ordner erstellen:
 		if ~isdir(file.Path)
 			mkdir(file.Path);
@@ -163,9 +189,6 @@ switch user_response
 			handles.sin.close_database;
 		end
 		delete(handles.NAT_main_gui);
-end
-catch ME
-    ME;
 end
 
 function NAT_main_OpeningFcn(hObject, ~, handles, varargin)
@@ -190,7 +213,7 @@ Path = fileparts(Source_File.Name);
 % Subfolder in Search-Path aufnehmen (damit alle Funktionen gefunden werden
 % können)
 addpath(genpath(Path));
-handles.Current_Settings.Main_Path = Path;
+handles.Current_Settings.Files.Main_Path = Path;
 
 % Default-Einstellungen laden
 handles = get_default_values(handles);
@@ -210,7 +233,7 @@ set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
 
 % Versuch, die Einstellungen des letzen Durchlaufs zu laden:
 try
-	file = handles.Current_Settings.Last_Conf;
+	file = handles.Current_Settings.Files.Last_Conf;
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
 	handles.Current_Settings = Current_Settings;
 	handles.System = System;
@@ -245,7 +268,7 @@ function popup_hh_worstcase_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Worstcase_Housholds = get(hObject,'Value');
+handles.Current_Settings.Data_Extract.Worstcase_Housholds = get(hObject,'Value');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -267,6 +290,20 @@ handles.Current_Settings.Data_Extract.Time_Resolution = get(hObject,'Value');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function push_cancel_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik push_cancel (siehe GCBO)
+% eventdata	 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Button wieder deaktivieren:
+set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
 guidata(hObject, handles);
@@ -304,11 +341,17 @@ function push_load_data_get_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+
+set(handles.push_load_data_get, 'Enable', 'off');
+set(handles.push_cancel, 'Enable', 'on');
+pause(.01);
+
 % Lastdaten einlesen und in Struktur speichern:
 handles = loaddata_get (handles);
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
+set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
 guidata(hObject, handles);
@@ -331,10 +374,15 @@ function push_network_calculation_start_Callback(hObject, ~, handles) %#ok<DEFNU
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+set(handles.push_network_calculation_start, 'Enable', 'off');
+set(handles.push_cancel, 'Enable', 'on');
+pause(0.01);
+
 handles = network_calculation(handles);
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
+set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
 guidata(hObject, handles);
@@ -345,7 +393,7 @@ function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 % aktuellen Speicherort für Daten auslesen:
-file = handles.Current_Settings.Grid;
+file = handles.Current_Settings.Files.Grid;
 % Userabfrage nach Speicherort
 [file.Name,file.Path] = uigetfile([...
 	{'*.sin','*.sin SINCAL-Netzdatei'};...
@@ -363,13 +411,35 @@ end
 % leztes Zeichen ("/") im Pfad entfernen:
 file.Path = file.Path(1:end-1);
 % Änderungen übernehmen:
-handles.Current_Settings.Grid = file;
+handles.Current_Settings.Files.Grid = file;
 
 % Netzdaten laden:
 handles = network_load (handles);
 
 % Anzeige des Hauptfensters aktualisieren:
 handles = refresh_display_NAT_main_gui (handles);
+
+% handles-Struktur aktualisieren:
+guidata(hObject, handles);
+
+function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik push_network_load_random_allocation (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
+Table_Data = handles.Current_Settings.Table_Network.Data;
+hh_typ_number = size(handles.System.housholds,1);
+
+for i=1:size(Table_Data,1)
+	idx = ceil(rand()*hh_typ_number);
+	Table_Data{i,3} = handles.System.housholds{idx,1};
+end
+
+handles.Current_Settings.Table_Network.Data = Table_Data;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
 
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
@@ -456,7 +526,7 @@ function radio_season_1_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Season = logical([1 0 0]');
+handles.Current_Settings.Data_Extract.Season = logical([1 0 0]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -469,7 +539,7 @@ function radio_season_2_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Season = logical([0 1 0]');
+handles.Current_Settings.Data_Extract.Season = logical([0 1 0]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -482,7 +552,7 @@ function radio_season_3_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Season = logical([0 0 1]');
+handles.Current_Settings.Data_Extract.Season = logical([0 0 1]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -495,7 +565,7 @@ function radio_weekday_1_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Weekday = logical([1 0 0]');
+handles.Current_Settings.Data_Extract.Weekday = logical([1 0 0]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -508,7 +578,7 @@ function radio_weekday_2_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Weekday = logical([0 1 0]');
+handles.Current_Settings.Data_Extract.Weekday = logical([0 1 0]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -521,7 +591,7 @@ function radio_weekday_3_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Weekday = logical([0 0 1]');
+handles.Current_Settings.Data_Extract.Weekday = logical([0 0 1]');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -574,6 +644,36 @@ handles = refresh_display_NAT_main_gui(handles);
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
 
+% --------------------------------------------------------------------
+function menue_network_load_Callback(hObject, eventdata, handles)
+% hObject    handle to menue_network_load (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menue_configuration_save_as_Callback(hObject, eventdata, handles)
+% hObject    handle to menue_configuration_save_as (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menue_configuration_save_Callback(hObject, eventdata, handles)
+% hObject    handle to menue_configuration_save (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menue_configuration_load_Callback(hObject, eventdata, handles)
+% hObject    handle to menue_configuration_load (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menue_file_mainpath_set_Callback(hObject, eventdata, handles)
+% hObject    handle to menue_file_mainpath_set (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
 % --- create-Funktionen (werden unmittelbar vor Sichtbarmachen des GUIs ausgeführt):
 function popup_time_resolution_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popup_time_resolution (see GCBO)
@@ -607,91 +707,5 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik push_network_load_random_allocation (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
-Table_Data = handles.Current_Settings.Table_Network.Data;
-hh_typ_number = size(handles.System.housholds,1);
-
-for i=1:size(Table_Data,1)
-	idx = ceil(rand()*hh_typ_number);
-	Table_Data{i,3} = handles.System.housholds{idx,1};
-end
-
-handles.Current_Settings.Table_Network.Data = Table_Data;
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function menue_network_load_Callback(hObject, eventdata, handles)
-% hObject    handle to menue_network_load (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
-function menue_configuration_save_as_Callback(hObject, eventdata, handles)
-% hObject    handle to menue_configuration_save_as (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
-function menue_configuration_save_Callback(hObject, eventdata, handles)
-% hObject    handle to menue_configuration_save (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
-function menue_configuration_load_Callback(hObject, eventdata, handles)
-% hObject    handle to menue_configuration_load (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menue_file_mainpath_set_Callback(hObject, eventdata, handles)
-% hObject    handle to menue_file_mainpath_set (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-function menue_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik menue_data_save (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
-
-
-
-
-
-% --------------------------------------------------------------------
-function menue_data_load_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik menue_data_load (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
-
-
-% --- Executes on button press in push_load_data_get.
 

@@ -4,9 +4,9 @@ function handles = get_data_households (handles)
 % Erstellt von:            Franz Zeilinger - 14.02.2012
 % Letzte Änderung durch:   Franz Zeilinger - 05.02.2013
 
-system = handles.System;                % Systemvariablen
-settin = handles.Current_Settings;      % aktuelle Einstellungen
-db_fil = settin.Load_Database;          % Datenbankstruktur
+system = handles.System;                             % Systemvariablen
+settin = handles.Current_Settings.Data_Extract;      % aktuelle Einstellungen
+db_fil = handles.Current_Settings.Load_Database;     % Datenbankstruktur
 
 % Ergebnis-Arrays initialisieren:
 Households.Data_Sample = [];
@@ -25,7 +25,7 @@ sep = db_fil.files.sep;    % Trenner im Dateinamen (' - ')
 season = system.seasons{settin.Season,1};
 weekda = system.weekdays{settin.Weekday,1};
 % zeitliche Auflösung ermitteln:
-time_res = system.time_resolutions{settin.Data_Extract.Time_Resolution,2};
+time_res = system.time_resolutions{settin.Time_Resolution,2};
 
 % die einzelnen Haushaltsklassen durchgehen:
 for i=1:size(system.housholds,1)
@@ -116,17 +116,17 @@ for i=1:size(system.housholds,1)
 		% Daten laden (Variable "data_phase")
 		load([path,filesep,name,'.mat']);
 		% je nach Einstellungen, die relevanten Daten auslesen:
-		if settin.Data_Extract.get_Sample_Value
+		if settin.get_Sample_Value
 			data_sample = data_phase(1:time_res:end,idx_part_real);
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_Sample = [Households.Data_Sample,...
 				data_sample];
 		end
-		if settin.Data_Extract.get_Mean_Value || ...
-				settin.Data_Extract.get_Min_Value || ...
-				settin.Data_Extract.get_Max_Value || ...
-				settin.Data_Extract.get_05_Quantile_Value || ...
-				settin.Data_Extract.get_95_Quantile_Value
+		if settin.get_Mean_Value || ...
+				settin.get_Min_Value || ...
+				settin.get_Max_Value || ...
+				settin.get_05_Quantile_Value || ...
+				settin.get_95_Quantile_Value
 			% Das ursprüngliche Datenarray so umformen, dass ein 3D Array mit allen
 			% Werten eines Zeitraumes in der ersten Dimension entsteht. Diese wird
 			% dann durch die nachfolgenden Funktionen (mean, min, max) sofort in die
@@ -138,7 +138,7 @@ for i=1:size(system.housholds,1)
 			% eingelesenen Daten wieder löschen (Speicher freigeben!)
 			clear data_phase;
 		end
-		if settin.Data_Extract.get_Min_Value
+		if settin.get_Min_Value
 			data_min = squeeze(min(data_mean));
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_Min = [Households.Data_Min,...
@@ -146,7 +146,7 @@ for i=1:size(system.housholds,1)
 			% eingelesenen Daten wieder löschen (Speicher freigeben!)
 			clear data_min;
 		end
-		if settin.Data_Extract.get_Max_Value
+		if settin.get_Max_Value
 			data_max = squeeze(max(data_mean));
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_Max = [Households.Data_Max,...
@@ -154,7 +154,7 @@ for i=1:size(system.housholds,1)
 			% eingelesenen Daten wieder löschen (Speicher freigeben!)
 			clear data_max;
 		end
-		if settin.Data_Extract.get_05_Quantile_Value
+		if settin.get_05_Quantile_Value
 			data_05q = squeeze(quantile(data_mean,0.05));
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_05P_Quantil = [...
@@ -163,7 +163,7 @@ for i=1:size(system.housholds,1)
 			% eingelesenen Daten wieder löschen (Speicher freigeben!)
 			clear data_05q;
 		end
-		if settin.Data_Extract.get_95_Quantile_Value
+		if settin.get_95_Quantile_Value
 			data_95q = squeeze(quantile(data_mean,0.95));
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_95P_Quantil = [...
@@ -172,7 +172,7 @@ for i=1:size(system.housholds,1)
 			% eingelesenen Daten wieder löschen (Speicher freigeben!)
 			clear data_95q;
 		end
-		if settin.Data_Extract.get_Mean_Value
+		if settin.get_Mean_Value
 			data_mean = squeeze(mean(data_mean));
 			% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 			Households.Data_Mean = [Households.Data_Mean,...
@@ -184,7 +184,7 @@ for i=1:size(system.housholds,1)
 end
 
 % Ergebnis zurückschreiben:
-if settin.Data_Extract.get_Time_Series
+if settin.get_Time_Series
 	% Die aus diesem Durchlauf ermittelten Daten werden zu den bisherigen hinzugefügt
 	% (sofern vorhanden):
 	if ~isfield(handles, 'Result') || ~isfield(handles.Result, 'Households')

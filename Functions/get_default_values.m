@@ -60,34 +60,32 @@ handles.System = System;
 % Default-Einstellungen herstellen sowie Einstellungsstruktur generieren: 
 %------------------------------------------------------------------------------------
 Current_Settings = handles.Current_Settings;
-
-% Anzahl der Haushalte Null setzen:
-for i=1:size(System.housholds,1)
-	Current_Settings.Households.(System.housholds{i,1}).Number = 0;
-end
+Files = Current_Settings.Files;
 
 % automatisch erzeugte Konfigurationsdatei (merken der letzten Einstellungen):
-Current_Settings.Last_Conf.Path = Current_Settings.Main_Path;
-Current_Settings.Last_Conf.Name = 'Einstellungen';
-Current_Settings.Last_Conf.Exte = '.cfg';
+Files.Last_Conf.Path = Files.Main_Path;
+Files.Last_Conf.Name = 'Einstellungen';
+Files.Last_Conf.Exte = '.cfg';
 
 % Daten (Pfad des .sin-Files und Name) des zu betrachtetenden Netzes:
-Current_Settings.Grid.Path = Current_Settings.Main_Path;
-Current_Settings.Grid.Name = [];
-Current_Settings.Grid.Exte = '.sin';
+Files.Grid.Path = Files.Main_Path;
+Files.Grid.Name = [];
+Files.Grid.Exte = '.sin';
 
 % Speicherpfad für Daten
-if ~isdir([Current_Settings.Main_Path,filesep,'Ergebnisse'])
-	mkdir([Current_Settings.Main_Path,filesep,'Ergebnisse']);
+if ~isdir([Files.Main_Path,filesep,'Ergebnisse'])
+	mkdir([Files.Main_Path,filesep,'Ergebnisse']);
 end
-Current_Settings.Save.Result.Path = [Current_Settings.Main_Path,filesep,'Ergebnisse'];
-Current_Settings.Save.Result.Name = 'Daten';
-Current_Settings.Save.Result.Exte = '.mat';
+Files.Save.Result.Path = [Files.Main_Path,filesep,'Ergebnisse'];
+Files.Save.Result.Name = 'Daten';
+Files.Save.Result.Exte = '.mat';
 
 % Name der automaisch gespeicherten Lastdaten (Pfad ist immer der Ordner des
 % jeweiligen Netzes): 
-Current_Settings.Auto_Load_Feed_Data.Name = 'act_Load_Feed_Data';
-Current_Settings.Auto_Load_Feed_Data.Exte = '.mat';
+Files.Auto_Load_Feed_Data.Name = 'act_Load_Feed_Data';
+Files.Auto_Load_Feed_Data.Exte = '.mat';
+
+Current_Settings.Files = Files;
 
 % Definieren der Simulations-Parameter:
 Current_Settings.Simulation.Parameters = {...
@@ -113,21 +111,24 @@ Current_Settings.Data_Extract.get_Time_Series = 0;
 Time_Series.Date_Start = '27.04.2012'; % Startdatum der Zeitreihe
 Time_Series.Duration = 7;              % Dauer der Zeitreihe in Tagen
 Current_Settings.Data_Extract.Time_Series = Time_Series;
-
 % Jahreszeiten setzen:
-Current_Settings.Season =  logical([1 0 0]');
-Current_Settings.Weekday = logical([1 0 0]');
+Current_Settings.Data_Extract.Season =  logical([1 0 0]');
+Current_Settings.Data_Extract.Weekday = logical([1 0 0]');
+% Anzahl der Haushalte Null setzen:
+for i=1:size(System.housholds,1)
+	Current_Settings.Data_Extract.Households.(System.housholds{i,1}).Number = 0;
+end
+% Aktueller Worstcase für Haushalte. Möglichkeiten siehe
+% HANDLES.SYSTEM.WC_HOUSEHOLDS.
+Current_Settings.Data_Extract.Worstcase_Housholds = 1; % Default = 'Kein'
+
 
 % Standard-Dateipfade, Pfad zur Datenbank:
-Current_Settings.Load_Database.Path = Current_Settings.Main_Path;
+Current_Settings.Load_Database.Path = Current_Settings.Files.Main_Path;
 Current_Settings.Load_Database.Name = 'DLE_Datenbank';
 
 % Einstellungstabelle für das Netz (wird in GUI angezeigt)
 Current_Settings.Table_Network = [];
-
-% Aktueller Worstcase für Haushalte. Möglichkeiten siehe
-% HANDLES.SYSTEM.WC_HOUSEHOLDS.
-Current_Settings.Worstcase_Housholds = 1; % Default = 'Kein'
 
 handles.Current_Settings = Current_Settings;
 
