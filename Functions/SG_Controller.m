@@ -23,7 +23,8 @@ classdef SG_Controller < Connection_Unit
 	%        handle auf das Objekt der angeschlossenen Einheit, welche von diesem
 	%        SG-Regler beeinflusst wird.
 		Values_Last_Step = [];
-	%        Werte des letzen Regelschrittes
+	%        Werte des letzen Regelschrittes, hier sind je nach Klasse
+	%        unterschiedlichste Daten enthalten
 
 	end
 	

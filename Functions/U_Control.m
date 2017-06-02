@@ -57,7 +57,7 @@ classdef U_Control < SG_Controller
 	
 	properties
 		%    E I G E N S C H A F T E N :
-		Q_controll_finished = false;
+% 		Q_controll_finished = false;
 		
 		%    P A R A M E T E R :
 		Termination_Threshold = 0;
@@ -107,19 +107,28 @@ classdef U_Control < SG_Controller
 		
 		function regulate(obj)
 			for i=1:numel(obj)
+				% überprüfen, ob Regelung bereits abgeschlossen:
 				obj(i).check_success;
+				
 				% Werte des letzten Schrittes speichern:
 				obj(i).Values_Last_Step = ...
 					obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:);
+				% bisherige Leistungsänderung auslesen:
 				dP_tot = obj(i).Values_Last_Step(1:2:6);
-				volt_act = obj(i).Connection_Point.Voltage;
-				d_P = obj(i).dP_dV .* (volt_act - obj(i).Setpoint);
+				
+				% zusätzliche erforderliche Leistungsänderung ermitteln (aufgrund der
+				% Abweichung der aktuellen Spannung von Sollwert):
+				d_P = obj(i).dP_dV .* (obj(i).Connection_Point.Voltage - obj(i).Setpoint);
+				% Anpassen an maximale Änderung:
 				d_P(d_P > obj(i).dPmax_dStep) = obj(i).dPmax_dStep;
-				% Neue Leistungswerte in P_Q_Array schreiben:
+				% Gesamte Leistung ermitteln:
 				dP_tot = dP_tot + d_P;
+				% Anpassen an Begrenzungen:
 				dP_tot(dP_tot > obj(i).P_max) = obj(i).P_max;
 				dP_tot(dP_tot < obj(i).P_min) = obj(i).P_min;
+				% Neue Leistungswerte in P_Q_Array des Anschlusspunktes schreiben:
 				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,1:2:6) = dP_tot;
+				% Markieren, dass sich die Werte geändert haben:
 				obj(i).Connection_Point.powers_changed = true;
 			end
 		end
@@ -128,16 +137,20 @@ classdef U_Control < SG_Controller
 			%SUCCESS    Überprüfen, ob Regler eingeschwungen
 			
 			success = false;
+			% Falls noch keine Werte vom vorhergehenden Rechenschritt vorhanden sind,
+			% kann keine Überprüfung stattfinden:
 			if isempty(obj.Values_Last_Step)
 				obj.Connection_Point.controller_finished = false;
 				return;
-			end
-			% Überprüfen, ob Regelung bereits erfolgreich war...
+			end,
 			
+			% Überprüfen, ob Regelung bereits erfolgreich war...
 			% Finden nur mehr kleine Leistungsänderungen statt?
 			diff = obj.Values_Last_Step - ...
 				obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
 			if all(abs(diff(1:2:6)) < obj.dP_min)
+				% Wenn ja --> keine Änderungen mehr möglich (z.B. weil Regler in
+				% Leistungsbegrenzung)
 				success = true;
 				obj.Connection_Point.controller_finished = ...
 					obj.Connection_Point.controller_finished & true;
@@ -147,6 +160,7 @@ classdef U_Control < SG_Controller
 			% Wurde Spannungssollwert bereits erreicht?
 			diff = obj.Setpoint - obj.Connection_Point.Voltage;
 			if all(abs(diff) < obj.Setpoint*obj.Termination_Threshold/100)
+				% Wenn ja --> Soll ist gleich Ist, fertig!
 				success = true;
 				obj.Connection_Point.controller_finished = ...
 					obj.Connection_Point.controller_finished & true;
@@ -157,7 +171,7 @@ classdef U_Control < SG_Controller
 		end
 		
 		function d_P = get_act_dp (obj)
-			%GET_ACT_DP
+			%GET_ACT_DP    ermittelt aktuelle Leistungsänderung dieser Komponente:
 			
 			d_P = zeros(numel(obj),6);
 			for i=1:numel(obj)

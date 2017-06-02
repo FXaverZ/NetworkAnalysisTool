@@ -95,11 +95,11 @@ classdef SINCAL < handle
 				exception = MException(...
 					'SINCAL:OpenDataBase:UnsuportedOperationSystem',...
 					['Not able to open a connection to SINCAL-Simulation ',...
-					'because of a unsupported operating system!']);
+					'because of an unsupported operating system!']);
 				throw(exception);
 			end
 			
-			% Setzen der Datenbankeinstelltungen und Sprache:
+			% Setzen der Datenbankeinstellungen und Sprache:
 			obj.Simulation.Database ([...
 				'TYP=NET;MODE=JET;FILE=',obj.Database.DBfilename,';'...
 				'USR=Admin;PWD=;SINFILE=',obj.Database.SINfilename,';'...
@@ -136,9 +136,7 @@ classdef SINCAL < handle
 			end
 			obj.Simulation.SetInputState(inputstate);
 			
-			% Umschalten des Batch-Modes: geladen wird von der physikalischen
-			% Datenbank, die Ergebnisse werden in eine virtuelle Datenbank abgelegt
-			% (schnellerer Datenzugriff, da keine Zugriff auf Platte erfolgt!)
+			% Umschalten des Batch-Modes:
 			obj.Simulation.BatchMode(obj.Settings.Batch_mode);
 			
 			% Laden der Datenbank in Arbeitsspeicher:
@@ -148,7 +146,7 @@ classdef SINCAL < handle
 				obj.close_database; %#ok<*NASGU>
 				exception = MException('SINCAL:OpenDataBase:LoadDBFailed',...
 					['LoadDB failed, unable to oben SINCAL-Database!',...
-					' Check settings!']);
+					' Check settings or Licenses!']);
 				throw(exception);
 			end
 			
@@ -301,7 +299,7 @@ classdef SINCAL < handle
 		end
 	end
 	
-	methods (Hidden = true)
+	methods (Hidden)
 		
 		function set_database_path (obj, varargin)
 			%SET_DATABASE_PATH    aktualisiert die Datenbankangaben

@@ -135,10 +135,12 @@ classdef PQU_Control < SG_Controller
 				obj(i).Values_Last_Step = ...
 					obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:);
 				
+				% Spannungsabweichung ermitteln:
+				d_V = obj(i).Connection_Point.Voltage - obj(i).Setpoint;
+				
 				% Regelungsberechnungen, zuerst Q einstellen:
 				dQ_tot = obj(i).Values_Last_Step(2:2:6);
-				d_Q = obj(i).dQ_dV .* (obj(i).Connection_Point.Voltage ...
-					- obj(i).Setpoint);
+				d_Q = obj(i).dQ_dV .* d_V;
 				d_Q(d_Q > obj(i).dQmax_dStep) = obj(i).dQmax_dStep;
 				dQ_tot = dQ_tot + d_Q;
 				dQ_tot(dQ_tot > obj(i).Q_max) = obj(i).Q_max;
@@ -149,8 +151,8 @@ classdef PQU_Control < SG_Controller
 				% Wo ist Blindleistungsregelung in Begrenzung?
 				idx = (dQ_tot == obj(i).Q_max | dQ_tot == obj(i).Q_min);
 				dP_tot = obj(i).Values_Last_Step(1:2:6);
-				d_P = obj(i).dP_dV .* (obj(i).Connection_Point.Voltage ...
-					- obj(i).Setpoint);
+				d_P = (1.05-(0.1*rand())) * obj(i).dP_dV .* ...
+					(obj(i).Connection_Point.Voltage - obj(i).Setpoint);
 				d_P(d_P > obj(i).dPmax_dStep) = obj(i).dPmax_dStep;
 				% Neue Leistungswerte in P_Q_Array schreiben:
 				dP_tot = dP_tot + d_P;
