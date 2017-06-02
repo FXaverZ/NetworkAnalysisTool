@@ -19,6 +19,8 @@ if handles.Current_Settings.Simulation.Number_Runs == 1
 	end
 	
 	settin = handles.Current_Settings;
+	% Zunächst bisherige Daten zurücksetzen:
+	handles.NAT_Data.Load_Infeed_Data = [];
 	% Je nach Zeitreiheneinstellungen verfahren:
 	if settin.Data_Extract.get_Time_Series
 		% Auslesen einer Zeitreihe, d.h. mehrere Datensätz kombinieren
@@ -60,33 +62,35 @@ if handles.Current_Settings.Simulation.Number_Runs == 1
 	end
 	
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
-	Load_Feed_Data = handles.NAT_Data.Result.Households; %#ok<NASGU>
-	Gene_Sola_Data = handles.NAT_Data.Result.Solar; %#ok<NASGU>
-	Data_Extract = settin.Data_Extract; %#ok<NASGU>
-	Table_Network = settin.Table_Network; %#ok<NASGU>
+	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
+	Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 	% Speicherort = aktulles Netzfile
-	file = settin.Files.Auto_Load_Feed_Data;
-	file.Path = [settin.Files.Grid.Path,filesep,settin.Files.Grid.Name,'_files'];
-	handles.Current_Settings = settin;
+	file = handles.Current_Settings.Files.Auto_Load_Feed_Data;
+	file.Path = [handles.Current_Settings.Files.Grid.Path,filesep,...
+		handles.Current_Settings.Files.Grid.Name,'_files'];
 	
 	save([file.Path,filesep,file.Name,file.Exte],...
-		'Load_Feed_Data', 'Gene_Sola_Data', 'Data_Extract', 'Table_Network');
+		'Load_Infeed_Data', 'Data_Extract');
 	fprintf('\t\t--> erledigt!\n');
 else
 	% es müssen mehrere Datensätze ausgelesen werden...
-	% Zunächst bisherige Daten zurücksetzen:
-	handles.NAT_Data.Load_Infeed_Data = [];
 	% Anzahl an zu auszulesenden Datensätzen:
 	num_set = handles.Current_Settings.Simulation.Number_Runs; 
 	% Diese erstellen:
 	fprintf('\tAuslesen der Lastdaten...\n');
+	tic; %Zeitmessung start
 	for i = 1:num_set
 		% Zufällige Zuordnung treffen:
 		handles = load_random_allocation(handles);
 		% Daten auslesen und dem Input-Datensatz hinzufügen:
 		get_data_households (handles, i);
 		get_data_solar(handles, i);
-		fprintf(['\t\tSatz ',num2str(i),' von ',num2str(num_set),' erledigt...\n']);
+		fprintf(['\t\tSatz ',num2str(i),' von ',num2str(num_set),' erledigt... ']);
+		t = toc;
+		progress = i/num_set;
+		time_elapsed = t/progress - t;
+		fprintf([' Laufzeit: ', sec2str(t),'. gesch. verbleibende Zeit: ',...
+			sec2str(time_elapsed),'\n']);
 	end
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
