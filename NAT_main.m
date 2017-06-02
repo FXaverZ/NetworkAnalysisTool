@@ -1,7 +1,7 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 05.02.2013
+% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
 
 % Last Modified by GUIDE v2.5 10-Apr-2013 12:36:49
 
@@ -123,6 +123,25 @@ function check_pqnode_active_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+function edit_simulation_number_runs_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik edit_simulation_number_runs (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+Number_Runs = ...
+	str2double(get(hObject,'String'));
+if isnan(Number_Runs)
+	errordlg('Ungültiges Zahlenformat!', 'Angabe Anzahl Einzelsimulationen ...');
+else
+	Number_Runs = round(Number_Runs);
+	handles.Current_Settings.Simulation.Number_Runs = Number_Runs;
+end
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren:
+guidata(hObject, handles);
+
 function menue_data_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik menue_data_load (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -144,7 +163,7 @@ if ~isequal(file.Name,0) && ~isequal(file.Path,0)
 	file.Path = file.Path(1:end-1);
 	% Daten laden und Einstellungen dieser Daten wiederherstellen:
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
-	handles.Result = Result;
+	handles.NAT_Data.Result = Result;
 	handles.Current_Settings = Result.Current_Settings;
 	% aktuellen Speicherort übernehmen:
 	handles.Current_Settings.Files.Save.Result = file;
@@ -288,6 +307,8 @@ handles.Current_Settings.Files.Main_Path = Path;
 
 % Default-Einstellungen laden
 handles = get_default_values(handles);
+% Datenobjekt erzeugen:
+handles.NAT_Data = NAT_Data();
 
 % GUI-Elemente mit Inhalten füllen:
 % Wochentage und Jahreszeiten anpassen:
@@ -335,7 +356,7 @@ guidata(hObject, handles);
 
 function varargout = NAT_main_OutputFcn(hObject, eventdata, handles) %#ok<STOUT,INUSD>
 
-function popup_gen_worstcase_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+function popup_gen_worstcase_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_hh_worstcase (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
@@ -506,6 +527,7 @@ handles = loaddata_get (handles);
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
+set(handles.push_load_data_get, 'Enable', 'on');
 set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
@@ -516,7 +538,8 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles = network_analysis(handles);
+% handles = network_analysis(handles);
+handles = post_analyzing_function_1(handles);
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -550,6 +573,12 @@ function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<D
 % Tabelle mit Default-Werten befüllen:
 [handles.Current_Settings.Table_Network, ...
     handles.Current_Settings.Data_Extract] = network_table_reset(handles);
+
+% Anzahl der jeweiligen Haushalte ermitteln:
+for i=1:size(handles.System.housholds,1)
+	handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
+		sum(strcmp(handles.System.housholds{i,1},handles.Current_Settings.Table_Network.Data(:,3)));
+end
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -773,7 +802,7 @@ if numel(eventdata.Indices) > 0
 	handles.Current_Settings.Table_Network.Selected_Row = eventdata.Indices(1);
 	
 	% das entsprechende Element in SINCAL GUI markieren (falls dieses offen ist):
-	handles.sin.gui_select_element(handles.Grid.P_Q_Node.ids(eventdata.Indices(1)));
+	handles.sin.gui_select_element(handles.NAT_Data.Grid.P_Q_Node.ids(eventdata.Indices(1)));
 else
 	handles.Current_Settings.Table_Network.Selected_Row = [];
 end
@@ -1013,12 +1042,6 @@ function edit_pqnode_wi_installed_power_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of edit_pqnode_wi_installed_power as text
 %        str2double(get(hObject,'String')) returns contents of edit_pqnode_wi_installed_power as a double
-
-function edit_simulation_number_runs_Callback(hObject, eventdata, handles)
-% hObject    handle to edit_simulation_number_runs (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 
 
 

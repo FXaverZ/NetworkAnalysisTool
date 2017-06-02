@@ -137,7 +137,7 @@ if dontOpen
 end
 
 % Überprüfen, ob Daten für die Anzeige vorhanden sind:
-if isempty(handles.main_handles.Result.Displayable)
+if isempty(handles.main_handles.NAT_Data.Result.Displayable)
 	% keine Daten zur Anzeige vorhanden!
 	exception = MException('DataExplorerVerifyInput:NoInputAvaiable', ...
 		'Keine Daten zur Anzeige vorhanden!');
@@ -152,11 +152,11 @@ create_plot_window(hObject, eventdata, handles);
 handles = guidata(hObject);
 
 % Ermitteln der Einträge für die Pop-Up-Menüs
-field_names = fields(handles.main_handles.Result.Displayable);
+field_names = fields(handles.main_handles.NAT_Data.Result.Displayable);
 string_pop_content = {numel(field_names)};
 for i = 1:numel(field_names)
 	string_pop_content{i} = ...
-		handles.main_handles.Result.Displayable.(field_names{i}).Title;
+		handles.main_handles.NAT_Data.Result.Displayable.(field_names{i}).Title;
 end
 
 set(handles.pop_results_cont, 'String', ...
@@ -367,8 +367,8 @@ function pop_results_cont_Callback(hObject, eventdata, handles)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 % Datenstrukturen einlesen:
-field_names = fields(handles.main_handles.Result.Displayable);
-Result = handles.main_handles.Result;
+field_names = fields(handles.main_handles.NAT_Data.Result.Displayable);
+Result = handles.main_handles.NAT_Data.Result;
 
 % Falls Diagrammfenster geschlossen wurde, ein neues erzeugen:
 if ~ishandle(handles.Diagramm.fig_diagr)

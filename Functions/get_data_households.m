@@ -1,8 +1,9 @@
-function handles = get_data_households (handles)
+function get_data_households (handles, varargin)
 %GET_DATA_HOUSEHOLDS    extrahiert die Daten der Haushalte 
 
+% Version:                 2.0 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 14.02.2012
-% Letzte Änderung durch:   Franz Zeilinger - 05.02.2013
+% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
 
 system = handles.System;                             % Systemvariablen
 settin = handles.Current_Settings.Data_Extract;      % aktuelle Einstellungen
@@ -16,6 +17,14 @@ Households.Data_Max = [];
 Households.Data_05P_Quantil = [];
 Households.Data_95P_Quantil = [];
 Households.Content = {};
+
+if nargin ==2
+	% als Zweites Argument wurde ein aktueller Index übergeben für eine
+	% Generierung von mehreren Datensätzen...
+	idx_act = varargin{1};
+else
+	idx_act = [];
+end
 
 max_num_data_set = db_fil.setti.max_num_data_set; % Anzahl an Datensätzen in einer
                                                   % Teildatei
@@ -183,38 +192,16 @@ for i=1:size(system.housholds,1)
 	end
 end
 
+% Zugriff auf das Datenobjekt:
+d = handles.NAT_Data;
+
 % Ergebnis zurückschreiben:
-if settin.get_Time_Series
-	% Die aus diesem Durchlauf ermittelten Daten werden zu den bisherigen hinzugefügt
-	% (sofern vorhanden):
-	if ~isfield(handles, 'Result') || ~isfield(handles.Result, 'Households')
-		% Die ermittelten Daten stellen den Beginn der Resultsstruktur dar:
-		handles.Result.Households = Households;
-		return;
-	end
-	% Es sind bereits Daten aus den vorhergehenden Durchläufen vorhanden, diese
-	% werden um die jetzt ermittelten Daten erweitert:
-	handles.Result.Households.Data_Sample = ...
-		[handles.Result.Households.Data_Sample(1:end-1,:);
-		Households.Data_Sample];
-	handles.Result.Households.Data_Mean = ...
-		[handles.Result.Households.Data_Mean;
-		Households.Data_Mean];
-	handles.Result.Households.Data_Min = ...
-		[handles.Result.Households.Data_Min;
-		Households.Data_Min];
-	handles.Result.Households.Data_Max = ...
-		[handles.Result.Households.Data_Max;
-		Households.Data_Max];
-	handles.Result.Households.Data_05P_Quantil = ...
-		[handles.Result.Households.Data_05P_Quantil;
-		Households.Data_05P_Quantil];
-	handles.Result.Households.Data_95P_Quantil = ...
-		[handles.Result.Households.Data_95P_Quantil;
-		Households.Data_95P_Quantil];
+if isempty(idx_act)
+	% Es wird nur ein Datensatz generiert, diese Direkt in die
+	% Load-Infeed-Struktur einfügen:
+	d.Load_Infeed_Data.Households = Households;
 else
-	% Die ermittelten Daten stellen die fertige Results-Struktur dar:
-	handles.Result.Households = Households;
-end
+	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Households = Households;
+	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 end
 

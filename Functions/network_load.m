@@ -9,6 +9,7 @@ function handles = network_load (handles)
 % Einstellungen und Systemvariablen:
 settin = handles.Current_Settings;
 system = handles.System;
+d = handles.NAT_Data;
 
 if ~isfield(handles, 'sin')
 	% Erzeugen der SINCAL-Instanz:
@@ -27,11 +28,11 @@ end
 sin.table_data_load('Element');
 
 % Element-IDs aller SINCAL-Lasten auslesen:
-Grid.P_Q_Node.ids = cell2mat(sin.Tables.Element(...
+d.Grid.P_Q_Node.ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Load',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
-Grid.Branches.ids = cell2mat(sin.Tables.Element(...
+d.Grid.Branches.ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Line',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
@@ -40,37 +41,33 @@ Grid.Branches.ids = cell2mat(sin.Tables.Element(...
 % Verbindungspunkte anlegen (jede Last im SINCAL-Netz entspricht einem Knoten, an dem
 % eine Einheit angeschlossen werden kann a.k.a. Hausanschluss:
 %------------------------------------------------------------------------------------
-Grid.P_Q_Node.Points = Connection_Point.empty(numel(Grid.P_Q_Node.ids),0);
-for i=1:numel(Grid.P_Q_Node.ids)
-	Grid.P_Q_Node.Points(i) = Connection_Point(sin, Grid.P_Q_Node.ids(i));
+d.Grid.P_Q_Node.Points = Connection_Point.empty(numel(d.Grid.P_Q_Node.ids),0);
+for i=1:numel(d.Grid.P_Q_Node.ids)
+	d.Grid.P_Q_Node.Points(i) = Connection_Point(sin, d.Grid.P_Q_Node.ids(i));
 end
 
-Grid.Branches.Lines = Branch.empty(numel(Grid.Branches.ids),0);
-for i=1:numel(Grid.Branches.ids)
-    Grid.Branches.Lines(i) = Branch(sin, Grid.Branches.ids(i));
+d.Grid.Branches.Lines = Branch.empty(numel(d.Grid.Branches.ids),0);
+for i=1:numel(d.Grid.Branches.ids)
+    d.Grid.Branches.Lines(i) = Branch(sin, d.Grid.Branches.ids(i));
 end
 
 % Sortieren der Namen:
-[~, IX] = sort({Grid.P_Q_Node.Points.P_Q_Name});
-Grid.P_Q_Node.Points = Grid.P_Q_Node.Points(IX);
-Grid.P_Q_Node.ids = Grid.P_Q_Node.ids(IX);
+[~, IX] = sort({d.Grid.P_Q_Node.Points.P_Q_Name});
+d.Grid.P_Q_Node.Points = d.Grid.P_Q_Node.Points(IX);
+d.Grid.P_Q_Node.ids = d.Grid.P_Q_Node.ids(IX);
 
-[~, IX] = sort({Grid.Branches.Lines.Branch_Name});
-Grid.Branches.Lines = Grid.Branches.Lines(IX);
-Grid.Branches.ids = Grid.Branches.ids(IX);
+[~, IX] = sort({d.Grid.Branches.Lines.Branch_Name});
+d.Grid.Branches.Lines = d.Grid.Branches.Lines(IX);
+d.Grid.Branches.ids = d.Grid.Branches.ids(IX);
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;
-% Netzobjekte speichern:
-handles.Grid = Grid;
 
 % Tabelle mit Default-Werten befüllen:
 [settin.Table_Network, settin.Data_Extract] = network_table_reset(handles);
 
 % Etwaige bereits geladene Daten und Simulationsergebnisse zurücksetzen:
-if isfield(handles, 'Result')
-    handles = rmfield(handles, 'Result');
-end
+handles.NAT_Data.Result = [];
 
 % Versuch, die letzten Lastdaten dieses Netzes zu laden:
 try
@@ -80,14 +77,15 @@ try
 	% Laden von 'Load_Feed_Data', 'Data_Extract', 'Table_Network':
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
 	
-	handles.Result.Households = Load_Feed_Data;
-	handles.Result.Solar = Gene_Sola_Data;
+	handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
 	settin.Data_Extract = Data_Extract;
-	settin.Table_Network = Table_Network;
+	if isfield(Load_Infeed_Data, 'Table_Network');
+		settin.Table_Network = Load_Infeed_Data.Table_Network;
+	end
 	% Anzahl der jeweiligen Haushalte ermitteln:
 	for i=1:size(system.housholds,1)
 		settin.Data_Extract.Households.(system.housholds{i,1}).Number = ...
-			sum(strcmp(system.housholds{i,1},Table_Network.Data(:,3)));
+			sum(strcmp(system.housholds{i,1},settin.Table_Network.Data(:,3)));
 	end
 catch ME
 	disp('Fehler beim Laden der Last- und Einspeisedaten:');

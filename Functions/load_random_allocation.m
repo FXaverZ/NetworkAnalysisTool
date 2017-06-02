@@ -84,5 +84,10 @@ handles.Current_Settings.Data_Extract.Solar = settin;
 handles.Current_Settings.Table_Network.Additional_Data = add_data;
 handles.Current_Settings.Table_Network.Data = Table_Data;
 
+% Anzahl der jeweiligen Haushalte ermitteln:
+for i=1:size(handles.System.housholds,1)
+	handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
+		sum(strcmp(handles.System.housholds{i,1},handles.Current_Settings.Table_Network.Data(:,3)));
+end
 end
 

@@ -2,10 +2,13 @@ function handles = get_default_values(handles)
 %GET_DEFAULT_VALUES Summary of this function goes here
 %   Detailed explanation goes here
 
+% Erstellt von:            Franz Zeilinger - 29.01.2013
+% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+
 %------------------------------------------------------------------------------------
 % System-Werte - sollten sich während der Systemlaufzeit nicht ändern!
 %------------------------------------------------------------------------------------
-System.Version = '3.2';
+System.Version = '4.0';
 
 % Standardbezeichnungen:
 System.seasons =   {... % Typen der Jahreszeiten
@@ -149,6 +152,14 @@ Current_Settings.Simulation.Parameters = {...
 	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
 	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
 	};
+% Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
+% Input-Datensätze sollen aus der Datenbank geladen werden?)
+Current_Settings.Simulation.Number_Runs = 10;
+% Welche verschiedenen Netze sollen simuliert werden. ACHTUNG: diese
+% sollten in ihrer Grundstruktur gleich sein: d.h. z.B. gleiche Anzahl an
+% Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
+% müssen!
+Current_Settings.Simulation.Grid_List = {};
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung
