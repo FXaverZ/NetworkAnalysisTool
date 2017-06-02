@@ -5,7 +5,7 @@ function handles = get_default_values(handles)
 %------------------------------------------------------------------------------------
 % System-Werte - sollten sich während der Systemlaufzeit nicht ändern!
 %------------------------------------------------------------------------------------
-System.Version = '1.0';
+System.Version = '3.2';
 
 % Standardbezeichnungen:
 System.seasons =   {... % Typen der Jahreszeiten
@@ -53,7 +53,62 @@ System.wc_households = {...
 	'Niedrigster Energieverbrauch';...
 	'Höchste Leistungsaufnahme';...
 	};
+System.wc_generation = {...
+	'Kein';...
+	'Höchste Tageseinspeisung';...
+	'Niedrigste Tageseinspeisung';...
+% 	'Höchste Leistung';...
+	};
 
+% Definition der Erzeugungs-Anlagenarten:
+System.sola.Typs = {...
+	'Fix montiert';...
+	'Tracker';...
+	};
+System.sola.Selectable = {...
+	'Keine Anlage ausgewählt'  ,[];...
+	'Neue Anlage hinzufügen...',[];...
+	};
+% Default Werte (alle Anlagen aus, Standardwerte) für PV-Anlagen:
+Default_Plant.Typ = 1;                  % Typ der Anlage (siehe 
+%                                             HANDLES.SYSTEM.SOLA.TYPS)
+Default_Plant.Number = 0;               % Anzahl Anlagen           [-]
+Default_Plant.Power_Installed = 0;      % Installierte Leistung    [kW]
+Default_Plant.Orientation = 0;          % Ausrichtung              [°]
+Default_Plant.Inclination = 30;         % Neigung                  [°]
+Default_Plant.Efficiency = 0.17;        % Wirkungsgrad Zelle + WR  [-]
+Default_Plant.Rel_Size_Collector = 6.5; % Rel. Kollektorfläche     [m²/kWp]
+Default_Plant.Size_Collector = ...      % Kollektorfläche          [m²]
+	Default_Plant.Power_Installed * Default_Plant.Rel_Size_Collector;
+Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung[s] 
+% Zwei Anlagen werden per Default angeboten:
+System.sola.Default_Plant = Default_Plant;
+clear('Default_Plant');
+
+% Name der verfügbaren Windkraft-Anlagen auslesen:
+System.wind.Typs = get_wind_turbine_parameters('typs');
+System.wind.Selectable = System.sola.Selectable;
+% Defaultwerte für Windkraftanlagen:
+Default_Plant.Typ =             1;      % Anlagen-Typ, 1 = "keine Anlage"
+Default_Plant.Number =          0;      % Anzahl der Anlagen               [-]
+Default_Plant.Power_Installed = 0;      % Nennleistung der Anlage          [W]
+Default_Plant.Rho =         1.225;      % Luftdichte                       [kg/m³]
+Default_Plant.v_nominal =      11;      % Windgeschwindigkeit bei der Nennleistung
+%                                             verfügbar ist                [m/s]
+Default_Plant.Efficiency =   0.98;      % Wirkungsgrad des Wechselrichters [-]
+Default_Plant.v_start =       0.8;      % Anlaufwindgeschwindigkeit        [m/s]
+Default_Plant.v_cut_off =      15;      % Abschaltwindgeschwindigkeit      [m/s]
+Default_Plant.Size_Rotor =    2.5;      % Rotordurchmesser                 [m]
+Default_Plant.Typ_Rotor =  'n.d.';      % Art des Rotors
+Default_Plant.Inertia =      20.0;      % Trägheit des Windrads            [s]
+Default_Plant.c_p =            [];      % Tabelle mit Leistungsbeiwerten bei
+%                                             bestimmten Windgeschwindigkeiten (kommt 
+%                                             aus Anlagenparameterdatei
+%                                             "get_wind_turbine_parameters").
+Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung        [s] 
+System.wind.Default_Plant = Default_Plant;
+
+% Systemeinstellungen speichern
 handles.System = System; 
 
 %------------------------------------------------------------------------------------
@@ -121,6 +176,10 @@ end
 % Aktueller Worstcase für Haushalte. Möglichkeiten siehe
 % HANDLES.SYSTEM.WC_HOUSEHOLDS.
 Current_Settings.Data_Extract.Worstcase_Housholds = 1; % Default = 'Kein'
+Current_Settings.Data_Extract.Worstcase_Generation = 1;
+% Erzeugungsanlagen:
+Current_Settings.Data_Extract.Solar.Selectable = System.sola.Selectable;
+Current_Settings.Data_Extract.Wind.Selectable = System.wind.Selectable;
 
 
 % Standard-Dateipfade, Pfad zur Datenbank:

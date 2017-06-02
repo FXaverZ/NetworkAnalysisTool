@@ -1,4 +1,4 @@
-function handles = adobt_data_for_display(handles)
+function handles = adopt_data_for_display(handles)
 %ADOBT_DATA_FOR_DISPLAY    aufbereiten der Daten für GUI 'Data_Explorer'
 %    HANDLES = ADOBT_DATA_FOR_DISPLAY(HANDLES) fügt der Struktur RESULTS innerhalb
 %    der HANDLES Datenstruktur die Struktur DISPLAYABLE hinzu, welche die
@@ -14,9 +14,15 @@ function handles = adobt_data_for_display(handles)
 
 Result = handles.Result;
 
+% Die akutellen Einstellungen mitspeichern:
+Result.System = handles.System;
+Result.Current_Settings = handles.Current_Settings;
+
 data_typs = {...
 	'Sample', 'Sample-Werte';...
 	'Mean',   'Mittelwerte';...
+	'Min',    'Minimalwerte';...
+	'Max',    'Maximalwerte';...
 	};
 % Zeitskalen erstellen:
 time_res = handles.System.time_resolutions{...
@@ -33,6 +39,7 @@ else
 end
 
 Result.Time_Mean = Result.Time_Sample(2:end);
+Result.Time_Max = Result.Time_Mean;
 Result.Time_Min = Result.Time_Mean;
 
 crv_cnt = 0;
@@ -392,108 +399,109 @@ if ~isempty(Result.Households.Data_05P_Quantil) &&...
 	dspl.(crv_nam).Y_Label = 'Q_{Aufnahme} [kVA]';
 	dspl.(crv_nam).Time = 'Time_Min';
 end
-% % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% %                              P V  -  A N L A G E N
-% % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% for i=1:size(data_typs,1)
-% 	if ~isempty(Result.Solar.(['Data_',data_typs{i,1}]))
-% 		% Anzeigbare Kurven definieren:
-% 		crv_cnt = crv_cnt + 1;
-% 		crv_nam = ['Curve_',num2str(crv_cnt)];
-% 		dspl.(crv_nam).Title = ['Gesamteinspeisung PV-Anlagen (',...
-% 			data_typs{i,2},')'];
-% 		dspl.(crv_nam).Data_fun = @get_power_total_kW;
-% 		dspl.(crv_nam).Data_fun_args = {'Solar','P',data_typs{i,1}};
-% 		dspl.(crv_nam).Unit = 'kW';
-% 		dspl.(crv_nam).Legend = 'P_{PV Ges.}';
-% 		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
-% 		
-% 		crv_cnt = crv_cnt + 1;
-% 		crv_nam = ['Curve_',num2str(crv_cnt)];
-% 		dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen pro Phase (',...
-% 			data_typs{i,2},')'];
-% 		dspl.(crv_nam).Data_fun = @get_power_total_kW;
-% 		dspl.(crv_nam).Data_fun_args = {'Solar','P_Phase',data_typs{i,1}};
-% 		dspl.(crv_nam).Unit = 'kW';
-% 		dspl.(crv_nam).Legend = [{'P_{L1}'},{'P_{L2}'},{'P_{L3}'}];
-% 		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
-% 		
-% 		crv_cnt = crv_cnt + 1;
-% 		crv_nam = ['Curve_',num2str(crv_cnt)];
-% 		dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
-% 			data_typs{i,2},')'];
-% 		dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
-% 		dspl.(crv_nam).Data_fun_args = {'Solar','P',data_typs{i,1}};
-% 		dspl.(crv_nam).Unit = 'kW';
-% 		num_plants = size(Result.Solar.(['Data_',data_typs{i,1}]),2)/6;
-% 		legend = cell(1,num_plants);
-% 		for j=1:num_plants
-% 			legend{j} = ['P_{PV} - Anlage ',num2str(j)];
-% 		end
-% 		dspl.(crv_nam).Legend = legend;
-% 		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
-% 	end
-% end
-% if ~isempty(Result.Solar.Data_Min) && ~isempty(Result.Solar.Data_Max)
-% 	% Anzeigbare Kurven definieren:
-% 	crv_cnt = crv_cnt + 1;
-% 	crv_nam = ['Curve_',num2str(crv_cnt)];
-% 	dspl.(crv_nam).Title = ['Gesamteinspeisung PV-Anlagen (',...
-% 		'Minimal und Maximalwerte',')'];
-% 	dspl.(crv_nam).Data_fun = @get_power_total_kW;
-% 	dspl.(crv_nam).Data_fun_args = {'Solar','P','Min_Max'};
-% 	dspl.(crv_nam).Unit = 'kW';
-% 	dspl.(crv_nam).Legend = [{'P_{Ges} PV Min'},{'P_{Ges} PV Max'}];
-% 	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 	dspl.(crv_nam).Time = 'Time_Min';
-% 	
-% 	crv_cnt = crv_cnt + 1;
-% 	crv_nam = ['Curve_',num2str(crv_cnt)];
-% 	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen pro Phase (',...
-% 		'Minimal und Maximalwerte',')'];
-% 	dspl.(crv_nam).Data_fun = @get_power_total_kW;
-% 	dspl.(crv_nam).Data_fun_args = {'Solar','P_Phase','Min_Max'};
-% 	dspl.(crv_nam).Unit = 'kW';
-% 	dspl.(crv_nam).Legend = [{'P_{min} - L1'},{'P_{max} - L1'},{'P_{min} - L2'},...
-% 		{'P_{max} - L2'},{'P_{min} - L3'},{'P_{max} - L3'}];
-% 	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 	dspl.(crv_nam).Time = 'Time_Min';
-% 	
-% 	crv_cnt = crv_cnt + 1;
-% 	crv_nam = ['Curve_',num2str(crv_cnt)];
-% 	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
-% 		'Minimalwerte',')'];
-% 	dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
-% 	dspl.(crv_nam).Data_fun_args = {'solar','P','Min'};
-% 	dspl.(crv_nam).Unit = 'kW';
-% 	num_plants = size(Result.Solar.Data_Min,2)/6;
-% 	legend = cell(1,num_plants);
-% 	for i=1:num_plants
-% 		legend{i} = ['P_{PV} - Anlage ',num2str(i)];
-% 	end
-% 	dspl.(crv_nam).Legend = legend;
-% 	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 	dspl.(crv_nam).Time = 'Time_Min';
-% 	
-% 	crv_cnt = crv_cnt + 1;
-% 	crv_nam = ['Curve_',num2str(crv_cnt)];
-% 	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
-% 		'Maximalwerte',')'];
-% 	dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
-% 	dspl.(crv_nam).Data_fun_args = {'Solar','P','Max'};
-% 	dspl.(crv_nam).Unit = 'kW';
-% 	num_plants = size(Result.Solar.Data_Min,2)/6;
-% 	legend = cell(1,num_plants);
-% 	for i=1:num_plants
-% 		legend{i} = ['P_{PV} - Anlage ',num2str(i)];
-% 	end
-% 	dspl.(crv_nam).Legend = legend;
-% 	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
-% 	dspl.(crv_nam).Time = 'Time_Min';
-% end
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%                              P V  -  A N L A G E N
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+for i=1:size(data_typs,1)
+	if ~isempty(Result.Solar.(['Data_',data_typs{i,1}]))
+		% Anzeigbare Kurven definieren:
+		crv_cnt = crv_cnt + 1;
+		crv_nam = ['Curve_',num2str(crv_cnt)];
+		dspl.(crv_nam).Title = ['Gesamteinspeisung PV-Anlagen (',...
+			data_typs{i,2},')'];
+		dspl.(crv_nam).Data_fun = @get_power_total_kW;
+		dspl.(crv_nam).Data_fun_args = {'Solar','P',data_typs{i,1}};
+		dspl.(crv_nam).Unit = 'kW';
+		dspl.(crv_nam).Legend = 'P_{PV Ges.}';
+		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
+		
+		crv_cnt = crv_cnt + 1;
+		crv_nam = ['Curve_',num2str(crv_cnt)];
+		dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen pro Phase (',...
+			data_typs{i,2},')'];
+		dspl.(crv_nam).Data_fun = @get_power_total_kW;
+		dspl.(crv_nam).Data_fun_args = {'Solar','P_Phase',data_typs{i,1}};
+		dspl.(crv_nam).Unit = 'kW';
+		dspl.(crv_nam).Legend = [{'P_{L1}'},{'P_{L2}'},{'P_{L3}'}];
+		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
+		
+		crv_cnt = crv_cnt + 1;
+		crv_nam = ['Curve_',num2str(crv_cnt)];
+		dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
+			data_typs{i,2},')'];
+		dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
+		dspl.(crv_nam).Data_fun_args = {'Solar','P',data_typs{i,1}};
+		dspl.(crv_nam).Unit = 'kW';
+		num_plants = size(Result.Solar.(['Data_',data_typs{i,1}]),2)/6;
+		legend = cell(1,num_plants);
+		for j=1:num_plants
+			legend{j} = ['P_{PV} - Anlage ',num2str(j)];
+		end
+		dspl.(crv_nam).Legend = legend;
+		dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+		dspl.(crv_nam).Time = ['Time_',data_typs{i,1}];
+	end
+end
+if ~isempty(Result.Solar.Data_Min) && ~isempty(Result.Solar.Data_Max)
+	% Anzeigbare Kurven definieren:
+	crv_cnt = crv_cnt + 1;
+	crv_nam = ['Curve_',num2str(crv_cnt)];
+	dspl.(crv_nam).Title = ['Gesamteinspeisung PV-Anlagen (',...
+		'Minimal und Maximalwerte',')'];
+	dspl.(crv_nam).Data_fun = @get_power_total_kW;
+	dspl.(crv_nam).Data_fun_args = {'Solar','P','Min_Max'};
+	dspl.(crv_nam).Unit = 'kW';
+	dspl.(crv_nam).Legend = [{'P_{Ges} PV Min'},{'P_{Ges} PV Max'}];
+	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+	dspl.(crv_nam).Time = 'Time_Min';
+	
+	crv_cnt = crv_cnt + 1;
+	crv_nam = ['Curve_',num2str(crv_cnt)];
+	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen pro Phase (',...
+		'Minimal und Maximalwerte',')'];
+	dspl.(crv_nam).Data_fun = @get_power_total_kW;
+	dspl.(crv_nam).Data_fun_args = {'Solar','P_Phase','Min_Max'};
+	dspl.(crv_nam).Unit = 'kW';
+	dspl.(crv_nam).Legend = [{'P_{min} - L1'},{'P_{max} - L1'},{'P_{min} - L2'},...
+		{'P_{max} - L2'},{'P_{min} - L3'},{'P_{max} - L3'}];
+	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+	dspl.(crv_nam).Time = 'Time_Min';
+	
+	crv_cnt = crv_cnt + 1;
+	crv_nam = ['Curve_',num2str(crv_cnt)];
+	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
+		'Minimalwerte',')'];
+	dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
+	dspl.(crv_nam).Data_fun_args = {'solar','P','Min'};
+	dspl.(crv_nam).Unit = 'kW';
+	num_plants = size(Result.Solar.Data_Min,2)/6;
+	legend = cell(1,num_plants);
+	for i=1:num_plants
+		legend{i} = ['P_{PV} - Anlage ',num2str(i)];
+	end
+	dspl.(crv_nam).Legend = legend;
+	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+	dspl.(crv_nam).Time = 'Time_Min';
+	
+	crv_cnt = crv_cnt + 1;
+	crv_nam = ['Curve_',num2str(crv_cnt)];
+	dspl.(crv_nam).Title = ['Einspeisung PV-Anlagen, Einzelanlagen (',...
+		'Maximalwerte',')'];
+	dspl.(crv_nam).Data_fun = @get_power_single_curves_kW;
+	dspl.(crv_nam).Data_fun_args = {'Solar','P','Max'};
+	dspl.(crv_nam).Unit = 'kW';
+	num_plants = size(Result.Solar.Data_Min,2)/6;
+	legend = cell(1,num_plants);
+	for i=1:num_plants
+		legend{i} = ['P_{PV} - Anlage ',num2str(i)];
+	end
+	dspl.(crv_nam).Legend = legend;
+	dspl.(crv_nam).Y_Label = 'P_{Einspeisung} [kW]';
+	dspl.(crv_nam).Time = 'Time_Min';
+end
+
 % % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % %                      K L E I N W I N D K R A F T A N L A G E N
 % % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -620,6 +628,10 @@ switch lower(data_typ)
 		data = res_struct.Data_Sample/1000;
 	case 'mean'
 		data = res_struct.Data_Mean/1000;
+	case 'min'
+		data = res_struct.Data_Min/1000;
+	case 'max'
+		data = res_struct.Data_Max/1000;
 	case 'min_max'
 		data_min = res_struct.Data_Min/1000;
 		data_max = res_struct.Data_Max/1000;

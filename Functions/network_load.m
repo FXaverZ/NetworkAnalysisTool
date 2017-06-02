@@ -59,26 +59,13 @@ Grid.P_Q_Node.ids = Grid.P_Q_Node.ids(IX);
 Grid.Branches.Lines = Grid.Branches.Lines(IX);
 Grid.Branches.ids = Grid.Branches.ids(IX);
 
-% Daten in Tabelle einstellen:
-data = {Grid.P_Q_Node.Points.P_Q_Name}';
-data(:,2) = deal({false});
-data(:,3) = deal(system.housholds(1,1));
-ColumnName = {'Names', 'Selection', 'Haush. Typ'};
-ColumnFormat = {'char', 'logical', ...
-	system.housholds(:,1)'};
-ColumnEditable = [false, true, true];
-RowName = [];
-
 % SINCAL-Objekt speichern:
 handles.sin = sin;
 % Netzobjekte speichern:
 handles.Grid = Grid;
 
-settin.Table_Network.Data = data;
-settin.Table_Network.ColumnName = ColumnName;
-settin.Table_Network.ColumnEditable = ColumnEditable;
-settin.Table_Network.ColumnFormat = ColumnFormat;
-settin.Table_Network.RowName = RowName;
+% Tabelle mit Default-Werten befüllen:
+[settin.Table_Network, settin.Data_Extract] = network_table_reset(handles);
 
 % Etwaige bereits geladene Daten und Simulationsergebnisse zurücksetzen:
 if isfield(handles, 'Result')
@@ -94,6 +81,7 @@ try
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
 	
 	handles.Result.Households = Load_Feed_Data;
+	handles.Result.Solar = Gene_Sola_Data;
 	settin.Data_Extract = Data_Extract;
 	settin.Table_Network = Table_Network;
 	% Anzahl der jeweiligen Haushalte ermitteln:

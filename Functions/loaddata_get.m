@@ -52,12 +52,13 @@ if settin.Data_Extract.get_Time_Series
 else
 	% Auslesen eines Tages:
 	handles = get_data_households(handles);
-% 	handles = get_data_solar(handles);
+	handles = get_data_solar(handles);
 % 	handles = get_data_wind(handles);
 end
 
 % Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 Load_Feed_Data = handles.Result.Households; %#ok<NASGU>
+Gene_Sola_Data = handles.Result.Solar; %#ok<NASGU>
 Data_Extract = settin.Data_Extract; %#ok<NASGU>
 Table_Network = settin.Table_Network; %#ok<NASGU>
 % Speicherort = aktulles Netzfile
@@ -65,7 +66,7 @@ file = settin.Files.Auto_Load_Feed_Data;
 file.Path = [settin.Files.Grid.Path,filesep,settin.Files.Grid.Name,'_files'];
 
 save([file.Path,filesep,file.Name,file.Exte],...
-	'Load_Feed_Data', 'Data_Extract', 'Table_Network');
+	'Load_Feed_Data', 'Gene_Sola_Data', 'Data_Extract', 'Table_Network');
 fprintf('\t\t--> erledigt!\n');
 
 set(handles.push_load_data_get, 'Enable', 'on');

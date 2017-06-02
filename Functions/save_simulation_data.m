@@ -4,7 +4,11 @@ function handles = save_simulation_data(handles)
 
 Result = handles.Result;
 
+% Dateieinstellungen aktualisieren:
+Result.Current_Settings.Files = handles.Current_Settings.Files;
 
+file = Result.Current_Settings.Files.Save.Result;
+save([file.Path,filesep,file.Name,file.Exte],'Result');
 
 end
 

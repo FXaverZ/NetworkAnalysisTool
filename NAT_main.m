@@ -3,7 +3,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.02.2013
 
-% Last Modified by GUIDE v2.5 08-Mar-2013 16:03:34
+% Last Modified by GUIDE v2.5 10-Apr-2013 12:36:49
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -128,9 +128,59 @@ function menue_data_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+% aktuellen Speicherort für Konfigurationen auslesen:
+file = handles.Current_Settings.Files.Save.Result;
+% Userabfrage nach Speicherort
+[file.Name,file.Path] = uigetfile([...
+	{'*.mat','Simulationsdaten'};...
+	{'*.*','Alle Dateien'}],...
+	'Laden von Simulationsdaten...',...
+	[file.Path,filesep]);
+% Überprüfen, ob gültiger Speicherort angegeben wurde:
+if ~isequal(file.Name,0) && ~isequal(file.Path,0)
+	% Falls, ja, Entfernen der Dateierweiterung vom Dateinamen:
+	[~, file.Name, file.Exte] = fileparts(file.Name);
+	% leztes Zeichen ("/") im Pfad entfernen:
+	file.Path = file.Path(1:end-1);
+	% Daten laden und Einstellungen dieser Daten wiederherstellen:
+	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
+	handles.Result = Result;
+	handles.Current_Settings = Result.Current_Settings;
+	% aktuellen Speicherort übernehmen:
+	handles.Current_Settings.Files.Save.Result = file;
+	
+	% Netz zurücksetzen:
+	handles.Current_Settings.Files.Grid.Name = [];
+	if isfield(handles,'sin')
+		handles = rmfield(handles,'sin');
+	end
+	try
+		db = handles.Current_Settings.Load_Database;
+		load([db.Path,filesep,db.Name,filesep,db.Name,'.mat']);
+		handles.Current_Settings.Database.setti = setti;
+		handles.Current_Settings.Database.files = files;
+		
+	catch ME
+		% alte Datenbankeinstellungen entfernen:
+		if isfield(handles.Current_Settings.Database,'setti')
+			handles.Current_Settings.Database = rmfield(...
+				handles.Current_Settings.Database,'setti');
+		end
+		if isfield(handles.Current_Settings.Database,'files')
+			handles.Current_Settings.Database = rmfield(...
+				handles.Current_Settings.Database,'files');
+		end
+		
+		% User informieren:
+		helpdlg({'Simulationsdaten erfolgreich geladen.',...
+			'Datenbank konnte nicht geladen werden,',...
+			'bitte Datenbankpfad erneut angeben!'});
+		disp('Fehler beim Laden der Datenbankeinstellungen:');
+		disp(ME.message);
+	end
+end
 
-
-% Anzeige aktualisieren:
+% Anzeigen aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
 
 % handles-Struktur aktualisieren:
@@ -141,7 +191,28 @@ function menue_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+% aktuellen Speicherort für Simulationsdaten auslesen:
+file = handles.Current_Settings.Files.Save.Result;
+% Userabfrage nach Speicherort
+[file.Name,file.Path] = uiputfile([...
+	{'*.mat','Simulationsdaten'};...
+	{'*.*','Alle Dateien'}],...
+	'Speicherort für aktuelle Simulationsdaten...',...
+	[file.Path,filesep,file.Name,file.Exte]);
+% Überprüfen, ob gültiger Speicherort angegeben wurde:
+if ~isequal(file.Name,0) && ~isequal(file.Path,0)
+	% Falls, ja, Entfernen der Dateierweiterung vom Dateinamen:
+	[~, file.Name, file.Exte] = fileparts(file.Name);
+	% leztes Zeichen ("/") im Pfad entfernen:
+	file.Path = file.Path(1:end-1);
+	% aktuellen Speicherort übernehmen:
+	handles.Current_Settings.Files.Save.Result = file;
+end
+
 handles = save_simulation_data(handles);
+
+% User informieren:
+helpdlg('Simulationsdaten erfolgreich gespeichert');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -228,6 +299,7 @@ for i=1:3
 end
 % Worst-Cases:
 set(handles.popup_hh_worstcase, 'String', handles.System.wc_households);
+set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation);
 % Haushaltstypen:
 set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
 
@@ -263,6 +335,19 @@ guidata(hObject, handles);
 
 function varargout = NAT_main_OutputFcn(hObject, eventdata, handles) %#ok<STOUT,INUSD>
 
+function popup_gen_worstcase_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik popup_hh_worstcase (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Data_Extract.Worstcase_Generation = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren
+guidata(hObject, handles);
+
 function popup_hh_worstcase_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_hh_worstcase (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -280,6 +365,76 @@ function popup_pqnode_hh_typ_Callback(hObject, eventdata, handles)
 % hObject    handle to popup_pqnode_hh_typ (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+function popup_pqnode_pv_typ_Callback(hObject, eventdata, handles)
+% hObject    handle to popup_pqnode_pv_typ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+settin = handles.Current_Settings.Data_Extract.Solar;
+row_act = handles.Current_Settings.Table_Network.Selected_Row;
+add_data = handles.Current_Settings.Table_Network.Additional_Data;
+sel = get(hObject,'Value');
+if sel == size(settin.Selectable,1)
+	% letzter Eintrag ausgewählt, also muss eine neue Anlage hinzugefügt werden:
+	if isstruct(settin.Plants)
+		n_pl = numel(fieldnames(settin.Plants));
+		name = ['Plant_',num2str(n_pl+1)];
+		
+	else
+		name = 'Plant_1';
+	end
+	settin.Plants.(name) = handles.System.sola.Default_Plant;
+	add_data{row_act,1} = name;
+	settin.Selectable{end+1,1} = settin.Selectable{end,1};
+	settin.Selectable{end-1,2} = name;
+	settin.Plants.(name) = ...
+		Configuration_PV_Parameters(handles,'Parameters',settin.Plants.(name));
+	settin.Plants.(name).Number = 1;
+	typ = handles.System.sola.Typs{settin.Plants.(name).Typ,1};
+	long_na = [typ(1:4),' - ',...
+		num2str(settin.Plants.(name).Power_Installed),' kWp - ',...
+		num2str(settin.Plants.(name).Orientation),'° - ',...
+		num2str(settin.Plants.(name).Inclination),'°'];
+	settin.Selectable{end-1,1} = long_na;
+	handles.Current_Settings.Table_Network.ColumnFormat{4} = settin.Selectable(:,1)';
+	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+elseif sel == 1
+	% keine Anlage mehr ausgewählt, Anlagenanzahl reduzieren:
+	name_old = add_data{row_act,2};
+	long_na = settin.Selectable{sel,1};
+	if ~isempty(name_old)
+		% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
+		settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
+	end
+	add_data{row_act,1} = [];
+	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+else
+	name = settin.Selectable{sel,2};
+	long_na = settin.Selectable{sel,1};
+	name_old = add_data{row_act,2};
+	if ~isempty(name_old)
+		% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
+		settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
+	end
+	% ausgewählte Anlage setzen:
+	settin.Plants.(name).Number = settin.Plants.(name).Number + 1;
+	add_data{row_act,1} = name;
+	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+end
+
+handles.Current_Settings.Data_Extract.Solar = settin;
+handles.Current_Settings.Table_Network.Additional_Data = add_data;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren
+guidata(hObject, handles);
+
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popup_pqnode_pv_typ contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popup_pqnode_pv_typ
 
 function popup_time_resolution_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_time_resolution (siehe GCBO)
@@ -387,6 +542,21 @@ set(handles.push_cancel, 'Enable', 'off');
 % handles-Structure aktualisieren:
 guidata(hObject, handles);
 
+function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik  push_network_load_allocation_reset (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+% Tabelle mit Default-Werten befüllen:
+[handles.Current_Settings.Table_Network, ...
+    handles.Current_Settings.Data_Extract] = network_table_reset(handles);
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
 function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_load (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -428,15 +598,7 @@ function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 % Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
-Table_Data = handles.Current_Settings.Table_Network.Data;
-hh_typ_number = size(handles.System.housholds,1);
-
-for i=1:size(Table_Data,1)
-	idx = ceil(rand()*hh_typ_number);
-	Table_Data{i,3} = handles.System.housholds{idx,1};
-end
-
-handles.Current_Settings.Table_Network.Data = Table_Data;
+handles = load_random_allocation(handles);
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -622,7 +784,7 @@ handles = refresh_display_NAT_main_gui(handles);
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
 
-function table_data_network_CellEditCallback(hObject, eventdata, handles) %#ok<INUSL,DEFNU>
+function table_data_network_CellEditCallback(hObject, eventdata, handles) %#ok<DEFNU>
 % --- Wird ausgeführt, wenn die Daten in table_data_network verändert werden
 % hObject    Link zur Grafik table_data_network (siehe GCBO)
 % eventdata  Struktur mit den folgenden Feldern (see UITABLE)
@@ -635,8 +797,74 @@ function table_data_network_CellEditCallback(hObject, eventdata, handles) %#ok<I
 %	      Format von Data nicht möglich war.
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+% Wo wurde was geändert?
+row_act = eventdata.Indices(1);
+col = eventdata.Indices(2);
+% Daten aktualisieren:
 handles.Current_Settings.Table_Network.Data = ...
 	get(handles.table_data_network, 'Data');
+
+% Falls in der vierten Spalte etwas geändert wurde, sind Änderungen bei den
+% Solaranlagen vorgenommen worden:
+if col == 4
+	settin = handles.Current_Settings.Data_Extract.Solar;
+	add_data = handles.Current_Settings.Table_Network.Additional_Data;
+	
+	sel = find(strcmp(handles.Current_Settings.Table_Network.Data{row_act,col}, ...
+		settin.Selectable(:,1)));
+	
+	if sel == size(settin.Selectable,1)
+		% letzter Eintrag ausgewählt, also muss eine neue Anlage hinzugefügt werden:
+		if isstruct(settin.Plants)
+			n_pl = numel(fieldnames(settin.Plants));
+			name = ['Plant_',num2str(n_pl+1)];
+		else
+			name = 'Plant_1';
+		end
+		settin.Plants.(name) = handles.System.sola.Default_Plant;
+		add_data{row_act,1} = name;
+		settin.Selectable{end+1,1} = settin.Selectable{end,1};
+		settin.Selectable{end-1,2} = name;
+		settin.Plants.(name) = ...
+			Configuration_PV_Parameters(handles,'Parameters',settin.Plants.(name));
+		settin.Plants.(name).Number = 1;
+		typ = handles.System.sola.Typs{settin.Plants.(name).Typ,1};
+		long_na = [typ(1:4),' - ',...
+			num2str(settin.Plants.(name).Power_Installed),' kWp - ',...
+			num2str(settin.Plants.(name).Orientation),'° - ',...
+			num2str(settin.Plants.(name).Inclination),'°'];
+		settin.Selectable{end-1,1} = long_na;
+		handles.Current_Settings.Table_Network.ColumnFormat{4} = settin.Selectable(:,1)';
+		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+	elseif sel == 1
+		% keine Anlage mehr ausgewählt, Anlagenanzahl reduzieren:
+		name_old = add_data{row_act,2};
+		long_na = settin.Selectable{sel,1};
+		if ~isempty(name_old)
+			% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
+			settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
+		end
+		add_data{row_act,1} = [];
+		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+	else
+		name = settin.Selectable{sel,2};
+		long_na = settin.Selectable{sel,1};
+		name_old = add_data{row_act,2};
+		if ~isempty(name_old)
+			% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
+			settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
+		end
+		% ausgewählte Anlage setzen:
+		settin.Plants.(name).Number = settin.Plants.(name).Number + 1;
+		add_data{row_act,1} = name;
+		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+	end
+	
+	handles.Current_Settings.Data_Extract.Solar = settin;
+	handles.Current_Settings.Table_Network.Additional_Data = add_data;
+end
+
+handles.Current_Settings.Table_Network.Selected_Row = row_act;
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -707,5 +935,151 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+% --- Executes on selection change in popup_pqnode_pv_typ.
 
 
+
+% --- Executes during object creation, after setting all properties.
+function popup_pqnode_pv_typ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popup_pqnode_pv_typ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_pqnode_pv_installed_power_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_pqnode_pv_installed_power (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_pqnode_pv_installed_power as text
+%        str2double(get(hObject,'String')) returns contents of edit_pqnode_pv_installed_power as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_pqnode_pv_installed_power_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_pqnode_pv_installed_power (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in push_pqnode_pv_parameters.
+function push_pqnode_pv_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_pv_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popup_pqnode_wi_typ.
+function popup_pqnode_wi_typ_Callback(hObject, eventdata, handles)
+% hObject    handle to popup_pqnode_wi_typ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popup_pqnode_wi_typ contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popup_pqnode_wi_typ
+
+
+% --- Executes during object creation, after setting all properties.
+function popup_pqnode_wi_typ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popup_pqnode_wi_typ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_pqnode_wi_installed_power_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_pqnode_wi_installed_power (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_pqnode_wi_installed_power as text
+%        str2double(get(hObject,'String')) returns contents of edit_pqnode_wi_installed_power as a double
+
+function edit_simulation_number_runs_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_simulation_number_runs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_pqnode_wi_installed_power_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_pqnode_wi_installed_power (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in push_pqnode_wi_parameters.
+function push_pqnode_wi_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_wi_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popup_gen_worstcase.
+
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popup_gen_worstcase contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popup_gen_worstcase
+
+
+% --- Executes during object creation, after setting all properties.
+function popup_gen_worstcase_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popup_gen_worstcase (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in push_network_load_allocation_reset.
+
+
+
+
+
+% Hints: get(hObject,'String') returns contents of edit_simulation_number_runs as text
+%        str2double(get(hObject,'String')) returns contents of edit_simulation_number_runs as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_simulation_number_runs_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_simulation_number_runs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
