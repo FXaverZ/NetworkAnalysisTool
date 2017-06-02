@@ -57,8 +57,8 @@ else
 end
 
 % Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
-Load_Feed_Data = handles.Result.Households; %#ok<NASGU>
-Gene_Sola_Data = handles.Result.Solar; %#ok<NASGU>
+Load_Feed_Data = handles.NAT_Data.Result.Households; %#ok<NASGU>
+Gene_Sola_Data = handles.NAT_Data.Result.Solar; %#ok<NASGU>
 Data_Extract = settin.Data_Extract; %#ok<NASGU>
 Table_Network = settin.Table_Network; %#ok<NASGU>
 % Speicherort = aktulles Netzfile

@@ -74,6 +74,7 @@ classdef SINCAL < handle
 			
 			% Default-Einstellungen:
 			obj.Settings.Calculation_method = 'LF_USYM';
+            
 			obj.Settings.Batch_mode  = 4;
 			obj.Settings.Database_typ = 'DB_EL';
 			obj.Settings.Language = 'DE';

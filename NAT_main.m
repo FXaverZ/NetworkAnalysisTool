@@ -144,7 +144,7 @@ if ~isequal(file.Name,0) && ~isequal(file.Path,0)
 	file.Path = file.Path(1:end-1);
 	% Daten laden und Einstellungen dieser Daten wiederherstellen:
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
-	handles.Result = Result;
+	handles.NAT_Data.Result = Result;
 	handles.Current_Settings = Result.Current_Settings;
 	% aktuellen Speicherort übernehmen:
 	handles.Current_Settings.Files.Save.Result = file;
@@ -327,6 +327,8 @@ image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
 axis off;                                         % Achsenbezeichnung ausschalten
 
+handles.NAT_Data = NAT_Data_Class();
+
 % Anzeige des Hauptfensters aktualisieren:
 handles = refresh_display_NAT_main_gui (handles);
 
@@ -335,7 +337,7 @@ guidata(hObject, handles);
 
 function varargout = NAT_main_OutputFcn(hObject, eventdata, handles) %#ok<STOUT,INUSD>
 
-function popup_gen_worstcase_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+function popup_gen_worstcase_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_hh_worstcase (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
@@ -516,7 +518,8 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles = network_analysis(handles);
+% handles = network_analysis(handles);
+handles = post_analyzing_function_1(handles); %%CH_MA
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -773,7 +776,7 @@ if numel(eventdata.Indices) > 0
 	handles.Current_Settings.Table_Network.Selected_Row = eventdata.Indices(1);
 	
 	% das entsprechende Element in SINCAL GUI markieren (falls dieses offen ist):
-	handles.sin.gui_select_element(handles.Grid.P_Q_Node.ids(eventdata.Indices(1)));
+	handles.sin.gui_select_element(handles.NAT_Data.Grid.P_Q_Node.ids(eventdata.Indices(1)));
 else
 	handles.Current_Settings.Table_Network.Selected_Row = [];
 end

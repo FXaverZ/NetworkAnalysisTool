@@ -187,34 +187,34 @@ end
 if settin.get_Time_Series
 	% Die aus diesem Durchlauf ermittelten Daten werden zu den bisherigen hinzugefügt
 	% (sofern vorhanden):
-	if ~isfield(handles, 'Result') || ~isfield(handles.Result, 'Households')
+	if ~isfield(handles.NAT_Data.Result, 'Households')
 		% Die ermittelten Daten stellen den Beginn der Resultsstruktur dar:
-		handles.Result.Households = Households;
+		handles.NAT_Data.Result.Households = Households;
 		return;
 	end
 	% Es sind bereits Daten aus den vorhergehenden Durchläufen vorhanden, diese
 	% werden um die jetzt ermittelten Daten erweitert:
 	handles.Result.Households.Data_Sample = ...
-		[handles.Result.Households.Data_Sample(1:end-1,:);
+		[handles.NAT_Data.Result.Households.Data_Sample(1:end-1,:);
 		Households.Data_Sample];
 	handles.Result.Households.Data_Mean = ...
-		[handles.Result.Households.Data_Mean;
+		[handles.NAT_Data.Result.Households.Data_Mean;
 		Households.Data_Mean];
 	handles.Result.Households.Data_Min = ...
-		[handles.Result.Households.Data_Min;
+		[handles.NAT_Data.Result.Households.Data_Min;
 		Households.Data_Min];
 	handles.Result.Households.Data_Max = ...
-		[handles.Result.Households.Data_Max;
+		[handles.NAT_Data.Result.Households.Data_Max;
 		Households.Data_Max];
 	handles.Result.Households.Data_05P_Quantil = ...
-		[handles.Result.Households.Data_05P_Quantil;
+		[handles.NAT_Data.Result.Households.Data_05P_Quantil;
 		Households.Data_05P_Quantil];
-	handles.Result.Households.Data_95P_Quantil = ...
-		[handles.Result.Households.Data_95P_Quantil;
+	handles.NAT_Data.Result.Households.Data_95P_Quantil = ...
+		[handles.NAT_Data.Result.Households.Data_95P_Quantil;
 		Households.Data_95P_Quantil];
 else
 	% Die ermittelten Daten stellen die fertige Results-Struktur dar:
-	handles.Result.Households = Households;
+	handles.NAT_Data.Result.Households = Households;
 end
 end
 

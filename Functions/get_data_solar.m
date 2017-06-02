@@ -227,6 +227,6 @@ for i=1:numel(plants)
 end
 
 % Ergebnis zurückschreiben:
-handles.Result.Solar = Solar;
+handles.NAT_Data.Result.Solar = Solar;
 end
 

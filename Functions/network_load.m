@@ -9,6 +9,7 @@ function handles = network_load (handles)
 % Einstellungen und Systemvariablen:
 settin = handles.Current_Settings;
 system = handles.System;
+data_o = handles.NAT_Data;
 
 if ~isfield(handles, 'sin')
 	% Erzeugen der SINCAL-Instanz:
@@ -25,52 +26,69 @@ end
 
 % Auslesen der aktuellen Tabelle mit den Elementdaten
 sin.table_data_load('Element');
+%-- changelog v1.1 (start) // 2013041
+sin.table_data_load('Node'); 
+sin.table_data_load('VoltageLevel'); 
+%-- changelog v1.1 (end) // 2013041
 
 % Element-IDs aller SINCAL-Lasten auslesen:
-Grid.P_Q_Node.ids = cell2mat(sin.Tables.Element(...
+data_o.Grid.P_Q_Node.ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Load',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
-Grid.Branches.ids = cell2mat(sin.Tables.Element(...
+data_o.Grid.Branches.ids = cell2mat(sin.Tables.Element(...
 	strncmp(sin.Tables.Element(:,strcmp(sin.Tables.Element(1,:),'Type')),'Line',4),...
 	strcmp(sin.Tables.Element(1,:),'Element_ID')...
 	));
+
+% -- changelog v1.1b ##### (start) // 20130411
+data_o.Grid.All_Node.ids = cell2mat(sin.Tables.Node(2:end,...
+	strcmp(sin.Tables.Node(1,:),'Node_ID')...
+	)); 
+% -- changelog v1.1b ##### (end) // 20130411
+
+
+
 
 %------------------------------------------------------------------------------------
 % Verbindungspunkte anlegen (jede Last im SINCAL-Netz entspricht einem Knoten, an dem
 % eine Einheit angeschlossen werden kann a.k.a. Hausanschluss:
 %------------------------------------------------------------------------------------
-Grid.P_Q_Node.Points = Connection_Point.empty(numel(Grid.P_Q_Node.ids),0);
-for i=1:numel(Grid.P_Q_Node.ids)
-	Grid.P_Q_Node.Points(i) = Connection_Point(sin, Grid.P_Q_Node.ids(i));
+data_o.Grid.P_Q_Node.Points = Connection_Point.empty(numel(data_o.Grid.P_Q_Node.ids),0);
+for i=1:numel(data_o.Grid.P_Q_Node.ids)
+	data_o.Grid.P_Q_Node.Points(i) = Connection_Point(sin, data_o.Grid.P_Q_Node.ids(i));
 end
 
-Grid.Branches.Lines = Branch.empty(numel(Grid.Branches.ids),0);
-for i=1:numel(Grid.Branches.ids)
-    Grid.Branches.Lines(i) = Branch(sin, Grid.Branches.ids(i));
+% -- changelog v1.1b ##### (start) // 20130411
+data_o.Grid.All_Node.Points = Connection_All_Point.empty(numel(data_o.Grid.All_Node.ids),0);
+for i=1:numel(data_o.Grid.All_Node.ids)
+    data_o.Grid.All_Node.Points(i) = Connection_All_Point(sin, data_o.Grid.All_Node.ids(i));
+end
+data_o.Grid.All_Node.Points.define_voltage_limits;
+% -- changelog v1.1b ##### (end) // 20130411
+
+data_o.Grid.Branches.Lines = Branch.empty(numel(data_o.Grid.Branches.ids),0);
+for i=1:numel(data_o.Grid.Branches.ids)
+    data_o.Grid.Branches.Lines(i) = Branch(sin, data_o.Grid.Branches.ids(i));
 end
 
 % Sortieren der Namen:
-[~, IX] = sort({Grid.P_Q_Node.Points.P_Q_Name});
-Grid.P_Q_Node.Points = Grid.P_Q_Node.Points(IX);
-Grid.P_Q_Node.ids = Grid.P_Q_Node.ids(IX);
+[~, IX] = sort({data_o.Grid.P_Q_Node.Points.P_Q_Name});
+data_o.Grid.P_Q_Node.Points = data_o.Grid.P_Q_Node.Points(IX);
+data_o.Grid.P_Q_Node.ids = data_o.Grid.P_Q_Node.ids(IX);
 
-[~, IX] = sort({Grid.Branches.Lines.Branch_Name});
-Grid.Branches.Lines = Grid.Branches.Lines(IX);
-Grid.Branches.ids = Grid.Branches.ids(IX);
+[~, IX] = sort({data_o.Grid.Branches.Lines.Branch_Name});
+data_o.Grid.Branches.Lines = data_o.Grid.Branches.Lines(IX);
+data_o.Grid.Branches.ids = data_o.Grid.Branches.ids(IX);
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;
-% Netzobjekte speichern:
-handles.Grid = Grid;
 
 % Tabelle mit Default-Werten befüllen:
 [settin.Table_Network, settin.Data_Extract] = network_table_reset(handles);
 
 % Etwaige bereits geladene Daten und Simulationsergebnisse zurücksetzen:
-if isfield(handles, 'Result')
-    handles = rmfield(handles, 'Result');
-end
+handles.NAT_Data.Result = [];
 
 % Versuch, die letzten Lastdaten dieses Netzes zu laden:
 try
@@ -80,8 +98,8 @@ try
 	% Laden von 'Load_Feed_Data', 'Data_Extract', 'Table_Network':
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
 	
-	handles.Result.Households = Load_Feed_Data;
-	handles.Result.Solar = Gene_Sola_Data;
+	handles.NAT_Data.Result.Households = Load_Feed_Data;
+	handles.NAT_Data.Result.Solar = Gene_Sola_Data;
 	settin.Data_Extract = Data_Extract;
 	settin.Table_Network = Table_Network;
 	% Anzahl der jeweiligen Haushalte ermitteln:

@@ -131,7 +131,8 @@ classdef Connection_Point < handle
 			% Das Berechnungsobjekt des Knotens speichern:
 			obj.Node_Obj = sin_ext.Simulation.GetObj('NODE', obj.Node_ID);
 			obj.Node_Name = obj.Node_Obj.get('Item','TOPO.Name');
-		end
+            
+        end
 		
 		function p_q = update_power(obj)
 			% Auswahl aller Objekte, für die eine Änderung in der Leistungsaufnahme

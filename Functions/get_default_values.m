@@ -150,6 +150,9 @@ Current_Settings.Simulation.Parameters = {...
 	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
 	};
 
+% Anzahl der durchzuführenden Einzelsimulationen:
+
+
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung
 data_settings.get_Sample_Value = 1;   % Sample-Werte ermitteln bzw. speichern.

@@ -181,13 +181,13 @@ else
     set(handles.push_load_data_get, 'Enable','off');
 end
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
-if isfield(handles, 'Result')
-	if isfield(handles.Result, 'Households') && isfield(handles, 'sin')
+if ~isempty(handles.NAT_Data.Result)
+	if isfield(handles.NAT_Data.Result, 'Households') && isfield(handles, 'sin')
 		set(handles.push_network_calculation_start, 'Enable','on');
 	else
 		set(handles.push_network_calculation_start, 'Enable','off');
 	end
-	if isfield(handles.Result, 'Displayable')
+	if isfield(handles.NAT_Data.Result, 'Displayable')
 		set(handles.push_data_show, 'Enable','on');
 	else
 		set(handles.push_data_show, 'Enable','off');

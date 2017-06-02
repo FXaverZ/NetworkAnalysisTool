@@ -12,7 +12,7 @@ function handles = adopt_data_for_display(handles)
 % Erstellt von:            Franz Zeilinger - 03.07.2012
 % Letzte Änderung durch:   Franz Zeilinger - 16.08.2012
 
-Result = handles.Result;
+Result = handles.NAT_Data.Result;
 
 % Die akutellen Einstellungen mitspeichern:
 Result.System = handles.System;
@@ -49,11 +49,11 @@ dspl = [];
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 if isfield(Result,'Grid');
-	for i=1:numel(handles.Grid.P_Q_Node.Points)
+	for i=1:numel(handles.NAT_Data.Grid.P_Q_Node.Points)
 		crv_cnt = crv_cnt + 1;
 		crv_nam = ['Curve_',num2str(crv_cnt)];
 		dspl.(crv_nam).Title = ['Spannungen am Knoten von ',...
-			handles.Grid.P_Q_Node.Points(i).P_Q_Name];
+			handles.NAT_Data.Grid.P_Q_Node.Points(i).P_Q_Name];
 % 		dspl.(crv_nam).Pop_up_Title = ['P Ges. Haushalte (',...
 % 			data_typs{i,2},')'];
 		dspl.(crv_nam).Data_fun = @get_node_voltages_V;
@@ -64,11 +64,11 @@ if isfield(Result,'Grid');
 		dspl.(crv_nam).Time = 'Time_Mean';
 	end
 	
-		for i=1:numel(handles.Grid.Branches.Lines)
+		for i=1:numel(handles.NAT_Data.Grid.Branches.Lines)
 		crv_cnt = crv_cnt + 1;
 		crv_nam = ['Curve_',num2str(crv_cnt)];
 		dspl.(crv_nam).Title = ['Ströme durch ',...
-			handles.Grid.Branches.Lines(i).Branch_Name];
+			handles.NAT_Data.Grid.Branches.Lines(i).Branch_Name];
 % 		dspl.(crv_nam).Pop_up_Title = ['P Ges. Haushalte (',...
 % 			data_typs{i,2},')'];
 		dspl.(crv_nam).Data_fun = @get_branch_current_A;
@@ -614,7 +614,7 @@ end
 % end
 
 Result.Displayable = dspl;
-handles.Result = Result;
+handles.NAT_Data.Result = Result;
 end
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = % 
