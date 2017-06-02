@@ -19,6 +19,7 @@ classdef SG_Controller < Connection_Unit
 	% Letzte Änderung durch:   Franz Zeilinger - 18.01.2013
 	
 	properties
+		
 		Controlled_Unit = [];
 	%        handle auf das Objekt der angeschlossenen Einheit, welche von diesem
 	%        SG-Regler beeinflusst wird.
@@ -30,16 +31,14 @@ classdef SG_Controller < Connection_Unit
 	
 	methods
 		
-		function obj = SG_Controller (cn_point, ctrld_unit, varargin)
+		function obj = SG_Controller (cn_point, varargin)
 			%SG_CONTROLLER    Konstruktor der Klasse SG_CONTROLLER
 			
 			% Zunächst ein Anschlussobjekt erzeugen: 
 			obj = obj@Connection_Unit(cn_point);
-			% Geregelte Einheit zuweisen:
-			obj.Controlled_Unit = ctrld_unit;
 			% Regelerfolg des Anschlusspunktes ist nicht erfüllt:
 			obj.Connection_Point.controller_finished = false;
-			% Weiteren Parameter abarbeiten:
+			% Weitere Parameter abarbeiten:
 			obj.update_settings(varargin{:})
 		end
 		
@@ -91,31 +90,34 @@ classdef SG_Controller < Connection_Unit
 		end
 		
 		function update_parameter(obj, varargin)
-			% aktualisieren der Parameter des Objekts
+			%UPDATE_PARAMETER    aktualisiert die Parameter des Objekts
+			
 			obj.update_settings(varargin{:})
-		end
-		
-		function regulate(obj, varargin)
-			% Diese Funktion muss in Sub-Klassen definiert werden.
-		end
-		
-		function success = check_success(obj, varargin)
-			% Diese Funktion muss in Sub-Klassen definiert werden.
-		end
-		
-		function reset_controller(obj, varargin)
-			%RESET_CONTROLLER    Regler wieder auf Ausgangswerte setzen.
-			% Diese Funktion muss in Sub-Klassen definiert werden.
 		end
 		
 	end
 	
-	methods (Hidden)
+	% Definition der Funktionen, die in den jeweiligen Sub-Klassen definiert werden
+	% müssen:
+	methods (Abstract)
 		
-		function update_obj_parameter(obj, parameter_name, input)
-			% Diese Funktion muss in Sub-Klassen definiert werden.
-		end
+		regulate(obj, varargin)
+		%REGULATE    führt eine Berechnung zur Regelung für aktuellen Schritt durch
+		
+		success = check_success(obj, varargin)
+		%CHECK_SUCCESS    überprügen, ob Regler bereits eingeschwungen
+		
+		reset_controller(obj, varargin)
+		%RESET_CONTROLLER    Regler wieder auf Ausgangswerte setzen
 		
 	end
+	
+	methods (Abstract, Hidden)
+		
+		update_obj_parameter(obj, parameter_name, input)
+		%UPDATE_OBJ_PARAMETER    prüft und übernimmt Parameter für dieses Objekt
+		
+	end
+	
 end
 

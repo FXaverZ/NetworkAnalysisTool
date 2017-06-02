@@ -21,8 +21,9 @@ classdef Connection_Unit < handle
 	end
 	
 	methods
+		
 		function obj = Connection_Unit(cn_point)
-			
+			%CONNECTION_UNIT    Konstruktor der Klasse CONNECTION_UNIT
 			obj.Connection_Point = cn_point;
 			obj.P_Q_Act_idx = size(obj.Connection_Point.P_Q_Act,1) + 1;
 			obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:) = zeros(1,6);
@@ -30,9 +31,6 @@ classdef Connection_Unit < handle
 				obj.Connection_Point.Num_Units_Connected + 1;
 		end
 		
-		function obj = update_power(obj, varargin)
-		end
 	end
-	
 end
 

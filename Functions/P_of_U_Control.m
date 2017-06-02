@@ -1,6 +1,16 @@
-classdef P_Q_U_Control < SG_Controller
-	%U_CONTROL     Klasse der simplen Spannungsregler mit P-&Q-Injektion
+classdef P_of_U_Control < SG_Controller
+	%P_OF_U_CONTROL    Klasse der simplen Spannungsregler mit P=f(U)-Injektion
 	%    Detailierte Beschreibung fehlt!
+	%
+	%    K O N S T R U K T O R:
+	%
+	%    OBJ = P_OF_U_CONTROL (CN_POINT, VARARGIN) erzeugt eine Instanz der Klasse
+	%    P_OF_U_CONTROL. Dazu wird der Konstruktor der Super-Klasse SG_CONTROLLER
+	%    verwendet. 
+	%    CN_POINT ist ein handle auf ein Anschlusspunktobjekt der Klasse
+	%    CONNECTION_POINT, an dem der Controller angeschlossen ist. Die restlichen
+	%    Parameter werden in VARARGIN als Parametername-Wert(e)-Paare übergeben
+	%    (siehe Abschnitt PARAMETER in dieser Hilfe).
 	%
 	%    E I G E N S C H A F T E N :
 	%
@@ -16,6 +26,7 @@ classdef P_Q_U_Control < SG_Controller
 	%        Werte des letzen Regelschrittes
 	%
 	%    P A R A M E T E R :
+	%
 	%    Parameter werden als Parametername-Wert(e)-Paare übergeben beim erstellen
 	%    der Klasse bzw. aktualisieren der Parameter:
 	%        OBJ = OBJ_CONSTRUCTOR(..., 'Parameter_Name', VALUE)    bzw.
@@ -53,13 +64,11 @@ classdef P_Q_U_Control < SG_Controller
 	%        Controllers.	
 	
 	% Erstellt von:            Franz Zeilinger - 12.11.2012
-	% Letzte Änderung durch:   Franz Zeilinger - 18.01.2013
+	% Letzte Änderung durch:   Franz Zeilinger - 28.01.2013
 	
 	properties
-		%    E I G E N S C H A F T E N :
-% 		Q_controll_finished = false;
 		
-		%    P A R A M E T E R :
+	%    P A R A M E T E R :
 		Termination_Threshold = 0;
 	%        [%]
 	%        prozentuelle Angabe von einem Sollwert, unter dem der akutelle
@@ -89,128 +98,116 @@ classdef P_Q_U_Control < SG_Controller
 	%        [MW/V]
 	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
 	%        Controllers.		
-		dQmax_dStep = Inf;
-	%        [MVAr/Rechenschritt]
-	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
-	%        Controllers.
-		Q_max = Inf;
-	%        [MVAr]
-	%        maximal mögliche Gesamt-Leistungsänderung (Lasterhöhung) dieses
-	%        Controllers.
-		Q_min =-Inf;
-	%        [MVAr]
-	%        maximal mögliche Gesamt-Leistungsänderung (Einspeisung) dieses
-	%        Controllers.
-		dQ_min =Inf;
-	%        [MVAr]
-	%        minimale Leistungsänderung des Controllers. Verändert sich die Leistung
-	%        nur mehr unterhalb dieses Grenzwertes, ist der Regler eingeschwungen.
-		dQ_dV = 1;
-	%        [MVAr/V]
-	%        maximal mögliche Leistungsänderung pro Rechenschritt dieses
-	%        Controllers.	
 	end
 	
 	methods
-		function obj = P_Q_U_Control (varargin)
+		function obj = P_of_U_Control (varargin)
+			%P_OF_U_CONTROL    Konstruktor der Klasse P_OF_U_CONTROL
+			%    Näheres siehe Hilfe der Klasse P_OF_U_CONTROL
+			
 			obj = obj@SG_Controller(varargin{:});
 		end
 		
 		function reset_controller(obj)
 			%RESET_CONTROLLER    Regler wieder auf Ausgangswerte setzen.
+			
 			for i=1:numel(obj)
-				obj(i).Connection_Point.P_Q_Act(obj_s.P_Q_Act_idx,:) = zeros(1,6);
+				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:) = zeros(1,6);
 				obj(i).Connection_Point.powers_changed = true;
-				obj.Values_Last_Step = [];
+				obj(i).Values_Last_Step = [];
 			end
 		end
 		
 		function regulate(obj)
-		end
-		
-		function regulate_Q(obj)
-			%REGULATE    Regelungsberechnungen ausführen
-			
+			%REGULATE    führt eine Berechnung zur Regelung für akt. Schritt durch
+						
 			for i=1:numel(obj)
-				if obj(i).check_success;
-					obj.Q_controll_finished = true;
+				% überprüfen, ob Regelung bereits abgeschlossen ist:
+				if obj(i).check_success
+					continue;
 				end
-				% Werte des letzten Schrittes speichern:
-				obj(i).Values_Last_Step = ...
-					obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:);
+
+				% wenn nicht, bisherige Leistungsänderungen auslesen:
+				dP_tot = obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,1:2:6);
 				
-				% Regelungsberechnungen, zuerst Q einstellen:
-				dQ_tot = obj(i).Values_Last_Step(2:2:6);
-				d_Q = obj(i).dQ_dV .* (obj(i).Connection_Point.Voltage ...
-					- obj(i).Setpoint);
-				d_Q(d_Q > obj(i).dQmax_dStep) = obj(i).dQmax_dStep;
-				dQ_tot = dQ_tot + d_Q;
-				dQ_tot(dQ_tot > obj(i).Q_max) = obj(i).Q_max;
-				dQ_tot(dQ_tot < obj(i).Q_min) = obj(i).Q_min;
-				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,2:2:6) = dQ_tot;
-				obj(i).Connection_Point.powers_changed = true;
-			end
-		end
-		
-		function regulate_P(obj)
-			%REGULATE    Regelungsberechnungen ausführen
-			for i=1:numel(obj)
-				obj(i).check_success;
-				% Werte des letzten Schrittes speichern:
-				obj(i).Values_Last_Step = ...
-					obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:);
-				dP_tot = obj(i).Values_Last_Step(1:2:6);
-				
-% 				% Wo ist Blindleistungsregelung in Begrenzung?
-% 				idx = (dQ_tot == obj(i).Q_max | dQ_tot == obj(i).Q_min);
-				d_P = obj(i).dP_dV .* (obj(i).Connection_Point.Voltage ...
-					- obj(i).Setpoint);
+				% zusätzliche erforderliche Leistungsänderung ermitteln (aufgrund der
+				% Abweichung der aktuellen Spannung von Sollwert):
+				d_P = obj(i).dP_dV .* (obj(i).Connection_Point.Voltage - obj(i).Setpoint);
+				% Anpassen an maximale Änderung:
 				d_P(d_P > obj(i).dPmax_dStep) = obj(i).dPmax_dStep;
-				% Neue Leistungswerte in P_Q_Array schreiben:
+				% Gesamte Leistung ermitteln:
 				dP_tot = dP_tot + d_P;
+				% Anpassen an Begrenzungen:
 				dP_tot(dP_tot > obj(i).P_max) = obj(i).P_max;
 				dP_tot(dP_tot < obj(i).P_min) = obj(i).P_min;
-% 				% Nur in jenem Zweig regeln, in dem Blindleistung in Begrenzung:
-% 				dP_tot(~idx) = 0;
+				% Neue Leistungswerte in P_Q_Array des Anschlusspunktes schreiben:
 				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,1:2:6) = dP_tot;
+				% Markieren, dass sich die Werte geändert haben:
 				obj(i).Connection_Point.powers_changed = true;
 			end
 		end
 		
 		function success = check_success(obj)
-			%SUCCESS    Überprüfen, ob Regler eingeschwungen
+			%CHECK_SUCCESS    Überprüfen, ob Regler eingeschwungen
+			%    Diese Funktion überprüft mit Hilfe der aktuellen und vergangenen
+			%    Werte, ob der Regler keine Änderugnen mehr vornimmt und teilt dies
+			%    einerseits dem aufrufenden Objekt mit sowie dem Verknüpfungspunkt.
+			%    Weiters speichert diese Funktion die aktuellen Werte für den
+			%    nächsten Schritt.
 			
 			success = false;
+			
+			% Falls noch keine Werte vom vorhergehenden Rechenschritt vorhanden sind,
+			% kann keine Überprüfung stattfinden:
 			if isempty(obj.Values_Last_Step)
 				obj.Connection_Point.controller_finished = false;
+				
+				% Werte des aktuellen Schrittes für nächsten Durchlauf speichern:
+				obj.Values_Last_Step = ...
+					obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
 				return;
 			end
-			% Überprüfen, ob Regelung bereits erfolgreich war...
 			
 			% Finden nur mehr kleine Leistungsänderungen statt?
 			diff = obj.Values_Last_Step - ...
 				obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
-			if all([abs(diff(1:2:6)) < obj.dP_min, abs(diff(2:2:6)) < obj.dQ_min])
+			if all(abs(diff(1:2:6)) < obj.dP_min)
+				% Wenn ja --> keine Änderungen mehr möglich (z.B. weil Regler in
+				% Leistungsbegrenzung)
 				success = true;
 				obj.Connection_Point.controller_finished = ...
 					obj.Connection_Point.controller_finished & true;
+				
+				% Werte des aktuellen Schrittes für nächsten Durchlauf speichern:
+				obj.Values_Last_Step = ...
+					obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
 				return;
 			end
 			
 			% Wurde Spannungssollwert bereits erreicht?
 			diff = obj.Setpoint - obj.Connection_Point.Voltage;
 			if all(abs(diff) < obj.Setpoint*obj.Termination_Threshold/100)
+				% Wenn ja --> Soll ist gleich Ist, fertig!
 				success = true;
 				obj.Connection_Point.controller_finished = ...
 					obj.Connection_Point.controller_finished & true;
+				
+				% Werte des aktuellen Schrittes für nächsten Durchlauf speichern:
+				obj.Values_Last_Step = ...
+					obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
 				return;
 			end
+			
 			obj.Connection_Point.controller_finished = false;
+			
+			% Werte des aktuellen Schrittes für nächsten Durchlauf speichern:
+			obj.Values_Last_Step = ...
+				obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:);
 			
 		end
 		
 		function d_P = get_act_dp (obj)
-			%GET_ACT_DP
+			%GET_ACT_DP    ermittelt aktuelle Leistungsänderung dieser Komponente:
 			
 			d_P = zeros(numel(obj),6);
 			for i=1:numel(obj)
@@ -308,61 +305,6 @@ classdef P_Q_U_Control < SG_Controller
 						throw(exception);
 					end
 				case 'dP_min'
-					% Muss eine Zahl sein
-					if isnumeric (input)
-						obj.(parameter_name) = input;
-					else
-						exception = MException(...
-							'U_CONTROL:UpdateParameter:WrongInput', ...
-							['Value for ''',parameter_name,...
-							''' has to be numeric!']);
-						throw(exception);
-					end
-				case 'dQmax_dStep'
-					% Muss eine Zahl sein
-					if isnumeric (input)
-						obj.(parameter_name) = input;
-					else
-						exception = MException(...
-							'U_CONTROL:UpdateParameter:WrongInput', ...
-							['Value for ''',parameter_name,...
-							''' has to be numeric!']);
-						throw(exception);
-					end
-				case 'dQ_dV'
-					% Muss eine Zahl sein
-					if isnumeric (input)
-						obj.(parameter_name) = input;
-					else
-						exception = MException(...
-							'U_CONTROL:UpdateParameter:WrongInput', ...
-							['Value for ''',parameter_name,...
-							''' has to be numeric!']);
-						throw(exception);
-					end
-				case 'Q_max'
-					% Muss eine Zahl sein
-					if isnumeric (input)
-						obj.(parameter_name) = input;
-					else
-						exception = MException(...
-							'U_CONTROL:UpdateParameter:WrongInput', ...
-							['Value for ''',parameter_name,...
-							''' has to be numeric!']);
-						throw(exception);
-					end
-				case 'Q_min'
-					% Muss eine Zahl sein
-					if isnumeric (input)
-						obj.(parameter_name) = input;
-					else
-						exception = MException(...
-							'U_CONTROL:UpdateParameter:WrongInput', ...
-							['Value for ''',parameter_name,...
-							''' has to be numeric!']);
-						throw(exception);
-					end
-				case 'dQ_min'
 					% Muss eine Zahl sein
 					if isnumeric (input)
 						obj.(parameter_name) = input;

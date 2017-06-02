@@ -7,7 +7,7 @@ classdef SINCAL < handle
 	%    SINCAL relevanten Variablen und Methoden zusammenzufassen.
 	
 	% Erstellt von:            Franz Zeilinger - 30.10.2012
-	% Letzte Änderung durch:   Franz Zeilinger - 14.11.2012
+	% Letzte Änderung durch:   Franz Zeilinger - 28.01.2013
 	
 	properties
 		Settings                % Struktur mit den aktuellen Einstellungen
