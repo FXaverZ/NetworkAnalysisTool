@@ -18,13 +18,20 @@ Households.Data_05P_Quantil = [];
 Households.Data_95P_Quantil = [];
 Households.Content = {};
 
-if nargin ==2
+if nargin == 2
 	% als Zweites Argument wurde ein aktueller Index übergeben für eine
 	% Generierung von mehreren Datensätzen...
 	idx_act = varargin{1};
 else
 	idx_act = [];
 end
+% 
+% if nargin == 3
+% 	% third Argument tells the function, that part-files have to be created...
+% 	save_part_files = varargin{2};
+% else
+% 	save_part_files = 0;
+% end
 
 max_num_data_set = db_fil.setti.max_num_data_set; % Anzahl an Datensätzen in einer
                                                   % Teildatei
@@ -222,9 +229,11 @@ for i=1:size(system.housholds,1)
 			num2str(j,'%03.0f')];
 		% Daten laden (Variable "data_phase")
 		load([path,filesep,name,'.mat']);
-		% Increase the active Power by 25% for a higher load
-		% ACHTUNG! Muss überarbeitet werden!
-		data_phase(:,1:2:6) = data_phase(:,1:2:6) * 1.25;
+		
+		% % Increase the active power by 25% for a higher load
+		% % ACHTUNG! Muss überarbeitet werden!
+		% data_phase(:,1:2:6) = data_phase(:,1:2:6) * 1.25;
+		
 		% je nach Einstellungen, die relevanten Daten auslesen:
 		if settin.get_Sample_Value
 			data_sample = data_phase(1:time_res:end,idx_part_real);

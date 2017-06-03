@@ -1,10 +1,10 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 4.0
+% Version:                 5.0
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 16.05.2013
 
-% Last Modified by GUIDE v2.5 06-Jun-2013 12:21:34
+% Last Modified by GUIDE v2.5 17-Oct-2013 10:53:37
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -189,36 +189,7 @@ function check_get_time_series_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Data_Extract.get_Time_Series = get(hObject, 'Value');
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% Update handles structure
-guidata(hObject, handles);
-
-function check_pqnode_active_Callback(hObject, eventdata, handles)
-% hObject    handle to check_pqnode_active (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-function check_use_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-handles.Current_Settings.Simulation.Use_Scenarios = get(hObject,'Value');
-
-% if handles.Current_Settings.Simulation.Use_Scenarios
-% 	% Re-Load the Szenarios:
-% 	handles = get_scenarios(handles);
-% end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+check_use_scenarios_Callback_Add (hObject, handles);
 
 function check_use_variants_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
@@ -244,7 +215,9 @@ if isnan(Number_Runs)
 	errordlg('Ungültiges Zahlenformat!', 'Angabe Anzahl Einzelsimulationen ...');
 else
 	Number_Runs = round(Number_Runs);
+	% adopt Number of Simruns (also in data extraction settings):
 	handles.Current_Settings.Simulation.Number_Runs = Number_Runs;
+	handles.Current_Settings.Data_Extract.Number_Data_Sets = Number_Runs;
 end
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -362,20 +335,20 @@ function NAT_main_gui_CloseRequestFcn(hObject, ~, handles) %#ok<INUSL>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-user_response = questdlg(['Soll das Programm beendet und die aktuellen',...
-	' Eintellungen gespeichert werden?'],'Beenden?',...
-	'Speichern & Beenden', 'Beenden', 'Abbrechen', 'Abbrechen');
+user_response = questdlg(['Should the program be closed and all',...
+	' settings be saved for later use?'],'Beenden?',...
+	'Save & Close', 'Close', 'Cancel', 'Cancel');
 switch user_response
-	case 'Abbrechen'
+	case 'Cancel'
 		% nichts unternehmen
-	case 'Beenden'
+	case 'Close'
 		% Kein speichern der akutellen Einstellungen, nur beenden des Programms:
 		if isfield(handles, 'sin')
 			handles.sin.close_file;
 			handles.sin.close_database;
 		end
 		delete(handles.NAT_main_gui);
-	case 'Speichern & Beenden'
+	case 'Save & Close'
 		% Konfiguration speichern:
 		Current_Settings = handles.Current_Settings;
 		System = handles.System; %#ok<NASGU>
@@ -417,8 +390,10 @@ addpath(genpath(Path));
 handles.Current_Settings.Files.Main_Path = Path;
 
 % Default-Einstellungen laden
-handles = get_default_values(handles);
-% Datenobjekt erzeugen:
+handles = get_default_values_NAT(handles);
+% Load the Szenarios:
+handles = get_scenarios(handles);
+% create NAT_Data object, which is an instance of the NAT_Data-Class:
 handles.NAT_Data = NAT_Data();
 
 % GUI-Elemente mit Inhalten füllen:
@@ -429,6 +404,9 @@ for i=1:3
 	set(handles.(['radio_season_',num2str(i)]),'String',seas{i,2});
 	set(handles.(['radio_weekday_',num2str(i)]),'String',week{i,2});
 end
+
+% Time resolutions:
+set(handles.popup_time_resolution, 'String', handles.System.time_resolutions(:,1));
 % Worst-Cases:
 set(handles.popup_hh_worstcase, 'String', handles.System.wc_households(:,1));
 set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation(:,1));
@@ -444,6 +422,11 @@ try
 	try
 		% Netzdaten laden:
 		handles = network_load (handles);
+		% Tabelle mit Default-Werten befüllen:
+		[handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
+			network_table_reset(handles);
+		% Lastdaten laden:
+		handles = load_input_last_settings(handles);
 	catch ME
 		disp('Fehler beim Laden des Netzes:');
 		disp(ME.message);
@@ -453,10 +436,7 @@ catch ME
 	disp(ME.message);
 end
 
-% Load the Szenarios:
-handles = get_scenarios(handles);
-
-% ESEA-Logo anzeigen:
+% Logo anzeigen:
 logo=imread('Figures\siemenslogo.jpg','jpg');   % Einlesen der Grafik
 image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
@@ -501,88 +481,19 @@ function popup_pqnode_hh_typ_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-function popup_pqnode_pv_typ_Callback(hObject, eventdata, handles)
+function popup_pqnode_pv_typ_Callback(hObject, ~, handles)
 % hObject    handle to popup_pqnode_pv_typ (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+% ~          reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-settin = handles.Current_Settings.Data_Extract.Solar;
-row_act = handles.Current_Settings.Table_Network.Selected_Row;
-add_data = handles.Current_Settings.Table_Network.Additional_Data;
-sel = get(hObject,'Value');
-if sel == size(settin.Selectable,1)
-	% letzter Eintrag ausgewählt, also muss eine neue Anlage hinzugefügt werden:
-	if isstruct(settin.Plants)
-		n_pl = numel(fieldnames(settin.Plants));
-		name = ['Plant_',num2str(n_pl+1)];
-		
-	else
-		name = 'Plant_1';
-	end
-	settin.Plants.(name) = handles.System.sola.Default_Plant;
-	add_data{row_act,1} = name;
-	settin.Selectable{end+1,1} = settin.Selectable{end,1};
-	settin.Selectable{end-1,2} = name;
-	settin.Plants.(name) = ...
-		Configuration_PV_Parameters(handles,'Parameters',settin.Plants.(name));
-	settin.Plants.(name).Number = 1;
-	typ = handles.System.sola.Typs{settin.Plants.(name).Typ,1};
-	long_na = [typ(1:4),' - ',...
-		num2str(settin.Plants.(name).Power_Installed),' kWp - ',...
-		num2str(settin.Plants.(name).Orientation),'° - ',...
-		num2str(settin.Plants.(name).Inclination),'°'];
-	settin.Selectable{end-1,1} = long_na;
-	handles.Current_Settings.Table_Network.ColumnFormat{4} = settin.Selectable(:,1)';
-	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-elseif sel == 1
-	% keine Anlage mehr ausgewählt, Anlagenanzahl reduzieren:
-	name_old = add_data{row_act,2};
-	long_na = settin.Selectable{sel,1};
-	if ~isempty(name_old)
-		% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
-		settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
-	end
-	add_data{row_act,1} = [];
-	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-else
-	name = settin.Selectable{sel,2};
-	long_na = settin.Selectable{sel,1};
-	name_old = add_data{row_act,2};
-	if ~isempty(name_old)
-		% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
-		settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
-	end
-	% ausgewählte Anlage setzen:
-	settin.Plants.(name).Number = settin.Plants.(name).Number + 1;
-	add_data{row_act,1} = name;
-	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-end
-
-handles.Current_Settings.Data_Extract.Solar = settin;
-handles.Current_Settings.Table_Network.Additional_Data = add_data;
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren
-guidata(hObject, handles);
-
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popup_pqnode_pv_typ contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popup_pqnode_pv_typ
+popup_pqnode_pv_typ_Callback_Add (hObject, handles);
 
 function popup_time_resolution_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_time_resolution (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-handles.Current_Settings.Data_Extract.Time_Resolution = get(hObject,'Value');
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+popup_time_resolution_Callback_Add (hObject, handles);
 
 function push_cancel_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_cancel (siehe GCBO)
@@ -605,176 +516,12 @@ function push_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
 NAT_main_gui_CloseRequestFcn(hObject, eventdata, handles);
 
-function push_data_show_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik push_data_show (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-try
-	% Daten-Explorer-GUI aufrufen:
-	handles = Data_Explorer('NAT_main', handles.NAT_main_gui);
-catch ME
-	error_titl = 'Anzeigen der Daten...';
-	error_text={...
-		'Anzeige der Daten ist nicht möglich:';...
-		'';...
-		ME.message};
-	helpdlg(error_text, error_titl);
-% 	rethrow(ME);
-end
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
-
 function push_load_data_get_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_load_data_get (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-set(handles.push_load_data_get, 'Enable', 'off');
-set(handles.push_cancel, 'Enable', 'on');
-pause(.01);
-% Ask User, from which Source the Data should be derived:
-answer = questdlg({['Sollen Daten aus der Datenbank geladen, auf ',...
-	'Simulationsergebnisse bei der Erstellung zurückgegriffen, ',...
-	'oder die orginalen Input Daten einer Simulation geladen werden?'];
-	'';...
-	'Bitte gewünschte Datenquelle angeben:'},...
-	'Spezifizierung Datenquelle',...
-	'Lastdatenbank', 'Simulationsergebnisse', 'Orginaldaten', 'Simulationsergebnisse');
-% According to this, use differen function for input-data creation:
-switch answer
-	case 'Lastdatenbank'
-		handles = get_input_from_database(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-	case 'Simulationsergebnisse'
-		% User has to specify, which results he want's to use...
-		file = handles.Current_Settings.Files.Load.Result;
-		[file.Name,file.Path] = uigetfile([...
-			{'*.mat','*.mat Simulation-Info-File'};...
-			{'*.*','Alle Dateien'}],...
-			'Laden von Simulationsergebnissen...',...
-			[file.Path,filesep]);
-		% Check, if there is a valid file specified:
-		if isequal(file.Name,0) || isequal(file.Path,0)
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			if ~isequal(file.Path,0)
-				% If there's a valid path, save this for later (programm
-				% will look here first...) :
-				handles.Current_Settings.Files.Load.Result.Path = file.Path;
-				% Update the handles-structure:
-				guidata(hObject, handles);
-			end
-			% leave the function:
-			return;
-		end
-		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
-		[~, file.Name, file.Exte] = fileparts(file.Name);
-		% leztes Zeichen ("/") im Pfad entfernen:
-		file.Path = file.Path(1:end-1);
-		try
-			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
-			Result = [];
-			Result.Result_Filepath = file.Path;
-			Result.Result_Filenames = inp_info.result_filename;
-			Result.Simulation_Options = inp_info.simulation_options;
-			Result.Scenarios = inp_info.scenarios;
-            Result.Grid_Variants = inp_info.variants;
-            Result.Datasets = inp_info.datasets;
-            Result.Timepoints = inp_info.simulation_options.Timepoints;            
-            Result.Result_Files = Load_Result_File(Result);
-		catch ME
-			errordlg({'Fehler beim Laden der Ergebnisse:';'';ME.message});
-			% If there's a valid path, save this for later (programm
-			% will look here first...) :
-			handles.Current_Settings.Files.Load.Result.Path = file.Path;
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			return;
-		end
-		handles.Result_Settings = Result;
-		handles.Current_Settings.Files.Load.Result = file;
-		handles = get_input_from_results(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-	case 'Orginaldaten'
-		% User has to specify, which results he want's to use...
-		file = handles.Current_Settings.Files.Load.Result;
-		[file.Name,file.Path] = uigetfile([...
-			{'*.mat','*.mat Simulation-Info-File'};...
-			{'*.*','Alle Dateien'}],...
-			'Laden von ursprünglichen Simulationsdaten...',...
-			[file.Path,filesep]);
-		% Check, if there is a valid file specified:
-		if isequal(file.Name,0) || isequal(file.Path,0)
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			if ~isequal(file.Path,0)
-				% If there's a valid path, save this for later (programm
-				% will look here first...) :
-				handles.Current_Settings.Files.Load.Result.Path = file.Path;
-				% Update the handles-structure:
-				guidata(hObject, handles);
-			end
-			% leave the function:
-			return;
-		end
-		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
-		[~, file.Name, file.Exte] = fileparts(file.Name);
-		% leztes Zeichen ("/") im Pfad entfernen:
-		file.Path = file.Path(1:end-1);
-		% try to load the information file of the Results:
-		try
-			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
-			Result = [];
-			Result.Result_Filepath = file.Path;
-			Result.Result_Filenames = inp_info.result_filename;
-			Result.Simulation_Options = inp_info.simulation_options;
-			Result.Scenarios = inp_info.scenarios;
-            Result.Grid_Variants = inp_info.variants;
-            Result.Datasets = inp_info.datasets;
-            Result.Timepoints = inp_info.simulation_options.Timepoints;            
-            Result.Result_Files = Load_Result_File(Result);
-		catch ME
-			errordlg({'Fehler beim Laden der originalenInput Daten:';'';ME.message});
-			% If there's a valid path, save this for later (programm
-			% will look here first...) :
-			handles.Current_Settings.Files.Load.Result.Path = file.Path;
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			return;
-		end
-		handles.Result_Settings = Result;
-		handles.Current_Settings.Files.Load.Result = file;
-		handles = load_input_from_results(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-	otherwise
-		% Do nothing...
-end
-
-% Refresh the GUI:
-handles = refresh_display_NAT_main_gui(handles);
-set(handles.push_cancel, 'Enable', 'off');
-set(handles.push_load_data_get, 'Enable', 'on');
-
-% Update the handles-structure:
-guidata(hObject, handles);
+push_load_data_get_Callback_Add(hObject, handles);
 
 function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_analysis_perform (siehe GCBO)
@@ -812,16 +559,7 @@ pause(0.01);
 if handles.Current_Settings.Simulation.Use_Scenarios
 	handles = network_scenario_calculation(handles);
 else
-	handles = network_calculation(handles);
-	if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-		handles = post_voltage_violation_report(handles);
-	end
-	if handles.Current_Settings.Simulation.Branch_Violation_Analysis
-		handles = post_branch_violation_report(handles);
-	end
-	if handles.Current_Settings.Simulation.Power_Loss_Analysis
-		handles = post_active_power_loss_report(handles);
-	end
+	handles = network_calculation_grid(handles);
 end
 
 % Anzeige aktualisieren:
@@ -861,43 +599,7 @@ function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Netzvarianten löschen:
-handles.Current_Settings.Simulation.Grid_List = {};
-handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.Main_Path;
-
-% aktuellen Speicherort für Daten auslesen:
-file = handles.Current_Settings.Files.Grid;
-% Userabfrage nach Speicherort
-[file.Name,file.Path] = uigetfile([...
-	{'*.sin','*.sin SINCAL-Netzdatei'};...
-	{'*.*','Alle Dateien'}],...
-	'Laden von Daten...',...
-	[file.Path,filesep]);
-% Überprüfen, ob ungültiger Speicherort angegeben wurde:
-if isequal(file.Name,0) || isequal(file.Path,0)
-	% Falls ja, diese Funktion verlassen:
-	% Anzeige des Hauptfensters aktualisieren:
-	handles = refresh_display_NAT_main_gui (handles);
-	% handles-Struktur aktualisieren:
-	guidata(hObject, handles);
-	return;
-end
-
-% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
-[~, file.Name, file.Exte] = fileparts(file.Name);
-% leztes Zeichen ("/") im Pfad entfernen:
-file.Path = file.Path(1:end-1);
-% Änderungen übernehmen:
-handles.Current_Settings.Files.Grid = file;
-
-% Netzdaten laden:
-handles = network_load (handles);
-
-% Anzeige des Hauptfensters aktualisieren:
-handles = refresh_display_NAT_main_gui (handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+push_network_load_Callback_Add (hObject, handles);
 
 function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_load_random_allocation (siehe GCBO)
@@ -934,68 +636,14 @@ function push_network_select_scenario_folder_Callback(hObject, ~, handles) %#ok<
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Userabfrage nach neuen Datenbankpfad:
-Main_Path = uigetdir(handles.Current_Settings.Simulation.Scenarios_Path,...
-	'Auswählen Ordners von Szenariendaten:');
-if ischar(Main_Path)
-	handles.Current_Settings.Simulation.Scenarios_Path = Main_Path;
-	try
-		load([Main_Path,filesep,'Scenario_Settings.mat']);
-        handles.Current_Settings.Simulation.Scenarios = Scenarios_Settings;
-        handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
-        load([Main_Path,filesep, Scenarios_Settings.Names{1},'.mat']);
-        handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
-	catch ME
-		disp('Fehler beim Laden der Szenarioeinstellungen:');
-		disp(ME.message);
-		handles.Current_Settings.Simulation.Scenarios_Path = handles.Current_Settings.Files.Main_Path;
-		handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 0;
-	end
-else
-	handles.Current_Settings.Simulation.Scenarios_Path = handles.Current_Settings.Files.Main_Path;
-	handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 0;
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+push_network_select_scenario_folder_Callback_Add (hObject, handles);
 
 function push_network_select_variant_folder_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_select_variant_folder (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Userabfrage nach neuen Datenbankpfad:
-Main_Path = uigetdir(handles.Current_Settings.Simulation.Grids_Path,...
-	'Auswählen des Hauptordners einer Datenbank:');
-if ischar(Main_Path)
-	handles.Current_Settings.Simulation.Grids_Path = Main_Path;
-	files = dir(Main_Path);
-	files = struct2cell(files);
-	files = files(1,3:end);
-	files = files(cellfun(@(x) strcmp(x(end-3:end),'.sin'), files));
-	% save the present .sin-files for later processing of them:
-	handles.Current_Settings.Simulation.Grid_List = files;
-	% load the first grid (for getting the primary load-topology):
-	handles.Current_Settings.Files.Grid.Path = Main_Path;
-	handles.Current_Settings.Files.Grid.Name = files{1}(1:end-4);
-	handles.Current_Settings.Files.Grid.Exte = files{1}(end-3:end);
-	
-	% load the network data:
-	handles = network_load (handles);
-	
-else
-	handles.Current_Settings.Simulation.Grid_List = {};
-	handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.Main_Path;
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+push_network_select_variant_folder_Callback_Add (hObject, handles);
 
 function push_network_simulation_settings_Callback(hObject, eventdata, handles)
 % hObject    handle to push_network_simulation_settings (see GCBO)
@@ -1007,43 +655,7 @@ function push_set_path_database_Callback(hObject, ~, handles)  %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% alte Datenbankeinstellungen entfernen:
-if isfield(handles.Current_Settings.Load_Database,'setti')
-	handles.Current_Settings.Load_Database = rmfield(...
-		handles.Current_Settings.Load_Database,'setti');
-end
-if isfield(handles.Current_Settings.Load_Database,'files')
-	handles.Current_Settings.Load_Database = rmfield(...
-		handles.Current_Settings.Load_Database,'files');
-end
-
-% Userabfrage nach neuen Datenbankpfad:
-Main_Path = uigetdir(handles.Current_Settings.Load_Database.Path,...
-	'Auswählen des Hauptordners einer Datenbank:');
-if ischar(Main_Path)
-	[pathstr, name] = fileparts(Main_Path);
-	% Die Einstellungen übernehmen:
-	handles.Current_Settings.Load_Database.Path = pathstr;
-	handles.Current_Settings.Load_Database.Name = name;
-	% Laden der Datenbankeinstellungen:
-	try
-		load([pathstr,filesep,name,filesep,name,'.mat']);
-		handles.Current_Settings.Load_Database.setti = setti;
-		handles.Current_Settings.Load_Database.files = files;
-		helpdlg('Datenbank erfolgreich geladen!', 'Laden der Datenbank...');
-	catch ME %#ok<NASGU>
-		% Falls keine gültige Datenbank geladen werden konnte, Fehlermeldung an User:
-		errordlg('Am angegebenen Pfad wurde keine gültige Datenbank gefunden!',...
-			'Fehler beim laden der Datenbank...');
-		% Anzeige aktualisieren:
-		handles = refresh_display(handles);
-	end
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+push_set_path_database_Callback_Add (hObject, handles);
 
 function push_time_series_settings_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik radio_season_1 (siehe GCBO)
@@ -1056,6 +668,34 @@ handles = Configuration_Time_Series_Parameters('NAT_main', ...
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
 % handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_network_type_lv_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_network_type_lv (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value')
+	handles.Current_Settings.Grid.Type = 'LV';
+end
+
+% update main GUI:
+handles = refresh_display_NAT_main_gui(handles);
+% update handles structure:
+guidata(hObject, handles);
+
+function radio_network_type_mv_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_network_type_mv (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value')
+	handles.Current_Settings.Grid.Type = 'MV';
+end
+
+% update main GUI:
+handles = refresh_display_NAT_main_gui(handles);
+% update handles structure:
 guidata(hObject, handles);
 
 function radio_season_1_Callback(hObject, ~, handles) %#ok<DEFNU>
@@ -1144,20 +784,7 @@ function table_data_network_CellSelectionCallback(hObject, eventdata, handles) %
 %     Indices: Zeilen- und Spaltenindex der aktuell ausgewählten Zellen
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-if numel(eventdata.Indices) > 0
-	handles.Current_Settings.Table_Network.Selected_Row = eventdata.Indices(1);
-	
-	% das entsprechende Element in SINCAL GUI markieren (falls dieses offen ist):
-	handles.sin.gui_select_element(handles.NAT_Data.Grid.(handles.sin.Settings.Grid_name).P_Q_Node.ids(eventdata.Indices(1)));
-else
-	handles.Current_Settings.Table_Network.Selected_Row = [];
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+table_data_network_CellSelectionCallback_Add (hObject, eventdata, handles);
 
 function table_data_network_CellEditCallback(hObject, eventdata, handles) %#ok<DEFNU>
 % --- Wird ausgeführt, wenn die Daten in table_data_network verändert werden
@@ -1172,80 +799,7 @@ function table_data_network_CellEditCallback(hObject, eventdata, handles) %#ok<D
 %	      Format von Data nicht möglich war.
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Wo wurde was geändert?
-row_act = eventdata.Indices(1);
-col = eventdata.Indices(2);
-% Daten aktualisieren:
-handles.Current_Settings.Table_Network.Data = ...
-	get(handles.table_data_network, 'Data');
-
-% Falls in der dritten Spalte etwas geändert wurde, sind Änderungen bei den
-% Solaranlagen vorgenommen worden:
-if col == 3
-	settin = handles.Current_Settings.Data_Extract.Solar;
-	add_data = handles.Current_Settings.Table_Network.Additional_Data;
-	
-	sel = find(strcmp(handles.Current_Settings.Table_Network.Data{row_act,col}, ...
-		settin.Selectable(:,1)));
-	
-	if sel == size(settin.Selectable,1)
-		% letzter Eintrag ausgewählt, also muss eine neue Anlage hinzugefügt werden:
-		if isstruct(settin.Plants)
-			n_pl = numel(fieldnames(settin.Plants));
-			name = ['Plant_',num2str(n_pl+1)];
-		else
-			name = 'Plant_1';
-		end
-		settin.Plants.(name) = handles.System.sola.Default_Plant;
-		add_data{row_act,1} = name;
-		settin.Selectable{end+1,1} = settin.Selectable{end,1};
-		settin.Selectable{end-1,2} = name;
-		settin.Plants.(name) = ...
-			Configuration_PV_Parameters(handles,'Parameters',settin.Plants.(name));
-		settin.Plants.(name).Number = 1;
-		typ = handles.System.sola.Typs{settin.Plants.(name).Typ,1};
-		long_na = [typ(1:4),' - ',...
-			num2str(settin.Plants.(name).Power_Installed),' kWp - ',...
-			num2str(settin.Plants.(name).Orientation),'° - ',...
-			num2str(settin.Plants.(name).Inclination),'°'];
-		settin.Selectable{end-1,1} = long_na;
-		handles.Current_Settings.Table_Network.ColumnFormat{4} = settin.Selectable(:,1)';
-		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-	elseif sel == 1
-		% keine Anlage mehr ausgewählt, Anlagenanzahl reduzieren:
-		name_old = add_data{row_act,2};
-		long_na = settin.Selectable{sel,1};
-		if ~isempty(name_old)
-			% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
-			settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
-		end
-		add_data{row_act,1} = [];
-		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-	else
-		name = settin.Selectable{sel,2};
-		long_na = settin.Selectable{sel,1};
-		name_old = add_data{row_act,2};
-		if ~isempty(name_old)
-			% Fall andere Anlagen zuvor angewählt war, deren Anzahl verringern:
-			settin.Plants.(name_old).Number = settin.Plants.(name_old).Number - 1;
-		end
-		% ausgewählte Anlage setzen:
-		settin.Plants.(name).Number = settin.Plants.(name).Number + 1;
-		add_data{row_act,1} = name;
-		handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
-	end
-	
-	handles.Current_Settings.Data_Extract.Solar = settin;
-	handles.Current_Settings.Table_Network.Additional_Data = add_data;
-end
-
-handles.Current_Settings.Table_Network.Selected_Row = row_act;
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+table_data_network_CellEditCallback_Add (hObject, eventdata, handles);
 
 function menue_network_load_Callback(hObject, eventdata, handles)
 % hObject    handle to menue_network_load (see GCBO)

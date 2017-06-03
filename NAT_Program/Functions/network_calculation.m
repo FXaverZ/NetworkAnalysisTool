@@ -26,32 +26,14 @@ if isempty(handles.Current_Settings.Simulation.Grid_List)
 	Grid_List{1} = [handles.Current_Settings.Files.Grid.Name,...
 		handles.Current_Settings.Files.Grid.Exte];
 	Grids_Path = handles.Current_Settings.Files.Grid.Path;
+elseif ~handles.Current_Settings.Simulation.Use_Grid_Variants
+	Grid_List = Grid_List(1);
 end
 
 handles.Current_Settings.Files.Grid.Path = Grids_Path;
 
-% -- changelog v1.1b ##### (start) // 20130430
-if ~handles.Current_Settings.Simulation.Use_Scenarios
-    % If scenarios are not used
-    % Create path to results (Netze folder\Results)
-    r_path = [handles.Current_Settings.Files.Grid.Path,filesep,'Results'];
-    if ~isdir(r_path);
-        mkdir(r_path);
-    end    
-    handles.Current_Settings.Files.Save.Result.Path = r_path;
-    % Name of result file
-    simdate = datestr(now,'yyyy-mm-dd_HH-MM-SS');    
-    handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - no_scenario'];
-
-    handles.Current_Settings.Files.Save.Result.Scen_info = ...
-            ['Res_',simdate,' - information'];
-    % Save result information file (variants, number of datasets,
-    % scenario=[])
-    create_scenario_information(handles);
-end
-% -- changelog v1.1b ##### (end) // 20130430  
-
 fprintf('\nStarte Netz-Simulationen...\n');
+
 for i=1:numel(Grid_List)
 	handles.Current_Settings.Files.Grid.Name = Grid_List{i}(1:end-4);
     
@@ -62,15 +44,26 @@ for i=1:numel(Grid_List)
 	cg = handles.sin.Settings.Grid_name;
 	
 	fprintf(['Starte Netz-Simulation ',num2str(i)',' von ',num2str(numel(Grid_List)),...
-		'\n']);
+		' (',Grid_List{i},')\n']);
 	
 	% create an empty network substrucure for the results:
 	d.Result.(cg) = [];
 	% Clear the previous simulation information:
 	d.Simulation = [];
 	
+	% how many data_sets are in the current input data available:
+	num_data_set = numel(fields(d.Load_Infeed_Data));
+	
 	tic; %Zeitmessung start
-	for j=1:handles.Current_Settings.Simulation.Number_Runs;
+	reset_counter = 1;
+	for j=1:num_data_set;
+		if j > (reset_counter * handles.System.number_max_profiles_simulated)
+			fprintf('\t\t\tReset of RPC-Connection...');
+			reset_counter = reset_counter + 1;
+			% re-load the network data:
+			handles = network_load (handles);
+			fprintf('\t done!\n');
+		end
 		%----------------------------------------------------------------------------
 		% Übernehmen der akutell geladenen Daten:
 		%----------------------------------------------------------------------------
@@ -138,27 +131,25 @@ for i=1:numel(Grid_List)
             % grid at first dataset iteration
             handles = result_preallocation(handles,cg); 
             
-            % -- changelog v1.1b ##### (start) // 20130506
             % Add an error-counter array
-            d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
-            % -- changelog v1.1b ##### (end) // 20130506
+            d.Result.(cg).Error_Counter = zeros(num_data_set, handles.Current_Settings.Simulation.Timepoints);
         end        
 		
-				
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
 		%--------------------------------------------------------------------------------
 		d.Grid.(cg).Load.Loads = Unit_Time_Dependent.empty(0,numel(d.Grid.(cg).P_Q_Node.ids));
 		hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
+		idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
 		for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
 			% Welcher Haushaltstyp soll angeschlossen werden?
-			hh_typ = handles.Current_Settings.Table_Network.Data{k,2};
+			hh_typ = handles.Current_Settings.Table_Network.Data{k,idx_hh};
 			idx = find(strcmp(hh_typ,d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content));
 			idx = idx(hhs.(hh_typ).Number)-1;
 			hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
 			% Last-Instanz erzeugen:
 			obj = Unit_Time_Dependent(...
-				d.Grid.(cg).P_Q_Node.Points(k),...                   % Anschlusspunkt-Objekt
+				d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
 				Load_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
 			% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
 			d.Grid.(cg).Load.Loads(k) = obj;
@@ -170,9 +161,10 @@ for i=1:numel(Grid_List)
 			elm_num = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Number;
 			elm_count = 0;
 			d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,elm_num);
+			idx_em = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'El. Mob.');
 			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
 				% Wieviele Fahrzeuge sollen hier angeschlossen werden?
-				elmoby = handles.Current_Settings.Table_Network.Data{k,4};
+				elmoby = handles.Current_Settings.Table_Network.Data{k,idx_em};
 				% Elektromobilitätsinstanz erzeugen:
 				for l=1:elmoby
 					obj = Unit_Time_Dependent(...
@@ -190,12 +182,13 @@ for i=1:numel(Grid_List)
 		%----------------------------------------------------------------------------
 		if ~isempty(Sola_Data)
 			add_data = handles.Current_Settings.Table_Network.Additional_Data;
+			idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
 			num_unit = size(Sola_Data,2)/6;
 			d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,num_unit);
 			plants =  d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Plants;
 			gen_count = 1;
 			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
-				gen_unit_name = add_data{k,1};
+				gen_unit_name = add_data{k,idx_pv_add};
 				if isempty(gen_unit_name)
 					continue;
 				end
@@ -237,7 +230,6 @@ for i=1:numel(Grid_List)
 				% within the NAT_Data-object, on which this function has access, no
 				% return value is neccesary:
 				
-                % -- changelog v1.1b ##### (start) // 20130502
 				% Perform online voltage violation analysis (true/false
 				% results)
 				if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
@@ -245,7 +237,6 @@ for i=1:numel(Grid_List)
 					% An additional condition for saving voltages is
 					% inside the online function
 				end
-                % -- changelog v1.1b ##### (start) // 20130502
                 
 				% Perform online branch violation analysis (true/false results)
 				if handles.Current_Settings.Simulation.Branch_Violation_Analysis
@@ -255,6 +246,7 @@ for i=1:numel(Grid_List)
 						save_branch_values(handles);
 					end
 				end
+				
 				% Perform online active power loss analysis (values in W)
 				if handles.Current_Settings.Simulation.Power_Loss_Analysis
 					online_power_loss_analysis(handles);
@@ -291,10 +283,10 @@ for i=1:numel(Grid_List)
 		
 		% Statusinfo zum Gesamtfortschritt an User:
 		t = toc;
-		progress = j/handles.Current_Settings.Simulation.Number_Runs;
+		progress = j/num_data_set;
 		time_elapsed = t/progress - t;
 		fprintf(['\t\tLastprofil Nr. ',num2str(j),' von ',...
-			num2str(handles.Current_Settings.Simulation.Number_Runs),' abgeschlossen. Laufzeit: ',...
+			num2str(num_data_set),' abgeschlossen. Laufzeit: ',...
 			sec2str(t),...
 			'. Verbleibende Zeit: ',...
 			sec2str(time_elapsed),'\n']);

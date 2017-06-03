@@ -2,9 +2,9 @@ function handles = load_random_allocation(handles)
 %LOAD_RANDOM_ALLOCATION Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 2.2
+% Version:                 2.3
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 15.05.2013
+% Letzte Änderung durch:   Franz Zeilinger - 17.10.2013
 
 % Access to the data object:
 d = handles.NAT_Data;
@@ -12,34 +12,7 @@ d = handles.NAT_Data;
 % which are defined here (compare to function "get_scenarios"):
 if ~isfield(d.Simulation, 'Active_Scenario')
 	% no active Scenario, use default settings:
-	% Bezeichnung des Szenarios:
-	Scenario.Description = ...
-		'Default settings for random allocation';
-	Scenario.Filename = '01_Default_Settings';
-	% Erzeugungsanlagen verteilen (gemäß Parametern):
-	Solar.Number = [50, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-	% Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [Wp]
-	Solar.Power_sgl = 5000;         % mittlere Leistung der Anlagen [Wp]
-	Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
-	Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-	Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
-	Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-	Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
-	Solar.Performance_Ratio = 0.62; % mittlere Betriebsbedingungen der Photovoltaikanlage [-]
-	Solar.dev_Performance_Ratio = 5;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
-	Solar.Efficiency = 0.12;        % mittlerer Wirkungsgrad Zelle + WR [-]
-	Solar.dev_Efficiency = 5;       % Standardabweichung des Wirkungsgrad [% vom Mittelwert]
-	
-	Solar.WC_Selection = 'none_';
-	Scenario.Solar = Solar;
-	
-	Households.WC_Selection = 'none_';
-	Scenario.Households = Households;
-	
-	El_Mobility.Number = 50;         % Prozent-Anteil an Elektroautos in den Haushalten
-	Scenario.El_Mobility = El_Mobility;
-	
-	d.Simulation.Active_Scenario = Scenario;
+	d.Simulation.Active_Scenario = handles.System.default_scenario;
 	% remember the case, that the default values were used!
 	used_default = 1;
 else
@@ -54,6 +27,8 @@ Table_Data = handles.Current_Settings.Table_Network.Data;
 % -----------------------------------------------------------------------------------
 % Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
 % -----------------------------------------------------------------------------------
+% Where are the households in the Table_Network data:
+idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
 % Die Verteilung der Haushalte umrechnen, um diese für die Zufallsauswahl
 % aufzubereiten:
 hh_distribution = cell2mat(handles.System.housholds(:,3));
@@ -69,13 +44,13 @@ for i=1:size(Table_Data,1)
 	else
 		idx = find(hh_distribution >= fortu, 1);
 	end
-	Table_Data{i,2} = handles.System.housholds{idx,1};
+	Table_Data{i,idx_hh} = handles.System.housholds{idx,1};
 end
 
 % Anzahl der jeweiligen Haushalte ermitteln:
 for i=1:size(handles.System.housholds,1)
 	handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-		sum(strcmp(handles.System.housholds{i,1},Table_Data(:,2)));
+		sum(strcmp(handles.System.housholds{i,1},Table_Data(:,idx_hh)));
 end
 
 % set the current worst case.
@@ -87,6 +62,11 @@ handles.Current_Settings.Data_Extract.Worstcase_Housholds = ...
 % -----------------------------------------------------------------------------------
 % Solaranlagen anordnen:
 % -----------------------------------------------------------------------------------
+% Where are the pv-plants in the Table_Network data:
+idx_pv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'PV-Plant');
+% Where is the additional data?
+idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+% get the settings:
 sola_settin = handles.Current_Settings.Data_Extract.Solar;
 add_data = handles.Current_Settings.Table_Network.Additional_Data;
 % Get the current scenarion settings:
@@ -113,7 +93,7 @@ for i=1:Solar.Number(1)
 	idx = ceil(rand*numel(row_idxes));
 	row_act = row_idxes(idx);
 	row_idxes(idx)=[];
-	add_data{row_act,1} = name;
+	add_data{row_act,idx_pv_add} = name;
 	
 	% Parameter der Anlage bestimmen:
 	sola_settin.Plants.(name).Power_Installed = vary_parameter(Solar.Power_sgl, Solar.Power_sgl_dev);
@@ -138,7 +118,7 @@ for i=1:Solar.Number(1)
 		num2str(sola_settin.Plants.(name).Inclination),'°'];
 	sola_settin.Selectable{end-1,1} = long_na;
 	
-	Table_Data{row_act,3} = long_na;
+	Table_Data{row_act,idx_pv} = long_na;
 end
 handles.Current_Settings.Data_Extract.Solar = sola_settin;
 
@@ -151,7 +131,12 @@ handles.Current_Settings.Data_Extract.Worstcase_Generation = ...
 % -----------------------------------------------------------------------------------
 % Elektrofahrzeugen einfügen:
 % -----------------------------------------------------------------------------------
+% Where are the pv-plants in the Table_Network data:
+idx_em = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'El. Mob.');
+% Get the settings:
 El_Mobility = d.Simulation.Active_Scenario.El_Mobility;
+% get the real number of mobiles out of the share and number of connection
+% nodes:
 El_Mobility.Number = round(size(Table_Data,1)*El_Mobility.Number/100);
 
 % Index-Array erstellen, aus denen die Anschlusspunkte ausgewählt werden:
@@ -161,12 +146,12 @@ for i=1:El_Mobility.Number(1)
 	idx = ceil(rand*numel(row_idxes));
 	row_act = row_idxes(idx);
 	row_idxes(idx)=[];
-	Table_Data{row_act,4} = Table_Data{row_act,4} + 1;
+	Table_Data{row_act,idx_em} = Table_Data{row_act,idx_em} + 1;
 end
 
 % ermitteln, wieviele Elektrofahrzeuge gesamt im Netz enthalten sind:
 handles.Current_Settings.Data_Extract.El_Mobility.Number = ...
-	sum(cell2mat(Table_Data(:,4)));
+	sum(cell2mat(Table_Data(:,idx_em)));
 
 handles.Current_Settings.Table_Network.ColumnFormat{3} = sola_settin.Selectable(:,1)';
 handles.Current_Settings.Table_Network.Additional_Data = add_data;

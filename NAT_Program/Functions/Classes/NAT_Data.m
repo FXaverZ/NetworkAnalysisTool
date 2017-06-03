@@ -7,10 +7,15 @@ classdef NAT_Data < handle
 	% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 	
 	properties
+	% Grid Properties and grid related Objects
 		Grid
+	% Structure with result data
 		Result
+	% Structure with the input data (loads and infeed)
 		Load_Infeed_Data
+	% Structure with data, which is neccesary during the running simulation:
 		Simulation
+	% Structure for saving debug information:
 		Debug
 	%        different simulation settings
 	end

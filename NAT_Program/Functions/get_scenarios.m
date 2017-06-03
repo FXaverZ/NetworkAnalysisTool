@@ -26,9 +26,13 @@ Solar.dev_Efficiency = 5;       % Standardabweichung des Wirkungsgrad [% vom Mit
 %                                     Szenario 1
 %------------------------------------------------------------------------------------
 scen_count = scen_count + 1;
+% create a default-scenario:
+Simulation.Scenarios.(['Sc_',num2str(scen_count)]) = handles.System.default_scenario;
+% Now adapt the default scenario:
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
 	'Base Scenario - Normal Load, No Infeed, 0% Elektromobility';
+% Filename, under which the data for this scenario will be saved:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = '01_Base_scenario';
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
 Solar.Number = [0, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
@@ -40,12 +44,15 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar;
 Households.WC_Selection = 'none_';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
 
-El_Mobility.Number = 0;         % Prozent-Anteil an Elektroautos in den Haushalten
+El_Mobility.Number = 0;         % Prozent-Anteil an Elektroautos an Anschlussknoten
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
 %------------------------------------------------------------------------------------
 %                                     Szenario 2
 %------------------------------------------------------------------------------------
 scen_count = scen_count + 1;
+% create a default-scenario:
+Simulation.Scenarios.(['Sc_',num2str(scen_count)]) = handles.System.default_scenario;
+% Now adapt the default scenario:
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
 	'Low load, high infeed - 0-25% E-HH, 24% PV-Infeed w. 20 kWp, 0% Elektromobility';
@@ -66,6 +73,9 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
 %                                     Szenario 3
 %------------------------------------------------------------------------------------
 scen_count = scen_count + 1;
+% create a default-scenario:
+Simulation.Scenarios.(['Sc_',num2str(scen_count)]) = handles.System.default_scenario;
+% Now adapt the default scenario:
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
 	'High load, medium infeed, high e-mobility - 75-100% E-HH, 33.6% PV-Infeed w. 4.5 kWp, 75% Elektromobility';
@@ -82,47 +92,53 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
 
 El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
-%------------------------------------------------------------------------------------
-%                                     Szenario 4
-%------------------------------------------------------------------------------------
-scen_count = scen_count + 1;
-% Bezeichnung des Szenarios:
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	'High load, High infeed, High e-mobility - 75-100% E-HH, 24% PV-Infeed w. 20 kWp, 75% Elektromobility';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = '04_High_load_High_infeed_High_e_mobility';
-% Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [24, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 20000;       % mittlere Leistung der Anlagen [Wp]
-
-Solar.WC_Selection = 'none_';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
-
-Households.WC_Selection = 'E_100';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
-
-El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
-%------------------------------------------------------------------------------------
-%                                     Szenario 5
-%------------------------------------------------------------------------------------
-scen_count = scen_count + 1;
-% Bezeichnung des Szenarios:
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	'Normal load, medium infeed (whole roofs), medium e-mobility - Normal Load, 67.2% PV-Infeed w. 4.5 kWp, 30% Elektromobility';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = '05_Normal_load_Medium_infeed_whole_roofs_Medium_e_mobility';
-% Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [67.2, 0];     % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 4500;       % mittlere Leistung der Anlagen [Wp]
-
-Solar.WC_Selection = 'none_';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
-
-Households.WC_Selection = 'none_';
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
-
-El_Mobility.Number = 30;         % Prozent-Anteil an Elektroautos in den Haushalten
-Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
-%====================================================================================
+% %------------------------------------------------------------------------------------
+% %                                     Szenario 4
+% %------------------------------------------------------------------------------------
+% scen_count = scen_count + 1;
+% % create a default-scenario:
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]) = handles.System.default_scenario;
+% % Now adapt the default scenario:
+% % Bezeichnung des Szenarios:
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
+% 	'High load, High infeed, High e-mobility - 75-100% E-HH, 24% PV-Infeed w. 20 kWp, 75% Elektromobility';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = '04_High_load_High_infeed_High_e_mobility';
+% % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
+% Solar.Number = [24, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+% Solar.Power_sgl = 20000;       % mittlere Leistung der Anlagen [Wp]
+% 
+% Solar.WC_Selection = 'none_';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
+% 
+% Households.WC_Selection = 'E_100';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
+% 
+% El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
+% %------------------------------------------------------------------------------------
+% %                                     Szenario 5
+% %------------------------------------------------------------------------------------
+% scen_count = scen_count + 1;
+% % create a default-scenario:
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]) = handles.System.default_scenario;
+% % Now adapt the default scenario:
+% % Bezeichnung des Szenarios:
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
+% 	'Normal load, medium infeed (whole roofs), medium e-mobility - Normal Load, 67.2% PV-Infeed w. 4.5 kWp, 30% Elektromobility';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = '05_Normal_load_Medium_infeed_whole_roofs_Medium_e_mobility';
+% % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
+% Solar.Number = [67.2, 0];     % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+% Solar.Power_sgl = 4500;       % mittlere Leistung der Anlagen [Wp]
+% 
+% Solar.WC_Selection = 'none_';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
+% 
+% Households.WC_Selection = 'none_';
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
+% 
+% El_Mobility.Number = 30;         % Prozent-Anteil an Elektroautos in den Haushalten
+% Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
+% %====================================================================================
 
 % Anzahl an akutell verf¸gbaren Szenarios:
 Simulation.Scenarios.Number = scen_count;

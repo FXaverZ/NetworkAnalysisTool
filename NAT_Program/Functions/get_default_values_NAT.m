@@ -1,26 +1,37 @@
-function handles = get_default_values(handles)
+function handles = get_default_values_NAT(handles)
 %GET_DEFAULT_VALUES   loads the default values for all setting for the NAT
 %   Detailed explanation goes here
 
 % Version:                 4.3
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 15.05.2013
+% Letzte Änderung durch:   Franz Zeilinger - 11.11.2013
 
 %------------------------------------------------------------------------------------
 % System-Werte - sollten sich während der Systemlaufzeit nicht ändern!
 %------------------------------------------------------------------------------------
-System.Version = '4.3';
+
+% Current version of the NAT
+System.version = '4.3';
+
+% maximum number of a whole dataset, if this number is exceeded, partial
+% files are created: 
+System.number_max_datasets = 200;
+
+% reset of RPC-server (SINCAL-connection) after this number of profiles (due to problems
+% with a permanently open connection with the RPC-Server. After the this number of
+% profiles is simulated, the SINCAL-connection is rebuild...)
+System.number_max_profiles_simulated = 50;
 
 % Standardbezeichnungen:
 System.seasons =   {... % Typen der Jahreszeiten
-	'Summer', 'Sommer';... 
-	'Transi', 'Übergang';...
+	'Summer', 'Summer';... 
+	'Transi', 'Transition';...
 	'Winter', 'Winter';...
 	}; 
 System.weekdays =  {... % Typen der Wochentage
-	'Workda', 'Werktag';...
-	'Saturd', 'Samstag';...
-	'Sunday', 'Sonntag';...
+	'Workda', 'Workday';...
+	'Saturd', 'Saturday';...
+	'Sunday', 'Sunday';...
 	};  
 System.housholds = {... % Definition der Haushaltskategorien:
 	'sing_vt', 'Single Vollzeit'               ,  4.91;... 
@@ -44,40 +55,41 @@ System.housholds = {... % Definition der Haushaltskategorien:
 
 % mögliche Zeitauflösungen:
 System.time_resolutions = {...
-	'sec - Sekunden',     1;...
-	'min - Minuten',     60;...
-	'5mi - 5 Minuten',  300;...
-	'10m - 10 Minuten', 600;...
-	'quh - 15 Minuten', 900;...
+	'sec - Seconds',     1;...
+	'min - Minutes',     60;...
+	'5mi - 5 Minutes',  300;...
+	'10m - 10 Minutes', 600;...
+	'quh - 15 Minutes', 900;...
 	};
 
 % Definition der verschiedenen "Worst Cases":
 System.wc_households = {...
-	'Kein',                             'none_';...
-	'Höchster Energieverbrauch',        'E_max';...
-	'Niedrigster Energieverbrauch',     'E_min';...
-	'Höchste Leistungsaufnahme',        'P_max';...
-	'0.0-0.25 Anteil Energieverbrauch', 'E_025';...
-	'0.25-0.5 Anteil Energieverbrauch', 'E_050';...
-	'0.5-0.75 Anteil Energieverbrauch', 'E_075';...
-	'0.75-1.0 Anteil Energieverbrauch', 'E_100';...
+	'None',                             'none_';...
+	'Highest Energyconsumption',        'E_max';...
+	'Lowest Energyconsumption',         'E_min';...
+	'Highest Powerconsumption',         'P_max';...
+	'0.0-0.25 Share Energyconsumption', 'E_025';...
+	'0.25-0.5 Share Energyconsumption', 'E_050';...
+	'0.5-0.75 Share Energyconsumption', 'E_075';...
+	'0.75-1.0 Share Energyconsumption', 'E_100';...
 	'DEBUG',                            'debug';...
 	};
 System.wc_generation = {...
-	'Kein';...
-	'Höchste Tageseinspeisung';...
-	'Niedrigste Tageseinspeisung';...
+	'None';...
+	'Highest Energyinfeed';...
+	'Lowest Energyinfeed';...
 % 	'Höchste Leistung';...
 	};
 
 % Definition der Erzeugungs-Anlagenarten:
 System.sola.Typs = {...
-	'Fix montiert';...
+	'Fix mounted';...
 	'Tracker';...
 	};
+% Default list with allready available solar plants for fast selection
 System.sola.Selectable = {...
-	'Keine Anlage ausgewählt'  ,[];...
-	'Neue Anlage hinzufügen...',[];...
+	'No plant selected'  ,[];...
+	'Add new plant...'   ,[];...
 	};
 
 % Default Werte (alle Anlagen aus, Standardwerte) für PV-Anlagen:
@@ -120,6 +132,45 @@ Default_Plant.c_p =            [];      % Tabelle mit Leistungsbeiwerten bei
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung        [s] 
 System.wind.Default_Plant = Default_Plant;
 
+% Define a default scenario:
+Scenario.Description = ...
+	'Default settings for random allocation';
+Scenario.Filename = '01_Default_Settings';
+Scenario.Data_is_divided = 0;   % indicates, if file-parts are presten (=1) or not (=0)
+Scenario.Data_number_parts = 1; % number of file-parts for the scenariodata (only valid, when ...Scenario.Data_is_divided = 1)
+Solar.Number = [50, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Power_sgl = 5000;         % mittlere Leistung der Anlagen [Wp]
+Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
+Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
+Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
+Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
+Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
+Solar.Performance_Ratio = 0.62; % mittlere Betriebsbedingungen der Photovoltaikanlage [-]
+Solar.dev_Performance_Ratio = 5;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
+Solar.Efficiency = 0.12;        % mittlerer Wirkungsgrad Zelle + WR [-]
+Solar.dev_Efficiency = 5;       % Standardabweichung des Wirkungsgrad [% vom Mittelwert]
+Solar.WC_Selection = 'none_';
+Scenario.Solar = Solar;
+Scenario.Households.WC_Selection = 'none_';   
+Scenario.El_Mobility.Number = 50; % Prozent-Anteil an Elektroautos in den Haushalten
+
+System.default_scenario = Scenario;
+
+% Default settings of the tables in the main GUI (for different grid-types)
+% Settings for LV-Grids
+System.table_settings.lv.ColumnName = {'Names', 'Active', 'Housh.type', 'PV-Plant', 'El. Mob.'};
+% 'Names' = Name of the PQ-Node (Connection Point)
+% 'Active' = is this node active (if not
+System.table_settings.lv.ColumnFormat = {...
+	'char', ...
+	'logical', ...
+	System.housholds(:,1)', ...
+    System.sola.Selectable(:,1)',...
+    'numeric'};
+System.table_settings.lv.ColumnEditable = [false, true, true, true, true];
+% Content of the additional data array
+System.table_settings.lv.Additional_Data_Content = {'PV_Plant_Name', 'Wind_Plant_Name'};
+
 % Systemeinstellungen speichern
 handles.System = System; 
 
@@ -131,7 +182,7 @@ Files = Current_Settings.Files;
 
 % automatisch erzeugte Konfigurationsdatei (merken der letzten Einstellungen):
 Files.Last_Conf.Path = Files.Main_Path;
-Files.Last_Conf.Name = 'Einstellungen';
+Files.Last_Conf.Name = 'Settings';
 Files.Last_Conf.Exte = '.cfg';
 
 % Daten (Pfad des .sin-Files und Name) des zu betrachtetenden Netzes:
@@ -140,14 +191,14 @@ Files.Grid.Name = [];
 Files.Grid.Exte = '.sin';
 
 % Speicherpfad für Daten
-if ~isdir([Files.Main_Path,filesep,'Ergebnisse'])
-	mkdir([Files.Main_Path,filesep,'Ergebnisse']);
+if ~isdir([Files.Main_Path,filesep,'Results'])
+	mkdir([Files.Main_Path,filesep,'Results']);
 end
-Files.Save.Result.Path = [Files.Main_Path,filesep,'Ergebnisse'];
-Files.Save.Result.Name = 'Daten';
+Files.Save.Result.Path = [Files.Main_Path,filesep,'Results'];
+Files.Save.Result.Name = 'Data';
 Files.Save.Result.Exte = '.mat';
 
-Files.Load.Result.Path = [Files.Main_Path,filesep,'Ergebnisse'];
+Files.Load.Result.Path = [Files.Main_Path,filesep,'Results'];
 Files.Load.Result.Name = 'Res_XXX - information';
 Files.Load.Result.Exte = '.mat';
 
@@ -160,6 +211,9 @@ Current_Settings.Files = Files;
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung
+data_settings.Timepoints_per_dataset = 1440; % Number of Timepoints per dataset (is 
+% depending on handles.Current_Settings.Data_Extract.Time_Resolution and time series 
+% settings) 
 data_settings.get_Sample_Value = 1;   % Sample-Werte ermitteln bzw. speichern.
 data_settings.get_Mean_Value = 0;     % Mittelwerte ermitteln bzw. speichern.
 data_settings.get_Min_Value = 0;      % Minimalwerte ermitteln bzw. speichern.
@@ -191,6 +245,7 @@ Current_Settings.Data_Extract.Worstcase_Generation = 1;
 Current_Settings.Data_Extract.Solar.Selectable = System.sola.Selectable;
 Current_Settings.Data_Extract.Wind.Selectable = System.wind.Selectable;
 
+Current_Settings.Grid.Type = 'LV';
 
 % Standard-Dateipfade, Pfad zur Datenbank:
 Current_Settings.Load_Database.Path = Current_Settings.Files.Main_Path;
@@ -201,7 +256,7 @@ Current_Settings.Table_Network = [];
 
 % Definieren der Simulations-Parameter:
 Simulation.Parameters = {...
-	'Calculation_method', 'LF_USYM',...  % Unsymmetrischer Lastfluss
+	'Calculation_method', 'LF_RST',...  % Unsymmetrischer Lastfluss
 	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
 	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
 	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
@@ -216,7 +271,7 @@ Simulation.Number_Runs = 10;
 Simulation.Grid_List = {};
 % Should the tool take into account different variants of the grid?
 Simulation.Use_Grid_Variants = 0;
-% Root path to the folder, in which the single Networks are stored...
+% Root path to the folder, in which the single Networks of the grid variants are stored...
 Simulation.Grids_Path = Files.Main_Path;
 % Should the tool calculate different scenarios (if avaliable)?
 Simulation.Use_Scenarios = 0;
@@ -241,6 +296,10 @@ Simulation.Save_Power_Loss_Results = 0;
 % 1 = Power Loss data is saved
 % 0 = Power Loss data is not saved
 Current_Settings.Simulation = Simulation;
+
+% Anzahl der unterschiedlichen Input-Datensätze (entspricht
+% handles.Current_Settings.Simulation.Number_Runs zum Extraktionszeitpunkt):
+Current_Settings.Data_Extract.Number_Data_Sets = Simulation.Number_Runs;
 
 handles.Current_Settings = Current_Settings;
 end

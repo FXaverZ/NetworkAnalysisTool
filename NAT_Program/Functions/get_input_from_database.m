@@ -7,9 +7,9 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 	handles = get_data_szenarios_load_infeed(handles);
 else
 	handles.NAT_Data.Simulation = [];
-	% Set the default scenario:
+	% Set the default (first) scenario:
 	handles.NAT_Data.Simulation.Active_Scenario = ...
-		handles.Current_Settings.Simulation.Scenarios.(['Sc_',num2str(2)]);
+		handles.Current_Settings.Simulation.Scenarios.(['Sc_',num2str(1)]);
 	handles = loaddata_get(handles);
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
