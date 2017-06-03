@@ -2,6 +2,8 @@ function handles = save_simulation_data(handles)
 %SAVE_SIMULATON_DATA Summary of this function goes here
 %   Detailed explanation goes here
 
+handles.NAT_Data.remove_COM_objects;
+
 Result = handles.NAT_Data.Result;
 Grid = handles.NAT_Data.Grid;
 Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data;

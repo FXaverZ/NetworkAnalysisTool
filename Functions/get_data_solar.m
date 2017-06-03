@@ -8,7 +8,7 @@ function get_data_solar (handles, varargin)
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
 db_fil = handles.Current_Settings.Load_Database;  % Datenbankstruktur
-d = handles.NAT_Data; % Zugriff auf das Datenobjekt:
+d = handles.NAT_Data; % Zugriff auf das Datenobjekt
 
 max_num_data_set = db_fil.setti.max_num_data_set*6; % Anzahl an Datensätzen in einer
 %                                                     Teildatei --> da im Fall von
@@ -29,6 +29,8 @@ Solar.Data_Sample = [];
 Solar.Data_Mean = [];
 Solar.Data_Min = [];
 Solar.Data_Max = [];
+Solar.Data_05P_Quantil = [];
+Solar.Data_95P_Quantil = [];
 % store the plants strukture for later use:
 Solar.Plants = handles.Current_Settings.Data_Extract.Solar.Plants;
 
@@ -244,13 +246,31 @@ for i=1:numel(plants)
 		% eingelesenen Daten wieder löschen (Speicher freigeben!)
 		clear data_max;
 	end
-		if settin.get_Min_Value
+	if settin.get_Min_Value
 		data_min = squeeze(min(data_mean));
 		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 		Solar.Data_Min = [Solar.Data_Min,...
 			data_min];
 		% eingelesenen Daten wieder löschen (Speicher freigeben!)
 		clear data_min;
+	end
+	if settin.get_05_Quantile_Value
+		data_05q = squeeze(quantile(data_mean,0.05));
+		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
+		Solar.Data_05P_Quantil = [...
+			Solar.Data_05P_Quantil,...
+			data_05q];
+		% eingelesenen Daten wieder löschen (Speicher freigeben!)
+		clear data_05q;
+	end
+	if settin.get_95_Quantile_Value
+		data_95q = squeeze(quantile(data_mean,0.95));
+		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
+		Solar.Data_95P_Quantil = [...
+			Solar.Data_95P_Quantil,...
+			data_95q];
+		% eingelesenen Daten wieder löschen (Speicher freigeben!)
+		clear data_95q;
 	end
 	if settin.get_Mean_Value
 		data_mean = squeeze(mean(data_mean));

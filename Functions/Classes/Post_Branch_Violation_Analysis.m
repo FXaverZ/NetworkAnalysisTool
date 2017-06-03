@@ -7,7 +7,7 @@ classdef Post_Branch_Violation_Analysis < handle
 
         Number_of_Violations = [];
             % Number of times branch violations occured at base, 1st, 2nd
-            % or 3rd limit
+            % or 3rd additional thermal limit
         Number_of_Violations_percent = [];
             % Percentage of times branch violations occured at base, 1st, 2nd
             % or 3rd limit        
@@ -69,7 +69,7 @@ classdef Post_Branch_Violation_Analysis < handle
                     % Iterate through all datasets cd = size(results,1)
                     
                     % The squeezed values for dataset cd and topology (cg) are saved in
-                    % voltage_violation_results
+                    % branch_violation_results
                     branch_violation_results(:,1:numel(observed_grid_branch)) =...
                         squeeze( observed_branch_violation(cd,:,:) );
                     

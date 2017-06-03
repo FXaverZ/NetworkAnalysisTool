@@ -63,8 +63,9 @@ classdef Connection_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
+	% Version:                 1.2
 	% Erstellt von:            Franz Zeilinger - 14.01.2013
-	% Letzte Änderung durch:   Franz Zeilinger - 28.01.2013
+	% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 	
 	properties
 		
@@ -142,7 +143,7 @@ classdef Connection_Point < handle
 			for i=1:numel(obj_s)
 				p_q = obj_s(i).P_Q_Act;
 				p_q = sum(p_q,1);
-                                
+               
                 obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));
 				obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
 				obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
