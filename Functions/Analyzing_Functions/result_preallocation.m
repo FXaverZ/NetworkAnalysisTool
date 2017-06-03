@@ -4,6 +4,10 @@ function handles = result_preallocation(handles,cg)
 % and for result saving. % Value of 1 turns on the preallocation 
 % function.
 
+% Version:                 1.2
+% Erstellt von:            Matej Rejc      - 17.04.2013
+% Letzte Änderung durch:   Matej Rejc      - 29.04.2013
+
     d = handles.NAT_Data;
     
     % Online analysis function preallocations **
@@ -21,8 +25,11 @@ function handles = result_preallocation(handles,cg)
         save_voltage_results = handles.Current_Settings.Simulation.Save_Voltage_Results ; 
         % Branch results (from node to element) will be saved. 
         save_branch_results = handles.Current_Settings.Simulation.Save_Branch_Results; % Save branch results
-
-    
+        % -- changelog v1.1b ##### (start) // 20130429
+        % Power loss results will be saved in W.
+        save_ploss_results = handles.Current_Settings.Simulation.Save_Power_Loss_Results; % Save branch results
+        % -- changelog v1.1b ##### (end) // 20130429
+        
     % ---------------------------------------------------------------------------
     % Result preallocation procedure - Voltage violation analysis
     % ---------------------------------------------------------------------------
@@ -164,8 +171,24 @@ function handles = result_preallocation(handles,cg)
             numel(d.Grid.(cg).Branches.Grouped),16);
     end
     
-
-
+    % -- changelog v1.1b ##### (start) // 20130429
+    % ---------------------------------------------------------------------------
+    % Result preallocation procedure - Save power loss results
+    % ---------------------------------------------------------------------------
+    if save_ploss_results == 1
+        % Branch_Values include both lines and 2w transformers
+        d.Result.(cg).Power_Loss_Values(...
+            1:handles.Current_Settings.Simulation.Number_Runs,...
+            1:handles.Current_Settings.Simulation.Timepoints,...
+            1:numel(d.Grid.(cg).Branches.Grouped),...
+            1) = ...
+            zeros(handles.Current_Settings.Simulation.Number_Runs,...
+            handles.Current_Settings.Simulation.Timepoints,...
+            numel(d.Grid.(cg).Branches.Grouped),1);
+        % <numb. of sets, numb. of timepoints,numb_of_branches,loss value>
+    end
+    % -- changelog v1.1b ##### (start) // 20130429
+             
 end
  
     

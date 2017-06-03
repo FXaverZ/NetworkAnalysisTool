@@ -2,9 +2,9 @@ function handles = network_calculation(handles)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 2.0
+% Version:                 2.1
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 24.04.2013
+% Letzte Änderung durch:   Matej Rejic     - 29.04.2013
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
@@ -70,6 +70,16 @@ for i=1:numel(Grid_List)
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Mean;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Mean;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Mean;
+% 			DEBUG: linear increasing Load, only active Power
+% 			Load_Data = zeros(size(Load_Data));
+% 			Load_Data(:,1:2:end) =...
+% 				repmat((500:(3000-500)/(size(Load_Data,1)):3000-1),size(Load_Data,2)/2,1)';
+% 			
+% 			Sola_Data = zeros(size(Sola_Data));
+% % 			Sola_Data(:,1:2:end)=...
+% % 				repmat((0:2000/size(Sola_Data,1):2000-1),size(Sola_Data,2)/2,1)';
+% 			
+% 			Elmo_Data = zeros(size(Sola_Data));
 		end
 		if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_05P_Quantil;
@@ -82,14 +92,18 @@ for i=1:numel(Grid_List)
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_95P_Quantil;
 		end
 		
-		Table_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network.Data;
-		
 		% Die Daten an SINCAL anpassen (Leistungen in MW und pos. bei Verbrauch):
 		Load_Data = Load_Data/1e6;
 		Elmo_Data = Elmo_Data/1e6;
 		Sola_Data = Sola_Data/-1e6; %Einspeiser negativ!
 		% Wieviele Zeitpunkte werden berechnet?
 		handles.Current_Settings.Simulation.Timepoints = size(Load_Data,1);
+		
+		% Reloading the Settings of the Network:
+		handles.Current_Settings.Table_Network = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
+		
+		% Resetting the connection points:
+		d.Grid.(cg).P_Q_Node.Points.reset_connections;
 		
 		%--------------------------------------------------------------------------------
         % Result preallocation
@@ -103,7 +117,7 @@ for i=1:numel(Grid_List)
         end        
 		
 		% Add an error-counter array
-		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Timepoints,1);
+		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
 		
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
@@ -112,7 +126,7 @@ for i=1:numel(Grid_List)
 		hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
 		for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
 			% Welcher Haushaltstyp soll angeschlossen werden?
-			hh_typ = Table_Data{k,2};
+			hh_typ = handles.Current_Settings.Table_Network.Data{k,2};
 			idx = find(strcmp(hh_typ,d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content));
 			idx = idx(hhs.(hh_typ).Number)-1;
 			hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
@@ -132,7 +146,7 @@ for i=1:numel(Grid_List)
 			d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,elm_num);
 			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
 				% Wieviele Fahrzeuge sollen hier angeschlossen werden?
-				elmoby = Table_Data{k,4};
+				elmoby = handles.Current_Settings.Table_Network.Data{k,4};
 				% Elektromobilitätsinstanz erzeugen:
 				for l=1:elmoby
 					obj = Unit_Time_Dependent(...
@@ -181,15 +195,15 @@ for i=1:numel(Grid_List)
 		d.Simulation.Input_Data_act = j;
 		for k=1:handles.Current_Settings.Simulation.Timepoints
 			try
+				
 				% aktuellen Zeipunkt speichern:
 				d.Simulation.Current_timepoint = k;
 				% Last- und Einspeisedaten aktualisieren:
 				d.Grid.(cg).Load.Loads.update_power(k);
 				d.Grid.(cg).Load.Elmob.update_power(k);
 				d.Grid.(cg).Sola.Gen_Units.update_power(k);
-				
 				% der Berechnung die neuen Leistungswerte übermitteln:
-				d.Grid.(cg).P_Q_Node.Points.update_power;
+				d.Grid.(cg).P_Q_Node.Points.update_power(cg, j, k, d);
 				% Lastfluss rechnen:
 				handles.sin.start_calculation;
 				
@@ -214,11 +228,13 @@ for i=1:numel(Grid_List)
 						save_branch_values(handles);
 					end
 				end
-				
-			catch ME
-				disp('An Error occured:');
-				disp(ME.message);
-				disp('No data for this timepoint!');
+				% Perform online active power loss analysis (values in W)
+				if handles.Current_Settings.Simulation.Power_Loss_Analysis
+					online_power_loss_analysis(handles);
+					% An additional condition for power loss saving is
+					% inside the online function
+				end
+			catch ME %#ok<NASGU>
 				d = handles.NAT_Data;
 				ct = d.Simulation.Current_timepoint;
 				cg = d.Simulation.Grid_act;
@@ -235,9 +251,10 @@ for i=1:numel(Grid_List)
 				if isfield(d.Result.(cg), 'Branch_Values')
 					d.Result.(cg).Branch_Values(cd,ct,:,:) = NaN;
 				end
-				d.Result.(cg).Error_Counter(ct) = d.Result.(cg).Error_Counter(ct) + 1;
+				d.Result.(cg).Error_Counter(cd,ct) = d.Result.(cg).Error_Counter(cd,ct) + 1;
 			end
 		end
+		
 		% Statusinfo zum Gesamtfortschritt an User:
 		t = toc;
 		progress = j/handles.Current_Settings.Simulation.Number_Runs;
@@ -247,6 +264,11 @@ for i=1:numel(Grid_List)
 			sec2str(t),...
 			'. Verbleibende Zeit: ',...
 			sec2str(time_elapsed),'\n']);
+		err_count = sum(d.Result.(cg).Error_Counter(j,:));
+		if err_count > 0
+			fprintf(['\t\t\tWährend der Berechnung sind ',...
+				num2str(err_count),' Fehler aufgetreten!"\n']);
+		end
 	end
 	
 	% select again the first grid (because here the load-& infeeeddata is

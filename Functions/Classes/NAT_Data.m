@@ -11,6 +11,7 @@ classdef NAT_Data < handle
 		Result
 		Load_Infeed_Data
 		Simulation
+		Debug
 	%        different simulation settings
 	end
 	

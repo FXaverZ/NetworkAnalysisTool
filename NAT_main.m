@@ -1,8 +1,8 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 3.7
+% Version:                 4.0
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 24.04.2013
+% Letzte Änderung durch:   Matej Rejic     - 29.04.2013
 
 % Last Modified by GUIDE v2.5 26-Apr-2013 13:41:45
 
@@ -652,7 +652,6 @@ helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
-set(handles.push_load_data_get, 'Enable', 'on');
 set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
@@ -671,6 +670,9 @@ end
 if handles.Current_Settings.Simulation.Branch_Violation_Analysis
 	handles = post_branch_violation_report(handles);
 % 	handles = grid_branches_comparison(handles,1:3,'all');
+end
+if handles.Current_Settings.Simulation.Power_Loss_Analysis
+    handles = post_active_power_loss_report(handles);
 end
 
 % Anzeige aktualisieren:
@@ -817,9 +819,11 @@ Main_Path = uigetdir(handles.Current_Settings.Simulation.Scenarios_Path,...
 if ischar(Main_Path)
 	handles.Current_Settings.Simulation.Scenarios_Path = Main_Path;
 	try
-		load([Main_Path,'Scenario_Settings.mat']);
-		handles.Current_Settings.Simulation.Scenarios = Scenario_Settings;
-		handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+		load([Main_Path,filesep,'Scenario_Settings.mat']);
+        handles.Current_Settings.Simulation.Scenarios = Scenarios_Settings;
+        handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+        load([Main_Path,filesep, Scenarios_Settings.Names{1},'.mat']);
+        handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
 	catch ME
 		disp('Fehler beim Laden der Szenarioeinstellungen:');
 		disp(ME.message);

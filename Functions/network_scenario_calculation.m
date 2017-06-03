@@ -2,6 +2,10 @@ function handles = network_scenario_calculation(handles)
 %NETWORK_SCENARIO_CALCULATION Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.2
+% Erstellt von:            Franz Zeilinger - 24.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 29.04.2013
+
 % Access to the data via the data object:
 d = handles.NAT_Data;
 
@@ -23,9 +27,10 @@ scenar.Names = sort(scenar.Names);
 fprintf('\nBerechne die Szenarien...\n');
 for i=1:scenar.Number;
 	cur_scen = scenar.Names{i};
-	fprintf(['\t\t\t',cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
+	fprintf([cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
+	d.Load_Infeed_Data = [];
 	d.Load_Infeed_Data = Load_Infeed_Data;
 	% perform the network calculations:
 	try
@@ -44,14 +49,14 @@ for i=1:scenar.Number;
 		disp(ME.message);
 		continue;
 	end
-	fprintf('\n================================== \n');
 	% save the results:
 	handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - ',cur_scen];
 	handles = save_simulation_data(handles);
 	fprintf('\n================================== \n');
-	fprintf('CALCULATION SUCCESSFULLY FINSIHED! \n');
-	fprintf('================================== \n');
 end
+fprintf('\n================================== \n');
+fprintf('CALCULATION SUCCESSFULLY FINSIHED! \n');
+fprintf('================================== \n');
 
 diary('off');
 

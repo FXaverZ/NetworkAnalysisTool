@@ -24,7 +24,7 @@ for i = 1:num_set
 	% Zufällige Zuordnung treffen:
 	handles = load_random_allocation(handles);
 	% Daten auslesen und dem Input-Datensatz hinzufügen:
-	get_data_households (handles, i);
+	get_data_households(handles, i);
 	get_data_solar(handles, i);
 	get_data_elmob(handles, i);
 	
