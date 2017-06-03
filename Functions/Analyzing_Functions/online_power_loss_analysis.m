@@ -26,36 +26,16 @@ cg = d.Simulation.Grid_act;
 cd = d.Simulation.Input_Data_act;
 
 %-------------------------------------------------------------------
-% Thermal limits can be recheck on-line if they change during
-% simulation
-% d.Grid.(cg).Branches.Lines.define_branch_limits;  % <----------
-% d.Grid.(cg).Branches.Transf.define_branch_limits; % <----------
-
-% Line limits are in most cases given in A, therefore we will check
-% limit values by comparing I to Ilim
-% d.Simulation.Branch_Violation_analysis.line_current_limits = ...
-%     vertcat(d.Grid.(cg).Branches.Lines.Current_Limits); % <----------
-
-% Transf. limits are in most cases given in VA, therefore we will check
-% limit values by comparing S to Smax
-% d.Simulation.Branch_Violation_analysis.transf_app_power_limits = ...
-%     vertcat(d.Grid.(cg).Branches.Transf.App_Power_Limits); % <----------
-
-% Merge line and transformer limits
-% d.Simulation.Branch_Violation_analysis.branch_limits = ...
-%     [d.Simulation.Branch_Violation_analysis.line_current_limits;...
-%      d.Simulation.Branch_Violation_analysis.transf_app_power_limits];  % <----------
-
-%-------------------------------------------------------------------
-% Online branch element violation analysis for unsymetric load flow
+% Online active power loss analysis for unsymetric load flow
 %-------------------------------------------------------------------
 
 % Check line currents
-d.Grid.(cg).Branches.Lines.update_current_branch_LF_USYM;
-line_currents = vertcat(d.Grid.(cg).Branches.Lines.Current);
+d.Grid.(cg).Branches.Lines.update_power_branch_LF_USYM_from;
+
+line_active_power = vertcat(d.Grid.(cg).Branches.Lines.Current);
 
 % Check transformer apparent power flow
-d.Grid.(cg).Branches.Transf.update_power_branch_LF_USYM;
+d.Grid.(cg).Branches.Transf.update_power_branch_LF_USYM_from;
 transf_apparent_power = vertcat(d.Grid.(cg).Branches.Transf.Apparent_Power);
 
 

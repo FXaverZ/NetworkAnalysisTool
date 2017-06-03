@@ -3,7 +3,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
 
-% Last Modified by GUIDE v2.5 10-Apr-2013 12:36:49
+% Last Modified by GUIDE v2.5 18-Apr-2013 18:23:34
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -226,9 +226,8 @@ if ~isequal(file.Name,0) && ~isequal(file.Path,0)
 	file.Path = file.Path(1:end-1);
 	% aktuellen Speicherort übernehmen:
 	handles.Current_Settings.Files.Save.Result = file;
+	handles = save_simulation_data(handles);
 end
-
-handles = save_simulation_data(handles);
 
 % User informieren:
 helpdlg('Simulationsdaten erfolgreich gespeichert');
@@ -538,10 +537,29 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% handles = network_analysis(handles);
-% -- changelog v1.2b ##### (start) // 20130418
-handles = post_voltage_analysis(handles);
-% -- changelog v1.2b ##### (end) // 20130418
+% -- changelog v1.1b ##### (start) // 20130423
+% Perform post voltage violation report, creates an object
+handles = post_voltage_violation_report(handles);
+
+% Perform post-branch violation report, creates an object
+handles = post_branch_violation_report(handles);
+ 
+% draw_violations shows a graph of:
+% - voltages at nodes (it is required to save the values!), limits at nodes
+%   and the conditional value if voltage limits are exceeded
+% - branch values at lines and transformers (it is required to save the
+%   values!), limits at branches and the conditional values if branch limits
+%   are exceeded
+draw_violations(handles,1); % <-----------
+
+% grid_voltages_comparison gives a comparison of voltage limit problems for
+% all observed grids in a horizontal bar form
+grid_voltages_comparison(handles);
+
+% grid_branches_comparison gives a comparison of branch limit problems for
+% all observed grids in a horizontal bar form
+grid_branches_comparison(handles);
+% -- changelog v1.1b ##### (end) // 20130423
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -577,9 +595,11 @@ function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<D
     handles.Current_Settings.Data_Extract] = network_table_reset(handles);
 
 % Anzahl der jeweiligen Haushalte ermitteln:
-for i=1:size(handles.System.housholds,1)
-	handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-		sum(strcmp(handles.System.housholds{i,1},handles.Current_Settings.Table_Network.Data(:,3)));
+if ~isempty(handles.Current_Settings.Table_Network)
+	for i=1:size(handles.System.housholds,1)
+		handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
+			sum(strcmp(handles.System.housholds{i,1},handles.Current_Settings.Table_Network.Data(:,3)));
+	end
 end
 
 % Anzeige aktualisieren:
@@ -593,6 +613,10 @@ function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+% Netzvarianten löschen:
+handles.Current_Settings.Simulation.Grid_List = {};
+handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.Main_Path;
+
 % aktuellen Speicherort für Daten auslesen:
 file = handles.Current_Settings.Files.Grid;
 % Userabfrage nach Speicherort
@@ -604,6 +628,10 @@ file = handles.Current_Settings.Files.Grid;
 % Überprüfen, ob ungültiger Speicherort angegeben wurde:
 if isequal(file.Name,0) || isequal(file.Path,0)
 	% Falls ja, diese Funktion verlassen:
+	% Anzeige des Hauptfensters aktualisieren:
+	handles = refresh_display_NAT_main_gui (handles);
+	% handles-Struktur aktualisieren:
+	guidata(hObject, handles);
 	return;
 end
 
@@ -804,7 +832,7 @@ if numel(eventdata.Indices) > 0
 	handles.Current_Settings.Table_Network.Selected_Row = eventdata.Indices(1);
 	
 	% das entsprechende Element in SINCAL GUI markieren (falls dieses offen ist):
-	handles.sin.gui_select_element(handles.NAT_Data.Grid.P_Q_Node.ids(eventdata.Indices(1)));
+	handles.sin.gui_select_element(handles.NAT_Data.Grid.(handles.sin.Settings.Grid_name).P_Q_Node.ids(eventdata.Indices(1)));
 else
 	handles.Current_Settings.Table_Network.Selected_Row = [];
 end
@@ -1100,6 +1128,65 @@ end
 % --- Executes during object creation, after setting all properties.
 function edit_simulation_number_runs_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_simulation_number_runs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function push_network_select_variant_folder_Callback(hObject, eventdata, handles)
+% hObject    handle to push_network_select_variant_folder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Userabfrage nach neuen Datenbankpfad:
+Main_Path = uigetdir(handles.Current_Settings.Simulation.Grids_Path,...
+	'Auswählen des Hauptordners einer Datenbank:');
+if ischar(Main_Path)
+	handles.Current_Settings.Simulation.Grids_Path = Main_Path;
+	files = dir(Main_Path);
+	files = struct2cell(files);
+	files = files(1,3:end);
+	files = files(cellfun(@(x) strcmp(x(end-3:end),'.sin'), files));
+	% save the present .sin-files for later processing of them:
+	handles.Current_Settings.Simulation.Grid_List = files;
+	% load the first grid (for getting the primary load-topology):
+	handles.Current_Settings.Files.Grid.Path = Main_Path;
+	handles.Current_Settings.Files.Grid.Name = files{1}(1:end-4);
+	handles.Current_Settings.Files.Grid.Exte = files{1}(end-3:end);
+	
+	% load the network data:
+	handles = network_load (handles);
+	
+else
+	handles.Current_Settings.Simulation.Grid_List = {};
+	handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.Main_Path;
+end
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Struktur aktualisieren:
+guidata(hObject, handles);
+
+
+
+function edit_network_number_variants_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_network_number_variants (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_network_number_variants as text
+%        str2double(get(hObject,'String')) returns contents of edit_network_number_variants as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_network_number_variants_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_network_number_variants (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

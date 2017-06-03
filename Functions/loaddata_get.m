@@ -5,8 +5,8 @@ function handles = loaddata_get(handles)
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
 
-% akutelle Daten auslesen:
-
+% bisherige Daten löschen:
+handles.NAT_Data.Load_Infeed_Data = [];
 
 if handles.Current_Settings.Simulation.Number_Runs == 1
 	% Ein einzelner Datensatz soll ausgelesen werden...
@@ -85,6 +85,8 @@ else
 		% Daten auslesen und dem Input-Datensatz hinzufügen:
 		get_data_households (handles, i);
 		get_data_solar(handles, i);
+		
+		% Infos to the console:
 		fprintf(['\t\tSatz ',num2str(i),' von ',num2str(num_set),' erledigt... ']);
 		t = toc;
 		progress = i/num_set;

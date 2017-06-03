@@ -1,4 +1,4 @@
-% -- changelog v1.1b ##### (start) // 20130411
+% -- changelog v1.1b ##### (start) // 20130423
 classdef Connection_All_Point < handle
     
 	%CONNECTION_ALL_POINT    
@@ -136,20 +136,20 @@ classdef Connection_All_Point < handle
 				obj(i).Voltage_Limits = voltage_limits;
 				% Voltage limits assigned to object
                 
-                % -- changelog v1.2b ##### (start) // 20130418
+                % -- changelog v1.1b ##### (start) // 20130423
                 % Determine if only one voltage limit is set across all nodes (more common than two)
                 % If all uul = uul2 and ull = ull2 are the same, comparison truth values
                 % equal the number of all nodes!
                 if size(voltage_limits,1) == sum(voltage_limits(:,1) == voltage_limits(:,3)) & ...
                    size(voltage_limits,1) == sum(voltage_limits(:,2) == voltage_limits(:,4))    
-                                          obj(i).Number_of_Voltage_Violation_limits = 1;
+               
+                     obj(i).Number_of_Voltage_Violation_limits = 0;
                      % Only one limit is defined ... Number_of_Voltage_Violation_limits = 1;
                 else
-                     obj(i).Number_of_Voltage_Violation_limits = 2;
-                     % Two limits are defined ... Number_of_Voltage_Violation_limits = 2;
-                end
-                     
-                % -- changelog v1.2b ##### (end) // 20130418
+                     obj(i).Number_of_Voltage_Violation_limits = 1;
+                     % Two limits are defined ... Number_of_Voltage_Violation_limits = 1;
+                end                     
+                % -- changelog v1.1b ##### (end) // 20130423
      
 			end
 		end
@@ -180,8 +180,20 @@ classdef Connection_All_Point < handle
 				voltage = LFNodeResult.get('Item','U_Un');
 				obj.Voltage = voltage;
 			end
-		end
-	end
-end
+        end
+        
+        function remove_COM_objects (obj)
+            % removing all COM-Object out of this class. This has to be
+            % done just before instances of this class are saved. Because
+            % the COM-Connection will be mostly lost, when this data is
+            % reloaded, warnings would appear. By a previous deletion of
+            % the COM-Objects, this can be avoided.
+            for i = 1:numel(obj)
+                obj(i).Node_Obj = [];
+            end
+        end
+        
+    end % Methods
+end % Classdef
 
-% -- changelog v1.1b ##### (end) // 20130411
+% -- changelog v1.1b ##### (end) // 20130423

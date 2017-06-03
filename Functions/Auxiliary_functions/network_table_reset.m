@@ -2,14 +2,18 @@ function [Table_Network, Data_Extract]  = network_table_reset(handles)
 %NETWORK_TABLE_RESET Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.0
 % Erstellt von:            Franz Zeilinger - 22.03.2013
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 17.04.2013
+
+Data_Extract = handles.Current_Settings.Data_Extract;
 
 if isempty(handles.NAT_Data.Grid)
+	Table_Network = [];
     return;   
 end
 
-Data_Extract = handles.Current_Settings.Data_Extract;
+
 cg = handles.sin.Settings.Grid_name;
 % Daten in Tabelle einstellen:
 data = {handles.NAT_Data.Grid.(cg).P_Q_Node.Points.P_Q_Name}';

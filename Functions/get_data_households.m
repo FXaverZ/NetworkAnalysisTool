@@ -1,9 +1,9 @@
 function get_data_households (handles, varargin)
 %GET_DATA_HOUSEHOLDS    extrahiert die Daten der Haushalte 
 
-% Version:                 2.0 - Für Verwendung im NAT
+% Version:                 2.1 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 14.02.2012
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 19.04.2013
 
 system = handles.System;                             % Systemvariablen
 settin = handles.Current_Settings.Data_Extract;      % aktuelle Einstellungen
@@ -192,15 +192,20 @@ for i=1:size(system.housholds,1)
 	end
 end
 
+% also store the number of different households (the allocation) for later
+% use:
+Households.Number = handles.Current_Settings.Data_Extract.Households;
+
 % Zugriff auf das Datenobjekt:
 d = handles.NAT_Data;
 
 % Ergebnis zurückschreiben:
 if isempty(idx_act)
-	% Es wird nur ein Datensatz generiert, diese Direkt in die
-	% Load-Infeed-Struktur einfügen:
-	d.Load_Infeed_Data.Households = Households;
+	% Es wird nur ein Datensatz generiert:
+	d.Load_Infeed_Data.Set_1.Households = Households;
+	d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
 else
+	
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Households = Households;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 end

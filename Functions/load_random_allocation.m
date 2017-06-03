@@ -2,6 +2,10 @@ function handles = load_random_allocation(handles)
 %LOAD_RANDOM_ALLOCATION Summary of this function goes here
 %   Detailed explanation goes here
 
+if isempty(handles.NAT_Data.Grid)
+    return;   
+end
+
 % Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
 Table_Data = handles.Current_Settings.Table_Network.Data;
 hh_typ_number = size(handles.System.housholds,1);

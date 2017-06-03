@@ -4,7 +4,7 @@ function handles = network_load (handles)
 
 % Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 04.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 17.04.2013
+% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 
 % Einstellungen und Systemvariablen:
 settin = handles.Current_Settings;
@@ -97,36 +97,47 @@ d.Grid.(cg).Branches.line_ids = d.Grid.(cg).Branches.line_ids(IX);
 d.Grid.(cg).Branches.Transf = d.Grid.(cg).Branches.Transf(IX);
 d.Grid.(cg).Branches.tran_ids = d.Grid.(cg).Branches.tran_ids(IX);
 
+% -- changelog v1.1b ##### (start) // 20130423
+% Merge Lines and transformers into one group!
+d.Grid.(cg).Branches.group_ids = [d.Grid.(cg).Branches.line_ids;
+                                  d.Grid.(cg).Branches.tran_ids];
+d.Grid.(cg).Branches.Grouped = [d.Grid.(cg).Branches.Lines,...
+                                d.Grid.(cg).Branches.Transf];
+% -- changelog v1.1b ##### (end) // 20130423
+
 % SINCAL-Objekt speichern:
 handles.sin = sin;
 
 % Tabelle mit Default-Werten befüllen:
 [settin.Table_Network, settin.Data_Extract] = network_table_reset(handles);
 
-% Etwaige bereits geladene Daten und Simulationsergebnisse zurücksetzen:
-handles.NAT_Data.Result = [];
-
 % Versuch, die letzten Lastdaten dieses Netzes zu laden:
 try
 	% automatisch gespeicherte Last- und Einspeisedaten laden:
 	file = settin.Files.Auto_Load_Feed_Data;
 	file.Path = [settin.Files.Grid.Path,filesep,settin.Files.Grid.Name,'_files'];
-	% Laden von 'Load_Feed_Data', 'Data_Extract', 'Table_Network':
+	% Laden von 'Load_Infeed_Data', 'Data_Extract':
 	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
 	
 	handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
 	settin.Data_Extract = Data_Extract;
 	if isfield(Load_Infeed_Data, 'Table_Network');
 		settin.Table_Network = Load_Infeed_Data.Table_Network;
+		settin.Simulation.Number_Runs = 1;
+	else
+		d_set_names = fields(Load_Infeed_Data);
+		settin.Simulation.Number_Runs = numel(d_set_names);
+		% ersten Datensatz darstellen:
+		settin.Table_Network = Load_Infeed_Data.(d_set_names{1}).Table_Network;
 	end
 	% Anzahl der jeweiligen Haushalte ermitteln:
 	for i=1:size(system.housholds,1)
 		settin.Data_Extract.Households.(system.housholds{i,1}).Number = ...
 			sum(strcmp(system.housholds{i,1},settin.Table_Network.Data(:,3)));
 	end
-catch ME
-	disp('Fehler beim Laden der Last- und Einspeisedaten:');
-	disp(ME.message);
+catch ME %#ok<NASGU>
+% 	disp('Fehler beim Laden der Last- und Einspeisedaten:');
+% 	disp(ME.message);
 end
 
 handles.Current_Settings = settin;
