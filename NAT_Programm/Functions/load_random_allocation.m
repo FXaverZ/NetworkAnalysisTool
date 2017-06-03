@@ -2,25 +2,73 @@ function handles = load_random_allocation(handles)
 %LOAD_RANDOM_ALLOCATION Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 2.0
+% Version:                 2.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 24.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 15.05.2013
 
 % Access to the data object:
 d = handles.NAT_Data;
+% Check, if an Scenario was selected, otherwise use the default settings,
+% which are defined here (compare to function "get_scenarios"):
+if ~isfield(d.Simulation, 'Active_Scenario')
+	% no active Scenario, use default settings:
+	% Bezeichnung des Szenarios:
+	Scenario.Description = ...
+		'Default settings for random allocation';
+	Scenario.Filename = '01_Default_Settings';
+	% Erzeugungsanlagen verteilen (gemäß Parametern):
+	Solar.Number = [50, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+	% Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [Wp]
+	Solar.Power_sgl = 5000;         % mittlere Leistung der Anlagen [Wp]
+	Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
+	Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
+	Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
+	Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
+	Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
+	Solar.Performance_Ratio = 0.62; % mittlere Betriebsbedingungen der Photovoltaikanlage [-]
+	Solar.dev_Performance_Ratio = 5;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
+	Solar.Efficiency = 0.12;        % mittlerer Wirkungsgrad Zelle + WR [-]
+	Solar.dev_Efficiency = 5;       % Standardabweichung des Wirkungsgrad [% vom Mittelwert]
+	
+	Solar.WC_Selection = 'none_';
+	Scenario.Solar = Solar;
+	
+	Households.WC_Selection = 'none_';
+	Scenario.Households = Households;
+	
+	El_Mobility.Number = 50;         % Prozent-Anteil an Elektroautos in den Haushalten
+	Scenario.El_Mobility = El_Mobility;
+	
+	d.Simulation.Active_Scenario = Scenario;
+	% remember the case, that the default values were used!
+	used_default = 1;
+else
+	used_default = 0;
+end
 
 % Clear the main Table:
 [handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
 	network_table_reset(handles);
-
-% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
 Table_Data = handles.Current_Settings.Table_Network.Data;
-hh_typ_number = size(handles.System.housholds,1);
-sola_settin = handles.Current_Settings.Data_Extract.Solar;
-add_data = handles.Current_Settings.Table_Network.Additional_Data;
+
+% -----------------------------------------------------------------------------------
+% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
+% -----------------------------------------------------------------------------------
+% Die Verteilung der Haushalte umrechnen, um diese für die Zufallsauswahl
+% aufzubereiten:
+hh_distribution = cell2mat(handles.System.housholds(:,3));
+hh_distribution = 100*hh_distribution/sum(hh_distribution);
+for i = 2:numel(hh_distribution)
+	hh_distribution(i) = hh_distribution(i-1) + hh_distribution(i);
+end
 
 for i=1:size(Table_Data,1)
-	idx = ceil(rand()*hh_typ_number);
+	fortu = ceil(rand()*100);
+	if fortu == 100
+		idx = size(handles.System.housholds,1);
+	else
+		idx = find(hh_distribution >= fortu, 1);
+	end
 	Table_Data{i,2} = handles.System.housholds{idx,1};
 end
 
@@ -36,6 +84,11 @@ handles.Current_Settings.Data_Extract.Worstcase_Housholds = ...
 	handles.System.wc_households(:,2),...
 	d.Simulation.Active_Scenario.Households.WC_Selection),1);
 
+% -----------------------------------------------------------------------------------
+% Solaranlagen anordnen:
+% -----------------------------------------------------------------------------------
+sola_settin = handles.Current_Settings.Data_Extract.Solar;
+add_data = handles.Current_Settings.Table_Network.Additional_Data;
 % Get the current scenarion settings:
 Solar = d.Simulation.Active_Scenario.Solar;
 
@@ -71,6 +124,8 @@ for i=1:Solar.Number(1)
 	sola_settin.Plants.(name).Inclination = ...
 		vary_parameter(Solar.mean_Inclination, Solar.dev_Inclination, 'Time');
 	sola_settin.Plants.(name).Number = 1;
+	sola_settin.Plants.(name).Efficiency = vary_parameter(Solar.Efficiency, Solar.dev_Efficiency);
+	sola_settin.Plants.(name).Performance_Ratio = vary_parameter(Solar.Performance_Ratio, Solar.dev_Performance_Ratio);
 	
 	% Anlage der Auswahl hinzufügen:
 	sola_settin.Selectable{end+1,1} = sola_settin.Selectable{end,1};
@@ -93,7 +148,9 @@ handles.Current_Settings.Data_Extract.Worstcase_Generation = ...
 	handles.System.wc_households(:,2),...
 	d.Simulation.Active_Scenario.Solar.WC_Selection),1);
 
-% Elektrofahrzeuge einfügen:
+% -----------------------------------------------------------------------------------
+% Elektrofahrzeugen einfügen:
+% -----------------------------------------------------------------------------------
 El_Mobility = d.Simulation.Active_Scenario.El_Mobility;
 El_Mobility.Number = round(size(Table_Data,1)*El_Mobility.Number/100);
 
@@ -115,5 +172,10 @@ handles.Current_Settings.Table_Network.ColumnFormat{3} = sola_settin.Selectable(
 handles.Current_Settings.Table_Network.Additional_Data = add_data;
 handles.Current_Settings.Table_Network.Data = Table_Data;
 
+if used_default
+	% If default values were used, erase the created field, that it will
+	% not occur further:
+	d.Simulation = rmfield(d.Simulation, 'Active_Scenario');
+end
 end
 

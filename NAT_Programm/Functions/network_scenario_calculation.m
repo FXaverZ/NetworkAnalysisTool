@@ -19,35 +19,30 @@ end
 
 handles.Current_Settings.Files.Save.Result.Path = r_path;
 simdate = datestr(now,'yyyy-mm-dd_HH-MM-SS');
-% -- changelog v1.1b ##### (start) // 20130430
 % Sim date saved in handles
 handles.Current_Settings.Files.Save.Result.Simdate = simdate;
-% -- changelog v1.1b ##### (end) // 20130430
 % Save the outputs to the console:
 diary([r_path,filesep,'Res_',simdate,' - log.txt']);
 diary('on');
 scenar.Names = sort(scenar.Names);
 fprintf('\nBerechne die Szenarien...\n');
 for i=1:scenar.Number;
-    
-    % -- changelog v1.1b ##### (start) // 20130430
-    if i == 1
-        % The log file and matlab scenario information is created at first
-        % calculation
-        
-        % write_scenario_log - create info txt file about the scenarios        
-        handles.Current_Settings.Files.Save.Result.Log_file = ...
-            ['Scen_' simdate ' - log.txt'];
-        write_scenario_log(handles,'create');
-        
-        % create_scenario_information - Creates .mat file with all relevant 
-        % information regarding the simulation - necessary for final result 
-        % comparisons and analyses
-        handles.Current_Settings.Files.Save.Result.Scen_info = ...
-            ['Res_',simdate,' - information'];
-        create_scenario_information(handles);
-    end
-    % -- changelog v1.1b ##### (end) // 20130430
+	if i == 1
+		% The log file and matlab scenario information is created at first
+		% calculation
+		
+		% write_scenario_log - create info txt file about the scenarios
+		handles.Current_Settings.Files.Save.Result.Log_file = ...
+			['Scen_' simdate ' - log.txt'];
+		write_scenario_log(handles,'create');
+		
+		% create_scenario_information - Creates .mat file with all relevant
+		% information regarding the simulation - necessary for final result
+		% comparisons and analyses
+		handles.Current_Settings.Files.Save.Result.Scen_info = ...
+			['Res_',simdate,' - information'];
+		create_scenario_information(handles);
+	end
     
 	cur_scen = scenar.Names{i};
 	fprintf([cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
@@ -68,7 +63,7 @@ for i=1:scenar.Number;
 			handles = post_active_power_loss_report(handles);
 		end
 	catch ME
-		disp('Ein Fehler ist aufgetreten:');
+		disp('An error occurred:');
 		disp(ME.message);
 		continue;
 	end
@@ -77,9 +72,7 @@ for i=1:scenar.Number;
 	handles = save_simulation_data(handles);
 	fprintf('\n================================== \n');
 end
-% -- changelog v1.1b ##### (start) // 20130430
 write_scenario_log(handles,'close');
-% -- changelog v1.1b ##### (end) // 20130430
 
 fprintf('\n================================== \n');
 fprintf('CALCULATION SUCCESSFULLY FINISHED! \n');

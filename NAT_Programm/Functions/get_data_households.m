@@ -222,6 +222,9 @@ for i=1:size(system.housholds,1)
 			num2str(j,'%03.0f')];
 		% Daten laden (Variable "data_phase")
 		load([path,filesep,name,'.mat']);
+		% Increase the active Power by 25% for a higher load
+		% ACHTUNG! Muss überarbeitet werden!
+		data_phase(:,1:2:6) = data_phase(:,1:2:6) * 1.25;
 		% je nach Einstellungen, die relevanten Daten auslesen:
 		if settin.get_Sample_Value
 			data_sample = data_phase(1:time_res:end,idx_part_real);
