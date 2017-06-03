@@ -1,6 +1,5 @@
 function handles = online_voltage_analysis(handles)
 %ON_LINE_VOLTAGE_ANALAYSIS - voltage_analysis
-%exANALYZING_FUNCTION_1    dummy of an analyzing function
 %    This function represents the body of an anlayzing function for
 %    "on-line" analyzing simulation results within the NAT.
 
@@ -28,12 +27,11 @@ function handles = online_voltage_analysis(handles)
 %      -  1st dim. is dataset used, 2nd dim. is current timepoint, 3rd
 %      -  dimension is nodal condition value (row)
 
-% Version:                 1.1
+% Version:                 1.2 // -- changelog v1.1b ##### (all) // 20130418
 
 % Getting access to the data-object
 d = handles.NAT_Data;
 % this object represents a connection to the stored data within the NAT
-
 
 % current time point (integer from 1 to number of timepoints to be
 % simulated):
@@ -44,192 +42,71 @@ cg = d.Simulation.Grid_act;
 cd = d.Simulation.Input_Data_act;
 
 %---- temporary (to define later)
-save_voltage_values = 1; % save voltage values in V
+% save_voltage_values = 1; % save voltage values in V
 % % save_voltage_values = 2; % save voltage values in % (norm. on Urated)
-% save_voltage_values = 0; % do not save the values of node voltages
+save_voltage_values = 0; % do not save the values of node voltages
 %---------
 
-% Voltage_Violation_analysis value is used for preallocating the
-% on-line result array
-if ~isfield(d.Simulation, 'Voltage_Violation_analysis')
-	d.Simulation.Voltage_Violation_analysis = 0;   
-    % Voltage_Violation_analysis value is used for preallocating the
-    % on-line result array
-        % 0 ... no voltage violation analysis yet performed,
-        % first preallocation for first active dataset
-end
 
-if ~isfield(d.Simulation, 'Voltage_Violation_limits')
-    d.Simulation.Voltage_Violation_limits = 0;
-    % Voltage_Violation_limits value is used to determine whether two
-    % voltage limits are defined across all nodes    
-        % 0 ... number of voltage limits not determined yet
-end
 %-------------------------------------------------------------------
+% Online voltage violation analysis for unsymetric load flow
+%-------------------------------------------------------------------
+        
+% Update voltages at all nodes for unsymmetrical loadflow
+d.Grid.(cg).All_Node.Points.update_voltage_node_LF_USYM;
+% node_voltages sort the L1 L2 L3 voltages in a n x 3 array 
+node_voltages = vertcat(d.Grid.(cg).All_Node.Points.Voltage);
 
-% Check what type of simulation was performed and use appropriate functions
-if strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_USYM') % Unsymetric load flow
+% Determine voltage limits within the online analysis
+% % d.Grid.(cg).All_Node.Points.define_voltage_limits; % <--------- 
+    % If voltage limits will be changed during the
+    % calculation phase, it is sensible to recheck the values, otherwise we
+    % can only check the voltage limits once. (This can be accessed during 
+    % on-line calculations or at the network_load start.) 
         
-    if d.Simulation.Voltage_Violation_analysis == 0  
-        
-        % d.Simulation.Voltage_Violation_analysis value is set to 1, i.e.
-        % the first preallocation has been performed for the first active
-        % dataset
-        d.Simulation.Voltage_Violation_analysis = 1;   
-        
-        % If voltage violation array does not exist yet for this topology
-        % model and for this Input_Data_act, preallocation of the array is performed 
-        d.Result.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
-            handles.Current_Settings.Simulation.Timepoints,...
-            numel(d.Grid.(cg).All_Node.Points));        
+% Rated voltages of nodes (voltage level)
+node_rated_voltages = vertcat(d.Grid.(cg).All_Node.Points.Rated_Voltage_phase_earth);
 
-        if save_voltage_values > 0 
-            % If voltages will be saved preallocation of arrays are
-            % performed
-            d.Result.(cg).Voltages(cd,:,:,:) = zeros(1,...
-                handles.Current_Settings.Simulation.Timepoints,...
-                numel(d.Grid.(cg).All_Node.Points),3);  % Three phase values                  
-        end    
-        
-    elseif d.Simulation.Voltage_Violation_analysis == 1 && ...
-            size(d.Result.(cg).Voltage_Violation,1) < cd
-        
-        % If more than one active dataset is used, additional 1st dimension
-        % preallocation is performed (size(...,1))
-        d.Result.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
-            handles.Current_Settings.Simulation.Timepoints,...
-            numel(d.Grid.(cg).All_Node.Points));    
-        % This elseif condition is used so first dataset values are not 
-        % overwritten at preallocation step
-        
-        if save_voltage_values > 0 
-            % If voltages will be saved preallocation of arrays are
-            % performed
-            d.Result.(cg).Voltages(cd,:,:,:) = zeros(1,...
-                handles.Current_Settings.Simulation.Timepoints,...
-                numel(d.Grid.(cg).All_Node.Points),3);  % Three phase values                  
-        end  
-        
-    end
+% Recalculate the voltages in p.u. (Ub = Urated)
+node_voltages_pu = node_voltages ./ node_rated_voltages;
 
-    % Update voltages at all nodes for unsymmetrical loadflow
-    d.Grid.(cg).All_Node.Points.update_voltage_node_LF_USYM;
-    node_voltages = vertcat(d.Grid.(cg).All_Node.Points.Voltage);
-    
-    % d.Grid.(cg).All_Node.Points.define_voltage_limits; % <---------
-        % This can be accessed during on-line calculations or at the
-        % network_load start. If voltage limits will be changed during the
-        % calculation phase, it is sensible to recheck the values, otherwise we
-        % can only check the voltage limits once.  
-        
-     node_rated_voltages = vertcat(d.Grid.(cg).All_Node.Points.Rated_Voltage_phase_earth);
-     
-     node_voltages_pu = node_voltages ./ node_rated_voltages;
-     % Voltage_violation_check - 
-        % True/False array where the condition u > umax | u < umin is checked
-     % Voltage_violation_check_2 - 
-        % check_2 - True/False array where the condition u > umax2 | u < umin is checked
-         
-     voltage_limit_values_pu = vertcat(d.Grid.(cg).All_Node.Points.Voltage_Limits)/100;
-      % voltage_limits defined as 4 element matrix
-                % [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
+% Recalculate voltage limits in p.u.
+voltage_limit_values_pu = vertcat(d.Grid.(cg).All_Node.Points.Voltage_Limits)/100;
+% voltage_limits defined as 4 element matrix
+% [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
 
 
-     if d.Simulation.Voltage_Violation_limits == 0 
-         if size(voltage_limit_values_pu,1) == sum(voltage_limit_values_pu(:,1) == voltage_limit_values_pu(:,3)) && ...
-            size(voltage_limit_values_pu,1) == sum(voltage_limit_values_pu(:,2) == voltage_limit_values_pu(:,4))    
-             % Determine if only one voltage limit is set across all nodes (more common than two)
-             % If all uul = uul2 and ull = ull2 are the same, comparison truth values
-             % equal the number of all nodes!
-             d.Simulation.Voltage_Violation_limits = 1;
-             % Only one limit is defined ... d.Simulation.Voltage_Violation_limits = 1;
-         else
-             d.Simulation.Voltage_Violation_limits = 2;
-             % Two limits are defined ... d.Simulation.Voltage_Violation_limits = 2;
-         end
-     end
-     
-     voltage_violation_check  = node_voltages_pu > repmat(voltage_limit_values_pu(:,1),1,3) | ...  % upper voltage limit
-                                node_voltages_pu < repmat(voltage_limit_values_pu(:,2),1,3);        % lower voltage limit
- 
+% Voltage_violation_check (T/F) array,  condition (u > umax  | u < umin ) is checked
+% Voltage_violation_check2 (T/F) array, condition (u > umax2 | u < umin2) is checked 
 
-     if d.Simulation.Voltage_Violation_limits == 2
-         voltage_violation_check2 = node_voltages_pu > repmat(voltage_limit_values_pu(:,3),1,3) | ...  % upper voltage limit
-                                    node_voltages_pu < repmat(voltage_limit_values_pu(:,4),1,3);       % lower voltage limit
+voltage_violation_check  = node_voltages_pu > repmat(voltage_limit_values_pu(:,1),1,3) | ...  % upper voltage limit
+                           node_voltages_pu < repmat(voltage_limit_values_pu(:,2),1,3);        % lower voltage limit
+                       
+voltage_violation_check2 = node_voltages_pu > repmat(voltage_limit_values_pu(:,3),1,3) | ...  % upper voltage limit 2
+                           node_voltages_pu < repmat(voltage_limit_values_pu(:,4),1,3);       % lower voltage limit 2
 
-         d.Result.(cg).Voltage_Violation(cd,ct,:) = ...
-             1*(sum(voltage_violation_check,2) > 0) +...
-             1*(sum(voltage_violation_check2,2) > 0);         
-     else
-         d.Result.(cg).Voltage_Violation(cd,ct,:) = ...
-             1*(sum(voltage_violation_check,2) > 0);
-         % d.Result.Grid_act.Voltage_Violation(cd,ct) is a 1xnode array
-         % with values 0 (no voltage limits exceeded), 1 (first voltage limit
-         % exceeded) and 2 (both voltage limits exceeded)!         
-     end
-     
-     if save_voltage_values == 1
-         d.Result.(cg).Voltages(cd,ct,:,:) = node_voltages;
-         % Voltages saved in V values
-     elseif save_voltage_values == 2
-         d.Result.(cg).Voltages(cd,ct,:,:) = 100*node_voltages_pu;
-         % Voltages saved in % values
-     end
+% -- changelog v1.2 ##### (start) // 20130419
+number_of_voltage_limits = vertcat(d.Grid.(cg).All_Node.Points.Number_of_Voltage_Violation_limits);
+% -- changelog v1.2 ##### (end) // 20130419
+
+% Voltage violation results are stored in structure
+% d.Result.Grid_act.Voltage_Violation(cd,ct,:) is a 1 x node array
+% Results are in (T/F) form:  0...no voltage limits exceeded, 
+%                             1...first voltage limit exceeded
+%                             2...both voltage limits exceeded
+
+d.Result.(cg).Voltage_Violation(cd,ct,:) = ...
+                            1*(sum(voltage_violation_check,2) > 0) +...
+                            (number_of_voltage_limits - 1).*(sum(voltage_violation_check2,2) > 0);         
+  
+% Save voltage results ?
+if save_voltage_values == 1
+    d.Result.(cg).Voltages(cd,ct,:,:) = node_voltages; % Voltages saved in V values    
+elseif save_voltage_values == 2
+    d.Result.(cg).Voltages(cd,ct,:,:) = 100*node_voltages_pu; % Voltages saved in % values
+end
   
      
-elseif strcmp(handles.Current_Settings.Simulation.Parameters(2),'LF_NR') % Unsymetric load flow
-    % Symmetrical loadflow calculation
-    
-    if d.Simulation.Voltage_Violation_analysis == 0  
-        
-        % d.Simulation.Voltage_Violation_analysis value is set to 1, i.e.
-        % the first preallocation has been performed for the first active
-        % dataset
-        d.Simulation.Voltage_Violation_analysis = 1;   
-        
-        % If voltage violation array does not exist yet for this topology
-        % model and for this Input_Data_act, preallocation of the array is performed 
-        d.Result.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
-            handles.Current_Settings.Simulation.Timepoints,...
-            numel(d.Grid.(cg).All_Node.Points));        
 
-        if save_voltage_values > 0 
-            % If voltages will be saved preallocation of arrays are
-            % performed
-            d.Result.(cg).Voltages(cd,:,:,:) = zeros(1,...
-                handles.Current_Settings.Simulation.Timepoints,...
-                numel(d.Grid.(cg).All_Node.Points),1);  % One! phase values                  
-        end    
-        
-    elseif d.Simulation.Voltage_Violation_analysis == 1 && ...
-            size(d.Result.(cg).Voltage_Violation,1) < cd
-        
-        % If more than one active dataset is used, additional 1st dimension
-        % preallocation is performed (size(...,1))
-        d.Result.(cg).Voltage_Violation(cd,:,:) = zeros(1,...
-            handles.Current_Settings.Simulation.Timepoints,...
-            numel(d.Grid.(cg).All_Node.Points));    
-        % This elseif condition is used so first dataset values are not 
-        % overwritten at preallocation step
-        
-        if save_voltage_values > 0 
-            % If voltages will be saved preallocation of arrays are
-            % performed
-            d.Result.(cg).Voltages(cd,:,:,:) = zeros(1,...
-                handles.Current_Settings.Simulation.Timepoints,...
-                numel(d.Grid.(cg).All_Node.Points),1);  % One! phase values                  
-        end  
-        
-    end
-    
-    disp('Not defined for NR loadflow yet!')
-    
-    
-    
-    
-    
-% end
-        
-
-end
+end % End of function
 

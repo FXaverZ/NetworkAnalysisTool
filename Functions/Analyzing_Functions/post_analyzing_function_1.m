@@ -7,9 +7,9 @@ function handles = post_analyzing_function_1(handles)
 d = handles.NAT_Data;
 % this object represents a connection to the stored data within the NAT
 
-grids = fields(d.Result);
+% grids = fields(d.Result);
 
-array = d.Result.(grids{1});
+% array = d.Result.(grids{1});
 
 % % e.g. all results at time-count 5 are:
 % t_5 = squeeze(array(:,5,:,:));

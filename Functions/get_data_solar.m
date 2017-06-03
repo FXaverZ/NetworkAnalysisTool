@@ -1,14 +1,14 @@
 function get_data_solar (handles, varargin)
 %GET_DATA_SOLAR    extrahiert und simuliert die Einspeise-Daten der Solaranlagen
 
-% Version:                 2.0 - Für Verwendung im NAT
+% Version:                 2.1 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 04.07.2012
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 19.04.2013
 
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
 db_fil = handles.Current_Settings.Load_Database;  % Datenbankstruktur
-d = handles.NAT_Data; % Zugriff auf das Datenobjekt:
+d = handles.NAT_Data; % Zugriff auf das Datenobjekt
 
 max_num_data_set = db_fil.setti.max_num_data_set*6; % Anzahl an Datensätzen in einer
 %                                                     Teildatei --> da im Fall von
@@ -29,6 +29,10 @@ Solar.Data_Sample = [];
 Solar.Data_Mean = [];
 Solar.Data_Min = [];
 Solar.Data_Max = [];
+Solar.Data_05P_Quantil = [];
+Solar.Data_95P_Quantil = [];
+% store the plants strukture for later use:
+Solar.Plants = handles.Current_Settings.Data_Extract.Solar.Plants;
 
 if nargin ==2
 	% als Zweites Argument wurde ein aktueller Index übergeben für eine
@@ -45,7 +49,10 @@ if isempty(settin.Solar.Plants)
 	if isempty(idx_act)
 		% Es wird nur ein Datensatz generiert, diese Direkt in die
 		% Load-Infeed-Struktur einfügen:
-		d.Load_Infeed_Data.Solar = Solar;
+		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
+			d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
+		end
 	else
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
 		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
@@ -70,7 +77,10 @@ if number_plants == 0
 	if isempty(idx_act)
 		% Es wird nur ein Datensatz generiert, diese Direkt in die
 		% Load-Infeed-Struktur einfügen:
-		d.Load_Infeed_Data.Solar = Solar;
+		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
+			d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
+		end
 	else
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
 		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
@@ -236,13 +246,31 @@ for i=1:numel(plants)
 		% eingelesenen Daten wieder löschen (Speicher freigeben!)
 		clear data_max;
 	end
-		if settin.get_Min_Value
+	if settin.get_Min_Value
 		data_min = squeeze(min(data_mean));
 		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
 		Solar.Data_Min = [Solar.Data_Min,...
 			data_min];
 		% eingelesenen Daten wieder löschen (Speicher freigeben!)
 		clear data_min;
+	end
+	if settin.get_05_Quantile_Value
+		data_05q = squeeze(quantile(data_mean,0.05));
+		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
+		Solar.Data_05P_Quantil = [...
+			Solar.Data_05P_Quantil,...
+			data_05q];
+		% eingelesenen Daten wieder löschen (Speicher freigeben!)
+		clear data_05q;
+	end
+	if settin.get_95_Quantile_Value
+		data_95q = squeeze(quantile(data_mean,0.95));
+		% die ausgelesenen Daten zum bisherigen Ergebnis hinzufügen:
+		Solar.Data_95P_Quantil = [...
+			Solar.Data_95P_Quantil,...
+			data_95q];
+		% eingelesenen Daten wieder löschen (Speicher freigeben!)
+		clear data_95q;
 	end
 	if settin.get_Mean_Value
 		data_mean = squeeze(mean(data_mean));
@@ -258,9 +286,11 @@ end
 if isempty(idx_act)
 	% Es wird nur ein Datensatz generiert, diese Direkt in die
 	% Load-Infeed-Struktur einfügen:
-	d.Load_Infeed_Data.Solar = Solar;
+	d.Load_Infeed_Data.Set_1.Solar = Solar;
+	if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
+		d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
+	end
 else
-	Solar.Plants = handles.Current_Settings.Data_Extract.Solar.Plants;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
 	if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
