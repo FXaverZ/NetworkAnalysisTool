@@ -2,7 +2,7 @@
 
 % Version:                 4.0
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Matej Rejic     - 29.04.2013
+% Letzte Änderung durch:   Matej Rejc     - 29.04.2013
 
 % Last Modified by GUIDE v2.5 26-Apr-2013 13:41:45
 
@@ -665,11 +665,11 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % d = handles.NAT_Data;
 if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 	handles = post_voltage_violation_report(handles);
-% 	handles = grid_voltages_comparison(handles,1:3,'all');
+    % 	handles = grid_voltages_comparison(handles,1:3,'all');
 end
 if handles.Current_Settings.Simulation.Branch_Violation_Analysis
 	handles = post_branch_violation_report(handles);
-% 	handles = grid_branches_comparison(handles,1:3,'all');
+    % 	handles = grid_branches_comparison(handles,1:3,'all');
 end
 if handles.Current_Settings.Simulation.Power_Loss_Analysis
     handles = post_active_power_loss_report(handles);
@@ -691,9 +691,15 @@ set(handles.push_cancel, 'Enable', 'on');
 pause(0.01);
 
 if handles.Current_Settings.Simulation.Use_Scenarios
-	handles = network_scenario_calculation(handles);
+    % Use scenarios
+    handles = network_scenario_calculation(handles);
 else
+    % -- changelog v1.1b ##### (start) // 20130430
+    % Do not use scenarios
 	handles = network_calculation(handles);
+    % After single scenario calculation save results
+    handles = save_simulation_data(handles);
+    % -- changelog v1.1b ##### (end) // 20130430
 	if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 		handles = post_voltage_violation_report(handles);
 	end

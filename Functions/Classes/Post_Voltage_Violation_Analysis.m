@@ -7,22 +7,17 @@ classdef Post_Voltage_Violation_Analysis < handle
     properties
 
         Number_of_Violations = [];
-            % Number of times voltage violations occured at 1st limit, 2nd
-            % limit and either of the two limits [1st limit, 2nd limit, 1st+2nd]
+            % Number of times voltage violations occured at base limit
         Number_of_Violations_percent = [];
-            % Percentage of  voltage violations occured at 1st limit, 2nd
-            % limit and either of the two limits [1st limit, 2nd limit, 1st+2nd]
+            % Percentage of  voltage violations occured at base limit
         Number_of_Nodes_With_Violations = [];
-            % Number of nodes, where voltage violations occured at 1st limit, 2nd
-            % limit and either of the two limits [1st limit, 2nd limit, 1st+2nd]
+            % Number of nodes, where voltage violations occured at base limit
         Number_of_Nodes_With_Violations_percent = [];
-            % Percentage of nodes, where voltage violations occured at 1st limit, 2nd
-            % limit and either of the two limits [1st limit, 2nd limit, 1st+2nd]
+            % Percentage of nodes, where voltage violations occured at base limit
         Names_of_Nodes_With_Violations = [];
-            % Names of nodes, where voltage violations occured at 1st limit, 2nd
-            % limit and either of the two limits [1st limit, 2nd limit, 1st+2nd]
+            % Names of nodes, where voltage violations occured at base limit
         All_Node_Names = []; 
-            % Node names, set to private for clearer class display       
+            % Node names, set to private for clearer class display  
     end
     
     properties(GetAccess = 'private')        
@@ -59,32 +54,21 @@ classdef Post_Voltage_Violation_Analysis < handle
                 voltage_violation_results =...
                     squeeze( ext_obj.Voltage_Violation_Analysis(cd,:,:) );
                 
-                % Voltage violations (A...both limits, 1...first, 2...second voltage limit)
-                voltage_violationsA_at_timepoints = sum(voltage_violation_results ~= 0,2) > 0;
-                voltage_violations1_at_timepoints = sum(voltage_violation_results == 1,2) > 0;
-                voltage_violations2_at_timepoints = sum(voltage_violation_results == 2,2) > 0;
+                % Voltage violations 
+                voltage_violations_at_timepoints = sum(voltage_violation_results == 1 & ~isnan(voltage_violation_results),2) > 0;
                 
                 % Number of times the grid experienced voltage violations
-                % grid_experienced_voltage_violations [1st, 2nd, 1st+2nd]
-                grid_experienced_voltage_violations(1) = sum(voltage_violations1_at_timepoints);
-                grid_experienced_voltage_violations(2) = sum(voltage_violations2_at_timepoints);
-                grid_experienced_voltage_violations(3) = sum(voltage_violationsA_at_timepoints);
-                
-               
-                
+                grid_experienced_voltage_violations(1) = sum(voltage_violations_at_timepoints);
+                               
                 % Define the names of nodes with voltage limit violations
                 % First define the ids (true/false) of nodes where voltages
                 % are violated
-                voltage_violationsA_at_nodes_ids = sum(voltage_violation_results ~= 0,1) > 0;
-                voltage_violations1_at_nodes_ids = sum(voltage_violation_results == 1,1) > 0;
-                voltage_violations2_at_nodes_ids = sum(voltage_violation_results == 2,1) > 0;
+                voltage_violations_at_nodes_ids = sum(voltage_violation_results == 1 & ~isnan(voltage_violation_results),1) > 0;
                 
                 % Number of nodes, where specific voltage violations
                 % occur [1st limit, 2nd limit, 1st+2nd limit]
-                number_of_nodes_with_voltage_violations(1) = sum(voltage_violations1_at_nodes_ids);
-                number_of_nodes_with_voltage_violations(2) = sum(voltage_violations2_at_nodes_ids);
-                number_of_nodes_with_voltage_violations(3) = sum(voltage_violationsA_at_nodes_ids);
-                
+                number_of_nodes_with_voltage_violations(1) = sum(voltage_violations_at_nodes_ids);
+                       
                                 
                 obj.Number_of_Violations(cd,:) = grid_experienced_voltage_violations;
                 obj.Number_of_Violations_percent(cd,:) = 100* grid_experienced_voltage_violations / timepoints;
@@ -94,42 +78,26 @@ classdef Post_Voltage_Violation_Analysis < handle
                 obj.Number_of_Nodes_With_Violations_percent(cd,:) = ...
                     100 * number_of_nodes_with_voltage_violations / size(ext_obj.Voltage_Violation_Analysis,3);
             
-                obj.Names_of_Nodes_With_Violations{cd,1} = node_names(voltage_violations1_at_nodes_ids);
-                obj.Names_of_Nodes_With_Violations{cd,2} = node_names(voltage_violations2_at_nodes_ids);
-                obj.Names_of_Nodes_With_Violations{cd,3} = node_names(voltage_violationsA_at_nodes_ids);
-                
-            
+                obj.Names_of_Nodes_With_Violations{cd,1} = node_names(voltage_violations_at_nodes_ids);
+                            
             end
         end % function Post_Voltage_Analysis
-        
         function obj = Display_results(obj)
             fprintf(['------------------------------------------------------------------------------\n']);
             for i = 1 : size(obj.Number_of_Violations,1)
                 fprintf(['Voltage violations;' obj.Grid_Name ';']);   
-                if sum(obj.Number_of_Violations) == 0
+                if obj.Number_of_Violations(i,1) == 0
                     %if no branch violations exist
-                    fprintf(['Set ' int2str(i) '; No branch violations;\n']);
-                elseif obj.Number_of_Violations(i,1) == obj.Number_of_Violations(i,3) &&...
-                        sum(obj.Number_of_Violations(i,:)) ~= 0  % If no second limit exists but voltage violations occur
-                    
+                    fprintf(['Set ' int2str(i) ';no voltage violations;\n']);
+                else
                     fprintf(['Set ' int2str(i) ';violations at '...
                         num2str(round(100*obj.Number_of_Nodes_With_Violations_percent(i,1))/100),...
                         ' %% nodes at '...
                         num2str(round(100*obj.Number_of_Violations_percent(i,1))/100),...
-                        ' %% timepoints; \n']);
-                else
-                    % Third additional limit exists
-                    fprintf(['Set ' int2str(i) ';violations at '...
-                        num2str(round(100*obj.Number_of_Nodes_With_Violations_percent(i,1))/100),'/',...
-                        num2str(round(100*obj.Number_of_Nodes_With_Violations_percent(i,2))/100),...
-                        ' %% nodes at '...
-                        num2str(round(100*obj.Number_of_Violations_percent(i,1))/100),'/'...
-                        num2str(round(100*obj.Number_of_Violations_percent(i,2))/100),...
-                        ' %% timepoints; \n']);                    
+                        ' %% timepoints; \n']);                 
                 end
             end
         end
-        
     end % Methods
 
 end % Classdef

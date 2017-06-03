@@ -68,13 +68,9 @@ node_voltages = vertcat(d.Grid.(cg).All_Node.Points.Voltage);
 % d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu = ...
 %     vertcat(d.Grid.(cg).All_Node.Points.Voltage_Limits)/100; % <--------- 
 
-% voltage_limits defined as 4 element matrix
-% [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
+% voltage_limits defined as 2 element matrix
+% [upper_U_limit  lower_U_limit]
 
-% number of voltage limits
-% d.Simulation.Voltage_Violation_Analysis.number_of_voltage_limits  = ...
-%     vertcat(d.Grid.test_2node.All_Node.Points.Number_of_Voltage_Violation_limits);
-%     % <--------- 
 % -----------------------------------------------------------------
 
 % Recalculate the voltages in p.u. (Ub = Urated)
@@ -82,23 +78,24 @@ node_voltages_pu = node_voltages ./ d.Simulation.Voltage_Violation_Analysis.node
 
 
 % Voltage_violation_check (T/F) array,  condition (u > umax  | u < umin ) is checked
-% Voltage_violation_check2 (T/F) array, condition (u > umax2 | u < umin2) is checked 
-
 voltage_violation_check  = node_voltages_pu > repmat(d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu(:,1),1,3) | ...  % upper voltage limit
                            node_voltages_pu < repmat(d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu(:,2),1,3);        % lower voltage limit
                        
-voltage_violation_check2 = node_voltages_pu > repmat(d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu(:,3),1,3) | ...  % upper voltage limit 2
-                           node_voltages_pu < repmat(d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu(:,4),1,3);       % lower voltage limit 2
 
 % Voltage violation results are stored in structure
 % d.Result.Grid_act.Voltage_Violation_Analysis(cd,ct,:) is a 1 x node array
 % Results are in (T/F) form:  0...no voltage limits exceeded, 
-%                             1...first voltage limit exceeded
-%                             2...both voltage limits exceeded
+%                             1... voltage limit exceeded
+
 d.Result.(cg).Voltage_Violation_Analysis(cd,ct,:) = ...
-    1*(sum(voltage_violation_check,2) > 0) +...
-    d.Simulation.Voltage_Violation_Analysis.number_of_voltage_limits .* ...
-    (sum(voltage_violation_check2,2) > 0);
+    1*(sum(voltage_violation_check,2) > 0);
   
+% Write results into the preallocated array at (cd,ct,:) position
+% Save voltage results in result structure
+if handles.Current_Settings.Simulation.Save_Voltage_Results
+    d.Result.(cg).Node_Voltages(cd,ct,:,:) = node_voltages;
+end
+                    
+                    
 end % End of function
 

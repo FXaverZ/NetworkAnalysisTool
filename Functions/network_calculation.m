@@ -4,9 +4,10 @@ function handles = network_calculation(handles)
 
 % Version:                 2.1
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Matej Rejic     - 29.04.2013
+% Letzte Änderung durch:   Matej Rejc     - 29.04.2013
 
 % Zugriff auf Datenobjekt:
+
 d = handles.NAT_Data;
 
 if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
@@ -28,10 +29,32 @@ if isempty(handles.Current_Settings.Simulation.Grid_List)
 end
 
 handles.Current_Settings.Files.Grid.Path = Grids_Path;
+
+% -- changelog v1.1b ##### (start) // 20130430
+if ~handles.Current_Settings.Simulation.Use_Scenarios
+    % If scenarios are not used
+    % Create path to results (Netze folder\Results)
+    r_path = [handles.Current_Settings.Files.Grid.Path,filesep,'Results'];
+    if ~isdir(r_path);
+        mkdir(r_path);
+    end    
+    handles.Current_Settings.Files.Save.Result.Path = r_path;
+    % Name of result file
+    simdate = datestr(now,'yyyy-mm-dd_HH-MM-SS');    
+    handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - no_scenario'];
+
+    handles.Current_Settings.Files.Save.Result.Scen_info = ...
+            ['Res_',simdate,' - information'];
+    % Save result information file (variants, number of datasets,
+    % scenario=[])
+    create_scenario_information(handles);
+end
+% -- changelog v1.1b ##### (end) // 20130430  
+
 fprintf('\nStarte Netz-Simulationen...\n');
 for i=1:numel(Grid_List)
 	handles.Current_Settings.Files.Grid.Name = Grid_List{i}(1:end-4);
-	
+    
 	% load the network data:
 	handles = network_load (handles);
 	
@@ -113,12 +136,15 @@ for i=1:numel(Grid_List)
         if j == 1
             % We predefine the results for all datasets for specific (cg)
             % grid at first dataset iteration
-            handles = result_preallocation(handles,cg);        
+            handles = result_preallocation(handles,cg); 
+            
+            % -- changelog v1.1b ##### (start) // 20130506
+            % Add an error-counter array
+            d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
+            % -- changelog v1.1b ##### (end) // 20130506
         end        
 		
-		% Add an error-counter array
-		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
-		
+				
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
 		%--------------------------------------------------------------------------------
@@ -195,7 +221,7 @@ for i=1:numel(Grid_List)
 		d.Simulation.Input_Data_act = j;
 		for k=1:handles.Current_Settings.Simulation.Timepoints
 			try
-				
+                    
 				% aktuellen Zeipunkt speichern:
 				d.Simulation.Current_timepoint = k;
 				% Last- und Einspeisedaten aktualisieren:
@@ -211,15 +237,16 @@ for i=1:numel(Grid_List)
 				% within the NAT_Data-object, on which this function has access, no
 				% return value is neccesary:
 				
+                % -- changelog v1.1b ##### (start) // 20130502
 				% Perform online voltage violation analysis (true/false
 				% results)
 				if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-					online_voltage_violation_analysis(handles);
-					% Save voltage results in result structure
-					if handles.Current_Settings.Simulation.Save_Voltage_Results
-						save_node_values(handles);
-					end
-				end
+					online_voltage_violation_analysis(handles);					
+                    % An additional condition for saving voltages is
+                    % inside the online function                    
+                end
+                % -- changelog v1.1b ##### (start) // 20130502
+                
 				% Perform online branch violation analysis (true/false results)
 				if handles.Current_Settings.Simulation.Branch_Violation_Analysis
 					online_branch_violation_analysis(handles);

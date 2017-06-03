@@ -62,20 +62,10 @@ transf_apparent_power = vertcat(d.Grid.(cg).Branches.Transf.Apparent_Power);
 if ~isempty(line_currents)     
      % branch_violation_check for lines
      branch_violation_check_lines  = ...
-         1*( repmat(max(line_currents(:,1:3),[],2),1,...
-         size(d.Simulation.Branch_Violation_analysis.line_current_limits,2)) >...
+         1*( max(line_currents(:,1:3),[],2) >...
          d.Simulation.Branch_Violation_analysis.line_current_limits);      
      % Checks the maximum current in the three phases, if any phase is
-     % overloaded, branch violation occurs! All limits are compared simultaneously 
-     % in a n x 4 matrix. Additionally separate lines and transformers
-
-     % Add weights for different thermal limits - this is needed for result
-     % analysis (so the user knows which limit is reached)
-     branch_violation_check_lines(:,1) = 1*branch_violation_check_lines(:,1);
-     branch_violation_check_lines(:,2) = 2*branch_violation_check_lines(:,2);
-     branch_violation_check_lines(:,3) = 3*branch_violation_check_lines(:,3);
-     branch_violation_check_lines(:,4) = 4*branch_violation_check_lines(:,4);
-
+     % overloaded, branch violation occurs! 
 else
     branch_violation_check_lines = [];
 end
@@ -86,15 +76,8 @@ if ~isempty(transf_apparent_power)
      % power limits are threephase equiv. values! Important for transf.
      % checking, since that uses apparent power!
      branch_violation_check_transf  = ...
-        1*( repmat(sum(transf_apparent_power(:,1:3),2),1,...
-        size(d.Simulation.Branch_Violation_analysis.transf_app_power_limits,2)) >...
-        d.Simulation.Branch_Violation_analysis.transf_app_power_limits);  
-    % Add weights for different thermal limits - this is needed for result
-    % analysis (so the user knows which limit is reached)    
-    branch_violation_check_transf(:,1) = 1*branch_violation_check_transf(:,1);
-    branch_violation_check_transf(:,2) = 2*branch_violation_check_transf(:,2);
-    branch_violation_check_transf(:,3) = 3*branch_violation_check_transf(:,3);
-    branch_violation_check_transf(:,4) = 4*branch_violation_check_transf(:,4);
+        1*( sum(transf_apparent_power(:,1:3),2) >...
+        d.Simulation.Branch_Violation_analysis.transf_app_power_limits);     
 else
     branch_violation_check_transf = [];
 end
@@ -104,12 +87,9 @@ branch_violation_check_group = ...
     [branch_violation_check_lines;branch_violation_check_transf ];
      
 % Write the results into the d.Result.(cg).Branch_Violation_Analysis
-     % If multiple limits are defined, the results will not give values
-     % of 1 (base limit exceeded), but 1,2,3,4 (base = 1, base+1st
-     % limit =2, base+1st + 2nd limit = 3, base + 1st+ 2nd + 3rd limit = 4)
      
  d.Result.(cg).Branch_Violation_Analysis(cd,ct,:) = ...
-     max(branch_violation_check_group,[],2);  % Lines + Transformers!
+     branch_violation_check_group;  % Lines + Transformers!
  
 
 end

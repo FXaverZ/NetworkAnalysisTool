@@ -45,7 +45,6 @@ All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 2013041
   - Line 126: on\_line\_voltage\_analysis(handles); %%CH\_MA
 
 
-
 **Changelog documentation in NAT,** v1.1b, date of changes: **15/04/2013**
 
 All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 20130415&quot; and ended by &quot;% -- changelog v1.1b ##### (end) // 20130415&quot;
@@ -104,3 +103,29 @@ All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 2013041
 **File changed:**  **network\_load.m**
 
 **Changelog documentation in NAT,** v1.1b, date of changes: **18/04/2013**
+
+**Changelog documentation in NAT,** v1.1c, date of changes: **02/05/2013**
+
+All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 20130502&quot; and ended by &quot;% -- changelog v1.1b ##### (end) // 20130502&quot;
+
+**Modified file:**  **write\_scenario\_log.m**
+
+- **--** Fixed typo: fprintf(fid, &#39;##CALCULATION SUCCESSFULLY FINISHED&#39;);
+
+**Modified file:**  **network\_scenario\_calculation.m**
+
+- **--** Fixed typo: fprintf(&#39;CALCULATION SUCCESSFULLY FINISHED! \n&#39;);
+
+**Modified file:**  **network\_calculation.m**
+
+**Modified file:**  **online\_voltage\_violation\_analysis.m**
+
+**Removed file:**  **save\_node\_values.m**
+
+- **--** Moved save node results into online\_voltage\_violation\_analysis.m function. The reason for this was that the online voltage violation function reads the voltages for its operation. By merging the two and separating them by the existing if &quot;Current\_Settings.Simulation.Save\_Voltage\_Results&quot; there is no need to access the database twice for the voltages. This is similar to the power loss analyzing function.
+- **--** The branch result saving is still separated, as the online branch violation function only requires currents to work, so we only need to read the currents. If we want to save the branch results, additional values must be read, therefore we separate the branch functions.
+  - Line 237 -245
+  - First simulations show a speed improvement of a 5-10 seconds per dataset.
+- **--**** Modified file: **** online\_voltage\_violation\_analysis.m**
+- **--**** Removed file: **** save\_node\_values.m**
+  - Line 103 - 107
