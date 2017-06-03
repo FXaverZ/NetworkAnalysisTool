@@ -1,8 +1,7 @@
-% -- changelog v1.1b ##### (start) // 20130411
+% -- changelog v1.1b ##### (start) // 20130423
 classdef Connection_All_Point < handle
-    
-	%CONNECTION_ALL_POINT    
-    
+	%CONNECTION_ALL_POINT 
+	%
     %    E I G E N S C H A F T E N :
 	%
 	%	 'Node_ID'
@@ -14,7 +13,6 @@ classdef Connection_All_Point < handle
 	%	 'Voltage'
 	%        aktuelle Spannungswerte. Werden durch OBJ.GET_VOLTAGES_NODE
 	%        aktualisiert mit den Spannungswerten des Knotens OBJ.NODE_ID. 
-
     %        Wert der Abhängigkeit der Spannungsänderung pro Laständerung an diesem
 	%        Knoten. Dabei handelt es sich um eine [6,3] Matrix, da für jede Phase
 	%        sowohl für Wirk- als auch Blindleistung die Spannungsänderung auf allen
@@ -27,9 +25,9 @@ classdef Connection_All_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
-	% Version:                 1.1
+	% Version:                 1.2
 	% Erstellt von:            Matej Rejc      - 17.04.2013
-	% Letzte Änderung durch:   
+	% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 	properties
 		
 	%        All node ids in network
@@ -47,6 +45,8 @@ classdef Connection_All_Point < handle
     %        Rated voltages phase - phase in V
         Voltage_Limits = [];        
     %        Voltage limits in %    
+        Number_of_Voltage_Violation_limits
+    %        Number of voltage limits (1 or 2)    
         Voltage = zeros(1,3);
 	%        aktuelle Spannungswerte. Werden durch OBJ.GET_VOLTAGES_NODE
 	%        aktualisiert mit den Spannungswerten des Knotens OBJ.NODE_ID. 
@@ -133,6 +133,19 @@ classdef Connection_All_Point < handle
 				
 				obj(i).Voltage_Limits = voltage_limits;
 				% Voltage limits assigned to object
+                
+                % Determine if only one voltage limit is set across all nodes (more common than two)
+                % If all uul = uul2 and ull = ull2 are the same, comparison truth values
+                % equal the number of all nodes!
+                if size(voltage_limits,1) == sum(voltage_limits(:,1) == voltage_limits(:,3)) && ...
+                   size(voltage_limits,1) == sum(voltage_limits(:,2) == voltage_limits(:,4))    
+               
+                     obj(i).Number_of_Voltage_Violation_limits = 0;
+                     % Only one limit is defined ... Number_of_Voltage_Violation_limits = 1;
+                else
+                     obj(i).Number_of_Voltage_Violation_limits = 1;
+                     % Two limits are defined ... Number_of_Voltage_Violation_limits = 1;
+                end                     
 			end
 		end
 		
@@ -162,8 +175,18 @@ classdef Connection_All_Point < handle
 				voltage = LFNodeResult.get('Item','U_Un');
 				obj.Voltage = voltage;
 			end
-		end
-	end
-end
-
-% -- changelog v1.1b ##### (end) // 20130411
+        end
+        
+        function remove_COM_objects (obj)
+            % removing all COM-Object out of this class. This has to be
+            % done just before instances of this class are saved. Because
+            % the COM-Connection will be mostly lost, when this data is
+            % reloaded, warnings would appear. By a previous deletion of
+            % the COM-Objects, this can be avoided.
+            for i = 1:numel(obj)
+                obj(i).Node_Obj = [];
+            end
+        end
+        
+    end % Methods
+end % Classdef

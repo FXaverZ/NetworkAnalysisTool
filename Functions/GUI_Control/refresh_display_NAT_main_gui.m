@@ -2,8 +2,9 @@ function handles = refresh_display_NAT_main_gui(handles)
 %REFRESH_DISPLAY_NAT_MAIN_GUI    Summary of this function goes here
 %    Detailed explanation goes here
 
+% Version:                 1.0
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 17.04.2013
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %      Einstellungen - Auslesen der Daten
@@ -102,11 +103,11 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 	set(handles.popup_pqnode_hh_typ,...
 		'Visible', 'on',...
 		'Value', find(strcmp(...
-		    handles.Current_Settings.Table_Network.Data{row,3},...
+		    handles.Current_Settings.Table_Network.Data{row,2},...
 		    handles.System.housholds(:,1))));
-	set(handles.check_pqnode_active,...
-		'Visible', 'on',...
-		'Value', handles.Current_Settings.Table_Network.Data{row,2});
+% 	set(handles.check_pqnode_active,...
+% 		'Visible', 'on',...
+% 		'Value', handles.Current_Settings.Table_Network.Data{row,2});
 	set(handles.text_pqnode_pv_typ, 'Visible', 'on');
 	set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
 	set(handles.edit_pqnode_pv_installed_power, 'Visible', 'on');
@@ -158,10 +159,14 @@ if ~isempty(handles.Current_Settings.Files.Grid.Name)
 		end
 	end
 	set(handles.static_text_network_path_name, 'String', str);
+	set(handles.push_network_load_allocation_reset, 'Enable','on');
+	set(handles.push_network_load_random_allocation, 'Enable','on');
 else
 	set(handles.static_text_network_path_name, 'String', 'Kein Netz geladen!');
 	set(handles.uipanel_detail_component,'Title','Kein Netz geladen!');
 	set(handles.push_network_calculation_start, 'Enable','off');
+	set(handles.push_network_load_allocation_reset, 'Enable','off');
+	set(handles.push_network_load_random_allocation, 'Enable','off');
 end
 
 if ~isempty(handles.Current_Settings.Table_Network)
@@ -184,8 +189,12 @@ else
     set(handles.push_load_data_get, 'Enable','off');
 end
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
-if ~isempty(handles.NAT_Data. Load_Infeed_Data)
-	if isfield(handles.NAT_Data.Load_Infeed_Data, 'Households') && isfield(handles, 'sin')
+if ~isempty(handles.NAT_Data.Load_Infeed_Data)
+	if (isfield(handles.NAT_Data.Load_Infeed_Data, 'Households') || ...
+			isfield(handles.NAT_Data.Load_Infeed_Data.Set_1, 'Households')) ...
+			&& isfield(handles, 'sin') ||...
+			(handles.Current_Settings.Simulation.Use_Scenarios && ...
+			handles.Current_Settings.Simulation.Scenarios.Data_avaliable)
 		set(handles.push_network_calculation_start, 'Enable','on');
 	else
 		set(handles.push_network_calculation_start, 'Enable','off');
@@ -203,4 +212,24 @@ end
 % Eingabefelder aktualisieren:
 set(handles.edit_simulation_number_runs,...
 	'String', num2str(handles.Current_Settings.Simulation.Number_Runs));
+
+% Wurden Variantennetz geladen, Buttons deaktivieren und Anzahl darstellen:
+if ~isempty(handles.Current_Settings.Simulation.Grid_List)
+	set(handles.edit_network_number_variants, 'String', num2str(numel(handles.Current_Settings.Simulation.Grid_List)));
+else
+	set(handles.edit_network_number_variants, 'String', 'Einzels.');
+end
+
+set(handles.check_use_scenarios, 'Value', handles.Current_Settings.Simulation.Use_Scenarios);
+set(handles.check_use_variants, 'Value', handles.Current_Settings.Simulation.Use_Grid_Variants);
+if handles.Current_Settings.Simulation.Use_Scenarios
+	set(handles.push_load_data_get,'String', 'Szenariendaten laden...');
+	set(handles.edit_simulation_number_scenarios,'String',...
+		num2str(handles.Current_Settings.Simulation.Scenarios.Number));
+else
+	set(handles.push_load_data_get,'String', 'Lastdaten laden...');
+	set(handles.edit_simulation_number_scenarios,'String','Einzels.');
+end
+
+end
 

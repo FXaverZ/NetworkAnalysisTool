@@ -1,9 +1,9 @@
 function get_data_households (handles, varargin)
 %GET_DATA_HOUSEHOLDS    extrahiert die Daten der Haushalte 
 
-% Version:                 2.0 - Für Verwendung im NAT
+% Version:                 2.1 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 14.02.2012
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 19.04.2013
 
 system = handles.System;                             % Systemvariablen
 settin = handles.Current_Settings.Data_Extract;      % aktuelle Einstellungen
@@ -56,8 +56,8 @@ for i=1:size(system.housholds,1)
 	num_data_sets = size(data_info,2)/6;
 	
 	% Je nach Einstellung Datensätze auswählen:
-	switch settin.Worstcase_Housholds
-		case 1 % Einstellung: Zufällige Auswahl
+	switch system.wc_households{settin.Worstcase_Housholds,2}
+		case 'none_' % Einstellung: Zufällige Auswahl
 			% eine Indexliste erstellen, mit zufällig ausgewählten Datensätzen:
 			pool = 1:num_data_sets;   % Liste mit Indizes der möglichen Datensätze
 			idx = zeros(number_hh,1); % Liste mit Indizes der ausgewählten Datensätze
@@ -70,7 +70,7 @@ for i=1:size(system.housholds,1)
 				% nicht mehr gezogen werden kann):
 				pool(fortu) = [];
 			end
-		case 2 % Worst Case: Höchster Energieverbrauch
+		case 'E_max' % Worst Case: Höchster Energieverbrauch
 			% aus den Phasenenergieaufnahmen die Gesamtenergieaufnahme ermitteln
 			% (Summe aus L1, L2 und L3):
 			data_e = sum([...
@@ -82,7 +82,7 @@ for i=1:size(system.housholds,1)
 			% die geforderten Inidizes mit dem höchsten Energieverbrauch übernehmen
 			% (sind die ersten "number_hh"-Inzies der Sortierliste I):
 			idx = I(1:number_hh)';
-		case 3 % Worst Case: Niedrigster Energieverbrauch
+		case 'E_min' % Worst Case: Niedrigster Energieverbrauch
 			% Gleicher Ablauf wie bei "Höchster Energieverbrauch", nur umgekehrte
 			% Sortierung:
 			data_e = sum([...
@@ -91,7 +91,7 @@ for i=1:size(system.housholds,1)
 				data_info(3,5:6:end)],1); %#ok<COLND>
 			[~, I] = sort(data_e); 
 			idx = I(1:number_hh)';
-		case 4 % Worst Case: Höchste Leistungsaufnahme
+		case 'P_max' % Worst Case: Höchste Leistungsaufnahme
 			% Summen-Leistungsaufnahme aus max. Phasenleistungsaufnahme ermitteln:
 			data_max = sum([...
 				data_info(1,1:6:end);...
@@ -100,6 +100,104 @@ for i=1:size(system.housholds,1)
 			[~, I] = sort(data_max,'descend');
 			% die geforderten Inidizes mit dem höchsten Energieverbrauch übernehmen:
 			idx = I(1:number_hh)';
+		case 'E_025' %0.0-0.25 Anteil Energieverbrauch (1. Viertel)
+			% aus den Phasenenergieaufnahmen die Gesamtenergieaufnahme ermitteln
+			% (Summe aus L1, L2 und L3):
+			data_e = sum([...
+				data_info(3,1:6:end);...
+				data_info(3,3:6:end);...
+				data_info(3,5:6:end)],1); %#ok<COLND>
+			% die Energiebeträge sortieren, die Indexliste I übernehmen:
+			[~, I] = sort(data_e);
+			num_hh_cont = numel(I);
+			idx = round(num_hh_cont/4);
+			pool = 1:idx;   % Liste mit Indizes der möglichen Datensätze
+			pool = I(pool);
+			idx = zeros(number_hh,1); % Liste mit Indizes der ausgewählten Datensätze
+			                          % (mit 0 intialisieren)
+			for j = 1:number_hh
+				% Erzeugen einer Zufallszahl im Bereich [1, Anz._verf._Datensätze]
+				fortu = round(rand()*(numel(pool)-1))+1;
+				idx(j) = pool(fortu); % diesen Index in Indexliste aufnehmen
+				% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
+				% nicht mehr gezogen werden kann):
+				pool(fortu) = [];
+			end
+		case 'E_050' %0.25-0.5 Anteil Energieverbrauch (1. Viertel)
+			% aus den Phasenenergieaufnahmen die Gesamtenergieaufnahme ermitteln
+			% (Summe aus L1, L2 und L3):
+			data_e = sum([...
+				data_info(3,1:6:end);...
+				data_info(3,3:6:end);...
+				data_info(3,5:6:end)],1); %#ok<COLND>
+			% die Energiebeträge sortieren, die Indexliste I übernehmen:
+			[~, I] = sort(data_e);
+			num_hh_cont = numel(I);
+			idx_start = round(num_hh_cont/4)+1;
+			idx_end = round(num_hh_cont/2);
+			pool = idx_start:idx_end;   % Liste mit Indizes der möglichen Datensätze
+			pool = I(pool);
+			idx = zeros(number_hh,1); % Liste mit Indizes der ausgewählten Datensätze
+			                          % (mit 0 intialisieren)
+			for j = 1:number_hh
+				% Erzeugen einer Zufallszahl im Bereich [1, Anz._verf._Datensätze]
+				fortu = round(rand()*(numel(pool)-1))+1;
+				idx(j) = pool(fortu); % diesen Index in Indexliste aufnehmen
+				% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
+				% nicht mehr gezogen werden kann):
+				pool(fortu) = [];
+			end
+		case 'E_075' %0.5-0.75 Anteil Energieverbrauch (1. Viertel)
+			% aus den Phasenenergieaufnahmen die Gesamtenergieaufnahme ermitteln
+			% (Summe aus L1, L2 und L3):
+			data_e = sum([...
+				data_info(3,1:6:end);...
+				data_info(3,3:6:end);...
+				data_info(3,5:6:end)],1); %#ok<COLND>
+			% die Energiebeträge sortieren, die Indexliste I übernehmen:
+			[~, I] = sort(data_e);
+			num_hh_cont = numel(I);
+			idx_start = round(num_hh_cont/2)+1;
+			idx_end = round(num_hh_cont*0.75);
+			pool = idx_start:idx_end;   % Liste mit Indizes der möglichen Datensätze
+			pool = I(pool);
+			idx = zeros(number_hh,1); % Liste mit Indizes der ausgewählten Datensätze
+			                          % (mit 0 intialisieren)
+			for j = 1:number_hh
+				% Erzeugen einer Zufallszahl im Bereich [1, Anz._verf._Datensätze]
+				fortu = round(rand()*(numel(pool)-1))+1;
+				idx(j) = pool(fortu); % diesen Index in Indexliste aufnehmen
+				% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
+				% nicht mehr gezogen werden kann):
+				pool(fortu) = [];
+			end
+		case 'E_100' %0.75-1.0 Anteil Energieverbrauch (1. Viertel)
+			% aus den Phasenenergieaufnahmen die Gesamtenergieaufnahme ermitteln
+			% (Summe aus L1, L2 und L3):
+			data_e = sum([...
+				data_info(3,1:6:end);...
+				data_info(3,3:6:end);...
+				data_info(3,5:6:end)],1); %#ok<COLND>
+			% die Energiebeträge sortieren, die Indexliste I übernehmen:
+			[~, I] = sort(data_e);
+			num_hh_cont = numel(I);
+			idx_start = round(num_hh_cont*0.75)+1;
+			idx_end = num_hh_cont;
+			pool = idx_start:idx_end;   % Liste mit Indizes der möglichen Datensätze
+			pool = I(pool);
+			idx = zeros(number_hh,1); % Liste mit Indizes der ausgewählten Datensätze
+			                          % (mit 0 intialisieren)
+			for j = 1:number_hh
+				% Erzeugen einer Zufallszahl im Bereich [1, Anz._verf._Datensätze]
+				fortu = round(rand()*(numel(pool)-1))+1;
+				idx(j) = pool(fortu); % diesen Index in Indexliste aufnehmen
+				% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
+				% nicht mehr gezogen werden kann):
+				pool(fortu) = [];
+			end
+		otherwise
+			disp('Unbekannter Auswahlmodus!');
+			return;
 	end
 	% die ermittelten Indizes sortieren (für effektiveres Abarbeiten):
 	idx = sort(idx);
@@ -192,14 +290,18 @@ for i=1:size(system.housholds,1)
 	end
 end
 
+% also store the number of different households (the allocation) for later
+% use:
+Households.Number = handles.Current_Settings.Data_Extract.Households;
+
 % Zugriff auf das Datenobjekt:
 d = handles.NAT_Data;
 
 % Ergebnis zurückschreiben:
 if isempty(idx_act)
-	% Es wird nur ein Datensatz generiert, diese Direkt in die
-	% Load-Infeed-Struktur einfügen:
-	d.Load_Infeed_Data.Households = Households;
+	% Es wird nur ein Datensatz generiert:
+	d.Load_Infeed_Data.Set_1.Households = Households;
+	d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
 else
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Households = Households;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
