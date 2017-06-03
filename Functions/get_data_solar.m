@@ -1,9 +1,9 @@
-function handles = get_data_solar (handles)
+function get_data_solar (handles, varargin)
 %GET_DATA_SOLAR    extrahiert und simuliert die Einspeise-Daten der Solaranlagen
 
-% Version:                 1.1
+% Version:                 2.0 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 04.07.2012
-% Letzte Änderung durch:   Franz Zeilinger - 15.03.2013
+% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
 
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
@@ -28,11 +28,29 @@ Solar.Data_Mean = [];
 Solar.Data_Min = [];
 Solar.Data_Max = [];
 
+if nargin ==2
+	% als Zweites Argument wurde ein aktueller Index übergeben für eine
+	% Generierung von mehreren Datensätzen...
+	idx_act = varargin{1};
+else
+	idx_act = [];
+end
+
 % Sind überhaupt Solaranlagen angelegt?
 if isempty(settin.Solar.Plants)
-    % --> Nein, es müssen daher keine Daten ausgelesen werden:
-    % (leeres) Ergebnis zurückschreiben:
-	handles.Result.Solar = Solar;
+    % Zugriff auf das Datenobjekt:
+    d = handles.NAT_Data;
+    % Ergebnis zurückschreiben:
+    if isempty(idx_act)
+        % Es wird nur ein Datensatz generiert, diese Direkt in die
+        % Load-Infeed-Struktur einfügen:
+        d.Load_Infeed_Data.Solar = Solar;
+    else
+        d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+        if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
+            d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
+        end
+    end
 	% Funktion beenden:
 	return;
 end
@@ -47,8 +65,19 @@ end
 
 % Überprüfen, ob überhaupt PV-Erzeugungsanlagen verarbeitet werden sollen:
 if number_plants == 0
-	% (leeres) Ergebnis zurückschreiben:
-	handles.Result.Solar = Solar;
+    % Zugriff auf das Datenobjekt:
+    d = handles.NAT_Data;
+    % Ergebnis zurückschreiben:
+    if isempty(idx_act)
+        % Es wird nur ein Datensatz generiert, diese Direkt in die
+        % Load-Infeed-Struktur einfügen:
+        d.Load_Infeed_Data.Solar = Solar;
+    else
+        d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+        if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
+            d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
+        end
+    end
 	% Funktion beenden:
 	return;
 end
@@ -226,7 +255,19 @@ for i=1:numel(plants)
 	end
 end
 
+% Zugriff auf das Datenobjekt:
+d = handles.NAT_Data;
+
 % Ergebnis zurückschreiben:
-handles.NAT_Data.Result.Solar = Solar;
+if isempty(idx_act)
+	% Es wird nur ein Datensatz generiert, diese Direkt in die
+	% Load-Infeed-Struktur einfügen:
+	d.Load_Infeed_Data.Solar = Solar;
+else
+	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+	if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
+		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
+	end
+end
 end
 

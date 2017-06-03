@@ -74,7 +74,6 @@ classdef SINCAL < handle
 			
 			% Default-Einstellungen:
 			obj.Settings.Calculation_method = 'LF_USYM';
-            
 			obj.Settings.Batch_mode  = 4;
 			obj.Settings.Database_typ = 'DB_EL';
 			obj.Settings.Language = 'DE';
@@ -371,7 +370,7 @@ classdef SINCAL < handle
 				% ausgeben:
 				obj.disp_messages('all', 1);
 				exception = MException('SINCAL:SimulationFailed',...
-					'SINCAL Calculation failed!');
+					'SINCAL Calculation failded!');
 				throw(exception);
 			end
 		end

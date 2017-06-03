@@ -7,12 +7,10 @@ function handles = post_analyzing_function_1(handles)
 d = handles.NAT_Data;
 % this object represents a connection to the stored data within the NAT
 
-%array = d.Result.Grid.Test_NS_50_Knoten_o_PV; %%CH_MA
-array = [];
+array = d.Result.Grid.Test_NS_50_Knoten_o_PV;
 
 % e.g. all results at time-count 5 are:
 t_5 = squeeze(array(:,5,:,:));
-
 % 1st dim: the single input data sets
 % 2nd dim: all the load nodes:
 loadnodes_names = {d.Grid.P_Q_Node.Points.Node_Name};

@@ -2,6 +2,9 @@ function handles = refresh_display_NAT_main_gui(handles)
 %REFRESH_DISPLAY_NAT_MAIN_GUI    Summary of this function goes here
 %    Detailed explanation goes here
 
+% Erstellt von:            Franz Zeilinger - 29.01.2013
+% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %      Einstellungen - Auslesen der Daten
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -181,8 +184,8 @@ else
     set(handles.push_load_data_get, 'Enable','off');
 end
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
-if ~isempty(handles.NAT_Data.Result)
-	if isfield(handles.NAT_Data.Result, 'Households') && isfield(handles, 'sin')
+if ~isempty(handles.NAT_Data. Load_Infeed_Data)
+	if isfield(handles.NAT_Data.Load_Infeed_Data, 'Households') && isfield(handles, 'sin')
 		set(handles.push_network_calculation_start, 'Enable','on');
 	else
 		set(handles.push_network_calculation_start, 'Enable','off');
@@ -196,3 +199,8 @@ else
 	set(handles.push_network_calculation_start, 'Enable','off');
 	set(handles.push_data_show, 'Enable','off');
 end
+
+% Eingabefelder aktualisieren:
+set(handles.edit_simulation_number_runs,...
+	'String', num2str(handles.Current_Settings.Simulation.Number_Runs));
+

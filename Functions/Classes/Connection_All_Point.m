@@ -27,10 +27,12 @@ classdef Connection_All_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
-	
+	% Version:                 1.1
+	% Erstellt von:            Matej Rejc      - 17.04.2013
+	% Letzte Änderung durch:   
 	properties
 		
-		%        All node ids in network
+	%        All node ids in network
 		Node_ID = [];
 	%        ID des Knotens, an der diese Instanz des Controllers angeschlossen ist.
 		Node_Obj = [];           
@@ -45,6 +47,8 @@ classdef Connection_All_Point < handle
     %        Rated voltages phase - phase in V
         Voltage_Limits = [];        
     %        Voltage limits in %    
+        Number_of_Voltage_Violation_limits
+    %        Number of voltage limits (1 or 2)    
         Voltage = zeros(1,3);
 	%        aktuelle Spannungswerte. Werden durch OBJ.GET_VOLTAGES_NODE
 	%        aktualisiert mit den Spannungswerten des Knotens OBJ.NODE_ID. 
@@ -70,11 +74,7 @@ classdef Connection_All_Point < handle
             % All Node Names:
 			obj.Node_Name = obj.Node_Obj.get('Item','TOPO.Name');
             
-            % -- changelog v1.1b ##### (start) // 20130415
             % Voltage level id of node
-            
-            % Search function requires trimmed exact values (strcmp and not
-            % strncmp), as obj.Node_Name is already trimmed!
             all_nodes_in_table = sin_ext.Tables.Node(:,strcmp(sin_ext.Tables.Node(1,:),'Name'));
             all_nodes_in_table = strtrim(all_nodes_in_table);
             
@@ -83,7 +83,6 @@ classdef Connection_All_Point < handle
                obj.Node_Name),...
                strcmp(sin_ext.Tables.Node(1,:),'VoltLevel_ID')...
                ));
-           % -- changelog v1.1b ##### (end) // 20130415
             
            % all voltage level ids
            volt_idx = ...
@@ -101,46 +100,60 @@ classdef Connection_All_Point < handle
            
            % Voltage level phase-earth in V (for unsymm. load flow calculations)
            obj.Rated_Voltage_phase_earth = repmat(obj.Rated_Voltage_phase_phase / sqrt(3),1,3); 
-%            
+		   
         end		
         
         function voltage_limits = define_voltage_limits (obj)
 			%DEFINE_VOLTAGE_LIMITS    aktualisieren der Spannungswerte
 			%    genaue Beschreibung fehlt!
-            voltage_limits(1) = 110;   % Default settings 1.1 p.u.
-            voltage_limits(2) = 90;    % Default settings 0.9 p.u.
-            voltage_limits(3) = 110; % Default settings 1.1 p.u.
-            voltage_limits(4) = 90;  % Default settings 0.9 p.u.
-                % voltage_limits defined as 4 element matrix
-                % [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
-                
-            
+			voltage_limits(1) = 110;   % Default settings 1.1 p.u.
+			voltage_limits(2) = 90;    % Default settings 0.9 p.u.
+			voltage_limits(3) = 110;   % Default settings 1.1 p.u.
+			voltage_limits(4) = 90;    % Default settings 0.9 p.u.
+			% voltage_limits defined as 4 element matrix
+			% [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
+			
 			for i = 1:numel(obj)
-                % Check if voltage limits are defined in SINCAL model
-                % If not, default values are used (110 % and 90 % for upper
-                % and lower limits)
-                if obj(i).Node_Obj.get('Item','uul') ~= 0
-                    voltage_limits(1) = obj(i).Node_Obj.get('Item','uul');
-                end   
+				% Check if voltage limits are defined in SINCAL model
+				% If not, default values are used (110 % and 90 % for upper
+				% and lower limits)
+				if obj(i).Node_Obj.get('Item','uul') ~= 0
+					voltage_limits(1) = obj(i).Node_Obj.get('Item','uul');
+				end
+				
+				if obj(i).Node_Obj.get('Item','ull') ~= 0
+					voltage_limits(2) = obj(i).Node_Obj.get('Item','ull');
+				end
+				
+				if obj(i).Node_Obj.get('Item','uul1') ~= 0
+					voltage_limits(3) = obj(i).Node_Obj.get('Item','uul1');
+				end
+				
+				if obj(i).Node_Obj.get('Item','ull1') ~= 0
+					voltage_limits(4) = obj(i).Node_Obj.get('Item','ull1');
+				end
+				
+				obj(i).Voltage_Limits = voltage_limits;
+				% Voltage limits assigned to object
                 
-                if obj(i).Node_Obj.get('Item','ull') ~= 0
-                   voltage_limits(2) = obj(i).Node_Obj.get('Item','ull');
+                % -- changelog v1.2b ##### (start) // 20130418
+                % Determine if only one voltage limit is set across all nodes (more common than two)
+                % If all uul = uul2 and ull = ull2 are the same, comparison truth values
+                % equal the number of all nodes!
+                if size(voltage_limits,1) == sum(voltage_limits(:,1) == voltage_limits(:,3)) & ...
+                   size(voltage_limits,1) == sum(voltage_limits(:,2) == voltage_limits(:,4))    
+                                          obj(i).Number_of_Voltage_Violation_limits = 1;
+                     % Only one limit is defined ... Number_of_Voltage_Violation_limits = 1;
+                else
+                     obj(i).Number_of_Voltage_Violation_limits = 2;
+                     % Two limits are defined ... Number_of_Voltage_Violation_limits = 2;
                 end
-                
-                if obj(i).Node_Obj.get('Item','uul1') ~= 0
-                    voltage_limits(3) = obj(i).Node_Obj.get('Item','uul1');
-                end        
-                
-                if obj(i).Node_Obj.get('Item','ull1') ~= 0
-                    voltage_limits(4) = obj(i).Node_Obj.get('Item','ull1');
-                end  
-                
-                obj(i).Voltage_Limits = voltage_limits;
-                % Voltage limits assigned to object 
-            end
-            
-        end
-        		
+                     
+                % -- changelog v1.2b ##### (end) // 20130418
+     
+			end
+		end
+		
 		function voltage = update_voltage_node_LF_USYM (obj)
 			%GET_VOLTAGES_NODE    aktualisieren der Spannungswerte
 			%    genaue Beschreibung fehlt!
