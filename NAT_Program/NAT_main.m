@@ -106,7 +106,6 @@ handles = refresh_display_NAT_main_gui(handles);
 % Update handles structure
 guidata(hObject, handles);
 
-
 function check_extract_05_quantile_value_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_extract_05_quantile_value (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)

@@ -261,7 +261,7 @@ for i=1:numel(Grid_List)
 					% An additional condition for power loss saving is
 					% inside the online function
 				end
-			catch ME %#ok<NASGU>
+			catch ME
 				d = handles.NAT_Data;
 				ct = d.Simulation.Current_timepoint;
 				cg = d.Simulation.Grid_act;
@@ -279,6 +279,13 @@ for i=1:numel(Grid_List)
 					d.Result.(cg).Branch_Values(cd,ct,:,:) = NaN;
 				end
 				d.Result.(cg).Error_Counter(cd,ct) = d.Result.(cg).Error_Counter(cd,ct) + 1;
+				% Give Informations about the occoured error:
+				fprintf(['\t\t\tError: ',ME.message,'\n']);
+				for l=1:3
+					fprintf(['\t\t\t\tfile: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...
+						'; name: ',ME.stack(l).name,...
+						'; line: ',num2str(ME.stack(l).line),'\n']);
+				end
 			end
 		end
 		

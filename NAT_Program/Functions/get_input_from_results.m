@@ -75,6 +75,7 @@ for i=1:numel(Result_Settings.Grid_Variants(Grid_Sel))
 			Grid.(Result_Settings.Grid_Variants{i}).Branches.Transf(1).Branch_ID;
 	else
 		% let the user select the transformer:
+		%TODO!!!
 	end
 	% create index selection of the results:
 	Sel_idx.(Result_Settings.Grid_Variants{i}) = ...
@@ -100,8 +101,10 @@ for i=1:numel(Result_Settings.Scenarios(Scen_Sel))
 	for j=1:numel(Result_Settings.Grid_Variants(Grid_Sel))
 		act_power = squeeze(Result.(Result_Settings.Grid_Variants{j}).Branch_Values(:,:,Sel_idx.(Result_Settings.Grid_Variants{j}),[1,5,9]));
 		rea_power = squeeze(Result.(Result_Settings.Grid_Variants{j}).Branch_Values(:,:,Sel_idx.(Result_Settings.Grid_Variants{j}),[2,6,10]));
+		% invert the powers, to get the correct power behavior:
 		act_power = act_power *-1;
 		rea_power = rea_power *-1;
+		% add the data to the final arrays:
 		act_power_total((j-1)*Result_Settings.Datasets+1:j*Result_Settings.Datasets,:,:) = act_power;
 		rea_power_total((j-1)*Result_Settings.Datasets+1:j*Result_Settings.Datasets,:,:) = rea_power;
 	end
@@ -187,7 +190,7 @@ for i=1:numel(Result_Settings.Scenarios(Scen_Sel))
 		% also store the number of different "households" (the allocation) for later
 		% use - here dummy values:
 		Households.Number = handles.Current_Settings.Data_Extract.Households;
-		% 
+		% save the created structure along with the current network table:
 		Load_Infeed_Data.(['Set_',num2str(j)]).Households = Households;
 		Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network = handles.Current_Settings.Table_Network;
 		

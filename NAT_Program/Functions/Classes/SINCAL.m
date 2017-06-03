@@ -6,6 +6,7 @@ classdef SINCAL < handle
 	%    Die SINCAL-Instanz wird verwendet, um alle, mit dem Zugriff auf
 	%    SINCAL relevanten Variablen und Methoden zusammenzufassen.
 	
+	% Version:                 1.1
 	% Erstellt von:            Franz Zeilinger - 30.10.2012
 	% Letzte Änderung durch:   Franz Zeilinger - 29.01.2013
 	
@@ -143,7 +144,12 @@ classdef SINCAL < handle
 			% Hier wird mit den definierten Hex-Werten (obj.Constants.Input_Mask)
 			% gearbeitet, die ODER-Verknüpfung wird dann zu einer Addition:
 			switch obj.Settings.Calculation_method
-				case 'LF_USYM' % Unsymmetrischer Lastfluss
+				case 'LF_USYM' % Unsymmetrischer Lastfluss (MGN)
+					inputstate = ...
+						hex2dec(obj.Constants.Input_Mask.Loadflow) +...
+						hex2dec(obj.Constants.Input_Mask.Short_Circiut) +...
+						hex2dec(obj.Constants.Input_Mask.Unsym_Loadflow);
+				case 'LF_RST' % unsymmetrical load-flow (RST)
 					inputstate = ...
 						hex2dec(obj.Constants.Input_Mask.Loadflow) +...
 						hex2dec(obj.Constants.Input_Mask.Short_Circiut) +...
