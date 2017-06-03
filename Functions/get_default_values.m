@@ -72,6 +72,7 @@ System.sola.Selectable = {...
 	'Keine Anlage ausgewählt'  ,[];...
 	'Neue Anlage hinzufügen...',[];...
 	};
+
 % Default Werte (alle Anlagen aus, Standardwerte) für PV-Anlagen:
 Default_Plant.Typ = 1;                  % Typ der Anlage (siehe 
 %                                             HANDLES.SYSTEM.SOLA.TYPS)
@@ -160,6 +161,8 @@ Current_Settings.Simulation.Number_Runs = 10;
 % Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
 % müssen!
 Current_Settings.Simulation.Grid_List = {};
+% Root path to the folder, in which the single Networks are stored...
+Current_Settings.Simulation.Grids_Path = Files.Main_Path;
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung

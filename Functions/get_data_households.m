@@ -200,7 +200,9 @@ if isempty(idx_act)
 	% Es wird nur ein Datensatz generiert, diese Direkt in die
 	% Load-Infeed-Struktur einfügen:
 	d.Load_Infeed_Data.Households = Households;
+	d.Load_Infeed_Data.Table_Network = handles.Current_Settings.Table_Network;
 else
+	Households.Number = handles.Current_Settings.Data_Extract.Households;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Households = Households;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 end

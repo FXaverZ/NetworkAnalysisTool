@@ -8,6 +8,8 @@ function get_data_solar (handles, varargin)
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
 db_fil = handles.Current_Settings.Load_Database;  % Datenbankstruktur
+d = handles.NAT_Data; % Zugriff auf das Datenobjekt:
+
 max_num_data_set = db_fil.setti.max_num_data_set*6; % Anzahl an Datensätzen in einer
 %                                                     Teildatei --> da im Fall von
 %                                                     Wetterdaten nur eine Spalte pro
@@ -40,7 +42,16 @@ end
 if isempty(settin.Solar.Plants)
     % --> Nein, es müssen daher keine Daten ausgelesen werden:
     % (leeres) Ergebnis zurückschreiben:
-	handles.Result.Solar = Solar;
+	if isempty(idx_act)
+		% Es wird nur ein Datensatz generiert, diese Direkt in die
+		% Load-Infeed-Struktur einfügen:
+		d.Load_Infeed_Data.Solar = Solar;
+	else
+		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
+			d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
+		end
+	end
 	% Funktion beenden:
 	return;
 end
@@ -56,7 +67,16 @@ end
 % Überprüfen, ob überhaupt PV-Erzeugungsanlagen verarbeitet werden sollen:
 if number_plants == 0
 	% (leeres) Ergebnis zurückschreiben:
-	handles.Result.Solar = Solar;
+	if isempty(idx_act)
+		% Es wird nur ein Datensatz generiert, diese Direkt in die
+		% Load-Infeed-Struktur einfügen:
+		d.Load_Infeed_Data.Solar = Solar;
+	else
+		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
+			d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
+		end
+	end
 	% Funktion beenden:
 	return;
 end
@@ -234,19 +254,18 @@ for i=1:numel(plants)
 	end
 end
 
-% Zugriff auf das Datenobjekt:
-d = handles.NAT_Data;
-
 % Ergebnis zurückschreiben:
 if isempty(idx_act)
 	% Es wird nur ein Datensatz generiert, diese Direkt in die
 	% Load-Infeed-Struktur einfügen:
 	d.Load_Infeed_Data.Solar = Solar;
 else
+	Solar.Plants = handles.Current_Settings.Data_Extract.Solar.Plants;
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
 	if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 	end
+	
 end
 end
 

@@ -10,6 +10,7 @@ classdef NAT_Data < handle
 		Result
 		Load_Infeed_Data
 		Simulation
+	%        different Simulation Setting
 	end
 	
 	methods

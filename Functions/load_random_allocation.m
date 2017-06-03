@@ -2,6 +2,10 @@ function handles = load_random_allocation(handles)
 %LOAD_RANDOM_ALLOCATION Summary of this function goes here
 %   Detailed explanation goes here
 
+if isempty(handles.NAT_Data.Grid)
+    return;   
+end
+
 % Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
 Table_Data = handles.Current_Settings.Table_Network.Data;
 hh_typ_number = size(handles.System.housholds,1);
@@ -16,7 +20,7 @@ end
 % Erzeugungsanlagen verteilen (gemäß Parametern):
 Solar.Number = [75, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 % Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [kWp]
-Solar.Power_sgl = 10;            % mittlere Leistung der Anlagen [kWp]
+Solar.Power_sgl = 10;           % mittlere Leistung der Anlagen [kWp]
 Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
 Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
 Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
