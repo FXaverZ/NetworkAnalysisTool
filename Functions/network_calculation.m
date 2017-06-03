@@ -8,6 +8,14 @@ function handles = network_calculation(handles)
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
+
+if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Power_Loss_Analysis)
+	fprintf('\nNo active analysis function! Abort simulation...\n')
+	return;
+end
+
 % getting infos about the grids to be simulated:
 Grid_List = handles.Current_Settings.Simulation.Grid_List;
 Grids_Path = handles.Current_Settings.Simulation.Grids_Path;
@@ -62,6 +70,9 @@ for i=1:numel(Grid_List)
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Mean;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Mean;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Mean;
+%             Load_Data = ones(size(Load_Data))*1e3;
+%             Sola_Data = ones(size(Sola_Data))*0.0e3;
+%             Elmo_Data = ones(size(Elmo_Data))*0.0e3;
 		end
 		if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_05P_Quantil;
@@ -75,7 +86,8 @@ for i=1:numel(Grid_List)
 		end
 		
 		Table_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network.Data;
-		
+		handles.Current_Settings.Table_Network = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
+        
 		% Die Daten an SINCAL anpassen (Leistungen in MW und pos. bei Verbrauch):
 		Load_Data = Load_Data/1e6;
 		Elmo_Data = Elmo_Data/1e6;
@@ -83,8 +95,7 @@ for i=1:numel(Grid_List)
 		% Wieviele Zeitpunkte werden berechnet?
 		handles.Current_Settings.Simulation.Timepoints = size(Load_Data,1);
 		
-        % -- changelog v1.1b ##### (start) // 20130425
-        %--------------------------------------------------------------------------------
+		%--------------------------------------------------------------------------------
         % Result preallocation
         %--------------------------------------------------------------------------------
         % Options for result preallocation are currently defined within
@@ -94,7 +105,9 @@ for i=1:numel(Grid_List)
             % grid at first dataset iteration
             handles = result_preallocation(handles,cg);        
         end        
-        % -- changelog v1.1b ##### (end) // 20130425
+		
+		% Add an error-counter array
+		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Timepoints,1);
 		
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
@@ -170,39 +183,73 @@ for i=1:numel(Grid_List)
 		% noch die aktuellen Einstellungen speichern:
 		d.Simulation.Grid_act = cg;
 		d.Simulation.Input_Data_act = j;
-				
 		for k=1:handles.Current_Settings.Simulation.Timepoints
-			
-			% aktuellen Zeipunkt speichern:
-			d.Simulation.Current_timepoint = k;
-			% Last- und Einspeisedaten aktualisieren:
-			d.Grid.(cg).Load.Loads.update_power(k);
-			d.Grid.(cg).Load.Elmob.update_power(k);
-			d.Grid.(cg).Sola.Gen_Units.update_power(k);
-			
-			% der Berechnung die neuen Leistungswerte übermitteln:
-			d.Grid.(cg).P_Q_Node.Points.update_power;
-			% Lastfluss rechnen:
-			handles.sin.start_calculation;
-			
-			% here the analyzing functions are called. Because the data is stored
-			% within the NAT_Data-object, on which this function has access, no
-			% return value is neccesary:
-			
-            % Perform online voltage violation analysis (true/false
-            % results)
-			online_voltage_violation_analysis(handles);
-            % Save voltage results in result structure
-            save_node_values(handles);
-            % Perform online branch violation analysis (true/false results)
-			online_branch_violation_analysis(handles);
-            % Save branch results in result structure
-            save_branch_values(handles);            
-            % -- changelog v1.1b ##### (end) // 20130425
-            online_power_loss_analysis(handles);
-            % -- changelog v1.1b ##### (end) // 20130425
-
-			
+			try
+				% aktuellen Zeipunkt speichern:
+				d.Simulation.Current_timepoint = k;
+				% Last- und Einspeisedaten aktualisieren:
+				d.Grid.(cg).Load.Loads.update_power(k);
+				d.Grid.(cg).Load.Elmob.update_power(k);
+				d.Grid.(cg).Sola.Gen_Units.update_power(k);
+				
+				% der Berechnung die neuen Leistungswerte übermitteln:
+				d.Grid.(cg).P_Q_Node.Points.update_power(d,cg,j,k);
+				% Lastfluss rechnen:
+				handles.sin.start_calculation;
+				
+				% here the analyzing functions are called. Because the data is stored
+				% within the NAT_Data-object, on which this function has access, no
+				% return value is neccesary:
+				
+				% Perform online voltage violation analysis (true/false
+				% results)
+				if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+					online_voltage_violation_analysis(handles);
+					% Save voltage results in result structure
+					if handles.Current_Settings.Simulation.Save_Voltage_Results
+						save_node_values(handles);
+					end
+				end
+				% Perform online branch violation analysis (true/false results)
+				if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+					online_branch_violation_analysis(handles);
+					if handles.Current_Settings.Simulation.Save_Branch_Results
+						% Save branch results in result structure
+						save_branch_values(handles);
+					end
+                end
+                
+                % -- changelog v1.1b ##### (start) // 20130429
+                % Perform online active power loss analysis (values in W)
+                if handles.Current_Settings.Simulation.Power_Loss_Analysis
+                    online_power_loss_analysis(handles);
+                    % An additional condition for power loss saving is
+                    % inside the online function
+                end
+                % -- changelog v1.1b ##### (end) // 20130429
+				
+			catch ME
+				disp('An Error occured:');
+				disp(ME.message);
+				disp('No results for this timepoint!');
+				d = handles.NAT_Data;
+				ct = d.Simulation.Current_timepoint;
+				cg = d.Simulation.Grid_act;
+				cd = d.Simulation.Input_Data_act;
+				if isfield(d.Result.(cg), 'Voltage_Violation_Analysis')
+					d.Result.(cg).Voltage_Violation_Analysis(cd,ct,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Node_Voltages')
+					d.Result.(cg).Node_Voltages(cd,ct,:,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Branch_Violation_Analysis')
+					 d.Result.(cg).Branch_Violation_Analysis(cd,ct,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Branch_Values')
+					d.Result.(cg).Branch_Values(cd,ct,:,:) = NaN;
+				end
+				d.Result.(cg).Error_Counter(ct) = d.Result.(cg).Error_Counter(ct) + 1;
+			end
 		end
 		% Statusinfo zum Gesamtfortschritt an User:
 		t = toc;
@@ -214,17 +261,14 @@ for i=1:numel(Grid_List)
 			'. Verbleibende Zeit: ',...
 			sec2str(time_elapsed),'\n']);
 	end
-	fprintf('\t\t--> erledigt!\n');
-	fprintf(['\tBerechnungen beendet nach ',sec2str(t),'\n']);
-end
-
-% select again the first grid (because here the load-& infeeeddata is
-% stored):
-handles.Current_Settings.Files.Grid.Name = Grid_List{1}(1:end-4);
-
-% % make additional calculation to prepare the data for displaying with the
-% % data explorer:
-% % handles = adopt_data_for_display(handles);
-
+	
+	% select again the first grid (because here the load-& infeeeddata is
+	% stored):
+	handles.Current_Settings.Files.Grid.Name = Grid_List{1}(1:end-4);
+	
+	% % make additional calculation to prepare the data for displaying with the
+	% % data explorer:
+	% % handles = adopt_data_for_display(handles);
+	
 end
 

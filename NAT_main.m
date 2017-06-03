@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 24.04.2013
 
-% Last Modified by GUIDE v2.5 24-Apr-2013 16:32:33
+% Last Modified by GUIDE v2.5 26-Apr-2013 13:41:45
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -27,6 +27,85 @@ else
     gui_mainfcn(gui_State, varargin{:});
 % Ende Initializationscode - NICHT EDITIEREN!
 end
+
+function check_analysis_branch_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_branch_data_save (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Save_Branch_Results = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+function check_analysis_branch_violation_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_branch_data_save (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Branch_Violation_Analysis = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+function check_analysis_power_loss_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_power_loss (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Power_Loss_Analysis = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+function check_analysis_power_loss_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_power_loss_data_save (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Save_Power_Loss_Results = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+function check_analysis_voltage_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_voltage_data_save (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Save_Voltage_Results = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
+function check_analysis_voltage_violation_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_analysis_voltage_violation (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+handles.Current_Settings.Simulation.Voltage_Violation_Analysis = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update handles structure
+guidata(hObject, handles);
+
 
 function check_extract_05_quantile_value_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_extract_05_quantile_value (siehe GCBO)
@@ -333,6 +412,8 @@ handles.Current_Settings.Files.Main_Path = Path;
 
 % Default-Einstellungen laden
 handles = get_default_values(handles);
+% Load the Szenarios:
+handles = get_scenarios(handles);
 % Datenobjekt erzeugen:
 handles.NAT_Data = NAT_Data();
 
@@ -550,11 +631,11 @@ pause(.01);
 % Lastdaten einlesen und in Struktur speichern:
 if handles.Current_Settings.Simulation.Use_Scenarios
 	handles = get_data_szenarios_load_infeed(handles);
-	helpdlg('Daten erfolgreich geladen!', 'Laden der Szenariodaten...');
 else
 	handles.NAT_Data.Simulation = [];
+	% Set the default scenario:
 	handles.NAT_Data.Simulation.Active_Scenario = ...
-        handles.Current_Settings.Simulation.Scenarios.(['Sc_',num2str(3)]);
+		handles.Current_Settings.Simulation.Scenarios.(['Sc_',num2str(2)]);
 	handles = loaddata_get(handles);
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
@@ -567,10 +648,10 @@ else
 	save([file.Path,filesep,file.Name,file.Exte],...
 		'Load_Infeed_Data', 'Data_Extract');
 end
+helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
-set(handles.push_load_data_get, 'Enable', 'on');
 set(handles.push_cancel, 'Enable', 'off');
 
 % handles-Structure aktualisieren:
@@ -581,21 +662,20 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% -- changelog v1.1b ##### (start) // 20130425
-% draw_violations(handles,1,1); % draw_violations(handles, dataset, variant);
-% draw_power_losses(handles,1,1);% draw_power_losses(handles, dataset, variant);
-
-% grid_voltages_comparison gives a comparison of voltage limit problems for
-% all observed grids in a horizontal bar form 
-grid_voltages_comparison(handles,1,'percent');
-
-% grid_branches_comparison gives a comparison of branch limit problems for
-% all observed grids in a horizontal bar form
-grid_branches_comparison(handles,1,'values');
-
-
-% -- changelog v1.1b ##### (end) // 20130425
-
+% d = handles.NAT_Data;
+if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+	handles = post_voltage_violation_report(handles);
+% 	handles = grid_voltages_comparison(handles,1:3,'all');
+end
+if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+	handles = post_branch_violation_report(handles);
+% 	handles = grid_branches_comparison(handles,1:3,'all');
+end
+% -- changelog v1.1b ##### (start) // 20130429
+if handles.Current_Settings.Simulation.Power_Loss_Analysis
+    handles = post_active_power_loss_report(handles);
+end
+% -- changelog v1.1b ##### (end) // 20130429
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -616,15 +696,16 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 	handles = network_scenario_calculation(handles);
 else
 	handles = network_calculation(handles);
-    % -- changelog v1.1b ##### (start) // 20130425
-    handles = post_voltage_violation_report(handles);
-    handles = post_branch_violation_report(handles);
-    handles = post_active_power_loss_report(handles);
-    % -- changelog v1.1b ##### (end) // 20130425
-
+	if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+		handles = post_voltage_violation_report(handles);
+	end
+	if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+		handles = post_branch_violation_report(handles);
+	end
+	if handles.Current_Settings.Simulation.Power_Loss_Analysis
+		handles = post_active_power_loss_report(handles);
+	end
 end
-
-
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -740,9 +821,11 @@ Main_Path = uigetdir(handles.Current_Settings.Simulation.Scenarios_Path,...
 if ischar(Main_Path)
 	handles.Current_Settings.Simulation.Scenarios_Path = Main_Path;
 	try
-		load([Main_Path,'Scenario_Settings.mat']);
-		handles.Current_Settings.Simulation.Scenarios = Scenario_Settings;
-		handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+		load([Main_Path,filesep,'Scenario_Settings.mat']);
+        handles.Current_Settings.Simulation.Scenarios = Scenarios_Settings;
+        handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+        load([Main_Path,filesep, Scenarios_Settings.Names{1},'.mat']);
+        handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
 	catch ME
 		disp('Fehler beim Laden der Szenarioeinstellungen:');
 		disp(ME.message);
@@ -1224,3 +1307,18 @@ end
 
 
 % Hint: get(hObject,'Value') returns toggle state of check_use_variants
+
+
+% --- Executes on button press in check_analysis_voltage_violation.
+
+
+
+
+
+
+
+
+% --- Executes on button press in check_analysis_power_loss.
+
+
+

@@ -49,37 +49,32 @@ classdef Post_Power_Loss_Analysis < handle
         end % Power_Loss_Summary(ext_obj,cg)
         
         function obj = Display_results(obj)
-            fprintf('\n------------------------------------------------------------------------------------\n');
-            fprintf('Summary of active power loss analysis\n');
-            fprintf(['Grid name        >> ' obj.Grid_Name '\n']);
-            fprintf('------------------------------------------------------------------------------------\n');
-            
+            % The prefix of the power losses - kW or MW
+            if size(int2str(round(max(obj.Max_Power_Loss_Values(:,end)))),2) > 6
+                % If the number is larger than 0.1e6
+                prefix = 1e6; text_prefix = 'M';
+            elseif size(int2str(round(max(obj.Max_Power_Loss_Values(:,end)))),2) < 6 &&...
+                    size(int2str(round(max(obj.Max_Power_Loss_Values(:,end)))),2) > 3
+                % The number is in the 1e3 range
+                prefix = 1e3; text_prefix = 'k';
+            else
+                % Losses small enough to display in W
+                prefix = 1e0; text_prefix = '';                
+            end            
+            fprintf(['------------------------------------------------------------------------------\n']);
             for i = 1 : size(obj.Max_Power_Loss_Values,1)
-                fprintf(['Dataset observed >> ' int2str(i) ' / '...
-                    int2str(size(obj.Max_Power_Loss_Values,1)) '\n\n' ]);
-                
-                % The prefix of the power losses - kW or MW
-                if size(int2str(round(obj.Max_Power_Loss_Values(i,end))),2) > 6
-                    % If the number is larger than 0.1e6
-                    prefix = 1e6; text_prefix = 'M';
-                else
-                    % The number is in the 1e3 range
-                    prefix = 1e3; text_prefix = 'k';
-                end
-                
-                
-                fprintf(['Highest / Lowest total network loss is '...
+                fprintf(['Electric power losses;' obj.Grid_Name ';']);
+                fprintf(['Set ' int2str(i) ';Max '...
                          num2str(obj.Max_Power_Loss_Values(i,end)/prefix)...
-                         ' ' text_prefix 'W / '...
+                         ' ' text_prefix 'W;',...
+                         ' Min '...
                          num2str(obj.Min_Power_Loss_Values(i,end)/prefix)...
-                          ' ' text_prefix 'W \n']);
-                      
-                fprintf(['Standard deviation of total network losses is '...
+                         ' ' text_prefix 'W;']);                      
+                fprintf(['Std '...
                          num2str(obj.Std_Power_Loss_Values(i,end)/prefix)...
-                         ' ' text_prefix 'W \n\n']);                     
+                         ' ' text_prefix 'W;\n']);                     
             end % For            
         end % Display_results function
-        
         
     end % Methods
 
