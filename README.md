@@ -96,3 +96,11 @@ All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 2013041
   - Branch values can also be stored as SI units for each phase or not at all (to be discussed). The result of the branch values are given in a n x 16 array (P,Q,S,I) for L1,L2,L3 and LE.
 - --Currently, the NR symmetrical load flow branch violation checking is not working, as I have yet to convince the program to use LF\_NR setting for the calculation method.
   - Line 130 of network calculation.m: nline\_branch\_violation\_analysis(handles)
+
+**Changelog documentation in NAT,** v1.1b, date of changes: **18/04/2013**
+
+All changes are preceeded by &quot;% -- changelog v1.1b ##### (start) // 20130418&quot; and ended by &quot;% -- changelog v1.1b ##### (end) // 20130418&quot;
+
+**File changed:**  **network\_load.m**
+
+**Changelog documentation in NAT,** v1.1b, date of changes: **18/04/2013**
