@@ -1,5 +1,5 @@
-function handles = post_branch_violation_report(handles)
-%POST_BRANCH_VIOLATION_REPORT - post analyzing function
+function handles = post_active_power_loss_report(handles)
+%POST_ACTIVE_POWER_LOSS_REPORT - post analyzing function
 
 % Getting access to the data-object
 d = handles.NAT_Data;
@@ -14,18 +14,14 @@ for cg = 1 : numel(list_of_grids)  % Number of topologies, i.e. models analysed
    ext_obj = d.Result.(grid); % Results of topologies/datasets/timepoints
    ext_grid = d.Grid.(grid); % Grid information
    
-   % Branch limit violation for lines - <Post_Branch_Violation_Analysis>
-   d.Result.(grid).Branch_Violation_Summary = ...
-       Post_Branch_Violation_Analysis(ext_obj,ext_grid,grid);
+   % Branch limit violation for lines - <Post_Power_Loss_Analysis>
+   d.Result.(grid).Power_Loss_Summary = ...
+       Post_Power_Loss_Analysis(ext_obj,ext_grid,grid);
    
    % Display results as text display in command window
-   d.Result.(grid).Branch_Violation_Summary.Display_results;
-   
-
+   d.Result.(grid).Power_Loss_Summary.Display_results;
 end
 
-
-
-end
+end % Function
 
 

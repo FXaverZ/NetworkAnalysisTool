@@ -231,5 +231,36 @@ else
 	set(handles.edit_simulation_number_scenarios,'String','Einzels.');
 end
 
+% Analysefunktionen Steuerung:
+set(handles.check_analysis_branch_violation, ...
+	'Value',handles.Current_Settings.Simulation.Branch_Violation_Analysis);
+if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+	set(handles.check_analysis_branch_data_save,...
+		'Value',handles.Current_Settings.Simulation.Save_Branch_Results,...
+		'Enable','on');
+else
+	set(handles.check_analysis_branch_data_save,'Value',0,'Enable','off');
+end
+
+set(handles.check_analysis_voltage_violation,...
+	'Value',handles.Current_Settings.Simulation.Voltage_Violation_Analysis);
+if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+	set(handles.check_analysis_voltage_data_save,...
+		'Value',handles.Current_Settings.Simulation.Save_Voltage_Results,...
+		'Enable','on');
+else
+	set(handles.check_analysis_voltage_data_save,'Value',0,'Enable','off');
+end
+
+set(handles.check_analysis_power_loss,...
+	'Value',handles.Current_Settings.Simulation.Power_Loss_Analysis)
+if handles.Current_Settings.Simulation.Power_Loss_Analysis
+	set(handles.check_analysis_power_loss_data_save,...
+		'Value',handles.Current_Settings.Simulation.Save_Power_Loss_Results,...
+		'Enable','on');
+else
+	set(handles.check_analysis_power_loss_data_save,'Value',0,'Enable','off')
+end
+
 end
 

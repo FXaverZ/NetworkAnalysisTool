@@ -8,6 +8,14 @@ function handles = network_calculation(handles)
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
+
+if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Power_Loss_Analysis)
+	fprintf('\nNo active analysis function! Abort simulation...\n')
+	return;
+end
+
 % getting infos about the grids to be simulated:
 Grid_List = handles.Current_Settings.Simulation.Grid_List;
 Grids_Path = handles.Current_Settings.Simulation.Grids_Path;
@@ -84,105 +92,18 @@ for i=1:numel(Grid_List)
 		handles.Current_Settings.Simulation.Timepoints = size(Load_Data,1);
 		
 		%--------------------------------------------------------------------------------
-		% Result preallocation
-		%--------------------------------------------------------------------------------
-		% Options for result preallocation
-		voltage_violation_analysis = 1; % Voltage violation analysis function is used
-		% voltage_violation_analysis = 0; % Voltage violation analysis function is not used
-		save_voltage_results = 1 ; % Save voltage results
-		% save_voltage_results = 0 ; % Do not save voltage results
-		branch_violation_analysis = 1; % Branch violation analysis function is used
-		% branch_violation_analysis = 0; % Branch violation analysis function is not used
-		save_branch_results = 1; % Save branch results
-		% save_branch_results = 0; % Do not save branch results
-		%---------------
+        % Result preallocation
+        %--------------------------------------------------------------------------------
+        % Options for result preallocation are currently defined within
+        % result_preallocation function
+        if j == 1
+            % We predefine the results for all datasets for specific (cg)
+            % grid at first dataset iteration
+            handles = result_preallocation(handles,cg);        
+        end        
 		
-		if voltage_violation_analysis == 1 && j == 1
-			% - If we have the information regarding the timepoints before the five if conditions
-			% above we can put this completely outside the for dataset loop!
-			% - Preallocation is performed at first dataset iteration, so all
-			% dimensions are created at first dataset and resizing of
-			% result array is not needed at every dataset step
-			% - Assumption: All datasets have the same number of timepoints
-			
-			d.Result.(cg).Voltage_Violation_Analysis(...
-				1:handles.Current_Settings.Simulation.Number_Runs,...
-				1:handles.Current_Settings.Simulation.Timepoints,...
-				1:numel(d.Grid.(cg).All_Node.Points)) = ...
-				zeros(handles.Current_Settings.Simulation.Number_Runs,...
-				handles.Current_Settings.Simulation.Timepoints,...
-				numel(d.Grid.(cg).All_Node.Points) );
-			% Determine voltage limits within the online analysis
-			d.Simulation.Voltage_Violation_Analysis.node_rated_voltages = ...
-				vertcat(d.Grid.(cg).All_Node.Points.Rated_Voltage_phase_earth);
-			% Recalculate voltage limits in p.u.
-			d.Simulation.Voltage_Violation_Analysis.voltage_limit_values_pu = ...
-				vertcat(d.Grid.(cg).All_Node.Points.Voltage_Limits)/100;
-			% voltage_limits defined as 4 element matrix
-			% [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
-			
-			% Determine number of voltage limits per node
-			d.Simulation.Voltage_Violation_Analysis.number_of_voltage_limits = ...
-				vertcat(d.Grid.(cg).All_Node.Points.Number_of_Voltage_Violation_limits);
-		end
-		
-		if save_voltage_results == 1 && j == 1
-			d.Result.(cg).Node_Voltages(...
-				1:handles.Current_Settings.Simulation.Number_Runs,...
-				1:handles.Current_Settings.Simulation.Timepoints,...
-				1:numel(d.Grid.(cg).All_Node.Points),...
-				1:3) = ...
-				zeros(handles.Current_Settings.Simulation.Number_Runs,...
-				handles.Current_Settings.Simulation.Timepoints,...
-				numel(d.Grid.(cg).All_Node.Points),3);  % Three phase values
-		end
-		
-		if branch_violation_analysis == 1 && j == 1
-			% Elements (lines and transformers) are merged
-			% NOTE: LINES ARE ALWAYS FIRST, THEN COME THE 2W TRANSF!
-			d.Result.(cg).Branch_Violation_Analysis(...
-				1:handles.Current_Settings.Simulation.Number_Runs,...
-				1:handles.Current_Settings.Simulation.Timepoints,...
-				1: numel(d.Grid.(cg).Branches.Grouped) ) = ...
-				zeros(handles.Current_Settings.Simulation.Number_Runs,...
-				handles.Current_Settings.Simulation.Timepoints,...
-				numel(d.Grid.(cg).Branches.Grouped) );
-			
-			% Line limits are in most cases given in A, therefore we will check
-			% limit values by comparing I to Ilim
-			
-			d.Simulation.Branch_Violation_analysis.element_type = vertcat(d.Grid.(cg).Branches.Grouped.Branch_Type_ID);
-			% d.Simulation.Branch_Violation_analysis.element_type is 1 if element is a line or 2 if element is a
-			% 2w transformer
-			
-			d.Simulation.Branch_Violation_analysis.line_current_limits = vertcat(d.Grid.(cg).Branches.Lines.Current_Limits);
-			% Transf. limits are in most cases given in VA, therefore we will check
-			% limit values by comparing S to Smax
-			d.Simulation.Branch_Violation_analysis.transf_app_power_limits = vertcat(d.Grid.(cg).Branches.Transf.App_Power_Limits);
-			
-			d.Simulation.Branch_Violation_analysis.branch_limits = ...
-				[d.Simulation.Branch_Violation_analysis.line_current_limits;
-				d.Simulation.Branch_Violation_analysis.transf_app_power_limits];
-			% d.Simulation.Branch_Violation_analysis.branch_limits has the
-			% limits to all branch elements - WARNING: the values here
-			% should only be used in conjunction with
-			% "d.Simulation.Branch_Violation_analysis.element_type",
-			% as the values are not the same unit (Amps for lines, VA for
-			% transformers) !!
-			
-		end
-		
-		if save_branch_results == 1 && j == 1
-			% Branch_Values include both lines and 2w transformers
-			d.Result.(cg).Branch_Values(...
-				1:handles.Current_Settings.Simulation.Number_Runs,...
-				1:handles.Current_Settings.Simulation.Timepoints,...
-				1:numel(d.Grid.(cg).Branches.Grouped),...
-				1:16) = ...
-				zeros(handles.Current_Settings.Simulation.Number_Runs,...
-				handles.Current_Settings.Simulation.Timepoints,...
-				numel(d.Grid.(cg).Branches.Grouped),16);
-		end
+		% Add an error-counter array
+		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Timepoints,1);
 		
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
@@ -258,35 +179,64 @@ for i=1:numel(Grid_List)
 		% noch die aktuellen Einstellungen speichern:
 		d.Simulation.Grid_act = cg;
 		d.Simulation.Input_Data_act = j;
-				
 		for k=1:handles.Current_Settings.Simulation.Timepoints
-			
-			% aktuellen Zeipunkt speichern:
-			d.Simulation.Current_timepoint = k;
-			% Last- und Einspeisedaten aktualisieren:
-			d.Grid.(cg).Load.Loads.update_power(k);
-			d.Grid.(cg).Load.Elmob.update_power(k);
-			d.Grid.(cg).Sola.Gen_Units.update_power(k);
-			
-			% der Berechnung die neuen Leistungswerte übermitteln:
-			d.Grid.(cg).P_Q_Node.Points.update_power;
-			% Lastfluss rechnen:
-			handles.sin.start_calculation;
-			
-			% here the analyzing functions are called. Because the data is stored
-			% within the NAT_Data-object, on which this function has access, no
-			% return value is neccesary:
-			
-			% Perform online voltage violation analysis (true/false
-            % results)
-			online_voltage_violation_analysis(handles);
-            % Save voltage results in result structure
-            save_node_values(handles);
-            % Perform online branch violation analysis (true/false results)
-			online_branch_violation_analysis(handles);
-            % Save branch results in result structure
-            save_branch_values(handles);
-			
+			try
+				% aktuellen Zeipunkt speichern:
+				d.Simulation.Current_timepoint = k;
+				% Last- und Einspeisedaten aktualisieren:
+				d.Grid.(cg).Load.Loads.update_power(k);
+				d.Grid.(cg).Load.Elmob.update_power(k);
+				d.Grid.(cg).Sola.Gen_Units.update_power(k);
+				
+				% der Berechnung die neuen Leistungswerte übermitteln:
+				d.Grid.(cg).P_Q_Node.Points.update_power;
+				% Lastfluss rechnen:
+				handles.sin.start_calculation;
+				
+				% here the analyzing functions are called. Because the data is stored
+				% within the NAT_Data-object, on which this function has access, no
+				% return value is neccesary:
+				
+				% Perform online voltage violation analysis (true/false
+				% results)
+				if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+					online_voltage_violation_analysis(handles);
+					% Save voltage results in result structure
+					if handles.Current_Settings.Simulation.Save_Voltage_Results
+						save_node_values(handles);
+					end
+				end
+				% Perform online branch violation analysis (true/false results)
+				if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+					online_branch_violation_analysis(handles);
+					if handles.Current_Settings.Simulation.Save_Branch_Results
+						% Save branch results in result structure
+						save_branch_values(handles);
+					end
+				end
+				
+			catch ME
+				disp('An Error occured:');
+				disp(ME.message);
+				disp('No data for this timepoint!');
+				d = handles.NAT_Data;
+				ct = d.Simulation.Current_timepoint;
+				cg = d.Simulation.Grid_act;
+				cd = d.Simulation.Input_Data_act;
+				if isfield(d.Result.(cg), 'Voltage_Violation_Analysis')
+					d.Result.(cg).Voltage_Violation_Analysis(cd,ct,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Node_Voltages')
+					d.Result.(cg).Node_Voltages(cd,ct,:,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Branch_Violation_Analysis')
+					 d.Result.(cg).Branch_Violation_Analysis(cd,ct,:) = NaN;
+				end
+				if isfield(d.Result.(cg), 'Branch_Values')
+					d.Result.(cg).Branch_Values(cd,ct,:,:) = NaN;
+				end
+				d.Result.(cg).Error_Counter(ct) = d.Result.(cg).Error_Counter(ct) + 1;
+			end
 		end
 		% Statusinfo zum Gesamtfortschritt an User:
 		t = toc;
@@ -298,17 +248,14 @@ for i=1:numel(Grid_List)
 			'. Verbleibende Zeit: ',...
 			sec2str(time_elapsed),'\n']);
 	end
-	fprintf('\t\t--> erledigt!\n');
-	fprintf(['\tBerechnungen beendet nach ',sec2str(t),'\n']);
-end
-
-% select again the first grid (because here the load-& infeeeddata is
-% stored):
-handles.Current_Settings.Files.Grid.Name = Grid_List{1}(1:end-4);
-
-% % make additional calculation to prepare the data for displaying with the
-% % data explorer:
-% % handles = adopt_data_for_display(handles);
-
+	
+	% select again the first grid (because here the load-& infeeeddata is
+	% stored):
+	handles.Current_Settings.Files.Grid.Name = Grid_List{1}(1:end-4);
+	
+	% % make additional calculation to prepare the data for displaying with the
+	% % data explorer:
+	% % handles = adopt_data_for_display(handles);
+	
 end
 

@@ -1,39 +1,50 @@
-function handles = draw_violations(handles,grid_no)
+function handles = draw_violations(handles,dataset,grid_no)
+% draw_violations shows a graph of:
+% - voltages at nodes (it is required to save the values!), limits at nodes
+%   and the conditional value if voltage limits are exceeded
+% - branch values at lines and transformers (it is required to save the
+%   values!), limits at branches and the conditional values if branch limits
+%   are exceeded
 
 d= handles.NAT_Data;
+
+% List of grids
 list_of_grids = fields(d.Result);
+% Observed grid
 cg = list_of_grids{grid_no};
-observed_dataset = 1;
-observed_node = 1;
+% Observed dataset
+observed_dataset = dataset;
+% Observe values 
 observed_phase = 1;
+
+% Observed value
 observed_col = 3; % Values of lines ( S (VA) )
 
-draw_voltages(d,cg,observed_dataset,observed_node,observed_phase);
+% Draw voltage violations
+draw_voltages(d,cg,observed_dataset,observed_phase);
+
+% Draw branch violations
 draw_branch_values(d,cg,observed_dataset,observed_col);
 end
 
-function d = draw_voltages(d,cg,observed_dataset,observed_node,observed_phase)
+function d = draw_voltages(d,cg,observed_dataset,observed_phase)
     
     % Rated voltage for all nodes
     rated_voltage = vertcat(d.Grid.(cg).All_Node.Points.Rated_Voltage_phase_earth);
-
     % Values of voltages
     voltage_value = squeeze( d.Result.(cg).Node_Voltages(observed_dataset,...
                      :, :,observed_phase) );
-
     voltage_value_pu =voltage_value./ repmat(rated_voltage(:,observed_phase)',size(voltage_value,1),[]);
     % Voltage limits
     voltage_limits = vertcat(d.Grid.(cg).All_Node.Points.Voltage_Limits)/100;
-    
-    % Voltage violations
+        % Voltage violations
     voltage_violations = squeeze( d.Result.(cg).Voltage_Violation_Analysis(...
         observed_dataset,:,:) );
     
     % Better plot is given by scaling the values near the voltage values
     % (i.e. easy zoom)
     shown_ylimit =[min([voltage_value_pu(:);voltage_limits(:)])-0.1,...
-                   max([voltage_value_pu(:);voltage_limits(:)])+0.1 ];
-               
+                   max([voltage_value_pu(:);voltage_limits(:)])+0.1 ];               
     plotted_voltage_violations=voltage_violations;    
     plotted_voltage_violations(voltage_violations==0) = min(shown_ylimit);    
     plotted_voltage_violations(voltage_violations==1) = mean(shown_ylimit);
@@ -46,8 +57,8 @@ function d = draw_voltages(d,cg,observed_dataset,observed_node,observed_phase)
 
     % Plot voltages for all nodes (p.u.), their limits (voltage limits) and
     % the voltage violation conditions
+    
     figure; hold on; %grid on; %box on
-
     set(gcf,'Position',[28,278,800*[1,0.5626]]);    
     plot(voltage_value_pu,'LineStyle','-');
     

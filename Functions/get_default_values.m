@@ -151,29 +151,6 @@ Files.Auto_Load_Feed_Data.Exte = '.mat';
 
 Current_Settings.Files = Files;
 
-% Definieren der Simulations-Parameter:
-Simulation.Parameters = {...
-	'Calculation_method', 'LF_USYM',...  % Unsymmetrischer Lastfluss
-	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
-	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
-	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
-	};
-% Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
-% Input-Datensätze sollen aus der Datenbank geladen werden?)
-Simulation.Number_Runs = 10;
-% Welche verschiedenen Netze sollen simuliert werden. ACHTUNG: diese
-% sollten in ihrer Grundstruktur gleich sein: d.h. z.B. gleiche Anzahl an
-% Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
-% müssen!
-Simulation.Grid_List = {};
-% Should the tool take into account different variants of the grid?
-Simulation.Use_Grid_Variants = 0;
-% Root path to the folder, in which the single Networks are stored...
-Simulation.Grids_Path = Files.Main_Path;
-% Should the tool calculate different scenarios (if avaliable)?
-Simulation.Use_Scenarios = 0;
-Simulation.Scenarios_Path = Files.Main_Path;
-
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung
 data_settings.get_Sample_Value = 1;   % Sample-Werte ermitteln bzw. speichern.
@@ -215,91 +192,49 @@ Current_Settings.Load_Database.Name = 'DLE_Datenbank';
 % Einstellungstabelle für das Netz (wird in GUI angezeigt)
 Current_Settings.Table_Network = [];
 
+% Definieren der Simulations-Parameter:
+Simulation.Parameters = {...
+	'Calculation_method', 'LF_USYM',...  % Unsymmetrischer Lastfluss
+	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
+	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
+	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
+	};
+% Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
+% Input-Datensätze sollen aus der Datenbank geladen werden?)
+Simulation.Number_Runs = 10;
+% Welche verschiedenen Netze sollen simuliert werden. ACHTUNG: diese
+% sollten in ihrer Grundstruktur gleich sein: d.h. z.B. gleiche Anzahl an
+% Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
+% müssen!
+Simulation.Grid_List = {};
+% Should the tool take into account different variants of the grid?
+Simulation.Use_Grid_Variants = 0;
+% Root path to the folder, in which the single Networks are stored...
+Simulation.Grids_Path = Files.Main_Path;
+% Should the tool calculate different scenarios (if avaliable)?
+Simulation.Use_Scenarios = 0;
+Simulation.Scenarios_Path = Files.Main_Path;
+
+Simulation.Voltage_Violation_Analysis = 0; 
+% 1 = Voltage violation analysis function is used
+% 0 = Voltage violation analysis function is not used
+Simulation.Save_Voltage_Results = 0;
+% 1 = Save voltage results
+% 0 = Do not save voltage results
+Simulation.Branch_Violation_Analysis = 0;
+% 1 = Branch violation analysis function is used
+% 0 = Branch violation analysis function is not used
+Simulation.Save_Branch_Results = 0;
+% 1 = Save branch results
+% 0 = Do not save branch results
+Simulation.Power_Loss_Analysis = 0;
+% 1 = Power Loss analysis function is used
+% 0 = Power Loss analysis function is not used
+Simulation.Save_Power_Loss_Results = 0;
+% 1 = Power Loss data is saved
+% 0 = Power Loss data is not saved
+Current_Settings.Simulation = Simulation;
+
 handles.Current_Settings = Current_Settings;
-
-%====================================================================================
-%                       S z e n a r i e n d e f i n i t i o n :
-%------------------------------------------------------------------------------------
-%                                     Szenario 1
-%------------------------------------------------------------------------------------
-% Bezeichnung des Szenarios:
-Simulation.Scenarios.Sc_1.Description = 'Scenario 1 - High Infeed, 30% Elektormobility, Low Load (0-25)%';
-Simulation.Scenarios.Sc_1.Filename = '02_Scenario_1';
-% Erzeugungsanlagen verteilen (gemäß Parametern):
-Solar.Number = [75, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-% Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [kWp]
-Solar.Power_sgl = 10;           % mittlere Leistung der Anlagen [kWp]
-Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
-Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
-Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
-Solar.WC_Selection = 'none_';
-Simulation.Scenarios.Sc_1.Solar = Solar; 
-
-Households.WC_Selection = 'E_025';
-Simulation.Scenarios.Sc_1.Households = Households;
-
-El_Mobility.Number = 30;         % Prozent-Anteil an Elektroautos in den Haushalten
-Simulation.Scenarios.Sc_1.El_Mobility = El_Mobility;
-
-%------------------------------------------------------------------------------------
-%                                     Szenario 2
-%------------------------------------------------------------------------------------
-Simulation.Scenarios.Sc_2.Description = 'Scenario 2 - Medium Infeed, 75% Elektormobility, High Load (75-100)%';
-Simulation.Scenarios.Sc_2.Filename = '03_Scenario_2';
-% Erzeugungsanlagen verteilen (gemäß Parametern):
-Solar.Number = [25, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-% Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [kWp]
-Solar.Power_sgl = 5;            % mittlere Leistung der Anlagen [kWp]
-Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
-Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
-Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
-Solar.WC_Selection = 'none_';
-Simulation.Scenarios.Sc_2.Solar = Solar; 
-
-Households.WC_Selection = 'E_100';
-Simulation.Scenarios.Sc_2.Households = Households;
-
-El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
-Simulation.Scenarios.Sc_2.El_Mobility = El_Mobility;
-
-%------------------------------------------------------------------------------------
-%                                     Szenario 3
-%------------------------------------------------------------------------------------
-Simulation.Scenarios.Sc_3.Description = 'Base Scenario - No Infeed, 0% Elektormobility, Normal Load';
-Simulation.Scenarios.Sc_3.Filename = '01_Base_Scenario';
-% Erzeugungsanlagen verteilen (gemäß Parametern):
-Solar.Number = [0, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-% Solar.Power_tot = 20;         % gesamte Leistung aller Anlagen [kWp]
-Solar.Power_sgl = 5;            % mittlere Leistung der Anlagen [kWp]
-Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
-Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
-Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
-Solar.WC_Selection = 'none_';
-Simulation.Scenarios.Sc_3.Solar = Solar; 
-
-Households.WC_Selection = 'none_';
-Simulation.Scenarios.Sc_3.Households = Households;
-
-El_Mobility.Number = 0;         % Prozent-Anteil an Elektroautos in den Haushalten
-Simulation.Scenarios.Sc_3.El_Mobility = El_Mobility;
-%====================================================================================
-
-% Anzahl an akutell verfügbaren Szenarios:
-Simulation.Scenarios.Number = numel(fields(Simulation.Scenarios));
-Simulation.Scenarios.Names = {};
-for i=1:Simulation.Scenarios.Number
-	Simulation.Scenarios.Names{end+1} = Simulation.Scenarios.(['Sc_',num2str(i)]).Filename;
-end
-% Szenariendaten verfügbar?
-Simulation.Scenarios.Data_avaliable = 0;
-
-handles.Current_Settings.Simulation = Simulation;
-
 end
 

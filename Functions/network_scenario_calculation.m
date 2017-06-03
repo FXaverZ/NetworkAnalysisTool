@@ -30,17 +30,27 @@ for i=1:scenar.Number;
 	% perform the network calculations:
 	try
 		handles = network_calculation(handles);
-		handles = post_voltage_violation_report(handles);
-		handles = post_branch_violation_report(handles);
+		if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+			handles = post_voltage_violation_report(handles);
+		end
+		if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+			handles = post_branch_violation_report(handles);
+		end
+		if handles.Current_Settings.Simulation.Power_Loss_Analysis
+			handles = post_active_power_loss_report(handles);
+		end
 	catch ME
 		disp('Ein Fehler ist aufgetreten:');
 		disp(ME.message);
-		disp('Simulationsergbnis wird ausgespart, keine Daten für dieses Szenario!');
 		continue;
 	end
+	fprintf('\n================================== \n');
 	% save the results:
 	handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - ',cur_scen];
 	handles = save_simulation_data(handles);
+	fprintf('\n================================== \n');
+	fprintf('CALCULATION SUCCESSFULLY FINSIHED! \n');
+	fprintf('================================== \n');
 end
 
 diary('off');
