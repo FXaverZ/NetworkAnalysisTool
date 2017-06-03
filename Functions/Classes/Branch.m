@@ -40,8 +40,6 @@ classdef Branch < handle
             % first,second, third] thermal limit in A        
         App_Power_Limits
             % Apparent power limits        
-        Number_of_Branch_Violation_limits
-            % Number of branch limits (0 or 1)   
             
         % -- changelog v1.1b ##### (start) // 20130425    
         Current = zeros(1,4); 
@@ -191,36 +189,15 @@ classdef Branch < handle
                 % The user can use one or the other (or just one, if we
                 % define it later)
                 
-                    current_limits=zeros(1,4);
-                    % Base current rating - if no base current rating is
-                    % defined an error is given
+                    current_limits=zeros(1);
+
                     if obj(i).Branch_Obj.get('Item','Ith') ~= 0                        
                         current_limits(1) = obj(i).Branch_Obj.get('Item','Ith')*1000;
                         current_limit_ids(1) = 1;
                     else
                         current_limits(1) = 9999999;                        
                     end                    
-                    % First, second and third current ratings are checked
-                    % If different current limits are not defined, we equal
-                    % all to the base thermal limit
-                    if obj(i).Branch_Obj.get('Item','Ith1') == 0
-                        current_limits(2) = NaN;                        
-                    else
-                        current_limits(2) = obj(i).Branch_Obj.get('Item','Ith1')*1000;
-                    end                    
-                    if obj(i).Branch_Obj.get('Item','Ith2') == 0
-                        current_limits(3) = NaN;
-                    else
-                        current_limits(3) = obj(i).Branch_Obj.get('Item','Ith2')*1000;
-                    end   
-                    % -- changelog v1.1b ##### (start) // 20130425
-                    if obj(i).Branch_Obj.get('Item','Ith3') == 0
-                        current_limits(4) = NaN;
-                    else
-                        current_limits(4) = obj(i).Branch_Obj.get('Item','Ith3')*1000;
-                    end
-                    % -- changelog v1.1b ##### (end) // 20130425
-
+                    
                     % Conversion from single-phase currents to apparent power limits for three-phase system!             
                     app_power_limits = 3*current_limits *...
                         obj(i).Rated_Voltage1_phase_phase/sqrt(3); % L123
@@ -231,61 +208,25 @@ classdef Branch < handle
                 % *1e6 to convert to VA. We define the current limit by dividing the value with 
                 % sqrt(3)*Ur1, thus the current limit is defined for the "from" side                    
                     
-                    app_power_limits=zeros(1,4);
+                    app_power_limits=zeros(1);
                     if obj(i).Branch_Obj.get('Item','Smax') ~= 0 % Base rating
                         app_power_limits(1) = obj(i).Branch_Obj.get('Item','Smax')*1e6;
                         app_power_limits_ids(1) = 1;
                     else
                         app_power_limits(1) = 999e6;
-                    end
-                   
-                    if obj(i).Branch_Obj.get('Item','Smax1') ~= 0 % First rating
-                        app_power_limits(2) = obj(i).Branch_Obj.get('Item','Smax1')*1e6;
-                    else
-                        app_power_limits(2) = NaN;
-                    end
-                    
-                    if obj(i).Branch_Obj.get('Item','Smax2') ~= 0 % Second rating
-                        app_power_limits(3) = obj(i).Branch_Obj.get('Item','Smax2')*1e6;
-                    else
-                        app_power_limits(3) = NaN;
-                    end              
-                    
-                    if obj(i).Branch_Obj.get('Item','Smax3') ~= 0 % Third rating
-                        app_power_limits(4) = obj(i).Branch_Obj.get('Item','Smax3')*1e6;
-                    else
-                        app_power_limits(4) = NaN;
-                    end
-                    
+                    end                                       
                     % Conversion from app. power to current on "from" side
                     current_limits = app_power_limits / (sqrt(3) * obj(i).Rated_Voltage1_phase_phase);
                     % Current limits are given in A for single phase
                     % App power limits are given in VA for all three phases L123
 
-                end % if object is line or transformer
-                
-                % -- changelog v1.1b ##### (start) // 20130423               
-                % Determine if only one branch limit is set across branches                
-                if sum(isnan(current_limits)) == 3
-                     % 'If 3 NaNs exist only the base value limit is
-                     % defined
-                     obj(i).Number_of_Branch_Violation_limits = 0;
-                     % Only one limit is defined 
-                 else
-                     obj(i).Number_of_Branch_Violation_limits = 1;
-                     % More than one thermal limit is defined 
-                 end
-               
-                % -- changelog v1.1b ##### (end) // 20130423
+                end % if object is line or transformer               
                 
                 obj(i).Current_Limits = current_limits; % Current limits defined for SINGLE PHASE!!
                 obj(i).App_Power_Limits = app_power_limits; % Apparent power limits defined for THREE PHASE!
                 
             end % for i = 1 : numel(obj)
         end % end of function
-        
-        % -- changelog v1.1b ##### (end) // 20130423
-        
         
         function current = update_current_branch_LF_USYM (obj)
 			%update_current_branch_LF_USYM    

@@ -4,7 +4,7 @@ function handles = network_calculation(handles)
 
 % Version:                 2.1
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Matej Rejic     - 29.04.2013
+% Letzte Änderung durch:   Matej Rejc     - 29.04.2013
 
 % Zugriff auf Datenobjekt:
 
@@ -136,12 +136,15 @@ for i=1:numel(Grid_List)
         if j == 1
             % We predefine the results for all datasets for specific (cg)
             % grid at first dataset iteration
-            handles = result_preallocation(handles,cg);        
+            handles = result_preallocation(handles,cg); 
+            
+            % -- changelog v1.1b ##### (start) // 20130506
+            % Add an error-counter array
+            d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
+            % -- changelog v1.1b ##### (end) // 20130506
         end        
 		
-		% Add an error-counter array
-		d.Result.(cg).Error_Counter = zeros(handles.Current_Settings.Simulation.Number_Runs, handles.Current_Settings.Simulation.Timepoints);
-		
+				
 		%--------------------------------------------------------------------------------
 		% Lasten ins Netz einfügen:
 		%--------------------------------------------------------------------------------
@@ -218,7 +221,7 @@ for i=1:numel(Grid_List)
 		d.Simulation.Input_Data_act = j;
 		for k=1:handles.Current_Settings.Simulation.Timepoints
 			try
-				
+                    
 				% aktuellen Zeipunkt speichern:
 				d.Simulation.Current_timepoint = k;
 				% Last- und Einspeisedaten aktualisieren:

@@ -26,6 +26,42 @@ simulation_options.Save_Power_Loss_Results = simulation_info.Save_Power_Loss_Res
 simulation_options.Use_Grid_Variants = simulation_info.Use_Grid_Variants;
 simulation_options.Use_Scenarios = simulation_info.Use_Scenarios;
 
+% What kind of data is used
+
+if handles.Current_Settings.Data_Extract.get_Sample_Value
+    simulation_options.Input_values_used = 'Data_Sample';
+elseif handles.Current_Settings.Data_Extract.get_Mean_Value
+    simulation_options.Input_values_used = 'Data_Mean';
+elseif handles.Current_Settings.Data_Extract.get_Min_Value
+    simulation_options.Input_values_used = 'Data_Min';    
+elseif handles.Current_Settings.Data_Extract.get_Max_Value
+    simulation_options.Input_values_used = 'Data_Max';    
+elseif handles.Current_Settings.Data_Extract.get_95_Quantile_Value
+    simulation_options.Input_values_used = 'Data_95P_Quantil';
+elseif handles.Current_Settings.Data_Extract.get_05_Quantile_Value
+    simulation_options.Input_values_used = 'Data_05P_Quantil';
+end
+% -- changelog v1.1b ##### (start) // 20130506
+% Check for datasets
+load_infeed_data_fields = fields(handles.NAT_Data.Load_Infeed_Data);
+% Check if households/solar/el. mobility exist (we require one, first check
+% households, if those do not exist, check solar or el mobility
+if ~isempty(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).Households.(simulation_options.Input_values_used))
+    simulation_options.Timepoints = ...
+        size(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).Households.(simulation_options.Input_values_used),1);
+else
+    if ~isempty(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).Solar.(simulation_options.Input_values_used))
+        simulation_options.Timepoints = ...
+            size(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).Solar.(simulation_options.Input_values_used),1);
+        
+    elseif ~isempty(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).El_Mobility.(simulation_options.Input_values_used))
+        simulation_options.Timepoints = ...
+            size(handles.NAT_Data.Load_Infeed_Data.(load_infeed_data_fields{1}).El_Mobility.(simulation_options.Input_values_used),1);
+    end
+end
+% -- changelog v1.1b ##### (end) // 20130506
+simulation_options.Current_Settings = handles.Current_Settings;
+
 % Save dataset number
 datasets = simulation_info.Number_Runs;
 % save scenario names  
@@ -59,14 +95,14 @@ result_filepath = file.Path;
 simdate = handles.Current_Settings.Files.Save.Result.Simdate;
 
 % Save result filenames
-if handles.Current_Settings.Simulation.Use_Scenarios
-	% If scenarios are used
-	for h = 1 : numel(handles.Current_Settings.Simulation.Scenarios.Names)
-		result_filename{h} = ['Res_',simdate,' - ',handles.Current_Settings.Simulation.Scenarios.Names{h},file.Exte];
-	end
+if handles.Current_Settings.Simulation.Use_Scenarios 
+    % If scenarios are used
+        for h = 1 : numel(handles.Current_Settings.Simulation.Scenarios.Names)
+        result_filename{h} = ['Res_',simdate,' - ',handles.Current_Settings.Simulation.Scenarios.Names{h},file.Exte];
+    end
 else
-	% If no scenarios are used
-	result_filename = [file.Name,file.Exte];
+    % If no scenarios are used
+    result_filename = [file.Name,file.Exte];
 end
 
 
