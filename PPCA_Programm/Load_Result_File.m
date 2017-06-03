@@ -7,7 +7,6 @@ classdef Load_Result_File < handle
     properties
         Result_Filenames = [];
         Result_Filepath = [];
-        Scenario_Filepath = [];
         Simulation_Options = [];
     end
     
@@ -16,9 +15,7 @@ classdef Load_Result_File < handle
         function obj = Load_Result_File(ext_obj)              
             obj.Result_Filenames = ext_obj.Result_Filenames;
             obj.Result_Filepath = ext_obj.Result_Filepath;
-            obj.Scenario_Filepath = ext_obj.Scenario_Filepath;
             obj.Simulation_Options = ext_obj.Simulation_Options;
-        
         end
         
         

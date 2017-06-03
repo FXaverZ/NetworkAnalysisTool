@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 16.05.2013
 
-% Last Modified by GUIDE v2.5 26-Apr-2013 13:41:45
+% Last Modified by GUIDE v2.5 06-Jun-2013 12:21:34
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -210,10 +210,10 @@ function check_use_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
 
 handles.Current_Settings.Simulation.Use_Scenarios = get(hObject,'Value');
 
-if handles.Current_Settings.Simulation.Use_Scenarios
-	% Re-Load the Szenarios:
-	handles = get_scenarios(handles);
-end
+% if handles.Current_Settings.Simulation.Use_Scenarios
+% 	% Re-Load the Szenarios:
+% 	handles = get_scenarios(handles);
+% end
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -635,34 +635,146 @@ function push_load_data_get_Callback(hObject, ~, handles) %#ok<DEFNU>
 set(handles.push_load_data_get, 'Enable', 'off');
 set(handles.push_cancel, 'Enable', 'on');
 pause(.01);
-
-% Lastdaten einlesen und in Struktur speichern:
-if handles.Current_Settings.Simulation.Use_Scenarios
-	handles = get_data_szenarios_load_infeed(handles);
-else
-	handles.NAT_Data.Simulation = [];
-	% Set the default scenario:
-	handles.NAT_Data.Simulation.Active_Scenario = ...
-		handles.Current_Settings.Simulation.Scenarios.(['Sc_',num2str(2)]);
-	handles = loaddata_get(handles);
-	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
-	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
-	Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
-	% Speicherort = aktulles Netzfile
-	file = handles.Current_Settings.Files.Auto_Load_Feed_Data;
-	file.Path = [handles.Current_Settings.Files.Grid.Path,filesep,...
-		handles.Current_Settings.Files.Grid.Name,'_files'];
-	
-	save([file.Path,filesep,file.Name,file.Exte],...
-		'Load_Infeed_Data', 'Data_Extract');
+% Ask User, from which Source the Data should be derived:
+answer = questdlg({['Sollen Daten aus der Datenbank geladen, auf ',...
+	'Simulationsergebnisse bei der Erstellung zurückgegriffen, ',...
+	'oder die orginalen Input Daten einer Simulation geladen werden?'];
+	'';...
+	'Bitte gewünschte Datenquelle angeben:'},...
+	'Spezifizierung Datenquelle',...
+	'Lastdatenbank', 'Simulationsergebnisse', 'Orginaldaten', 'Simulationsergebnisse');
+% According to this, use differen function for input-data creation:
+switch answer
+	case 'Lastdatenbank'
+		handles = get_input_from_database(handles);
+		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+	case 'Simulationsergebnisse'
+		% User has to specify, which results he want's to use...
+		file = handles.Current_Settings.Files.Load.Result;
+		[file.Name,file.Path] = uigetfile([...
+			{'*.mat','*.mat Simulation-Info-File'};...
+			{'*.*','Alle Dateien'}],...
+			'Laden von Simulationsergebnissen...',...
+			[file.Path,filesep]);
+		% Check, if there is a valid file specified:
+		if isequal(file.Name,0) || isequal(file.Path,0)
+			% Refresh the GUI:
+			handles = refresh_display_NAT_main_gui(handles);
+			set(handles.push_cancel, 'Enable', 'off');
+			set(handles.push_load_data_get, 'Enable', 'on');
+			% Update the handles-structure:
+			guidata(hObject, handles);
+			if ~isequal(file.Path,0)
+				% If there's a valid path, save this for later (programm
+				% will look here first...) :
+				handles.Current_Settings.Files.Load.Result.Path = file.Path;
+				% Update the handles-structure:
+				guidata(hObject, handles);
+			end
+			% leave the function:
+			return;
+		end
+		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
+		[~, file.Name, file.Exte] = fileparts(file.Name);
+		% leztes Zeichen ("/") im Pfad entfernen:
+		file.Path = file.Path(1:end-1);
+		try
+			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
+			Result = [];
+			Result.Result_Filepath = file.Path;
+			Result.Result_Filenames = inp_info.result_filename;
+			Result.Simulation_Options = inp_info.simulation_options;
+			Result.Scenarios = inp_info.scenarios;
+            Result.Grid_Variants = inp_info.variants;
+            Result.Datasets = inp_info.datasets;
+            Result.Timepoints = inp_info.simulation_options.Timepoints;            
+            Result.Result_Files = Load_Result_File(Result);
+		catch ME
+			errordlg({'Fehler beim Laden der Ergebnisse:';'';ME.message});
+			% If there's a valid path, save this for later (programm
+			% will look here first...) :
+			handles.Current_Settings.Files.Load.Result.Path = file.Path;
+			% Refresh the GUI:
+			handles = refresh_display_NAT_main_gui(handles);
+			set(handles.push_cancel, 'Enable', 'off');
+			set(handles.push_load_data_get, 'Enable', 'on');
+			% Update the handles-structure:
+			guidata(hObject, handles);
+			return;
+		end
+		handles.Result_Settings = Result;
+		handles.Current_Settings.Files.Load.Result = file;
+		handles = get_input_from_results(handles);
+		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+	case 'Orginaldaten'
+		% User has to specify, which results he want's to use...
+		file = handles.Current_Settings.Files.Load.Result;
+		[file.Name,file.Path] = uigetfile([...
+			{'*.mat','*.mat Simulation-Info-File'};...
+			{'*.*','Alle Dateien'}],...
+			'Laden von ursprünglichen Simulationsdaten...',...
+			[file.Path,filesep]);
+		% Check, if there is a valid file specified:
+		if isequal(file.Name,0) || isequal(file.Path,0)
+			% Refresh the GUI:
+			handles = refresh_display_NAT_main_gui(handles);
+			set(handles.push_cancel, 'Enable', 'off');
+			set(handles.push_load_data_get, 'Enable', 'on');
+			% Update the handles-structure:
+			guidata(hObject, handles);
+			if ~isequal(file.Path,0)
+				% If there's a valid path, save this for later (programm
+				% will look here first...) :
+				handles.Current_Settings.Files.Load.Result.Path = file.Path;
+				% Update the handles-structure:
+				guidata(hObject, handles);
+			end
+			% leave the function:
+			return;
+		end
+		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
+		[~, file.Name, file.Exte] = fileparts(file.Name);
+		% leztes Zeichen ("/") im Pfad entfernen:
+		file.Path = file.Path(1:end-1);
+		% try to load the information file of the Results:
+		try
+			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
+			Result = [];
+			Result.Result_Filepath = file.Path;
+			Result.Result_Filenames = inp_info.result_filename;
+			Result.Simulation_Options = inp_info.simulation_options;
+			Result.Scenarios = inp_info.scenarios;
+            Result.Grid_Variants = inp_info.variants;
+            Result.Datasets = inp_info.datasets;
+            Result.Timepoints = inp_info.simulation_options.Timepoints;            
+            Result.Result_Files = Load_Result_File(Result);
+		catch ME
+			errordlg({'Fehler beim Laden der originalenInput Daten:';'';ME.message});
+			% If there's a valid path, save this for later (programm
+			% will look here first...) :
+			handles.Current_Settings.Files.Load.Result.Path = file.Path;
+			% Refresh the GUI:
+			handles = refresh_display_NAT_main_gui(handles);
+			set(handles.push_cancel, 'Enable', 'off');
+			set(handles.push_load_data_get, 'Enable', 'on');
+			% Update the handles-structure:
+			guidata(hObject, handles);
+			return;
+		end
+		handles.Result_Settings = Result;
+		handles.Current_Settings.Files.Load.Result = file;
+		handles = load_input_from_results(handles);
+		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+	otherwise
+		% Do nothing...
 end
-helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
 
-% Anzeige aktualisieren:
+% Refresh the GUI:
 handles = refresh_display_NAT_main_gui(handles);
 set(handles.push_cancel, 'Enable', 'off');
+set(handles.push_load_data_get, 'Enable', 'on');
 
-% handles-Structure aktualisieren:
+% Update the handles-structure:
 guidata(hObject, handles);
 
 function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
@@ -733,7 +845,9 @@ function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<D
 if ~isempty(handles.Current_Settings.Table_Network)
 	for i=1:size(handles.System.housholds,1)
 		handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-			sum(strcmp(handles.System.housholds{i,1},handles.Current_Settings.Table_Network.Data(:,3)));
+			sum(strcmp(...
+			handles.System.housholds{i,1},...
+			handles.Current_Settings.Table_Network.Data(:,strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Haush. Typ'))));
 	end
 end
 
@@ -1189,8 +1303,6 @@ function edit_network_number_variants_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-
 function edit_simulation_number_scenarios_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_simulation_number_scenarios (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1307,24 +1419,3 @@ function edit_network_number_variants_CreateFcn(hObject, eventdata, handles) %#o
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in check_use_variants.
-
-
-% Hint: get(hObject,'Value') returns toggle state of check_use_variants
-
-
-% --- Executes on button press in check_analysis_voltage_violation.
-
-
-
-
-
-
-
-
-% --- Executes on button press in check_analysis_power_loss.
-
-
-

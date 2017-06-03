@@ -27,6 +27,8 @@ classdef plot_line_graphs
         % Grid
         node;
         % Node
+        branch;
+        % Branch
         
     end
     
@@ -122,6 +124,78 @@ classdef plot_line_graphs
                 'FontName','Times New Roman','FontSize',12);
             box(l,'off')            
         end % function timeplot_for_node
+        
+        
+        function obj = timeplot_for_branch(obj,varargin)
+            if numel(varargin) == 6
+                input = varargin{1};
+                if size(input,2) ~=5
+                    error('ErrorTests:convertTest',...
+                        'Error using timeplot_for_branch\nInput values are not properly sized.');
+                end
+                axc = varargin{2};
+                xlabel_txt = varargin{3};
+                ylabel_txt = varargin{4};
+                title_txt = varargin{5};
+                legend_txt = varargin{6};
+            else
+                error('ErrorTests:convertTest',...
+                    'Error using timeplot_for_branch\nToo many/few input arguments.');
+            end
+            
+            ax_handles{axc} = subplot(obj.gc_subplots,1,axc);
+            
+            hold on;
+            % Input
+            %   1-3 columns : L1, L2, L3 
+            %   4 column: therm limit
+            %   5 column: Branch violation condition
+            
+            for i = 1 : 3
+                plot(input(:,i),'LineStyle','-','LineWidth',1.5,...
+                    'Color',obj.cmap(i,:),'Marker','none');
+            end
+            plot(input(:,i+1),'LineStyle','--','LineWidth',1.5,...
+                'Color',obj.cmap(end,:),'Marker','none');
+            plot(input(:,i+2),'LineStyle','-','LineWidth',1.75,...
+                'Color',obj.cmap(i+3,:),'Marker','none');
+            % Set limits
+            ylimits = [-0.05 + round(10*min(min(input(:,1:3))))/10,...
+                0.05 + round(10*max(max(input(:,1:3))))/10];
+            if min(ylimits) > 0.9
+                ylimits(1) = 0.9-0.05;
+            end
+            if max(ylimits) < 1.1
+                ylimits(2) = 1.1+0.05;
+            end
+            ylim(ylimits);
+            xlim([1,size(input,1)]);
+            
+            % Set x axis ticks
+            if  size(input,1) <= 10
+                xtick = 1;
+            elseif size(input,1) >10 & size(input,1) <= 20
+                xtick = 2;
+            elseif size(input,1) > 20 & size(input,1) <= 50
+                xtick = 5;
+            elseif size(input,1) > 50 & size(input,1) <= 100
+                xtick = 10;
+            elseif size(input,1) > 100 & size(input,1) < 150
+                xtick = 10;
+            elseif size(input,1) >= 150 & size(input,1) < 200
+                xtick = 20;
+            else
+                xtick = 50;
+            end
+            set(ax_handles{axc},'FontName','Times New Roman','FontSize',12,...
+                'XTick',1:xtick:size(input,1));
+            
+            xlabel(xlabel_txt,'FontName','Times New Roman','FontSize',12);
+            ylabel(ylabel_txt,'FontName','Times New Roman','FontSize',12);
+            l=legend(legend_txt,'Location','NorthEast',...
+                'FontName','Times New Roman','FontSize',12);
+            box(l,'off')
+        end % function timeplot_for_branch
         
         function obj = voltageplot_for_nodes(obj,varargin)
             if numel(varargin) == 6

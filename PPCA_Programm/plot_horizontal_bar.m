@@ -73,7 +73,11 @@ classdef plot_horizontal_bar
             
             title(['Dataset comparison for scenario ' int2str(obj.dataset(1)) ' and grid ' int2str(obj.dataset(2)), ''],...
                 'FontName','Times New Roman','FontSize',12)
-                    
+            for l = 1 : numel(ytick_label)
+               if size(ytick_label{l},2) > 24
+                   ytick_label{l} = [ytick_label{l}(1:21),'...'];
+               end
+            end
             % Subplot graphics
             ax_handles{axc} = subplot(obj.gc_subplots,1,axc); 
             hold on;
@@ -125,9 +129,13 @@ classdef plot_horizontal_bar
             
             if ~isempty(scenario) & isempty(obj.scenario)
                 obj.scenario=scenario;
+            end  
+            
+            for l = 1 : numel(ytick_label)
+                if size(ytick_label{l},2) > 24
+                    ytick_label{l} = [ytick_label{l}(1:21),'...'];
+                end
             end
-            
-            
                     
             % Subplot graphics
             ax_handles{axc} = subplot(obj.gc_subplots,1,axc); 
@@ -152,18 +160,27 @@ classdef plot_horizontal_bar
             % X label
             xlabel(xlabel_txt,'FontName','Times New Roman','FontSize',12);
             if ~isempty(legend_txt)
-                l=legend(legend_txt,'Location','NorthEast');
+                for l = 1 : numel(legend_txt)
+                    if size(legend_txt{l},2) > 24
+                        legend_txt{l} = [legend_txt{l}(1:21),'...'];
+                    end
+                end
+                l=legend(legend_txt,'Location','SouthEast');
                 box(l,'off')
             end
-            if max(input(:)) == 100
-                upper_lim = 100;
+            if max(input(:)) > 1e3 % If input are the losses
+                % no need to limit xaxis
             else
-                upper_lim = ceil(1.25*max(input(:))/10)*10;
-                if upper_lim >= 100
+                if max(input(:)) == 100
                     upper_lim = 100;
-                end
-            end            
-            xlim([0,upper_lim]);            
+                else
+                    upper_lim = ceil(1.25*max(input(:))/10)*10;
+                    if upper_lim >= 100
+                        upper_lim = 100;
+                    end
+                end            
+                xlim([0,upper_lim]);            
+            end
         end % display : grids
         
         function obj = grids_and_scenarios(obj,varargin)
@@ -233,6 +250,16 @@ classdef plot_horizontal_bar
             for i = 1 : numel(legend_txt)
                legend_txt{i}(legend_txt{i} =='_') = ' ';
             end
+            for l = 1 : numel(legend_txt)
+                if size(legend_txt{l},2) > 24
+                    legend_txt{l} = [legend_txt{l}(1:21),'...'];
+                end
+            end
+            for l = 1 : numel(ytick_label)
+                if size(ytick_label{l},2) > 24
+                    ytick_label{l} = [ytick_label{l}(1:21),'...'];
+                end
+            end
             
             % Subplot graphics
             ax_handles{axc} = subplot(obj.gc_subplots,1,axc); 
@@ -259,32 +286,41 @@ classdef plot_horizontal_bar
                 xlabel(xlabel_txt,'FontName','Times New Roman','FontSize',12);
             end
             if ~isempty(legend_txt)
-                l=legend(legend_txt,'Location','NorthEast','FontName','Times New Roman','FontSize',12);
+                for l = 1 : numel(legend_txt)
+                    if size(legend_txt{l},2) > 24
+                        legend_txt{l} = [legend_txt{l}(1:21),'...'];
+                    end
+                end
+                l=legend(legend_txt,'Location','SouthEast','FontName','Times New Roman','FontSize',12);
                 box(l,'off')
             end
             
-            if max(input(:)) == 100
-                upper_lim = 100;
-            elseif max(input(:)) > 40
-                upper_lim = ceil(1.8*max(input(:))/10)*10;
-                if upper_lim >= 100
-                    upper_lim = 100;
-                end
-                
-            elseif max(input(:)) > 30 && max(input(:)) <= 40
-                upper_lim = ceil(1.55*max(input(:))/10)*10;
-                if upper_lim >= 100
-                    upper_lim = 100;
-                end
+            if max(input(:)) > 1e3
+                % If losses are plotted, no need to limit axis
             else
-                upper_lim = ceil(1.05*max(input(:))/10)*10;
-                if upper_lim >= 100
+                if max(input(:)) == 100
                     upper_lim = 100;
+                elseif max(input(:)) > 40
+                    upper_lim = ceil(1.8*max(input(:))/10)*10;
+                    if upper_lim >= 100
+                        upper_lim = 100;
+                    end
+                    
+                elseif max(input(:)) > 30 && max(input(:)) <= 40
+                    upper_lim = ceil(1.55*max(input(:))/10)*10;
+                    if upper_lim >= 100
+                        upper_lim = 100;
+                    end
+                else
+                    upper_lim = ceil(1.05*max(input(:))/10)*10;
+                    if upper_lim >= 100
+                        upper_lim = 100;
+                    end
+                    
                 end
-                
-            end    
-            if ~isempty(legend_txt)
-                xlim([0,upper_lim]);
+                if ~isempty(legend_txt)
+                    xlim([0,upper_lim]);
+                end
             end
         end % display : grids and scenarios
         

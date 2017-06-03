@@ -147,6 +147,10 @@ Files.Save.Result.Path = [Files.Main_Path,filesep,'Ergebnisse'];
 Files.Save.Result.Name = 'Daten';
 Files.Save.Result.Exte = '.mat';
 
+Files.Load.Result.Path = [Files.Main_Path,filesep,'Ergebnisse'];
+Files.Load.Result.Name = 'Res_XXX - information';
+Files.Load.Result.Exte = '.mat';
+
 % Name der automaisch gespeicherten Lastdaten (Pfad ist immer der Ordner des
 % jeweiligen Netzes): 
 Files.Auto_Load_Feed_Data.Name = 'act_Load_Feed_Data';

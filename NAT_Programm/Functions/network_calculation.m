@@ -241,10 +241,10 @@ for i=1:numel(Grid_List)
 				% Perform online voltage violation analysis (true/false
 				% results)
 				if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-					online_voltage_violation_analysis(handles);					
-                    % An additional condition for saving voltages is
-                    % inside the online function                    
-                end
+					online_voltage_violation_analysis(handles);
+					% An additional condition for saving voltages is
+					% inside the online function
+				end
                 % -- changelog v1.1b ##### (start) // 20130502
                 
 				% Perform online branch violation analysis (true/false results)
@@ -294,7 +294,7 @@ for i=1:numel(Grid_List)
 		err_count = sum(d.Result.(cg).Error_Counter(j,:));
 		if err_count > 0
 			fprintf(['\t\t\tWährend der Berechnung sind ',...
-				num2str(err_count),' Fehler aufgetreten!"\n']);
+				num2str(err_count),' Fehler aufgetreten!\n']);
 		end
 	end
 	
