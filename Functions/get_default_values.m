@@ -22,23 +22,23 @@ System.weekdays =  {... % Typen der Wochentage
 	'Sunday', 'Sonntag';...
 	};  
 System.housholds = {... % Definition der Haushaltskategorien:
-% 	'fami_rt', 'Familie mit Pensionist(en)'    ;...
-% 	'sing_vt', 'Single Vollzeit'               ;... 
-% 	'coup_vt', 'Paar Vollzeit'                 ;... 
-% 	'sing_pt', 'Single Teilzeit'               ;... 
-%  	'coup_pt', 'Paar Teilzeit'                 ;... 
-% 	'sing_rt', 'Single Pension'                ;... 
-% 	'coup_rt', 'Paar Pension'                  ;... 
-% 	'fami_2v', 'Familie, 2 Mitglieder Vollzeit';...    
-% 	'fami_1v', 'Familie, 1 Mitglied Vollzeit'  ;... 
-	'home_1',  'Haus - 1 Bewohner'            ;...
-	'home_2',  'Haus - 2 Bewohner'            ;...
-	'home_3',  'Haus - 3 Bewohner'            ;...
-	'hom_4p',  'Haus - 4 und mehr Bewohner'   ;...
-	'flat_1',  'Wohnung - 1 Bewohner'         ;...
-	'flat_2',  'Wohnung - 2 Bewohner'         ;...
-	'flat_3',  'Wohnung - 3 Bewohner'         ;...
-	'fla_4p',  'Wohnung - 4 und mehr Bewohner';...
+	'fami_rt', 'Familie mit Pensionist(en)'    ;...
+	'sing_vt', 'Single Vollzeit'               ;... 
+	'coup_vt', 'Paar Vollzeit'                 ;... 
+	'sing_pt', 'Single Teilzeit'               ;... 
+ 	'coup_pt', 'Paar Teilzeit'                 ;... 
+	'sing_rt', 'Single Pension'                ;... 
+	'coup_rt', 'Paar Pension'                  ;... 
+	'fami_2v', 'Familie, 2 Mitglieder Vollzeit';...    
+	'fami_1v', 'Familie, 1 Mitglied Vollzeit'  ;... 
+% 	'home_1',  'Haus - 1 Bewohner'            ;...
+% 	'home_2',  'Haus - 2 Bewohner'            ;...
+% 	'home_3',  'Haus - 3 Bewohner'            ;...
+% 	'hom_4p',  'Haus - 4 und mehr Bewohner'   ;...
+% 	'flat_1',  'Wohnung - 1 Bewohner'         ;...
+% 	'flat_2',  'Wohnung - 2 Bewohner'         ;...
+% 	'flat_3',  'Wohnung - 3 Bewohner'         ;...
+% 	'fla_4p',  'Wohnung - 4 und mehr Bewohner';...
 	};
 
 % mögliche Zeitauflösungen:
@@ -151,29 +151,6 @@ Files.Auto_Load_Feed_Data.Exte = '.mat';
 
 Current_Settings.Files = Files;
 
-% Definieren der Simulations-Parameter:
-Simulation.Parameters = {...
-	'Calculation_method', 'LF_USYM',...  % Unsymmetrischer Lastfluss
-	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
-	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
-	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
-	};
-% Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
-% Input-Datensätze sollen aus der Datenbank geladen werden?)
-Simulation.Number_Runs = 10;
-% Welche verschiedenen Netze sollen simuliert werden. ACHTUNG: diese
-% sollten in ihrer Grundstruktur gleich sein: d.h. z.B. gleiche Anzahl an
-% Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
-% müssen!
-Simulation.Grid_List = {};
-% Should the tool take into account different variants of the grid?
-Simulation.Use_Grid_Variants = 0;
-% Root path to the folder, in which the single Networks are stored...
-Simulation.Grids_Path = Files.Main_Path;
-% Should the tool calculate different scenarios (if avaliable)?
-Simulation.Use_Scenarios = 0;
-Simulation.Scenarios_Path = Files.Main_Path;
-
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
 data_settings.Time_Resolution = 1;    % zeitliche Auflösung
 data_settings.get_Sample_Value = 1;   % Sample-Werte ermitteln bzw. speichern.
@@ -215,8 +192,47 @@ Current_Settings.Load_Database.Name = 'DLE_Datenbank';
 % Einstellungstabelle für das Netz (wird in GUI angezeigt)
 Current_Settings.Table_Network = [];
 
-handles.Current_Settings = Current_Settings;
+% Definieren der Simulations-Parameter:
+Simulation.Parameters = {...
+	'Calculation_method', 'LF_USYM',...  % Unsymmetrischer Lastfluss
+	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
+	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
+	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
+	};
+% Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
+% Input-Datensätze sollen aus der Datenbank geladen werden?)
+Simulation.Number_Runs = 10;
+% Welche verschiedenen Netze sollen simuliert werden. ACHTUNG: diese
+% sollten in ihrer Grundstruktur gleich sein: d.h. z.B. gleiche Anzahl an
+% Last- und Einspeisepunkten, da diese mit den Eingangsdaten übereinstimmen
+% müssen!
+Simulation.Grid_List = {};
+% Should the tool take into account different variants of the grid?
+Simulation.Use_Grid_Variants = 0;
+% Root path to the folder, in which the single Networks are stored...
+Simulation.Grids_Path = Files.Main_Path;
+% Should the tool calculate different scenarios (if avaliable)?
+Simulation.Use_Scenarios = 0;
+Simulation.Scenarios_Path = Files.Main_Path;
 
+Simulation.Voltage_Violation_Analysis = 0; 
+% 1 = Voltage violation analysis function is used
+% 0 = Voltage violation analysis function is not used
+Simulation.Save_Voltage_Results = 0;
+% 1 = Save voltage results
+% 0 = Do not save voltage results
+Simulation.Branch_Violation_Analysis = 0;
+% 1 = Branch violation analysis function is used
+% 0 = Branch violation analysis function is not used
+Simulation.Save_Branch_Results = 0;
+% 1 = Save branch results
+% 0 = Do not save branch results
+Simulation.Power_Loss_Analysis = 0;
+% 1 = Power Loss analysis function is used
+% 0 = Power Loss analysis function is not used
+Simulation.Save_Power_Loss_Results = 0;
+% 1 = Power Loss data is saved
+% 0 = Power Loss data is not saved
 %====================================================================================
 %                       S z e n a r i e n d e f i n i t i o n :
 %------------------------------------------------------------------------------------
@@ -298,8 +314,8 @@ for i=1:Simulation.Scenarios.Number
 end
 % Szenariendaten verfügbar?
 Simulation.Scenarios.Data_avaliable = 0;
+Current_Settings.Simulation = Simulation;
 
-handles.Current_Settings.Simulation = Simulation;
-
+handles.Current_Settings = Current_Settings;
 end
 

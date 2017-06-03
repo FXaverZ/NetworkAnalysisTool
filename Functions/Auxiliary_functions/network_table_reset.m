@@ -2,9 +2,9 @@ function [Table_Network, Data_Extract]  = network_table_reset(handles)
 %NETWORK_TABLE_RESET Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.0
+% Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 22.03.2013
-% Letzte Änderung durch:   Franz Zeilinger - 17.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 24.04.2013
 
 Data_Extract = handles.Current_Settings.Data_Extract;
 

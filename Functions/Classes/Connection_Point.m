@@ -63,8 +63,9 @@ classdef Connection_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
+	% Version:                 1.2
 	% Erstellt von:            Franz Zeilinger - 14.01.2013
-	% Letzte Änderung durch:   Franz Zeilinger - 28.01.2013
+	% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 	
 	properties
 		
@@ -131,9 +132,8 @@ classdef Connection_Point < handle
 			% Das Berechnungsobjekt des Knotens speichern:
 			obj.Node_Obj = sin_ext.Simulation.GetObj('NODE', obj.Node_ID);
 			obj.Node_Name = obj.Node_Obj.get('Item','TOPO.Name');
-        end
+		end
 		
-        
 		function p_q = update_power(obj)
 			% Auswahl aller Objekte, für die eine Änderung in der Leistungsaufnahme
 			% vorliegt:
@@ -143,7 +143,7 @@ classdef Connection_Point < handle
 			for i=1:numel(obj_s)
 				p_q = obj_s(i).P_Q_Act;
 				p_q = sum(p_q,1);
-                
+                                
                 obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));
 				obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
 				obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
@@ -185,19 +185,19 @@ classdef Connection_Point < handle
 				voltage = LFNodeResultLoad.get('Item','U_Un');
 				obj.Voltage = voltage;
 			end
-		end
-		
-		function remove_COM_objects (obj)
-			% removing all COM-Object out of this class. This has to be
-			% done just before instances of this class are saved. Because
-			% the COM-Connection will be mostly lost, when this data is
-			% reloaded, warnings would appear. By a previous deletion of
-			% the COM-Objects, this can be avoided.
-			for i = 1:numel(obj)
-				obj(i).P_Q_Obj = [];
-				obj(i).Node_Obj = [];
-			end
-		end
-	end
-end
+        end
+        
+        function remove_COM_objects (obj)
+            % removing all COM-Object out of this class. This has to be
+            % done just before instances of this class are saved. Because
+            % the COM-Connection will be mostly lost, when this data is
+            % reloaded, warnings would appear. By a previous deletion of
+            % the COM-Objects, this can be avoided.
+            for i = 1:numel(obj)
+                obj(i).P_Q_Obj = [];
+                obj(i).Node_Obj = [];
+            end
+        end
+    end % End of methods
+end % End of classdef
 

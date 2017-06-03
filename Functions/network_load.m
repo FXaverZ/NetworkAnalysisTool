@@ -2,9 +2,9 @@ function handles = network_load (handles)
 %LOAD_NETWORK    Summary of this function goes here
 %    Detailed explanation goes here
 
-% Version:                 1.2
+% Version:                 1.3
 % Erstellt von:            Franz Zeilinger - 04.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 17.04.2013
+% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
 
 % Einstellungen und Systemvariablen:
 settin = handles.Current_Settings;
@@ -96,6 +96,12 @@ d.Grid.(cg).Branches.line_ids = d.Grid.(cg).Branches.line_ids(IX);
 [~, IX] = sort({d.Grid.(cg).Branches.Transf.Branch_Name});
 d.Grid.(cg).Branches.Transf = d.Grid.(cg).Branches.Transf(IX);
 d.Grid.(cg).Branches.tran_ids = d.Grid.(cg).Branches.tran_ids(IX);
+
+% Merge Lines and transformers into one group!
+d.Grid.(cg).Branches.group_ids = [d.Grid.(cg).Branches.line_ids;
+                                  d.Grid.(cg).Branches.tran_ids];
+d.Grid.(cg).Branches.Grouped = [d.Grid.(cg).Branches.Lines,...
+                                d.Grid.(cg).Branches.Transf];
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;

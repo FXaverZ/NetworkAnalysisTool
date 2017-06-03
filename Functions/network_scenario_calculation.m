@@ -15,16 +15,23 @@ end
 
 handles.Current_Settings.Files.Save.Result.Path = r_path;
 simdate = datestr(now,'yyyy-mm-dd_HH-MM-SS');
+
+% Save the outputs to the console:
+diary([r_path,filesep,'Res_',simdate,' - log.txt']);
+diary('on');
 scenar.Names = sort(scenar.Names);
 fprintf('\nBerechne die Szenarien...\n');
 for i=1:scenar.Number;
 	cur_scen = scenar.Names{i};
+	fprintf(['\t\t\t',cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
 	d.Load_Infeed_Data = Load_Infeed_Data;
 	% perform the network calculations:
 	try
 		handles = network_calculation(handles);
+		handles = post_voltage_violation_report(handles);
+		handles = post_branch_violation_report(handles);
 	catch ME
 		disp('Ein Fehler ist aufgetreten:');
 		disp(ME.message);
@@ -35,4 +42,6 @@ for i=1:scenar.Number;
 	handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - ',cur_scen];
 	handles = save_simulation_data(handles);
 end
+
+diary('off');
 
