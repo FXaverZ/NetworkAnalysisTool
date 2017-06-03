@@ -72,7 +72,7 @@ barh_branch_violations_grouped(bh, observed_dataset, display_option);
 
 end % Main function
 
-function [] = barh_branch_violations_grouped(bh, observed_dataset, display_option);
+function [] = barh_branch_violations_grouped(bh, observed_dataset, display_option)
         
 violations = eval(['bh.Number_', display_option]);
 nodes_with = eval(['bh.Nodes_', display_option]);

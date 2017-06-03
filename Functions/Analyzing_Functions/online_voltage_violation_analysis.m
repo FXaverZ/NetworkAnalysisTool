@@ -100,5 +100,12 @@ d.Result.(cg).Voltage_Violation_Analysis(cd,ct,:) = ...
     d.Simulation.Voltage_Violation_Analysis.number_of_voltage_limits .* ...
     (sum(voltage_violation_check2,2) > 0);
   
+% Write results into the preallocated array at (cd,ct,:) position
+% Save voltage results in result structure
+if handles.Current_Settings.Simulation.Save_Voltage_Results
+    d.Result.(cg).Node_Voltages(cd,ct,:,:) = node_voltages;
+end
+                    
+                    
 end % End of function
 

@@ -4,6 +4,10 @@ function handles = result_preallocation(handles,cg)
 % and for result saving. % Value of 1 turns on the preallocation 
 % function.
 
+% Version:                 1.2
+% Erstellt von:            Matej Rejc      - 17.04.2013
+% Letzte Änderung durch:   Matej Rejc      - 29.04.2013
+
     d = handles.NAT_Data;
     
     % Online analysis function preallocations **

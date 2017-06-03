@@ -31,13 +31,10 @@ for i=1:size(handles.System.housholds,1)
 end
 
 % set the current worst case.
-if handles.Current_Settings.Simulation.Use_Scenarios
 handles.Current_Settings.Data_Extract.Worstcase_Housholds = ...
 	find(strcmp(...
 	handles.System.wc_households(:,2),...
 	d.Simulation.Active_Scenario.Households.WC_Selection),1);
-end
-    
 
 % Get the current scenarion settings:
 Solar = d.Simulation.Active_Scenario.Solar;

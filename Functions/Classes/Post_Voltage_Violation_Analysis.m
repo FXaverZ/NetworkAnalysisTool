@@ -1,8 +1,9 @@
 classdef Post_Voltage_Violation_Analysis < handle
     
-    % Version:                 1.1
+    % Version:                 1.2
     % Erstellt von:            Matej Rejc      - 17.04.2013
-    % Letzte Änderung durch:
+    % Letzte Änderung durch:   Matej Rejc      - 24.04.2013
+	
     properties
 
         Number_of_Violations = [];
@@ -100,14 +101,14 @@ classdef Post_Voltage_Violation_Analysis < handle
             
             end
         end % function Post_Voltage_Analysis
-        
+        % -- changelog v1.1b ##### (start) // 20130430
         function obj = Display_results(obj)
             fprintf(['------------------------------------------------------------------------------\n']);
             for i = 1 : size(obj.Number_of_Violations,1)
                 fprintf(['Voltage violations;' obj.Grid_Name ';']);   
-                if sum(obj.Number_of_Violations) == 0
+                if sum(obj.Number_of_Violations(i,:)) == 0
                     %if no branch violations exist
-                    fprintf(['Set ' int2str(i) '; No branch violations;\n']);
+                    fprintf(['Set ' int2str(i) ';no voltage violations;\n']);
                 elseif obj.Number_of_Violations(i,1) == obj.Number_of_Violations(i,3) &&...
                         sum(obj.Number_of_Violations(i,:)) ~= 0  % If no second limit exists but voltage violations occur
                     
@@ -128,7 +129,7 @@ classdef Post_Voltage_Violation_Analysis < handle
                 end
             end
         end
-        
+        % -- changelog v1.1b ##### (end) // 20130430
     end % Methods
 
 end % Classdef

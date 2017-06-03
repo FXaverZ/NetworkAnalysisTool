@@ -1,21 +1,12 @@
 function handles = online_power_loss_analysis(handles)
-%ANALYZING_FUNCTION_1    dummy of an analyzing function
-%    This function represents the body of an anlayzing function for
-%    "on-line" analyzing simulation results within the NAT.
-%
-%    This function has to know:
-%      -  the current timepoint, which is simulated (e.g. time of day)
-%      -  the used "set" of input values
-%      -  the simulated grid variant
-%      -  how the grid is organized within MATLAB (Grid representation in
-%         MATLAB) in order to allow a mapping of the results. The Mapping
-%         is done automatically, if the objects of the MATLAB Grid
-%         representation (Structure "Grid") are used (see examples below) 
+
+% Version:                 1.0
+% Erstellt von:            Matej Rejc      - 29.04.2013
+% Letzte Änderung durch:   
 
 % Getting access to the data-object
 d = handles.NAT_Data;
 % this object represents a connection to the stored data within the NAT
-
 
 % current time point (integer from 1 to number of timepoints to be
 % simulated):

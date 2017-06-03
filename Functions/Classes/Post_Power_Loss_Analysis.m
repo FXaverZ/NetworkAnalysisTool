@@ -1,8 +1,9 @@
 classdef Post_Power_Loss_Analysis < handle
     
-    % Version:                 1.1
+    % Version:                 1.2
     % Erstellt von:            Matej Rejc      - 17.04.2013
-    % Letzte Änderung durch:
+    % Letzte Änderung durch:   Matej Rejc      - 24.04.2013
+	
     properties  
             % Summary report of active power losses at specific voltage
             % levels and the last column includes the sum of all voltage
