@@ -32,7 +32,7 @@ end
 Table.ColumnName = d.Control.Simulation_Description.Variants(:,1);
 for i = 1 : numel(Table.ColumnName)
     Table.ColumnName{i} = strrep(Table.ColumnName{i}, '_', ' ');
-    if size(Table.ColumnName{i},2) > 12
-        Table.ColumnName{i} = [Table.ColumnName{i}(1:12),'...'];
-    end
+%     if size(Table.ColumnName{i},2) > 12
+%         Table.ColumnName{i} = [Table.ColumnName{i}(1:12),'...'];
+%     end
 end

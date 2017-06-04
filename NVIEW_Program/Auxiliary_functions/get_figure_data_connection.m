@@ -26,6 +26,19 @@ figure_data_id{16,1} = 'Electrical_Losses_Timeline_Scen';
 figure_data_id{17,1} = 'Total_Electrical_Losses_Timeline_Grid';
 figure_data_id{18,1} = 'Total_Electrical_Losses_Timeline_Scen';
 
+figure_data_id{19,1} = 'Total_Voltage_Mean_Timeline_Grid';
+figure_data_id{20,1} = 'Total_Voltage_Mean_Timeline_Scen';
+figure_data_id{21,1} = 'Voltage_Mean_Timeline_Grid';
+figure_data_id{22,1} = 'Voltage_Mean_Timeline_Scen';
+figure_data_id{23,1} = 'Total_Voltage_Min_Timeline_Grid';
+figure_data_id{24,1} = 'Total_Voltage_Min_Timeline_Scen';
+figure_data_id{25,1} = 'Voltage_Min_Timeline_Grid';
+figure_data_id{26,1} = 'Voltage_Min_Timeline_Scen';
+figure_data_id{27,1} = 'Total_Voltage_Max_Timeline_Grid';
+figure_data_id{28,1} = 'Total_Voltage_Max_Timeline_Scen';
+figure_data_id{29,1} = 'Voltage_Max_Timeline_Grid';
+figure_data_id{30,1} = 'Voltage_Max_Timeline_Scen';
+
 
 % function menu_load_analysis_all_Callback
 figure_name = get(active_figure,'Name');
@@ -68,6 +81,30 @@ elseif strncmp(figure_name,'Electric losses sum for all datasets at',39) && strn
     output = 17;
 elseif strncmp(figure_name,'Electric losses sum for all datasets timeline for',49)
     output = 18;
+elseif strncmp(figure_name,'Total Voltage mean values for grid ',35)
+	output = 19;
+elseif strncmp(figure_name,'Total Voltage mean values for scenario ',39)
+	output = 20;
+elseif strncmp(figure_name,'Voltage mean values timelines for grid ',39)
+	output = 21;
+elseif strncmp(figure_name,'Voltage mean values timelines for scenario ',43)
+	output = 22;
+elseif strncmp(figure_name,'Total Voltage minimum values for grid ',38)
+	output = 23;
+elseif strncmp(figure_name,'Total Voltage minimum values for scenario ', 42)
+	output = 24;
+elseif strncmp(figure_name,'Voltage mininimum values timelines for grid ',44)
+	output = 25;
+elseif strncmp(figure_name,'Voltage minimum values timelines for scenario ', 46)
+	output = 26;
+elseif strncmp(figure_name,'Total Voltage maximum values for grid ',38)
+	output = 27;
+elseif strncmp(figure_name,'Total Voltage maximum values for scenario ',42)
+	output = 28;
+elseif strncmp(figure_name,'Voltage maximum values timelines for grid ',42)
+	output = 29;
+elseif strncmp(figure_name,'Voltage maximum values timelines for scenario ', 46)
+	output = 30;
 end
 
 if ~isempty(output)

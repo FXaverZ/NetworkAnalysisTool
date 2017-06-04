@@ -28,19 +28,31 @@ for i = 1 :  numel(check_active_figures)
 				
 				Table_rf.Description = Table.(Data_List{j}).Description;
 				Table_rf.Description = strrep(Table_rf.Description,lower('Voltage'),'U');
+				Table_rf.Description = strrep(Table_rf.Description,'Voltage','U');
 				Table_rf.Description = strrep(Table_rf.Description,lower('Current'),'I');
+				Table_rf.Description = strrep(Table_rf.Description,'Current','I');
 				Table_rf.Description = strrep(Table_rf.Description,'violations','viol.');
+				Table_rf.Description = strrep(Table_rf.Description,'values ', '');
 				Table_rf.Description = strrep(Table_rf.Description,'timeline at grids for','T for');
 				Table_rf.Description = strrep(Table_rf.Description,'Total number of','Sum-');
+				Table_rf.Description = strrep(Table_rf.Description,'Total ','Sum-');
 				Table_rf.Description = strrep(Table_rf.Description,'timeline','T');
+				Table_rf.Description = strrep(Table_rf.Description,'timelines','T');
 				Table_rf.Description = strrep(Table_rf.Description,'Average','Avr.');
 				Table_rf.Description = strrep(Table_rf.Description,'average','avr.');
+				Table_rf.Description = strrep(Table_rf.Description,'Mean','Avr.');
+				Table_rf.Description = strrep(Table_rf.Description,'mean','avr.');
+				Table_rf.Description = strrep(Table_rf.Description,'Maximum','Max.');
+				Table_rf.Description = strrep(Table_rf.Description,'maximum','max.');
+				Table_rf.Description = strrep(Table_rf.Description,'Minimum','Min.');
+				Table_rf.Description = strrep(Table_rf.Description,'minimum','min.');
 				Table_rf.Description = strrep(Table_rf.Description,'loading','load.');
 				Table_rf.Description = strrep(Table_rf.Description,'branch','br.');
 				Table_rf.Description = strrep(Table_rf.Description,'for all datasets for','for');
 				Table_rf.Description = strrep(Table_rf.Description,'Electric losses','El. loss.');
 				Table_rf.Description = strrep(Table_rf.Description,'El. loss. sum for all datasets at','Sum- El. loss. for');
 				Table_rf.Description = strrep(Table_rf.Description,'El. loss. sum for all datasets T for' ,'Sum- El. loss. for');
+				Table_rf.Description = strrep(Table_rf.Description,'for scenario','f. scen.');
 				if size(Table_rf.Description,2) > 31
 					Table_rf.Description = [Table_rf.Description(1:28),'...'];
 				end
@@ -56,7 +68,7 @@ for i = 1 :  numel(check_active_figures)
 		% Changelog FZ 1.3 Start
 		elseif isempty(output)
 			helpdlg({'The data of the plot';'';...
-				['"',Table.Name,'"'];'';...
+				['"',get(check_active_figures(i),'Name'),'"'];'';...
 				'cannot be saved to Excel!';'';...
 				'If the plot is a histogram, the data is available in the summary Excel-file!'},'Save plot data...');
 		% Changelog FZ 1.3 End

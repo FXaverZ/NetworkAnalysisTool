@@ -60,6 +60,7 @@ for i = 1 : numel(Grid_List)
         
         nodes_afflicted = cell(size(bus_voltages,2),size(bus_voltages,1));
         voltage_violations = zeros(size(bus_voltages,1),size(bus_voltages,2),size(bus_voltages,3),size(bus_voltages,4));
+		voltage_values = zeros([size(voltage_violations) 3]);
         violated_nodes_number = zeros(size(bus_voltages,2),size(bus_voltages,1));
         
 
@@ -68,10 +69,12 @@ for i = 1 : numel(Grid_List)
                 for t = 1 : size(bus_voltages,3) % timepoint
                     for n = 1 : size(bus_voltages,4) % node
                         
-                        if sum(bus_voltages(s,d,t,n,:)==0) > 0
-                            bus_voltages(s,d,t,n,:) = NaN;
-                        end
-                        
+						if sum(bus_voltages(s,d,t,n,:)==0) > 0
+							bus_voltages(s,d,t,n,:) = NaN;
+						end
+						
+						voltage_values (s,d,t,n,:) = bus_voltages(s,d,t,n,:) / bus_info(n,3);
+						
                         voltage_violations(s,d,t,n) = ((bus_voltages(s,d,t,n,1) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,1) / bus_info(n,3)) > Umax) ||...
                             ((bus_voltages(s,d,t,n,2) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,2) / bus_info(n,3)) > Umax) ||...
                             ((bus_voltages(s,d,t,n,3) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,3) / bus_info(n,3)) > Umax);
@@ -138,9 +141,10 @@ for i = 1 : numel(Grid_List)
         res.(Grid_List{i}).bus_violations_at_datasets = voltage_violation_numbers;
         res.(Grid_List{i}).bus_violated_at_datasets = violated_nodes_number;
         res.(Grid_List{i}).bus_deviations = bus_deviation_summary;
+		res.(Grid_List{i}).bus_voltages = voltage_values;
         
         clear bus_info voltage_violations bus_violated bus_voltages voltage_violation_numbers violated_nodes_number counter
-        clear voltage_violation_statistics bus_deviations bus_deviation_summary bus_violations_number  nodes_afflicted voltage_statistics
+        clear voltage_violation_statistics bus_deviations bus_deviation_summary bus_violations_number  nodes_afflicted voltage_statistics voltage_values
     end % VOLTAGE ANALYSIS
     
     if handles.NVIEW_Control.Simulation_Options.Overcurrent_Analysis == 1

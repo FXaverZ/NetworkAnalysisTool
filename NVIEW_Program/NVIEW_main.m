@@ -344,6 +344,8 @@ function menu_export_analysis_to_xls_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Write to Excel
 handles = write_to_excel(handles);
 guidata(hObject, handles);
@@ -354,6 +356,8 @@ function menu_export_analysis_to_nview_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Write to matlab
 handles = write_to_nview(handles);
 guidata(hObject, handles);
@@ -512,6 +516,8 @@ function pushtool_OpenExcel_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 
 path = handles.System.Export_Path;
 file = [strrep(handles.NVIEW_Control.Result_Information_File.Name,' - information','_'),'NVIEW'];
@@ -658,6 +664,8 @@ function menu_voltage_analysis_all_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,0);
 guidata(hObject, handles);
@@ -669,6 +677,8 @@ function menu_show_voltage_analysis_table_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,-1);
 guidata(hObject, handles);
@@ -680,6 +690,8 @@ function menu_voltage_violation_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,1);
 guidata(hObject, handles);
@@ -691,6 +703,8 @@ function menu_nodes_violated_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,2);
 guidata(hObject, handles);
@@ -702,6 +716,8 @@ function menu_voltage_histograms_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,3);
 guidata(hObject, handles);
@@ -713,6 +729,8 @@ function menu_voltage_deviations_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,4);
 guidata(hObject, handles);
@@ -737,6 +755,8 @@ function menu_load_analysis_all_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_load_analysis(handles,1);
 guidata(hObject, handles);
@@ -747,6 +767,8 @@ function menu_show_load_table_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_load_analysis(handles,0);
 guidata(hObject, handles);
@@ -758,6 +780,8 @@ function menu_load_time_graph_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_load_time_graph(handles,1);
 guidata(hObject, handles);
@@ -768,6 +792,8 @@ function menu_load_time_graph_average_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_load_time_graph(handles,2);
 guidata(hObject, handles);
@@ -778,6 +804,8 @@ function menu_voltage_violation_time_graph_grid_Callback(hObject, eventdata, han
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_violation_time_graph(handles,1);
 guidata(hObject, handles);
@@ -789,6 +817,8 @@ function menu_voltage_violation_time_graph_scenario_Callback(hObject, eventdata,
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_violation_time_graph(handles,2);
 guidata(hObject, handles);
@@ -800,6 +830,8 @@ function menu_voltage_violation_sum_time_graph_grid_Callback(hObject, eventdata,
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_violation_time_graph(handles,3);
 guidata(hObject, handles);
@@ -810,6 +842,8 @@ function menu_voltage_violation_sum_time_graph_scenario_Callback(hObject, eventd
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_violation_time_graph(handles,4);
 guidata(hObject, handles);
@@ -821,6 +855,8 @@ function menu_current_analysis_all_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_analysis(handles,0);
 guidata(hObject, handles);
@@ -832,6 +868,8 @@ function menu_show_current_analysis_table_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_analysis(handles,-1);
 guidata(hObject, handles);
@@ -842,6 +880,8 @@ function menu_current_violation_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_analysis(handles,1);
 guidata(hObject, handles);
@@ -852,6 +892,8 @@ function menu_branches_violated_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_analysis(handles,2);
 guidata(hObject, handles);
@@ -862,6 +904,8 @@ function menu_current_histograms_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_analysis(handles,3);
 guidata(hObject, handles);
@@ -872,6 +916,8 @@ function menu_branch_loading_analysis_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_current_analysis(handles,4);
 guidata(hObject, handles);
 
@@ -881,6 +927,8 @@ function menu_current_violation_time_graph_grid_Callback(hObject, eventdata, han
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,1);
 guidata(hObject, handles);
@@ -892,6 +940,8 @@ function menu_current_violation_time_graph_scenario_Callback(hObject, eventdata,
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,2);
 guidata(hObject, handles);
@@ -902,6 +952,8 @@ function menu_current_violation_sum_time_graph_grid_Callback(hObject, eventdata,
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,3);
 guidata(hObject, handles);
@@ -912,6 +964,8 @@ function menu_current_violation_sum_time_graph_scenario_Callback(hObject, eventd
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,4);
 guidata(hObject, handles);
@@ -922,6 +976,8 @@ function menu_branch_loading_time_graph_grid_Callback(hObject, eventdata, handle
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,5);
 guidata(hObject, handles);
@@ -932,6 +988,8 @@ function menu_branch_loading_time_graph_scenario_Callback(hObject, eventdata, ha
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_current_violation_time_graph(handles,6);
 guidata(hObject, handles);
@@ -942,6 +1000,8 @@ function menu_branch_loading_time_graph_scenario_total_Callback(hObject, eventda
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 % Changelog FZ 1.3 Start
 handles = call_current_violation_time_graph(handles,8);
@@ -954,6 +1014,8 @@ function menu_branch_loading_time_graph_grid_total_Callback(hObject, eventdata, 
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 % Changelog FZ 1.3 Start
 handles = call_current_violation_time_graph(handles,7);
@@ -966,6 +1028,8 @@ function menu_electric_losses_analysis_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_analysis(handles,0);
 guidata(hObject, handles);
 
@@ -975,6 +1039,8 @@ function menu_electric_losses_histogram_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_analysis(handles,2);
 guidata(hObject, handles);
 
@@ -984,6 +1050,8 @@ function menu_show_electric_losses_analysis_table_Callback(hObject, eventdata, h
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_analysis(handles,-1);
 guidata(hObject, handles);
 
@@ -993,6 +1061,8 @@ function menu_electric_losses_time_graph_grid_Callback(hObject, eventdata, handl
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_time_graph(handles,1);
 guidata(hObject, handles);
 
@@ -1002,6 +1072,8 @@ function menu_electric_losses_time_graph_scenario_Callback(hObject, eventdata, h
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_time_graph(handles,2);
 guidata(hObject, handles);
 
@@ -1011,6 +1083,8 @@ function menu_electric_losses_sum_time_graph_grid_Callback(hObject, eventdata, h
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_time_graph(handles,3);
 guidata(hObject, handles);
 
@@ -1020,6 +1094,8 @@ function menu_electric_losses_sum_time_graph_scenario_Callback(hObject, eventdat
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_electric_losses_time_graph(handles,4);
 guidata(hObject, handles);
 
@@ -1038,6 +1114,8 @@ function show_list_nodes_violated_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
 handles = call_list_nodes_violated(handles);
 guidata(hObject, handles);
 
@@ -1047,7 +1125,168 @@ function show_list_branches_violated_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
-
+% Update handles structure
+guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_list_branches_violated(handles);
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_mean_grids_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_mean_grids (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_voltage_time_graph(handles,2);
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_mean_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_mean_scenarios (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_voltage_time_graph(handles,4);
+% Update handles structure
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function menu_voltage_show_mean_total_grids_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_mean_total_grids (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_voltage_time_graph(handles,1);
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_mean_total_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_mean_total_scenarios (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_voltage_time_graph(handles,3);
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_voltage_show (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_grids_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_grids (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction calls
+handles = call_voltage_time_graph(handles,1);
+handles = call_voltage_time_graph(handles,6);
+handles = call_voltage_time_graph(handles,10);
+handles = call_voltage_time_graph(handles,2);
+handles = call_voltage_time_graph(handles,7);
+handles = call_voltage_time_graph(handles,11);
+handles = call_voltage_violation_time_graph(handles,1);
+handles = call_voltage_violation_time_graph(handles,3);
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_voltage_show_all_scen_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_voltage_show_all_scen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction calls
+handles = call_voltage_time_graph(handles,3);
+handles = call_voltage_time_graph(handles,8);
+handles = call_voltage_time_graph(handles,12);
+handles = call_voltage_time_graph(handles,4);
+handles = call_voltage_time_graph(handles,9);
+handles = call_voltage_time_graph(handles,13);
+handles = call_voltage_violation_time_graph(handles,2);
+handles = call_voltage_violation_time_graph(handles,4);
+% Update handles structure
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_current_show_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_current_show (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function menu_current_show_grids_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_current_show_grids (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_current_violation_time_graph(handles,1);
+handles = call_current_violation_time_graph(handles,3);
+handles = call_current_violation_time_graph(handles,5);
+handles = call_current_violation_time_graph(handles,7);
+% Update handles structure
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function menu_current_show_all_scen_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_current_show_all_scen (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% process data if neccesary:
+handles = process_nat_results_as(handles); % Process results
+% Update handles structure
+guidata(hObject, handles);
+% Analysis subfunction call
+handles = call_current_violation_time_graph(handles,2);
+handles = call_current_violation_time_graph(handles,4);
+handles = call_current_violation_time_graph(handles,6);
+handles = call_current_violation_time_graph(handles,8);
+% Update handles structure
 guidata(hObject, handles);
