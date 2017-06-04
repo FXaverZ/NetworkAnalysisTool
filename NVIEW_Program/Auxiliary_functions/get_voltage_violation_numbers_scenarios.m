@@ -24,6 +24,6 @@ for i = 1 : numel(Table.RowName)
         Table.RowName{i} = [Table.RowName{i}(1:12),'...'];
     end
 end
-Table.Description = 'Percentage of grid nodes affected by voltage violations seperated by scenarios';
+Table.Description = 'Voltage violations seperated by scenarios';
 
 end

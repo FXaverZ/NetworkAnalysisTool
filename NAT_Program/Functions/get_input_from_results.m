@@ -217,7 +217,7 @@ for i=1:scen_new.Number
 	if i>1
 		load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(i)}]);
 		% delete the not needed data:
-		clear('Debug','Load_Infeed_Data');
+		clear('Debug');
 	end
 	
 	if scen_new.(['Sc_',num2str(i)]).Data_is_divided

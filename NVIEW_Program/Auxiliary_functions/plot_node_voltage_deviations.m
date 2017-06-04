@@ -39,6 +39,7 @@ end
 % Append temporary data to gcf - append ID for colorscheme control!
 setappdata(findobj(gcf,'type','figure'),'FigureID','line_voltage_deviations');
 
-
+% Append table data to gcf - values
+%     setappdata(findobj(gcf,'type','figure'),'table',Table);
 
 end

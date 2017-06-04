@@ -16,6 +16,10 @@ clear Table_Inp
 Table_Voltage = create_voltage_violation_table(handles,d);
 Table_Current = create_current_table(handles,d);
 Table_Losses = create_loss_table(handles,d);
+Table_Node_List = get_violated_node_list(d);
+Table_Branch_List = get_violated_branch_list(d);
+
+%----------------------------------------------------------------
 
 % Reshape voltage violations to Excel form
 Grid_List = d.Control.Simulation_Description.Variants;
@@ -57,6 +61,14 @@ Table_Losses.Excel_Header{1,1} = 'ELECTRIC LOSSES SUMMARY REPORT';
 Table_Losses.Excel_table = [Table_Losses.Excel_Header;Table_Losses.Excel_table];
 Table_Losses.Excel_table(3,:) = Table_Losses.ColumnName; % Add ID header
 
+Table_Node_List.Excel_Header = cell(2,size(Table_Node_List.Values_Excel,2)); 
+Table_Node_List.Excel_Header{1,1} = 'NODES AFFECTED BY VOLTAGE VIOLATIONS';
+Table_Node_List.Excel_table = [Table_Node_List.Excel_Header;Table_Node_List.Values_Excel];
+
+Table_Branch_List.Excel_Header = cell(2,size(Table_Branch_List.Values_Excel,2)); 
+Table_Branch_List.Excel_Header{1,1} = 'BRANCHES AFFECTED BY OVERCURRENTS';
+Table_Branch_List.Excel_table = [Table_Branch_List.Excel_Header;Table_Branch_List.Values_Excel];
+
 Table_Voltage_Violation_All.Excel_table = [Table_Voltage_Violation_All.Excel_Header; Table_Voltage_Violation_All.Values_Cell];
 Table_Voltage_Violation_All.Excel_table{1,1} = Table_Voltage_Violation_All.Main_Header;
 
@@ -86,6 +98,8 @@ Sheet_Descr_Load = Table_Load.Description(1:find(Table_Load.Description=='_')-1)
 Sheet_Descr_Volt = Table_Voltage.Description(1:find(Table_Voltage.Description=='_')-1);
 Sheet_Descr_Curr = Table_Current.Description(1:find(Table_Current.Description=='_')-1);
 Sheet_Descr_Loss = Table_Losses.Description(1:find(Table_Losses.Description=='_')-1);
+Sheet_Descr_Nodes = 'Nodes aff. by volt. viol.'; 
+Sheet_Descr_Branches = 'Branches aff. by overcurr.'; 
 
 Sheet_Descr_Volt_Viol_All = Table_Voltage_Violation_All.Description;
 Sheet_Descr_Curr_Viol_All = Table_Current_Violation_All.Description;
@@ -97,6 +111,8 @@ xlswrite(file,Table_Load.Excel_table,Sheet_Descr_Load);
 xlswrite(file,Table_Voltage.Excel_table,Sheet_Descr_Volt);
 xlswrite(file,Table_Current.Excel_table,Sheet_Descr_Curr);
 xlswrite(file,Table_Losses.Excel_table,Sheet_Descr_Loss);
+xlswrite(file,Table_Node_List.Excel_table,Sheet_Descr_Nodes);
+xlswrite(file,Table_Branch_List.Excel_table,Sheet_Descr_Branches);
 
 xlswrite(file,Table_Voltage_Violation_All.Excel_table,Sheet_Descr_Volt_Viol_All);
 xlswrite(file,Table_Current_Violation_All.Excel_table,Sheet_Descr_Curr_Viol_All);
@@ -201,7 +217,38 @@ for sheetIdx = 1 : numSheets
                 int2str(Highlight_Table_Voltage_Rows(i))]).Interior.ColorIndex = 17;
         end
         
+    elseif strcmp(sheetName,Sheet_Descr_Nodes)
         
+        Highlight_Table_Nodes_Rows = [1,3,4]  ;        
+        hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
+        for columnIdx = 1 : size(Table_Node_List.Excel_table,2)
+            hWorksheet.Columns.Item(columnIdx).columnWidth = 30; %first column
+        end
+        
+        for i = 1 : numel(Highlight_Table_Nodes_Rows)
+            hWorksheet.Range(['A1:', Excel_Column_ID{size(Table_Node_List.Excel_table,2)}, '1']).Interior.ColorIndex = 17;
+            hWorksheet.Range(['A3:', Excel_Column_ID{size(Table_Node_List.Excel_table,2)}, '3']).Interior.ColorIndex = 24;
+            hWorksheet.Range(['A', int2str(Highlight_Table_Nodes_Rows(i)) ,...
+                ':', Excel_Column_ID{size(Table_Node_List.Excel_table,2)},...
+                int2str(Highlight_Table_Nodes_Rows(i))]).Interior.ColorIndex = 17;
+        end
+        
+    elseif strcmp(sheetName,Sheet_Descr_Branches)
+        
+        Highlight_Table_Branches_Rows = [1,3,4]  ;        
+        hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
+        for columnIdx = 1 : size(Table_Branch_List.Excel_table,2)
+            hWorksheet.Columns.Item(columnIdx).columnWidth = 30; %first column
+        end
+        
+        for i = 1 : numel(Highlight_Table_Branches_Rows)
+            hWorksheet.Range(['A1:', Excel_Column_ID{size(Table_Branch_List.Excel_table,2)}, '1']).Interior.ColorIndex = 17;
+            hWorksheet.Range(['A3:', Excel_Column_ID{size(Table_Branch_List.Excel_table,2)}, '3']).Interior.ColorIndex = 24;
+            hWorksheet.Range(['A', int2str(Highlight_Table_Branches_Rows(i)) ,...
+                ':', Excel_Column_ID{size(Table_Branch_List.Excel_table,2)},...
+                int2str(Highlight_Table_Branches_Rows(i))]).Interior.ColorIndex = 17;
+        end
+                
     elseif strcmp(sheetName,Table_Simulation.Description)
         hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
         hWorksheet.Columns.Item(1).columnWidth = 70; %first column

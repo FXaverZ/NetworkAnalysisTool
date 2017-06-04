@@ -6,16 +6,16 @@ for i = 1 : numel(Data_List)
     
     switch Data_List{i}
         case 'Households'
-            Table.(Data_List{i}).Description = 'Household active power consumption timeline';
+            Table.(Data_List{i}).Description = 'Household average active power consumption timeline';
             Table.(Data_List{i}).RowName =  'Average household active power consumption (kW)';
         case 'Solar'
-            Table.(Data_List{i}).Description = 'Solar power plants active power injection timeline';
+            Table.(Data_List{i}).Description = 'Solar power plants average active power injection timeline';
             Table.(Data_List{i}).RowName =  'Average solar power plants active power injection (kW)';
         case 'El_mobility'
-            Table.(Data_List{i}).Description = 'E-mobility active power consumption timeline';
+            Table.(Data_List{i}).Description = 'E-mobility average active power consumption timeline';
             Table.(Data_List{i}).RowName =  'Average E-mobility active power consumption (kW)';
         case 'Balance'
-            Table.(Data_List{i}).Description = 'System balance active power timeline';
+            Table.(Data_List{i}).Description = 'System balance average active power timeline';
             Table.(Data_List{i}).RowName =  'Average system balance active power (kW)';
     end    
     

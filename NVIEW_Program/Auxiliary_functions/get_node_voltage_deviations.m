@@ -15,7 +15,7 @@ for i = 1 : numel(cg)
         Table_inp_min(j,:) = d.(cg{i}).bus_deviations(j,3,:);
     end
     
-    Table.Values{i} = [nanmax(Table_inp_max); nanmean(Table_inp_mean); nanmin(Table_inp_min)];
+    Table.Values{i} = [nanmax(Table_inp_max,[],1); nanmean(Table_inp_mean,1); nanmin(Table_inp_min,[],1)];
 end
 
 Table.Description = 'Voltage deviations at grid nodes';

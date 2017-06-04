@@ -73,6 +73,7 @@ for H = 1 : numel(Data_List)
     hold off;
     % Append temporary data to gcf - append ID for colorscheme control!
     setappdata(findobj(gcf,'type','figure'),'FigureID','hist');
+  
 end
 
 end

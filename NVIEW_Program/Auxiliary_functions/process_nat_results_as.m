@@ -62,14 +62,19 @@ for i = 1 : numel(Grid_List)
         voltage_violations = zeros(size(bus_voltages,1),size(bus_voltages,2),size(bus_voltages,3),size(bus_voltages,4));
         violated_nodes_number = zeros(size(bus_voltages,2),size(bus_voltages,1));
         
+
         for s = 1 : size(bus_voltages,1) % scenario
             for d = 1 : size(bus_voltages,2) % dataset
                 for t = 1 : size(bus_voltages,3) % timepoint
                     for n = 1 : size(bus_voltages,4) % node
+                        
+                        if sum(bus_voltages(s,d,t,n,:)==0) > 0
+                            bus_voltages(s,d,t,n,:) = NaN;
+                        end
+                        
                         voltage_violations(s,d,t,n) = ((bus_voltages(s,d,t,n,1) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,1) / bus_info(n,3)) > Umax) ||...
                             ((bus_voltages(s,d,t,n,2) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,2) / bus_info(n,3)) > Umax) ||...
                             ((bus_voltages(s,d,t,n,3) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,3) / bus_info(n,3)) > Umax);
-                        
                         
                     end % node
                     nodes_afflicted{d,s} = unique([nodes_afflicted{d,s}; find(squeeze(voltage_violations(s,d,t,:)) == 1)]);
@@ -122,9 +127,9 @@ for i = 1 : numel(Grid_List)
                     counter = max(counter + (1:size(voltage_statistics,1)));
                 end
             end
-            bus_deviation_summary(s,:,:) = [nanmax(squeeze(bus_deviations(s,:,:)));
-                                            nanmean(squeeze(bus_deviations(s,:,:)));
-                                            nanmin(squeeze(bus_deviations(s,:,:)))];
+            bus_deviation_summary(s,:,:) = [nanmax(squeeze(bus_deviations(s,:,:)),[],1);
+                                            nanmean(squeeze(bus_deviations(s,:,:)),1);
+                                            nanmin(squeeze(bus_deviations(s,:,:)),[],1)];
         end
         
         res.(Grid_List{i}).voltage_violations = voltage_violations;

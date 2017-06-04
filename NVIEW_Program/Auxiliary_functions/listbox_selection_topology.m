@@ -41,6 +41,11 @@ clear i j
 
 
 for i = 1 : Selection_list_number
+	%CHANGELOG FZ 25.02.2014
+	% Sort the List by names:
+	[Listbox_input.(Selection_list_names{i}),IX] = sort(Listbox_input.(Selection_list_names{i}));
+	%CHANGELOG FZ 25.02.2014
+	
     % Pop up window
     flb.window  = figure('menubar','none','units','pixels','position',[540 200 300 400],...
         'numbertitle','off','name',[inp_selection, ' for ', Selection_list_names{i} ],'resize','off','CloseRequestFcn',{@my_closereq});
@@ -73,6 +78,11 @@ for i = 1 : Selection_list_number
         end
     end
     delete(flb.window);
+	%CHANGELOG FZ 25.02.2014
+	% backsorting:
+	Selected_List.(Selection_list_names{i}) = IX(Selected_List.(Selection_list_names{i}));
+	Selected_List.(Selection_list_names{i}) = sort(Selected_List.(Selection_list_names{i}));
+	%CHANGELOG FZ 25.02.2014
 end
 
 end

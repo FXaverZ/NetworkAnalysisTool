@@ -19,6 +19,6 @@ for i = 1 : numel(Table.ColumnName)
     end
 end
 Table.RowName = '';
-Table.Description = 'Overall percentage of grid nodes affected by voltage violations';
+Table.Description = 'Overall percentage of voltage violations';
 
 end

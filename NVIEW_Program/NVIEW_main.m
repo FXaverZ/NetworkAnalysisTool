@@ -105,7 +105,7 @@ function menu_about_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
  msgbox(sprintf(['Netzanalyse und Simulationstool result viewer\n',...
-                 'Matej Rejc, UL FE, Slovenia, 2013']),...
+                 'Matej Rejc, UL FE/SIEMENS, 2014']),...
                  'NVIEW result processing toolbox','help');
  
 function menu_import_nat_results_Callback(hObject, eventdata, handles)
@@ -926,7 +926,6 @@ handles = process_nat_results_as(handles); % Process results
 handles = call_electric_losses_analysis(handles,-1);
 guidata(hObject, handles);
 
-
 % --------------------------------------------------------------------
 function menu_electric_losses_time_graph_grid_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_electric_losses_time_graph_grid (see GCBO)
@@ -936,7 +935,6 @@ handles = process_nat_results_as(handles); % Process results
 handles = call_electric_losses_time_graph(handles,1);
 guidata(hObject, handles);
 
-
 % --------------------------------------------------------------------
 function menu_electric_losses_time_graph_scenario_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_electric_losses_time_graph_scenario (see GCBO)
@@ -945,7 +943,6 @@ function menu_electric_losses_time_graph_scenario_Callback(hObject, eventdata, h
 handles = process_nat_results_as(handles); % Process results
 handles = call_electric_losses_time_graph(handles,2);
 guidata(hObject, handles);
-
 
 % --------------------------------------------------------------------
 function menu_electric_losses_sum_time_graph_grid_Callback(hObject, eventdata, handles)
@@ -963,4 +960,33 @@ function menu_electric_losses_sum_time_graph_scenario_Callback(hObject, eventdat
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
 handles = call_electric_losses_time_graph(handles,4);
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function pushtool_SaveFigData_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_SaveFigData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = get_figure_data(handles);
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function show_list_nodes_violated_Callback(hObject, eventdata, handles)
+% hObject    handle to show_list_nodes_violated (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = process_nat_results_as(handles); % Process results
+handles = call_list_nodes_violated(handles);
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function show_list_branches_violated_Callback(hObject, eventdata, handles)
+% hObject    handle to show_list_branches_violated (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = process_nat_results_as(handles); % Process results
+
+% Analysis subfunction call
+handles = call_list_branches_violated(handles);
 guidata(hObject, handles);
