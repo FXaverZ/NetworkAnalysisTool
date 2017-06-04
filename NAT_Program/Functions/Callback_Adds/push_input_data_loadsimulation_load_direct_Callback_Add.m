@@ -26,12 +26,12 @@ if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
 	data_typ = '_95P_Quantil';
 end
 
-Main_Path = uigetdir([handles.Current_Settings.Files.Grid.Path,filesep,...
+Main_Path_HH_Data = uigetdir([handles.Current_Settings.Files.Grid.Path,filesep,...
 	handles.Current_Settings.Files.Grid.Name,'_nat'],...
-	'Selcet folder with grid variants...');
-if ischar(Main_Path)
+	'Selcet folder with load simulation data...');
+if ischar(Main_Path_HH_Data)
 	% Check, if simulation data files are present in this folder:
-	files = dir(Main_Path);
+	files = dir(Main_Path_HH_Data);
 	files = struct2cell(files);
 	files = files(1,3:end);
 	model_files = files(cellfun(@(x) strcmp(x(end-13:end-4),'Modeldaten'), files));
@@ -63,6 +63,41 @@ switch but
 		return;
 end
 
+Main_Path_Solar_Data = uigetdir([handles.Current_Settings.Files.Grid.Path,filesep,...
+	handles.Current_Settings.Files.Grid.Name,'_nat'],...
+	'Selcet folder with solar irradiation data...');
+error_solar = 0;
+if ischar(Main_Path_Solar_Data)
+	% Check, if simulation data files are present in this folder:
+	files_solar = dir(Main_Path_Solar_Data);
+	files_solar = struct2cell(files_solar);
+	files_solar = files_solar(1,3:end);
+	
+	idx_db_set = find(strcmp(files_solar,'EDLEM_Datenbank.mat'), 1);
+	
+	if isempty(idx_db_set)
+		error_solar = 1;
+	end
+else
+	error_solar = 1;
+end
+
+if error_solar
+	% Ask user, if data preperation should be proceeded without solar data:
+	but = questdlg({'No irradiation for consideration of PV-plants fount!';' ';...
+		'Should the input data preperation continue only with load data?'},...
+		'Selcet folder with irradiation data...',...
+		'Continue','Abort','Abort');
+	switch but
+		case 'Continue'
+			Main_Path_Solar_Data = [];
+			error_solar = 0;
+		case 'Abort'
+			return;
+	end
+	
+end
+
 model_files = files(cellfun(@(x) strcmp(x(1:8),simulations{1}), files));
 model_files = model_files(cellfun(@(x) strcmp(x(end-13:end-4),'Modeldaten'), model_files));
 
@@ -87,13 +122,15 @@ HH.Data_05P_Quantil = [];
 HH.Data_95P_Quantil = [];
 
 Solar = HH;
+Solar.Plants = settin.Solar.Plants;
+
 El_Mobility = HH;
 
 HH.Content = {};
 
 % load the model data for further information:
 % loading structures "Model", "Configuration", "Time", "Households"
-load([Main_Path,filesep,model_files{1}]);
+load([Main_Path_HH_Data,filesep,model_files{1}]);
 
 % get the most important information:
 data_sets_number = Model.Number_Runs;
@@ -239,7 +276,7 @@ for i=1:data_sets_number
 					date,data_sep,season,data_sep,weekday,data_sep,...
 					Model.Sim_Resolution,'.mat'];
 				% "Result"
-				load([Main_Path,filesep,filename]);
+				load([Main_Path_HH_Data,filesep,filename]);
 			end
 			data_raw = Result.(households_av_typs{k});
 			% 			Result = rmfield(Result, households_av_typs{k});
@@ -287,16 +324,230 @@ for i=1:data_sets_number
 		sec2str((data_sets_number-i)*t/i),', total time: ',...
 		sec2str(t+(data_sets_number-i)*t/i),'\n']);
 end
+d.Load_Infeed_Data.Set_1.Households = HH;
 
 % also store the number of different households (the allocation) for later
 % use:
 HH.Number = settin.Households.Number;
-
 d.Load_Infeed_Data.Set_1.Households = HH;
+
+% now proceed the solar data:
+if ~isempty(Main_Path_Solar_Data)
+	% load the database structure:
+	db_fil = load([Main_Path_Solar_Data, filesep, files_solar{idx_db_set}]);
+	sep = db_fil.files.sep;    % Trenner im Dateinamen (' - ')
+	max_num_data_set = db_fil.setti.max_num_data_set*6;
+	
+	% Sind überhaupt Solaranlagen angelegt?
+	if isempty(settin.Solar.Plants)
+		% --> Nein, es müssen daher keine Daten ausgelesen werden:
+		% (leeres) Ergebnis zurückschreiben:
+		
+		% Es wird nur ein Datensatz generiert, diese Direkt in die
+		% Load-Infeed-Struktur einfügen:
+		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		error_solar = 1;
+		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
+			d.Load_Infeed_Data.Set_1.Table_Network = table_;
+		end
+	end
+	
+	% Gesamtanzahl der zu simulierenden Anlagen ermitteln:
+	plants = fieldnames(settin.Solar.Plants);
+	number_plants = 0;
+	for i=1:numel(plants)
+		plant = settin.Solar.Plants.(plants{i});
+		number_plants = number_plants + plant.Number;
+	end
+	
+	% Überprüfen, ob überhaupt PV-Erzeugungsanlagen verarbeitet werden sollen:
+	if number_plants == 0
+		% (leeres) Ergebnis zurückschreiben:
+		
+		% Es wird nur ein Datensatz generiert, diese Direkt in die
+		% Load-Infeed-Struktur einfügen:
+		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		error_solar = 1;
+		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
+			d.Load_Infeed_Data.Set_1.Table_Network = table_;
+		end
+	end
+else
+	error_solar = 1;
+end
+
+if ~error_solar
+	%create solar infeed data, first determine the solar irradiation data:
+	% Aus den allgemeinen Strahlungsdaten und den Analgenparametern die aktuellen
+	% Einstrahlungswerte interpolieren, dazu erst die entsprechenden Daten laden:
+	name = ['Gene',sep,'Solar',sep,'Radiation'];
+	% Daten laden (Variable 'radiation_data_fix' und 'Content'):
+	load([Main_Path_Solar_Data,filesep,name,'.mat']);
+	
+	% Aufbau des Arrays für geneigte Flächen (fix montiert, 'radiation_data_fix'):
+	% 1. Dimension: Tag innerhalb eines Jahres (von 1.1 bis 31.12. 365 Tage)
+	% 2. Dimension: Orientierung z.B. [-15°, 0°, 15°] (0° = Süd; -90° = Ost)
+	% 3. Dimension: Neigung [15°, 30°, 45°, 60°, 90°] (0°  = waagrecht,
+	%                                                        90° = senkrecht,
+	%                                                        trac = Tracker)
+	% 4. Dimension: Datenart [Zeit, Temperatur, Direkt, Diffus]
+	% 5. Dimension: Werte in W/m^2 in Minutenauflösung
+	%
+	% Die Struktur "Content" enthält die korrekten Bezeichnungen/Werte der einzelnen
+	% Dimensionen für die spätere Weiterverarbeitung (für Indexsuche bzw.
+	% Interpolationen). Aufbau siehe: 'create_radiation_array.m'
+	
+	% Ein Datumsarray erstellen, um auf die Solardaten zugreifen zu können:
+	solar_data_sets_days = 0:364;
+	year = datenum(datestr(data_sets_days(1),'yyyy'),'yyyy');
+	solar_data_sets_days = solar_data_sets_days + year;
+	
+	% Überprüfen, ob die Tag vorhanden sind, ansonsten Array duplizieren:
+	while error_solar || (isempty(find(solar_data_sets_days == data_sets_days(1),1)) && ...
+			isempty(find(solar_data_sets_days == data_sets_days(end),1)));
+		if data_sets_days(1) < solar_data_sets_days(1)
+			errordlg({'Radiation Data has not enough days';...
+				'Extension has to be implemented!'},...
+				'Perepare PV-Infeed data...');
+			error_solar = 1;
+		end
+		
+		if solar_data_sets_days(end) < data_sets_days(end)
+			errordlg({'Radiation Data has not enough days';...
+				'Extension has to be implemented!'},...
+				'Perepare PV-Infeed data...');
+			error_solar = 1;
+		end
+	end
+	
+	num_data_sets = [];
+	data_info_sol = [];
+	idx_so_dat = [];
+	for i=1:numel(data_sets_days)
+		[season, ~, ~] = day2sim_parameter(Model, data_sets_days(i));
+		if ~isfield(num_data_sets, season)
+			name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,'Info'];
+			% Daten laden (Variable "data_info")
+			load([Main_Path_Solar_Data,filesep,name,'.mat']);
+			% wieviele Datensätze gibt es insgesamt?
+			num_data_sets.(season) = size(data_info,2);
+			data_info_sol.(season) = data_info;
+			idx_so_dat.(season) = [];
+			pool.(season) = 1:num_data_sets.(season); % Liste mit Indizes der möglichen Datensätze
+		end
+		
+		% je nach Einstellungen die Wetterdaten des aktuellen Tages einlesen:
+		switch settin.Worstcase_Generation
+			case 1 % zufällige Auswahl
+				% Zufällig einen Wolkendatensatz auswählen:
+				% Erzeugen einer Zufallszahl im Bereich [1, Anz._verf._Datensätze]
+				fortu = round(rand()*(numel(pool.(season))-1))+1;
+				idx_so_dat.(season)(end+1) = pool.(season)(fortu);% Dieser Index bezeichnet den ausgewählten Datensatz!
+				pool.(season)(fortu) = [];
+			otherwise
+				disp('Unbekannter Auswahlmodus!');
+				errordlg('Worst-Case not implemented yet!!!');
+				error_solar = 1;
+		end
+	end
+end
+clear pool fortu year name
+
+if ~error_solar
+	idx_counter = [];
+	Solar.Content = cell(1,number_plants);
+	Data_Mean = [];
+	for i=1:numel(data_sets_days)
+		Content_count = 1;
+		% ermitteln des Wolkendatensatzes, der geladen werden muss, dazu zunächst den
+		% Index auslesen:
+		[season, ~, ~] = day2sim_parameter(Model, data_sets_days(i));
+		if ~isfield(idx_counter, season)
+			idx_counter.(season) = 1;
+		end
+		idx = idx_so_dat.(season)(idx_counter.(season));
+		idx_counter.(season) = idx_counter.(season) + 1;
+		% ermitteln, in welchem Wolkendatensatz dieser enthalten ist:
+		j = ceil(idx/max_num_data_set);
+		% Indexzahl korrigieren (der Index der geladenen Daten geht nur von
+		% 1:max_num_datasets je Datei):
+		idx_part = idx - (j-1)*max_num_data_set;
+		% Name der aktuellen Teil-Datei:
+		name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,...
+			num2str(j,'%03.0f')];
+		% Daten laden (Variable "data_cloud_factor")
+		load([Main_Path_Solar_Data,filesep,name,'.mat']);
+		% die relevanten Daten auslesen:
+		data_cloud_factor = data_cloud_factor(:,idx_part);
+		
+		% Welcher Tag in der Einstrahlungsmatrix wird gerade simuliert?
+		day_solar = find(data_sets_days(1) == solar_data_sets_days);
+		
+		% nun stehen für die Anlagen jeweils Einstrahlungsdaten sowie Wolkeneinflussdaten zur
+		% Verfügung. Mit diesen Daten sowie den definierten Anlagenparametern werden nun die
+		% Anlagen simuliert:
+		for k=1:numel(plants)
+			plant = settin.Solar.Plants.(plants{k});
+			% Inhaltsverzeichnis der Daten erstellen:
+			if i == 1
+
+			end
+			switch plant.Typ
+				case 1 % Fix installierte Anlage
+					data_phase = model_pv_fix_yearly_profiles(plant, Content,...
+						data_cloud_factor, radiation_data_fix, day_solar);
+				otherwise % Tracker
+					errordlg('Plant-Type not implemented yet!!!');
+					error_solar = 1;
+			end
+			
+			% adjust the data to the needed time resolution:
+			switch data_typ
+				case '_Mean'
+					% get the number of timepoints to be treated:
+					num_points = round(settin.Time_Resolution/1);
+					num_time_points = 24*60*60/settin.Time_Resolution;
+					if num_points <= 0
+						errordlg('Time resolutions not campatible!!!');
+						return;
+					end
+					if num_points > 1
+						data_phase = data_phase(1:end-1,:);
+						data_phase = reshape(data_phase,num_points,[],6);
+						data_phase = squeeze(mean(data_phase));
+					end
+					
+					if i == 1
+						for j=1:plant.Number
+							Solar.Content{1,Content_count} = plants{k};
+							Content_count = Content_count + 1;
+						end
+						
+						% Beginn der Zeitreihe
+						Data_Mean = [Data_Mean, data_phase]; %#ok<AGROW>
+					else
+						for j=1:plant.Number
+							% Zeitreihe wird fortgeführt:
+							Data_Mean((i-1)*num_time_points+1:i*num_time_points,((Content_count-1)*6)+(1:6)) = ...
+								data_phase; %#ok<AGROW>
+							Content_count = Content_count + 1;
+						end
+					end
+				otherwise
+					disp('Unknown data typ!');
+					errordlg('Data typ not implemented yet!!!');
+					return;
+			end
+		end
+	end
+end
+if ~error_solar
+	Solar.Data_Mean = Data_Mean;
+end
+
 d.Load_Infeed_Data.Set_1.Solar = Solar;
 d.Load_Infeed_Data.Set_1.El_Mobility = El_Mobility;
 d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
-
 
 Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
 

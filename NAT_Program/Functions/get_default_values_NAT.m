@@ -1,5 +1,5 @@
 function handles = get_default_values_NAT(handles)
-%GET_DEFAULT_VALUES   loads the default values for all setting for the NAT
+%GET_DEFAULT_VALUES_NAT   loads the default values for all setting for the NAT
 %   Detailed explanation goes here
 
 % Version:                 7.0
