@@ -83,25 +83,40 @@ else
 		'Enable','on');
 end
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
+% Update the PQ-Node field
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		~isempty(handles.Current_Settings.Table_Network.Selected_Row)
+	
+	% the current selected row:
 	row = handles.Current_Settings.Table_Network.Selected_Row;
-	plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{row,1};
+	% Where are the names of the PQ-Nodes:
+	idx_na = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Names');
+	% Where is the additional data?
+	idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+	% Where are the households?
+	idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
+	% Where is the "active"-Flag Column:
+	idx_ac = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Active');
+	
+	% Get the PV-Plant Information:
+	plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{idx_pv_add,1};
 	sel_pv = find(strcmp(plant_pv_name,...
 		handles.Current_Settings.Data_Extract.Solar.Selectable(:,2)));
 	if isempty(sel_pv)
 		sel_pv = 1;
 	end
 	
+	% Update the gui elements (activate them + show the information of the currently
+	% selected PQ-node):
 	set(handles.uipanel_detail_component,...
 		'Title', ['Details for ',...
-		handles.Current_Settings.Table_Network.Data{row,1},':']);
+		handles.Current_Settings.Table_Network.Data{row,idx_na},':']);
 	set(handles.text_pqnode_hh_typ, 'Visible', 'on');
 	set(handles.popup_pqnode_hh_typ,...
 		'Visible', 'on',...
 		'Value', find(strcmp(...
-		    handles.Current_Settings.Table_Network.Data{row,3},...
+		    handles.Current_Settings.Table_Network.Data{row,idx_hh},...
 		    handles.System.housholds(:,1))));
 	set(handles.text_pqnode_pv_typ, 'Visible', 'on');
 	set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
@@ -123,14 +138,17 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 	set(handles.edit_pqnode_wi_installed_power, 'Visible', 'on');
 	set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'on');
 	set(handles.push_pqnode_wi_parameters, 'Visible', 'on');
-	set(handles.check_pqnode_active, 'Visible', 'on', 'Enable', 'on');
+	set(handles.check_pqnode_active, ...
+		'Visible', 'on',...
+		'Enable',  'on',...
+		'Value',   handles.Current_Settings.Table_Network.Data{row,idx_ac});
 	
 else
 	set(handles.check_pqnode_active, 'Visible', 'off');
 	set(handles.popup_pqnode_hh_typ, 'Visible', 'off');
 	set(handles.text_pqnode_hh_typ, 'Visible', 'off');
 	set(handles.uipanel_detail_component,...
-		'Title', 'Kein Netzknoten ausgewählt');
+		'Title', 'No grid node selected');
 	set(handles.text_pqnode_pv_typ, 'Visible', 'off');
 	set(handles.popup_pqnode_pv_typ, 'Visible', 'off');
 	set(handles.edit_pqnode_pv_installed_power, 'Visible', 'off');
@@ -144,6 +162,8 @@ else
 	set(handles.push_pqnode_wi_parameters, 'Visible', 'off');
 end
 
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if ~isempty(handles.Current_Settings.Files.Grid.Name)
 	str = [handles.Current_Settings.Files.Grid.Path,filesep,...
 		handles.Current_Settings.Files.Grid.Name,...
@@ -174,15 +194,6 @@ if ~isempty(handles.Current_Settings.Table_Network)
 		'ColumnFormat', ntw.ColumnFormat,...
 		'ColumnEditable', ntw.ColumnEditable,...
 		'RowName', ntw.RowName);
-end
-
-% Wenn eine gültige Datenbank geladen wurde, die Schaltfläche "Lastdaten laden..."
-% aktivieren:
-if isfield(handles.Current_Settings.Load_Database,'setti')
-    set(handles.push_load_data_get, 'Enable','on');
-else
-	set(handles.push_network_calculation_start, 'Enable','off');
-    set(handles.push_load_data_get, 'Enable','off');
 end
 
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...

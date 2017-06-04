@@ -11,7 +11,7 @@ if numel(eventdata.Indices) > 0
 			handles.NAT_Data.Grid.(handles.sin.Settings.Grid_name).P_Q_Node.ids(eventdata.Indices(1)));
 	end
 else
-	handles.Current_Settings.Table_Network.Selected_Row = [];
+	% handles.Current_Settings.Table_Network.Selected_Row = [];
 end
 
 % Anzeige aktualisieren:

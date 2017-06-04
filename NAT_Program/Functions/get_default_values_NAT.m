@@ -15,7 +15,7 @@ System.version = '4.3';
 
 % maximum number of a whole dataset, if this number is exceeded, partial
 % files are created: 
-System.number_max_datasets = 200;
+System.number_max_datasets = 500;
 
 % reset of RPC-server (SINCAL-connection) after this number of profiles (due to problems
 % with a permanently open connection with the RPC-Server. After the this number of
@@ -250,6 +250,7 @@ Current_Settings.Grid.Type = 'LV';
 % Standard-Dateipfade, Pfad zur Datenbank:
 Current_Settings.Load_Database.Path = Current_Settings.Files.Main_Path;
 Current_Settings.Load_Database.Name = 'DLE_Datenbank';
+Current_Settings.Load_Database.valid = 0;
 
 % Einstellungstabelle für das Netz (wird in GUI angezeigt)
 Current_Settings.Table_Network = [];

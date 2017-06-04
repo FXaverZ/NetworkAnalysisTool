@@ -26,6 +26,7 @@ if ischar(Main_Path)
 		load([pathstr,filesep,name,filesep,name,'.mat']);
 		handles.Current_Settings.Load_Database.setti = setti;
 		handles.Current_Settings.Load_Database.files = files;
+		handles.Current_Settings.Load_Database.valid = 1;
 		helpdlg('Datenbank erfolgreich geladen!', 'Laden der Datenbank...');
 	catch ME %#ok<NASGU>
 		% Falls keine gültige Datenbank geladen werden konnte, Fehlermeldung an User:
@@ -33,6 +34,7 @@ if ischar(Main_Path)
 			'Fehler beim laden der Datenbank...');
 		% Anzeige aktualisieren:
 		handles = refresh_display_NAT_main_gui(handles);
+		handles.Current_Settings.Load_Database.valid = 0;
 	end
 end
 

@@ -184,12 +184,26 @@ handles = refresh_display_NAT_main_gui(handles);
 % Update handles structure
 guidata(hObject, handles);
 
+function check_use_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+check_use_scenarios_Callback_Add (hObject, handles)
+
 function check_get_time_series_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_output_mean_value (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 check_use_scenarios_Callback_Add (hObject, handles);
+
+function check_pqnode_active_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to check_pqnode_active (see GCBO)
+% ~          reserved for eventdata, here not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+check_pqnode_active_Callback_Add (hObject, handles);
 
 function check_use_variants_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
@@ -476,10 +490,12 @@ handles = refresh_display_NAT_main_gui(handles);
 % handles-Struktur aktualisieren
 guidata(hObject, handles);
 
-function popup_pqnode_hh_typ_Callback(hObject, eventdata, handles)
+function popup_pqnode_hh_typ_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to popup_pqnode_hh_typ (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+% ~          reserved - eventdata here not needed
 % handles    structure with handles and user data (see GUIDATA)
+
+popup_pqnode_hh_typ_Callback_Add (hObject, handles);
 
 function popup_pqnode_pv_typ_Callback(hObject, ~, handles)
 % hObject    handle to popup_pqnode_pv_typ (see GCBO)
@@ -505,6 +521,8 @@ handles = refresh_display_NAT_main_gui(handles);
 
 % Button wieder deaktivieren:
 set(handles.push_cancel, 'Enable', 'off');
+% get surem that the other bottuns are active again:
+set(handles.push_load_data_get, 'Enable', 'on');
 
 % handles-Structure aktualisieren:
 guidata(hObject, handles);

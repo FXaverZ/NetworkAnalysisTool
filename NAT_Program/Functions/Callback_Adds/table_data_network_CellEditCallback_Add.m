@@ -18,6 +18,15 @@ col = eventdata.Indices(2);
 handles.Current_Settings.Table_Network.Data = ...
 	get(handles.table_data_network, 'Data');
 
+% Where is the "active"-Flag Column:
+idx_ac = find(strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Active'));
+
+if col == idx_ac && eventdata.EditData
+	handles.Current_Settings.Table_Network.Data{row_act, col} = true;
+elseif col == idx_ac && ~eventdata.EditData
+	handles.Current_Settings.Table_Network.Data{row_act, col} = false;
+end
+
 % Where are the pv-plants in the Table_Network data:
 idx_pv = find(strcmp(handles.Current_Settings.Table_Network.ColumnName, 'PV-Plant'));
 if col == idx_pv
@@ -83,10 +92,10 @@ end
 
 handles.Current_Settings.Table_Network.Selected_Row = row_act;
 
-% Anzeige aktualisieren:
+% update GUI:
 handles = refresh_display_NAT_main_gui(handles);
 
-% handles-Struktur aktualisieren:
+% update handles structure:
 guidata(hObject, handles);
 end
 

@@ -6,33 +6,46 @@ set(handles.push_load_data_get, 'Enable', 'off');
 set(handles.push_cancel, 'Enable', 'on');
 pause(.01);
 % Ask User, from which Source the Data should be derived:
-answer = questdlg({['Sollen Daten aus der Datenbank geladen, auf ',...
-	'Simulationsergebnisse bei der Erstellung zurückgegriffen, ',...
-	'oder die orginalen Input Daten einer Simulation geladen werden?'];
-	'';...
-	'Bitte gewünschte Datenquelle angeben:'},...
-	'Spezifizierung Datenquelle',...
-	'Lastdatenbank', 'Simulationsergebnisse', 'Orginaldaten', 'Simulationsergebnisse');
-% According to this, use differen function for input-data creation:
+if handles.Current_Settings.Load_Database.valid
+	answer = questdlg({[...
+		'Should the data be loaded from the load- and infeed-database, ',...
+		'should it be newly created out of simulation results (MV input out of LV ',...
+		'input) or should the orginal input data from a previous simulation be loaded?'...
+		];...
+		'';...
+		'Please specify desired data source:'},...
+		'Specifying data source',...
+		'Load- and Infeed-Database', 'Simulationresults', 'Orginal Data', 'Simulationresults');
+else
+	answer = questdlg({[...
+		'Should the data be newly created out of simulation results (MV input out of LV ',...
+		'input) or should the orginal input data from a previous simulation be loaded?'...
+		];...
+		'';...
+		'Please specify desired data source:'},...
+		'Specifying data source',...
+		'Simulationresults', 'Orginal Data', 'Simulationresults');
+end
+% According to this, use different function for input-data creation:
 switch answer
-	case 'Lastdatenbank'
+	case 'Load- and Infeed-Database'
 		handles = get_input_from_database(handles);
 		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-	case 'Simulationsergebnisse'
+	case 'Simulationresults'
 		% User has to specify, which results he want's to use...
 		file = handles.Current_Settings.Files.Load.Result;
 		[file.Name,file.Path] = uigetfile([...
 			{'*.mat','*.mat Simulation-Info-File'};...
-			{'*.*','Alle Dateien'}],...
-			'Laden von Simulationsergebnissen...',...
+			{'*.*','All Files'}],...
+			'Load simulation results...',...
 			[file.Path,filesep]);
-		% Check, if there is a valid file specified:
+		% Check, if there is a invalid file specified:
 		if isequal(file.Name,0) || isequal(file.Path,0)
-			% Refresh the GUI:
+			% if so, refresh the GUI and abort:
 			handles = refresh_display_NAT_main_gui(handles);
 			set(handles.push_cancel, 'Enable', 'off');
 			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
+			% update the handles-structure:
 			guidata(hObject, handles);
 			if ~isequal(file.Path,0)
 				% If there's a valid path, save this for later (programm
@@ -44,82 +57,48 @@ switch answer
 			% leave the function:
 			return;
 		end
-		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
+		% a valid file was selected, get the needed information:
 		[~, file.Name, file.Exte] = fileparts(file.Name);
-		% leztes Zeichen ("/") im Pfad entfernen:
+		% remove last character in path ("/"):
 		file.Path = file.Path(1:end-1);
 		try
-			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
-			Result = [];
-			Result.Result_Filepath = file.Path;
-			Result.Result_Filenames = inp_info.result_filename;
-			Result.Simulation_Options = inp_info.simulation_options;
-			Result.Scenarios = inp_info.scenarios;
-            Result.Grid_Variants = inp_info.variants;
-            Result.Datasets = inp_info.datasets;
-            Result.Timepoints = inp_info.simulation_options.Timepoints;            
-            Result.Result_Files = Load_Result_File(Result);
-		catch ME
-			errordlg({'Fehler beim Laden der Ergebnisse:';'';ME.message});
-			% If there's a valid path, save this for later (programm
-			% will look here first...) :
-			handles.Current_Settings.Files.Load.Result.Path = file.Path;
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			return;
-		end
-		handles.Result_Settings = Result;
-		handles.Current_Settings.Files.Load.Result = file;
-		handles = get_input_from_results(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-	case 'Orginaldaten'
-		% User has to specify, which results he want's to use...
-		file = handles.Current_Settings.Files.Load.Result;
-		[file.Name,file.Path] = uigetfile([...
-			{'*.mat','*.mat Simulation-Info-File'};...
-			{'*.*','Alle Dateien'}],...
-			'Laden von ursprünglichen Simulationsdaten...',...
-			[file.Path,filesep]);
-		% Check, if there is a valid file specified:
-		if isequal(file.Name,0) || isequal(file.Path,0)
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
-			% Update the handles-structure:
-			guidata(hObject, handles);
-			if ~isequal(file.Path,0)
-				% If there's a valid path, save this for later (programm
-				% will look here first...) :
-				handles.Current_Settings.Files.Load.Result.Path = file.Path;
-				% Update the handles-structure:
-				guidata(hObject, handles);
+			% Load the settings of the simulation ('Current_Settings'):
+			load([file.Path,filesep,file.Name,file.Exte]);
+			% Save the needed settings for Results-Processing:
+			handles.Result_Settings = [];
+			handles.Result_Settings.Data_Extract = Current_Settings.Data_Extract;
+			handles.Result_Settings.Simulation = Current_Settings.Simulation;
+			handles.Result_Settings.Grid = Current_Settings.Grid;
+			
+			% get the result filenames, first search for all files in the current location along with
+			% the scenario description
+			files = dir(file.Path);
+			files = struct2cell(files);
+			files = files(1,3:end);
+			% reset the files-list:
+			handles.Result_Settings.Result_Files = {};
+			% get the prefix of the restultfilenames of the current settings file (form:
+			% 'Res_yyyy_mm_dd-HH.MM.SS - Scearnrioname.mat'):
+			simprefix = regexp(file.Name,' - ','split');
+			simprefix = simprefix{1};
+			% get the names of the main scenario files:
+			if Current_Settings.Simulation.Use_Scenarios
+				handles.Current_Settings.Simulation.Use_Scenarios = 1;
+				for i=1:Current_Settings.Simulation.Scenarios.Number
+					filename = [simprefix,' - ',...
+						Current_Settings.Simulation.Scenarios.(['Sc_',num2str(i)]).Filename,...
+						'.mat'];
+					if ~isempty(find(strcmp(files, filename), 1))
+						handles.Result_Settings.Result_Files{end+1} = filename;
+					end
+				end
+			else
+				errordlg('Single scenario simulation currently not supported!');
+				return;
 			end
-			% leave the function:
-			return;
-		end
-		% Falls nein, Entfernen der Dateierweiterung vom Dateinamen:
-		[~, file.Name, file.Exte] = fileparts(file.Name);
-		% leztes Zeichen ("/") im Pfad entfernen:
-		file.Path = file.Path(1:end-1);
-		% try to load the information file of the Results:
-		try
-			inp_info = load([file.Path,filesep,file.Name,file.Exte]);
-			Result = [];
-			Result.Result_Filepath = file.Path;
-			Result.Result_Filenames = inp_info.result_filename;
-			Result.Simulation_Options = inp_info.simulation_options;
-			Result.Scenarios = inp_info.scenarios;
-            Result.Grid_Variants = inp_info.variants;
-            Result.Datasets = inp_info.datasets;
-            Result.Timepoints = inp_info.simulation_options.Timepoints;            
-            Result.Result_Files = Load_Result_File(Result);
+			clear('Current_Settings');
 		catch ME
-			errordlg({'Fehler beim Laden der originalen Input Daten:';'';ME.message});
+			errordlg({'Error while loading the results:';'';ME.message});
 			% If there's a valid path, save this for later (programm
 			% will look here first...) :
 			handles.Current_Settings.Files.Load.Result.Path = file.Path;
@@ -131,10 +110,14 @@ switch answer
 			guidata(hObject, handles);
 			return;
 		end
-		handles.Result_Settings = Result;
 		handles.Current_Settings.Files.Load.Result = file;
-		handles = load_input_from_results(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+		[handles, error] = get_input_from_results(handles);
+		if ~error
+			helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+		end
+	case 'Orginal Data'
+		errordlg('Currently not supported!');
+		%TODO: Extraction of Input-Data out of Simulation Resluts...
 	otherwise
 		% Do nothing...
 end

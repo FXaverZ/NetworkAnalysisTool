@@ -11,20 +11,51 @@ for I = 1 : numel(handles.NVIEW_Control.Result_Files)
     clear data; file.Name = []; 
     % Define filename from handles structure at i-th iteration
     file.Name = handles.NVIEW_Control.Result_Files{I};
-    % Load data structure from stored mat file
-    data = load([file.Path,filesep,file.Name]);
-    
-    % --------------------------------------------------------------------
-    % CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
-    % --------------------------------------------------------------------        
-    if I == 1
-        grid_data = create_grid_structure(handles,data);
-    end
-    % --------------------------------------------------------------------
-    % READ RESULTS AND REFORMAT TO GRID STRUCTURE
-    % --------------------------------------------------------------------     
-    Scenario_Structure.(['Scenario_', int2str(I)]) = [];
-    Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data,grid_data);
+	
+	% Check, if the result-file is partioned:,
+	Scen_settings = handles.NVIEW_Control.Simulation_Options.NAT_Settings.Simulation.Scenarios;
+	scen_name = handles.NVIEW_Control.Simulation_Description.Scenario{I,1};
+	scen_idx = find(strcmp(scen_name, Scen_settings.Names));
+	
+	if Scen_settings.(['Sc_',num2str(scen_idx)]).Data_is_divided
+		% Data is available in multiple files! Deal this correctly:
+		data_merged = [];
+		for J=1:Scen_settings.(['Sc_',num2str(scen_idx)]).Data_number_parts
+			if J == 1
+				% Load data structure from first stored .mat file (has same file name as
+				% in the single file case...
+				data = load([file.Path,filesep,file.Name]);
+				% --------------------------------------------------------------------
+				% CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
+				% --------------------------------------------------------------------
+				grid_data = create_grid_structure(handles,data);
+			else
+				file.Name = [file.Name(1:end-4),'_',num2str(J,'%03.0f'),'.mat'];
+				data = load([file.Path,filesep,file.Name]);
+			end
+			% merge Simulation Data of the single files:
+			data_merged = merge_simdata(handles, data_merged, data); %!!! THIS FUNCTION IS NOT FINISHED !!!
+		end
+		% --------------------------------------------------------------------
+		% USE MERGED RESULTS AND REFORMAT TO GRID STRUCTURE
+		% --------------------------------------------------------------------
+		Scenario_Structure.(['Scenario_', int2str(I)]) = [];
+		Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data_merged,grid_data);
+	else
+		% Data is available in a single file! Load data structure from stored .mat file
+		data = load([file.Path,filesep,file.Name]);
+		% --------------------------------------------------------------------
+		% CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
+		% --------------------------------------------------------------------
+		if I == 1
+			grid_data = create_grid_structure(handles,data);
+		end
+		% --------------------------------------------------------------------
+		% READ RESULTS AND REFORMAT TO GRID STRUCTURE
+		% --------------------------------------------------------------------
+		Scenario_Structure.(['Scenario_', int2str(I)]) = [];
+		Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data,grid_data);
+	end
 end
 
 % --------------------------------------------------------------------

@@ -23,7 +23,13 @@ scenar = handles.Current_Settings.Simulation.Scenarios;
 s_path = handles.Current_Settings.Simulation.Scenarios_Path;
 
 % Check and maybe create path for the result files:
-r_path = [handles.Current_Settings.Simulation.Grids_Path,filesep,'Results'];
+if isempty(handles.Current_Settings.Simulation.Grid_List)
+	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
+		handles.Current_Settings.Files.Grid.Name,'_files'];
+else
+	path = handles.Current_Settings.Simulation.Grids_Path;
+end
+r_path = [path,filesep,'Results'];
 if ~isdir(r_path);
 	mkdir(r_path);
 end
