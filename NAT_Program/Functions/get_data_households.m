@@ -1,7 +1,7 @@
 function get_data_households (handles, varargin)
 %GET_DATA_HOUSEHOLDS    extrahiert die Daten der Haushalte 
 
-% Version:                 2.1 - Für Verwendung im NAT
+% Version:                 3.0 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 14.02.2012
 % Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
 
@@ -44,9 +44,14 @@ weekda = system.weekdays{settin.Weekday,1};
 time_res = settin.Time_Resolution;
 
 % die einzelnen Haushaltsklassen durchgehen:
-for i=1:size(system.housholds,1)
+for i=1:size(system.housholds,1)-1
 	% Anzahl der Haushalte gemäß Einstellungen auslesen:
-	number_hh = settin.Households.(system.housholds{i,1}).Number;
+	idx = find(strcmp(settin.Households.Number(:,1), system.housholds{i,1}));
+	if isempty(idx)
+		% this householdtyp does not exist, contiune to next one:
+		continue;
+	end
+	number_hh = settin.Households.Number{idx,2};
 	if number_hh < 1
 		% Falls für diesen Haushalt keine Daten extrahiert werden sollen 
 		% (Anzahl = 0), überspringen:
@@ -230,10 +235,6 @@ for i=1:size(system.housholds,1)
 		% Daten laden (Variable "data_phase")
 		load([path,filesep,name,'.mat']);
 		
-		% % Increase the active power by 25% for a higher load
-		% % ACHTUNG! Muss überarbeitet werden!
-		% data_phase(:,1:2:6) = data_phase(:,1:2:6) * 1.25;
-		
 		% je nach Einstellungen, die relevanten Daten auslesen:
 		if settin.get_Sample_Value
 			data_sample = data_phase(1:time_res:end,idx_part_real);
@@ -304,7 +305,7 @@ end
 
 % also store the number of different households (the allocation) for later
 % use:
-Households.Number = handles.Current_Settings.Data_Extract.Households;
+Households.Number = settin.Households.Number;
 
 % Zugriff auf das Datenobjekt:
 d = handles.NAT_Data;

@@ -2,9 +2,9 @@ function handles = refresh_display_NAT_main_gui(handles)
 %REFRESH_DISPLAY_NAT_MAIN_GUI    Summary of this function goes here
 %    Detailed explanation goes here
 
-% Version:                 1.1
+% Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
+% Letzte Änderung durch:   Franz Zeilinger - 16.12.2014
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %      Einstellungen - Auslesen der Daten
@@ -116,6 +116,7 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 	set(handles.text_pqnode_wi_typ, 'Visible', 'on');
 	set(handles.text_pqnode_pv_typ, 'Visible', 'on');
 	
+	
 	if strcmp(handles.Current_Settings.Grid.Type,'LV')
 		% Where is the additional data?
 		idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
@@ -123,7 +124,7 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
 		
 		% Get the PV-Plant Information:
-		plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{idx_pv_add,1};
+		plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{row,idx_pv_add};
 		sel_pv = find(strcmp(plant_pv_name,...
 			handles.Current_Settings.Data_Extract.Solar.Selectable(:,2)));
 		if isempty(sel_pv)
@@ -132,10 +133,29 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		
 		set(handles.text_pqnode_hh_typ, 'String', 'Hh. Type');
 		set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
-		set(handles.popup_pqnode_hh_typ,...
-			'Value', find(strcmp(...
+		idx_hh_sel = find(strcmp(...
 			handles.Current_Settings.Table_Network.Data{row,idx_hh},...
-			handles.System.housholds(:,1))));
+			handles.System.housholds(:,1)));
+		set(handles.popup_pqnode_hh_typ,...
+			'Value',idx_hh_sel);
+		set(handles.push_pqnode_hh_selection, 'Visible', 'on', 'Enable', 'on', 'String', 'Sel. HH-typs...');
+		set(handles.check_pqnode_hh_selection_all, 'Visible', 'on', 'Enable', 'on', 'Value', ...
+			handles.Current_Settings.Data_Extract.Households.Selection_active_all);
+		
+		% is set that multiple households are connected to this point?
+		if idx_hh_sel == size(handles.System.housholds,1)
+			% if so, activate the corresponding input-fields for control and update
+			% values
+			idx_hh_num = strcmp(handles.Current_Settings.Table_Network.ColumnName,'Hh. Number');
+			set(handles.edit_pqnode_hh_number, 'Visible', 'on', 'Enable', 'on',...
+				'String',num2str(handles.Current_Settings.Table_Network.Data{row,idx_hh_num}));
+			
+			set(handles.text_pqnode_hh_number, 'Visible', 'on');
+		else
+			set(handles.edit_pqnode_hh_number, 'Visible', 'off');
+			set(handles.text_pqnode_hh_number, 'Visible', 'off');
+		end
+		
 		set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
 		set(handles.text_pqnode_pv_installed_power_unit, 'Visible', 'on');
 		set(handles.edit_pqnode_pv_installed_power, 'Visible', 'on');
@@ -181,6 +201,8 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		set(handles.edit_pqnode_wi_installed_power, 'Visible', 'off');
 		set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'off');
 		set(handles.push_pqnode_wi_parameters, 'Visible', 'off');
+		set(handles.push_pqnode_hh_selection, 'Visible', 'off');
+		set(handles.check_pqnode_hh_selection_all, 'Visible', 'off');
 	end
 else
 	set(handles.check_pqnode_active, 'Visible', 'off');
@@ -201,8 +223,11 @@ else
 	set(handles.push_pqnode_wi_parameters, 'Visible', 'off');
 	set(handles.check_pqnode_emob_present, 'Visible', 'off');
 	set(handles.check_pqnode_pv_present, 'Visible', 'off');
+	set(handles.edit_pqnode_hh_number, 'Visible', 'off');
+	set(handles.push_pqnode_hh_selection, 'Visible', 'off');
+	set(handles.text_pqnode_hh_number, 'Visible', 'off')
+	set(handles.check_pqnode_hh_selection_all, 'Visible', 'off');
 end
-
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if ~isempty(handles.Current_Settings.Files.Grid.Name)
@@ -219,8 +244,10 @@ if ~isempty(handles.Current_Settings.Files.Grid.Name)
 	if strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
 			isempty(handles.Current_Settings.Data_Extract.LV_Grids_List)
 		set(handles.push_network_load_random_allocation, 'Enable','off');
+		set(handles.push_network_table_import_export, 'Enable','off');
 	else
 		set(handles.push_network_load_random_allocation, 'Enable','on');
+		set(handles.push_network_table_import_export, 'Enable','on');
 
 	end
 	set(handles.push_network_load_allocation_reset, 'Enable','on');
@@ -231,6 +258,7 @@ else
 	set(handles.uipanel_detail_component,'Title','No grid loaded!');
 	set(handles.push_network_load_allocation_reset, 'Enable','off');
 	set(handles.push_network_load_random_allocation, 'Enable','off');
+	set(handles.push_network_table_import_export, 'Enable','off');
 	set(handles.push_load_data_get,'Enable','off');
 	set(handles.check_simulation_start_after_data_extraction,'Enable','off');
 end

@@ -56,7 +56,7 @@ else
 	% ausgewählte Anlage setzen:
 	settin.Plants.(name).Number = settin.Plants.(name).Number + 1;
 	add_data{row_act,idx_pv_add} = name;
-	handles.Current_Settings.Table_Network.Data{row_act,4} = long_na;
+	handles.Current_Settings.Table_Network.Data{row_act,idx_pv} = long_na;
 end
 
 handles.Current_Settings.Data_Extract.Solar = settin;
