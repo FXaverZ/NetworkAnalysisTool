@@ -2,21 +2,21 @@ classdef Branch < handle
     %BRANCH    Klasse der Zweigelemente (z.B. Leitungen)
 	%    Detaillierte Beschreibung fehlt!
 	
-	% Version:                 1.0
+	% Version:                 2.0
 	% Erstellt von:            Franz Zeilinger - 14.03.2013
-	% Letzte Änderung durch:   
+	% Letzte Änderung durch:   Franz Zeilinger - 03.12.2014
     
     properties
-        Branch_ID
+		Branch_ID
 	%        ID des Kanten-Objektes
-        Branch_Obj
-	%        Berechnungsobjekt "Line" des Kanten-Objektes		
-        Branch_Name	
+		Branch_Obj
+	%        Berechnungsobjekt "Line" des Kanten-Objektes
+		Branch_Name
 	%        Name des Kanten-Objektes
-        Branch_Type
-    %        Type of branch element (Line, 2W TR) 
-        Branch_Type_ID
-    %        Branch_Type_ID = 1 (Lines), = 2 (2W TR)
+		Branch_Type
+	%        Type of branch element (Line, 2W TR)
+		Branch_Type_ID
+	%        Branch_Type_ID = 1 (Lines), = 2 (2W TR)
         Node_1_ID
         Node_1_Obj
         Node_1_Name
@@ -24,44 +24,43 @@ classdef Branch < handle
         Node_2_Obj
         Node_2_Name
 
-        Rated_Voltage1_phase_phase
-            % Rated_Voltage1_phase_phase is defined for the "from" node        
-        Rated_Voltage1_phase_earth
-            % [U_L1-E U_L2-E U_L3-E] in Volts
-            % Rated_Voltage1_phase_earth is defined for the "from" node        
-        Rated_Voltage2_phase_phase
-            % Rated_Voltage2_phase_phase is defined for the "to" node            
-        Rated_Voltage2_phase_earth
-            % [U_L1-E U_L2-E U_L3-E] in Volts
-            % Rated_Voltage2_phase_earth is defined for the "to" node
-        Current_Limits 
-            % Current limits (thermal) defined by base rating, first, second,
-            % third additional thermal limit. Given in the form of a 1x4 array [base,
-            % first,second, third] thermal limit in A        
-        App_Power_Limits
-            % Apparent power limits        
-            
-        % -- changelog v1.1b ##### (start) // 20130425    
-        Current = zeros(1,4); 
-            % Currents (from node to element) [L1 L2 L3 LE?]        
-        Active_Power = zeros(1,4); 
-            % Active Power (from node to element) [L1 L2 L3 LE?]    
+		Rated_Voltage1_phase_phase
+	%        Rated_Voltage1_phase_phase is defined for the "from" node
+		Rated_Voltage1_phase_earth
+	%        [U_L1-E U_L2-E U_L3-E] in Volts
+	%        Rated_Voltage1_phase_earth is defined for the "from" node
+		Rated_Voltage2_phase_phase
+	%        Rated_Voltage2_phase_phase is defined for the "to" node
+		Rated_Voltage2_phase_earth
+	%        [U_L1-E U_L2-E U_L3-E] in Volts
+	%        Rated_Voltage2_phase_earth is defined for the "to" node
+		Voltage_Level_ID
+	%        Voltage level ID of element from the "from" node
+		Current_Limits
+	%        Current limits (thermal) defined by base rating, first, second,
+	%        third additional thermal limit. Given in the form of a 1x4 array [base,
+	%        first,second, third] thermal limit in A
+		App_Power_Limits
+	%        Apparent power limits
+		Current = zeros(1,8);
+	%        Currents (from element to node) [I1 I2 I3 Ie phiI1 phiI2 phiI3 cos_phie]
+		Active_Power = zeros(1,4);
+    %        Active Power (from element to node) [L1 L2 L3 LE?]    
         Reactive_Power = zeros(1,4); 
-            % Reactive Power (from node to element) [L1 L2 L3 LE?]  
+    %        Reactive Power (from element to node) [L1 L2 L3 LE?]  
         Apparent_Power = zeros(1,4);
-            % Apperant power (from node to element) [L1 L2 L3 LE?]  
-        Voltage_Level_ID
-            % Voltage level ID of element from the "from" node 
+    %        Apperant power (from element to node) [L1 L2 L3 LE?]  
+		Current_to = zeros(1,8); 
+    %        Currents (from node to element) [I1 I2 I3 Ie phiI1 phiI2 phiI3 cos_phie]     
         Active_Power_to = zeros(1,4); 
-            % Active Power (from element to node) [L1 L2 L3 LE?]    
+    %        Active Power (from node to element) [L1 L2 L3 LE?]    
         Reactive_Power_to = zeros(1,4); 
-            % Reactive Power (from element to node) [L1 L2 L3 LE?]  
+    %        Reactive Power (from node to element) [L1 L2 L3 LE?]  
         Apparent_Power_to = zeros(1,4);
-            % Apperant power (from element to node) [L1 L2 L3 LE?]          
-    % -- changelog v1.1b ##### (start) // 2013042
+    %        Apperant power (from node to element) [L1 L2 L3 LE?]          
     end
     % Note: Current, Active_Power, Reactive_Power and Apparent_Power
-    % are all defined FROM node TO element
+    % are all defined TO node FROM element
 
         
     methods
@@ -131,7 +130,6 @@ classdef Branch < handle
                 obj.Branch_Type_ID = 2; 
                 % 2w transformers have an internal branch type ID of 2!
                 
-                % -- changelog v1.1b ##### (start) // 20130425
                 % To define voltage level ID we require the following code
                 % Voltage level defined from the "from" node               
                 all_nodes_in_table = sin_ext.Tables.Node(:,strcmp(sin_ext.Tables.Node(1,:),'Name'));
@@ -144,7 +142,6 @@ classdef Branch < handle
                
                 % Define voltage level ID of element from the "from" node
                 obj.Voltage_Level_ID = VoltLevel1;
-                % -- changelog v1.1b ##### (end) // 20130425
               
                 % Rated voltages for primary and secondary transformer side
                 % are given in kV, therefore we use *1000 to convert to
@@ -158,7 +155,6 @@ classdef Branch < handle
             end
         end
         
-        % -- changelog v1.1b ##### (start) // 20130423
         function current_limits = define_branch_limits (obj)
 			%DEFINE_BRANCH_LIMITS
             % app_power_limits and current_limits defined as 4 element array 
@@ -226,25 +222,51 @@ classdef Branch < handle
                 obj(i).App_Power_Limits = app_power_limits; % Apparent power limits defined for THREE PHASE!
                 
             end % for i = 1 : numel(obj)
-        end % end of function
+        end % end of function current_limits
         
         function current = update_current_branch_LF_USYM (obj)
 			%update_current_branch_LF_USYM    
 			for i = 1:numel(obj)
-				current = zeros(1,4); 
-				LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 1);
+				current = zeros(1,8); 
+				LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 2);
                 if ~isempty(LFBranchResultLoad)
                     current(1,1) = LFBranchResultLoad.get('Item','I1');
                     current(1,2) = LFBranchResultLoad.get('Item','I2');
                     current(1,3) = LFBranchResultLoad.get('Item','I3');
-                    current(1,4) = LFBranchResultLoad.get('Item','Ie');
-                    current = current*1000; % Umrechnen von kA in A
+					current(1,4) = LFBranchResultLoad.get('Item','Ie');
+					current(1,5) = LFBranchResultLoad.get('Item','phiI1');
+					current(1,6) = LFBranchResultLoad.get('Item','phiI2');
+					current(1,7) = LFBranchResultLoad.get('Item','phiI3');
+					current(1,8) = LFBranchResultLoad.get('Item','cos_phie');
+                    current(:,1:4) = current(:,1:4)*1000; % Umrechnen von kA in A
                     obj(i).Current = current;
                 else
                     % Fehlerbehandlung?!?
                 end
 			end
-        end
+		end
+		
+		function current = update_current_branch_LF_USYM_to (obj)
+			%update_current_branch_LF_USYM
+			for i = 1:numel(obj)
+				current = zeros(1,8);
+				LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 1);
+				if ~isempty(LFBranchResultLoad)
+					current(1,1) = LFBranchResultLoad.get('Item','I1');
+					current(1,2) = LFBranchResultLoad.get('Item','I2');
+					current(1,3) = LFBranchResultLoad.get('Item','I3');
+					current(1,4) = LFBranchResultLoad.get('Item','Ie');
+					current(1,5) = LFBranchResultLoad.get('Item','phiI1');
+					current(1,6) = LFBranchResultLoad.get('Item','phiI2');
+					current(1,7) = LFBranchResultLoad.get('Item','phiI3');
+					current(1,8) = LFBranchResultLoad.get('Item','cos_phie');
+                    current(:,1:4) = current(:,1:4)*1000; % Umrechnen von kA in A
+					obj(i).Current_to = current;
+				else
+					% Fehlerbehandlung?!?
+				end
+			end
+		end
         
         function power = update_power_branch_LF_USYM (obj)
             %update_power_branch_LF_USYM  - load flow values are read
@@ -253,7 +275,8 @@ classdef Branch < handle
                 active_power = zeros(1,4);
                 reactive_power = zeros(1,4);
                 apparent_power = zeros(1,4);                
-                
+                power = [active_power, reactive_power, apparent_power];
+				
                 LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 2);
                 if ~isempty(LFBranchResultLoad)
                     
@@ -279,15 +302,15 @@ classdef Branch < handle
                     obj(i).Active_Power = active_power;
                     obj(i).Reactive_Power = reactive_power;
                     obj(i).Apparent_Power = apparent_power;
+					power = [active_power, reactive_power, apparent_power];
                     
                 else
                     % Fehlerbehandlung?!?
                 end
             end
-        end % End of update_power_branch
-                
-        % -- changelog v1.1b ##### (start) // 20130425        
-        function obj = update_power_branch_LF_USYM_to(obj)
+        end % end of function update_power_branch
+                     
+        function power = update_power_branch_LF_USYM_to(obj)
             %update_power_branch_LF_USYM_to  - load flow values are read
             %for elements - TO node FROM element
             % ** 'To' values are useful for power loss analysis
@@ -295,8 +318,9 @@ classdef Branch < handle
                 active_power_to = zeros(1,4);
                 reactive_power_to = zeros(1,4);
                 apparent_power_to = zeros(1,4);                
-                
-                LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 2);
+                power = [active_power_to, reactive_power_to, apparent_power_to];
+				
+                LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 1);
                 if ~isempty(LFBranchResultLoad)
                     
                     active_power_to(1,1) = LFBranchResultLoad.get('Item','P1');
@@ -321,13 +345,12 @@ classdef Branch < handle
                     obj(i).Active_Power_to = active_power_to;
                     obj(i).Reactive_Power_to = reactive_power_to;
                     obj(i).Apparent_Power_to = apparent_power_to;
-                    
+                    power = [active_power_to, reactive_power_to, apparent_power_to];
                 else
                     % Fehlerbehandlung?!?
                 end
             end
-        end
-        % -- changelog v1.1b ##### (end) // 20130425
+		end
         
         function remove_COM_objects (obj)
             % removing all COM-Object out of this class. This has to be
@@ -340,6 +363,7 @@ classdef Branch < handle
                 obj(i).Node_1_Obj = [];
                 obj(i).Node_2_Obj = [];
             end
-        end % End of remove_COM_objects        
+        end % End of remove_COM_objects  
+		
     end % End of Methods    
 end % End of classdef

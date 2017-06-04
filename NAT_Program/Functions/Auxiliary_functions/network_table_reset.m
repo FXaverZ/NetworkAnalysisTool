@@ -2,9 +2,9 @@ function [Table_Network, Data_Extract]  = network_table_reset(handles)
 %NETWORK_TABLE_RESET Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.2
+% Version:                 1.4
 % Erstellt von:            Franz Zeilinger - 22.03.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 11.12.2014
 
 Data_Extract = handles.Current_Settings.Data_Extract;
 
@@ -20,6 +20,8 @@ cg = handles.sin.Settings.Grid_name;
 % spezified in the default settings:
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	ColumnName = handles.System.table_settings.lv.ColumnName;
+	AddDataName = handles.System.table_settings.lv.Additional_Data_Content;
+	
 	%create an empty cell array:
 	data = cell(numel({handles.NAT_Data.Grid.(cg).P_Q_Node.Points.P_Q_Name}'),numel(handles.System.table_settings.lv.ColumnName));
 	% node names:
@@ -30,12 +32,19 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	data(:,idx) = num2cell(true(size(data,1),1));
 	idx = strcmp(ColumnName, 'Housh.type');
 	data(:,idx) = deal(handles.System.housholds(1,1));
+	idx = strcmp(ColumnName, 'Hh. Number');
+	[data{:,idx}] = deal(1);
 	idx = strcmp(ColumnName, 'PV-Plant');
 	data(:,idx) = deal(handles.System.sola.Selectable(1,1));
 	idx = strcmp(ColumnName, 'El. Mob.');
 	data(:,idx) = num2cell(zeros(size(data,1),1));
 	
+	% fill the additional dData array with default values:
 	add_data = cell(size(data,1),numel(handles.System.table_settings.lv.Additional_Data_Content));
+	idx = strcmp(AddDataName, 'HHs_Selection');
+	add_data(:,idx) = deal({handles.System.housholds(1,1)});
+	idx = strcmp(AddDataName, 'HHs_Pool');
+	[add_data{:,idx}] = deal([]);
 	
 	Table_Network.Data = data;
 	Table_Network.Additional_Data = add_data;

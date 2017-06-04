@@ -6,7 +6,7 @@ function handles = result_preallocation(handles,cg)
 
 % Version:                 1.3
 % Erstellt von:            Matej Rejc      - 17.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.09.2013
+% Letzte Änderung durch:   Franz Zeilinger - 04.12.2014
 
 % Access to the data-Object:
 d = handles.NAT_Data;
@@ -166,6 +166,7 @@ if save_branch_results == 1
 		zeros(num_data_set,...
 		handles.Current_Settings.Simulation.Timepoints,...
 		numel(d.Grid.(cg).Branches.Grouped),16);
+	d.Result.(cg).Branch_Values_to = d.Result.(cg).Branch_Values;
 end
 
 % ---------------------------------------------------------------------------

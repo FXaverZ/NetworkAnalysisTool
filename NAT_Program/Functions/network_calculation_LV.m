@@ -2,9 +2,9 @@ function handles = network_calculation_LV(handles)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 2.2
+% Version:                 3.0
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.09.2014
+% Letzte Änderung durch:   Franz Zeilinger - 18.12.2014
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
@@ -210,23 +210,66 @@ for i=1:numel(Grid_List)
 		%------------------------------------------------------------------------
 		% Haushalts-Lasten ins Netz einfügen:
 		%------------------------------------------------------------------------
-		d.Grid.(cg).Load.Loads = Unit_Time_Dependent.empty(0,numel(d.Grid.(cg).P_Q_Node.ids));
-		hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
-		idx_hh = strcmp(cur_set.Table_Network.ColumnName, 'Housh.type');
+		% get important information, first content of the loaded profiles
+		hh_conten = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content;
+		% total number of present households:
+		hh_num_to = numel(hh_conten);
+		% numper of households per typ:
+		hh_number = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
+		% where are the PQ-Node names in the network table?
+		idx_pq_na = strcmp(cur_set.Table_Network.ColumnName, 'Names');
+		% where are the number of households of the node?
+		idx_hh_nu = strcmp(cur_set.Table_Network.ColumnName, 'Hh. Number');
+		% where in the additional table are the household typs? 
+		idx_hh_ty = strcmp(cur_set.Table_Network.Additional_Data_Content, 'HHs_Selection');
+		
+		% create emtpy instances of the Class Unit_Time_Dependet according to the number
+		% of households to be connected:
+		d.Grid.(cg).Load.Loads = Unit_Time_Dependent.empty(0,hh_num_to);
+		
+		% go through all P_Q_Nodes and connect the household loads to them according to
+		% their number and typ selection:
+		load_counter = 1; % counter for load-objects
 		for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
-			% Welcher Haushaltstyp soll angeschlossen werden?
-			hh_typ = cur_set.Table_Network.Data{k,idx_hh};
-			idx = find(strcmp(hh_typ,d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content));
-			idx = idx(hhs.(hh_typ).Number)-1;
-			hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
-			% Last-Instanz erzeugen:
-			obj = Unit_Time_Dependent(...
-				d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
-				true, ...                                % Objekt aktiv
-				Load_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
-			% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
-			d.Grid.(cg).Load.Loads(k) = obj;
+			% where ist the entry of the current point in the network table?
+			pq_name = d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name;
+			idx_pq_nt = strcmp(cur_set.Table_Network.Data(:,idx_pq_na),pq_name);
+			% How many Households have to be connected at that point?
+			hh_pq_num = cur_set.Table_Network.Data{idx_pq_nt,idx_hh_nu};
+			
+			% go through all households at that point
+			for l=1:hh_pq_num
+				% Welcher Haushaltstyp soll angeschlossen werden?
+				hh_typ = cur_set.Table_Network.Additional_Data{idx_pq_nt,idx_hh_ty}{l};
+				% get the positions of the data of the households of this type
+				idx = find(strcmp(hh_typ,hh_conten));
+				% how many of these households have to be connected?
+				idx_hh_typ_number = strcmp(hh_number(:,1),hh_typ);
+				hh_typ_number = hh_number{idx_hh_typ_number,2};
+				
+				% according to the remaining number of housholds to be connected select
+				% the last dataset of this typ (to ensure, that every dataset is only
+				% connected to onnce!
+				idx = idx(hh_typ_number);
+				% Last-Instanz erzeugen und dem Objektarray hinzufügen:
+				obj = Unit_Time_Dependent(...
+					d.Grid.(cg).P_Q_Node.Points(k),...         % Anschlusspunkt-Objekt
+					true, ...                                  % Objekt aktiv
+					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6)); % Lastgang des Last
+				d.Grid.(cg).Load.Loads(load_counter) = obj;
+				
+				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
+					,hh_typ,'(',num2str(l),')']);
+				
+				%incread counter for load objects and decrease number of households of
+				%this typ to be connected:
+				load_counter = load_counter + 1;
+				hh_typ_number = hh_typ_number - 1;
+				hh_number{idx_hh_typ_number,2} = hh_typ_number;
+			end
 		end
+		clear hh_conten hh_num_to hh_number load_counter l k pq_name hh_pq_num hh_typ obj
+		clear idx_hh_nu idx_hh_ty idx_pq_na idx_pq_nt idx idx_hh_typ_number hh_typ_number
 		%------------------------------------------------------------------------
 		% Elektrofahrzeuge einfügen:
 		%------------------------------------------------------------------------
