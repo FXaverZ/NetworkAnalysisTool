@@ -12,10 +12,6 @@ if isempty(handles.NVIEW_Control.Result_Information_File.Name) & isempty(handles
     set(handles.panel_result_details,'Title','NVIEW Content Panel');
     set(handles.static_text_result_details, 'String','');
     
-    
-    % 	set(handles.push_network_calculation_start, 'Enable','off');
-    % 	set(handles.push_network_load_allocation_reset, 'Enable','off');
-    % 	set(handles.push_network_load_random_allocation, 'Enable','off');
 else
     if isempty(handles.NVIEW_Control.NVIEW_Result_Information_File.Name)
         % Static text import results display

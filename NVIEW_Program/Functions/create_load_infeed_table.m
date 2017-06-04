@@ -2,10 +2,22 @@ function Table = create_load_infeed_table(handles,ext_inp)
 
 % Table output functions
 s = handles.NVIEW_Control;
+
+%----------------------------------------------------------------------------
+% Limit the observations to selected lists in <s> and <d>!
+Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
+Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+
+% Limit scenarios to the selected list in <s>
+s.Simulation_Description.Scenario = s.Simulation_Description.Scenario(Selected_Scenarios,:);
+s.Simulation_Options.Number_of_Scenarios = size(Selected_Scenarios,1);
+%----------------------------------------------------------------------------
+
 cs = s.Simulation_Options.Number_of_Scenarios;
 cd = s.Simulation_Options.Number_of_datasets;
 cg = s.Simulation_Description.Variants;
 Data_List = fields(ext_inp);
+
 % Values ID
 Table = []; 
 RoundEps = 1e-2;
@@ -59,6 +71,8 @@ for rowIdx = 1 : numel(rowIdx_loop)
     end
 end
 
-Table.Description ='Load/Infeed analysis';
+sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = strrep(sc_id,' ','');
+Table.Description =['Load/Infeed analysis_', sc_id];
 
 end

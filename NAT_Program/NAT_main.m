@@ -1,10 +1,10 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 5.0
+% Version:                 5.1
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 16.05.2013
+% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
 
-% Last Modified by GUIDE v2.5 17-Oct-2013 10:53:37
+% Last Modified by GUIDE v2.5 03-Dec-2013 14:25:31
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -184,26 +184,33 @@ handles = refresh_display_NAT_main_gui(handles);
 % Update handles structure
 guidata(hObject, handles);
 
-function check_use_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-check_use_scenarios_Callback_Add (hObject, handles)
-
-function check_get_time_series_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    Link zur Grafik check_output_mean_value (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-check_use_scenarios_Callback_Add (hObject, handles);
-
 function check_pqnode_active_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to check_pqnode_active (see GCBO)
 % ~          reserved for eventdata, here not needed
 % handles    structure with handles and user data (see GUIDATA)
 
 check_pqnode_active_Callback_Add (hObject, handles);
+
+function check_simulation_start_after_data_extraction_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to check_simulation_start_after_data_extraction (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of check_simulation_start_after_data_extraction
+handles.Current_Settings.Start_Simulation_after_Extraction = get(hObject,'Value');
+
+% Refresh the GUI:
+handles = refresh_display_NAT_main_gui(handles);
+
+% Update the handles-structure:
+guidata(hObject, handles);
+
+function check_use_scenarios_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+check_use_scenarios_Callback_Add (hObject, handles)
 
 function check_use_variants_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_use_scenarios (siehe GCBO)
@@ -217,6 +224,13 @@ handles = refresh_display_NAT_main_gui(handles);
 
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
+
+function check_get_time_series_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    Link zur Grafik check_output_mean_value (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+check_use_scenarios_Callback_Add (hObject, handles);
 
 function edit_simulation_number_runs_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik edit_simulation_number_runs (siehe GCBO)
@@ -570,22 +584,7 @@ function push_network_calculation_start_Callback(hObject, ~, handles) %#ok<DEFNU
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-set(handles.push_network_calculation_start, 'Enable', 'off');
-set(handles.push_cancel, 'Enable', 'on');
-pause(0.01);
-
-if handles.Current_Settings.Simulation.Use_Scenarios
-	handles = network_scenario_calculation(handles);
-else
-	handles = network_calculation_grid(handles);
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-set(handles.push_cancel, 'Enable', 'off');
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+push_network_calculation_start_Callback_Add (hObject, handles);
 
 function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik  push_network_load_allocation_reset (siehe GCBO)
@@ -648,6 +647,13 @@ if isfield(handles, 'sin');
 else
 	helpdlg('Kein Netz geladen!','Öffnen des akutellen Netzes...');
 end
+
+function push_network_select_scenario_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_network_select_scenario (see GCBO)
+% ~          reserved - eventdata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_network_select_scenario_Callback_Add(hObject, handles);
 
 function push_network_select_scenario_folder_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_select_scenario_folder (siehe GCBO)

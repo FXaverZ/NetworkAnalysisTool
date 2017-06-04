@@ -25,11 +25,11 @@ s_path = handles.Current_Settings.Simulation.Scenarios_Path;
 % Check and maybe create path for the result files:
 if isempty(handles.Current_Settings.Simulation.Grid_List)
 	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
-		handles.Current_Settings.Files.Grid.Name,'_files'];
+		handles.Current_Settings.Files.Grid.Name];
 else
 	path = handles.Current_Settings.Simulation.Grids_Path;
 end
-r_path = [path,filesep,'Results'];
+r_path = [path,'_nat',filesep,'Results'];
 if ~isdir(r_path);
 	mkdir(r_path);
 end
@@ -42,8 +42,21 @@ simdatestr = datestr(now,'yyyy_mm_dd-HH.MM.SS');
 % Save the outputs to the console:
 diary([r_path,filesep,'Res_',simdatestr,' - log.txt']);
 diary('on');
-% sort the scenarios:
-scenar.Names = sort(scenar.Names);
+
+% adapt the Scenario-Settings according to the selection:
+if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
+	Scen_Sel = handles.Current_Settings.Simulation.Scenarios_Selection;
+	scen_old = scenar;
+	scen_new.Number = numel(Scen_Sel);
+	scen_new.Names = cell(1,scen_new.Number);
+	for i=1:scen_new.Number
+		scen_new.Names{i} = scen_old.Names{Scen_Sel(i)};
+		scen_new.(['Sc_',num2str(i)]) = scen_old.(['Sc_',num2str(Scen_Sel(i))]);
+	end
+	scen_new.Data_avaliable = 1;
+	scenar = scen_new;
+end
+
 fprintf('\nBerechne die Szenarien...\n');
 for i=1:scenar.Number;
 	% 	if i == 1
@@ -119,7 +132,8 @@ for i=1:scenar.Number;
 end
 % write_scenario_log(handles,'close');
 % Save the current Settings of the tool:
-Current_Settings = handles.Current_Settings; %#ok<NASGU>
+Current_Settings = handles.Current_Settings;
+Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
 fprintf('\n================================== \n');

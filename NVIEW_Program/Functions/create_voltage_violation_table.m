@@ -1,13 +1,11 @@
 function Table = create_voltage_violation_table(handles,d,s)
 
 % Table output functions
-voltage_violation_numbers_overall = get_voltage_violation_numbers_overall(handles,d,s);
+voltage_violation_numbers_overall = get_voltage_violation_numbers_overall(handles,d,s); 
 voltage_violation_numbers_scenarios = get_voltage_violation_numbers_scenarios(handles,d,s);
 violated_node_numbers_overall = get_violated_node_numbers_overall(handles,d,s);
 violated_node_numbers_scenarios = get_violated_node_numbers_scenarios(handles,d,s);
-
-node_voltage_deviations = get_node_voltage_deviations(handles,d,s);
-
+node_voltage_deviations = get_node_voltage_deviations(handles,d,s); %$
 
 % Values ID
 Table = []; RoundEps = 1e-2;
@@ -22,7 +20,7 @@ Table.Values = [ nan(1,size(voltage_violation_numbers_overall.Values,2));
  Table.Values = Table.Values - mod(Table.Values ,RoundEps);
 
 % Add deviations
-for i = 1 : 4
+for i = 1 : numel(node_voltage_deviations.ColumnName)
     for j = 1 : 3
         max_volt(j,i) = node_voltage_deviations.Values{i}(1,j);
         mean_volt(j,i) = node_voltage_deviations.Values{i}(2,j);
@@ -46,11 +44,11 @@ Table.Values = [Table.Values;
 Table.ColumnName = [{''};voltage_violation_numbers_overall.ColumnName];
 % Scenario ID
 Table.RowName = [{upper(voltage_violation_numbers_overall.Name)};
-                 {'All scenarios included'}
+                 {'All scenarios observed'}
                  voltage_violation_numbers_scenarios.RowName;
                  {''};
                  {upper(violated_node_numbers_overall.Name)};
-                 {'All scenarios included'}
+                 {'All scenarios observed'}
                  violated_node_numbers_scenarios.RowName ];
 
  end_of_rounding = size(Table.RowName,1);
@@ -104,6 +102,11 @@ for rowIdx = 1 : numel(rowIdx_loop)
     end
 end
 
-Table.Description ='Voltage analysis';
+sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = strrep(sc_id,' ','');
+gv_id = int2str(handles.NVIEW_Control.Display_Options.Variants');
+gv_id = strrep(gv_id,' ','');
+
+Table.Description =['Voltage analysis_',sc_id,'_',gv_id];
 
 end

@@ -2,14 +2,15 @@ function handles = get_data_szenarios_load_infeed(handles)
 %GET_DATA_SZENARIOS_LOAD_INFEED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.2
+% Version:                 1.4
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 29.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
 
 fprintf('\nErstelle Szenariendaten...\n');
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
-path = handles.Current_Settings.Simulation.Grids_Path;
+path = [handles.Current_Settings.Files.Grid.Path,filesep,...
+		handles.Current_Settings.Files.Grid.Name,'_nat'];
 if ~isdir([path,filesep,'Load_Infeed_Data_f_Scenarios'])
 	mkdir([path,filesep,'Load_Infeed_Data_f_Scenarios']);
 end
@@ -56,9 +57,10 @@ end
 Scenarios_Settings.Data_avaliable = 1;
 % Create variables for saving:
 Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
+System = handles.System; %#ok<NASGU>
 % Save the Settings:
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
-	'Scenarios_Settings', 'Data_Extract');
+	'Scenarios_Settings', 'Data_Extract', 'System');
 handles.Current_Settings.Simulation.Scenarios = Scenarios_Settings;
 
 

@@ -17,7 +17,6 @@ Table_Simulation.Excel_table = ...
     [{'SIMULATION DESCRIPTION AND PARAMETERS USED'};
     {''};
     {['''', handles.NVIEW_Control.Result_Information_File.Name ,'''',' Result information file read']};
-    {['''', handles.NVIEW_Control.Scen_Grid_Information_File.Name ,'''',' Scenario/Grid information file read']};
     {''};
     {[int2str(size(handles.NVIEW_Control.Simulation_Description.Variants,1)), ' Grid variants compared']};
     {[int2str(size(handles.NVIEW_Control.Simulation_Description.Scenario,1)), ' Scenarios analysed']};
@@ -43,7 +42,7 @@ Table_Voltage.Excel_table(3,:) = Table_Voltage.ColumnName; % Add ID header
 warning('off', 'MATLAB:xlswrite:AddSheet'); % Turn off warning
 
 path = handles.System.Export_Path;
-file = [strrep(handles.NVIEW_Control.Result_Information_File.Name,' - information','_'),'Summary'];
+file = [strrep(handles.NVIEW_Control.Result_Information_File.Name,' - Settings',' - '),'Summary'];
 file = [path,filesep,file,'.xls'];
 
 if exist(file,'file') == 2
@@ -53,9 +52,11 @@ if exist(file,'file') == 2
 end
 
 % Create excel file and define sheets
+Sheet_Descr_Load = Table_Load.Description(1:find(Table_Load.Description=='_')-1);
+Sheet_Descr_Volt = Table_Voltage.Description(1:find(Table_Voltage.Description=='_')-1);
 xlswrite(file,Table_Simulation.Excel_table,Table_Simulation.Description);
-xlswrite(file,Table_Load.Excel_table,Table_Load.Description);
-xlswrite(file,Table_Voltage.Excel_table,Table_Voltage.Description);
+xlswrite(file,Table_Load.Excel_table,Sheet_Descr_Load);
+xlswrite(file,Table_Voltage.Excel_table,Sheet_Descr_Volt);
 
 
 % Clear default sheets
@@ -83,7 +84,7 @@ numSheets = hWorksheets.Count;
 for sheetIdx = 1 : numSheets
     sheetName = [];
     sheetName = hWorksheets.Item(sheetIdx).Name;
-    if strcmp(sheetName,Table_Load.Description)
+    if strcmp(sheetName,Sheet_Descr_Load)
         hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
         hWorksheet.Columns.Item(1).columnWidth = 55; %first column
         for columnIdx = 2 : size(Table_Load.Excel_table,2)
@@ -96,7 +97,7 @@ for sheetIdx = 1 : numSheets
         hWorksheet.Range(['A16:', Excel_Column_ID{size(Table_Load.Excel_table,2)}, '16']).Interior.ColorIndex = 17;
         hWorksheet.Range(['A22:', Excel_Column_ID{size(Table_Load.Excel_table,2)}, '22']).Interior.ColorIndex = 17;
         
-    elseif strcmp(sheetName,Table_Voltage.Description)
+    elseif strcmp(sheetName,Sheet_Descr_Volt)
         % What rows must be highlighted (2x scenario+overall tables and 3x
         % L1, L2, L3 phase tables
         Highlight_Table_Voltage_Rows = 3 + [1, 2, 3] + ...

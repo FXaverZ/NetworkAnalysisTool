@@ -24,6 +24,19 @@ end
 	network_table_reset(handles);
 Table_Data = handles.Current_Settings.Table_Network.Data;
 
+% Set the the current time-settings:
+if ~isempty(d.Simulation.Active_Scenario.Time.Season)
+	% adjsut season setting:
+	handles.Current_Settings.Data_Extract.Season = ...
+		strcmp(handles.System.seasons(:,1),d.Simulation.Active_Scenario.Time.Season);
+end
+if ~isempty(d.Simulation.Active_Scenario.Time.Weekday)
+	% adjust weekday setting:
+	handles.Current_Settings.Data_Extract.Weekday = ...
+		strcmp(handles.System.weekdays(:,1),d.Simulation.Active_Scenario.Time.Weekday);
+end
+
+
 % -----------------------------------------------------------------------------------
 % Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
 % -----------------------------------------------------------------------------------

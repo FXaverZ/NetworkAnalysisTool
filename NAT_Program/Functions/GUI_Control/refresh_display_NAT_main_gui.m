@@ -40,6 +40,12 @@ else
 	set(handles.check_get_time_series, 'Value',0);
 end
 
+if handles.Current_Settings.Start_Simulation_after_Extraction
+	set(handles.check_simulation_start_after_data_extraction, 'Value', 1);
+else
+	set(handles.check_simulation_start_after_data_extraction, 'Value', 0);
+end
+
 % update the pop-up-menues:
 set(handles.popup_time_resolution, 'Value',...
 	handles.Current_Settings.Data_Extract.Time_Resolution);
@@ -177,12 +183,16 @@ if ~isempty(handles.Current_Settings.Files.Grid.Name)
 	set(handles.static_text_network_path_name, 'String', str);
 	set(handles.push_network_load_allocation_reset, 'Enable','on');
 	set(handles.push_network_load_random_allocation, 'Enable','on');
+	set(handles.push_load_data_get,'Enable','on');
+	set(handles.check_simulation_start_after_data_extraction,'Enable','on');
 else
 	set(handles.static_text_network_path_name, 'String', 'No grid loaded!');
 	set(handles.uipanel_detail_component,'Title','No grid loaded!');
 	set(handles.push_network_calculation_start, 'Enable','off');
 	set(handles.push_network_load_allocation_reset, 'Enable','off');
 	set(handles.push_network_load_random_allocation, 'Enable','off');
+	set(handles.push_load_data_get,'Enable','off');
+	set(handles.check_simulation_start_after_data_extraction,'Enable','off');
 end
 
 if ~isempty(handles.Current_Settings.Table_Network)
@@ -194,6 +204,11 @@ if ~isempty(handles.Current_Settings.Table_Network)
 		'ColumnFormat', ntw.ColumnFormat,...
 		'ColumnEditable', ntw.ColumnEditable,...
 		'RowName', ntw.RowName);
+	set(handles.push_load_data_get,'Enable','on');
+	set(handles.check_simulation_start_after_data_extraction,'Enable','on');
+else
+	set(handles.push_load_data_get,'Enable','off');
+	set(handles.check_simulation_start_after_data_extraction,'Enable','off');
 end
 
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
@@ -239,11 +254,18 @@ end
 set(handles.check_use_scenarios, 'Value', handles.Current_Settings.Simulation.Use_Scenarios);
 if handles.Current_Settings.Simulation.Use_Scenarios
 	set(handles.push_load_data_get,'String', 'Load Scenariodata...');
-	set(handles.edit_simulation_number_scenarios,'String',...
-		num2str(handles.Current_Settings.Simulation.Scenarios.Number));
+	set(handles.push_network_select_scenario,'Enable', 'on');
+	if isempty(handles.Current_Settings.Simulation.Scenarios_Selection);
+		set(handles.edit_simulation_number_scenarios,'String',...
+			num2str(handles.Current_Settings.Simulation.Scenarios.Number));
+	else
+		set(handles.edit_simulation_number_scenarios,'String',...
+			num2str(sum(handles.Current_Settings.Simulation.Scenarios_Selection>=1)));
+	end
 else
 	set(handles.push_load_data_get,'String', 'Load Loaddata...');
 	set(handles.edit_simulation_number_scenarios,'String','Singlesim.');
+	set(handles.push_network_select_scenario,'Enable', 'off');
 end
 
 % Analysefunktionen Steuerung:

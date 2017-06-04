@@ -151,8 +151,8 @@ classdef Connection_Point < handle
 				obj_s(i).P_Q_Obj.set('Item','P3',p_q(5));
 				obj_s(i).P_Q_Obj.set('Item','Q3',p_q(6));
 				% also set the total power:
-				obj_s(i).P_Q_Obj.set('Item','P',p_q(1)+p_q(3)+p_q(5));
-				obj_s(i).P_Q_Obj.set('Item','Q',p_q(2)+p_q(4)+p_q(6));
+% 				obj_s(i).P_Q_Obj.set('Item','P',p_q(1)+p_q(3)+p_q(5));
+% 				obj_s(i).P_Q_Obj.set('Item','Q',p_q(2)+p_q(4)+p_q(6));
 				% mark that this object and the SINCAL-load-object have the
 				% same power-data
 				obj_s(i).powers_changed = false;

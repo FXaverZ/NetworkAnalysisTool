@@ -1,67 +1,38 @@
 function [handles,NVIEW_Results,NVIEW_Control] = convert_nat_results_to_nview(handles)
 
-% Create file structure where result files will be defined and subsequently
-% loaded
-file.Path = handles.NVIEW_Control.Result_Information_File.Path;
-file.Name = [];
-file.Exte = '.mat';
-
 for I = 1 : numel(handles.NVIEW_Control.Result_Files)
     % clear data structure and filename variable
-    clear data; file.Name = []; 
+    clear data; file.Name = []; file.Path = [];
     % Define filename from handles structure at i-th iteration
     file.Name = handles.NVIEW_Control.Result_Files{I};
-	
-	% Check, if the result-file is partioned:,
-	Scen_settings = handles.NVIEW_Control.Simulation_Options.NAT_Settings.Simulation.Scenarios;
-	scen_name = handles.NVIEW_Control.Simulation_Description.Scenario{I,1};
-	scen_idx = find(strcmp(scen_name, Scen_settings.Names));
-	
-	if Scen_settings.(['Sc_',num2str(scen_idx)]).Data_is_divided
-		% Data is available in multiple files! Deal this correctly:
-		data_merged = [];
-		for J=1:Scen_settings.(['Sc_',num2str(scen_idx)]).Data_number_parts
-			if J == 1
-				% Load data structure from first stored .mat file (has same file name as
-				% in the single file case...
-				data = load([file.Path,filesep,file.Name]);
-				% --------------------------------------------------------------------
-				% CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
-				% --------------------------------------------------------------------
-				grid_data = create_grid_structure(handles,data);
-			else
-				file.Name = [file.Name(1:end-4),'_',num2str(J,'%03.0f'),'.mat'];
-				data = load([file.Path,filesep,file.Name]);
-			end
-			% merge Simulation Data of the single files:
-			data_merged = merge_simdata(handles, data_merged, data); %!!! THIS FUNCTION IS NOT FINISHED !!!
-		end
-		% --------------------------------------------------------------------
-		% USE MERGED RESULTS AND REFORMAT TO GRID STRUCTURE
-		% --------------------------------------------------------------------
-		Scenario_Structure.(['Scenario_', int2str(I)]) = [];
-		Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data_merged,grid_data);
-	else
-		% Data is available in a single file! Load data structure from stored .mat file
-		data = load([file.Path,filesep,file.Name]);
-		% --------------------------------------------------------------------
-		% CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
-		% --------------------------------------------------------------------
-		if I == 1
-			grid_data = create_grid_structure(handles,data);
-		end
-		% --------------------------------------------------------------------
-		% READ RESULTS AND REFORMAT TO GRID STRUCTURE
-		% --------------------------------------------------------------------
-		Scenario_Structure.(['Scenario_', int2str(I)]) = [];
-		Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data,grid_data);
-	end
+    file.Path = handles.NVIEW_Control.Result_Files_Paths{I};
+    file.Exte = '.mat';
+    % If the results are partitioned
+    if ~ischar(file.Name)
+        % Merge partial files for individual scenario
+        data = group_partitioned_results(handles, file);
+    else        
+        % Load data structure from stored mat file
+        data = load([file.Path,filesep,file.Name,file.Exte]);
+    end
+    % --------------------------------------------------------------------
+    % CREATE GRID STRUCTURE. DEFINE BUS/BRANCH ARRAYS FOR GRID VARIANTS
+    % --------------------------------------------------------------------        
+    if I == 1
+        grid_data = create_grid_structure(handles,data);
+    end
+    % --------------------------------------------------------------------
+    % READ RESULTS AND REFORMAT TO GRID STRUCTURE
+    % --------------------------------------------------------------------     
+    Scenario_Structure.(['Scenario_', int2str(I)]) = [];
+    Scenario_Structure.(['Scenario_', int2str(I)]) = create_result_structure(handles,data,grid_data);
 end
 
 % --------------------------------------------------------------------
 % READ GRID STRUCTURE FORMAT AND RESHAPE INTO NVIEW FORMAT
 % --------------------------------------------------------------------
 Grid_List = handles.NVIEW_Control.Simulation_Description.Variants;
+No_Scenarios = handles.NVIEW_Control.Simulation_Options.Number_of_Scenarios;
 
 NVIEW_Results = [];
 for I = 1 : numel(Grid_List)
@@ -73,14 +44,15 @@ for I = 1 : numel(Grid_List)
     NVIEW_Results.(Grid_List{I}).bus_statistics = [];
     NVIEW_Results.(Grid_List{I}).bus_violated_at_datasets = [];    
     NVIEW_Results.(Grid_List{I}).bus_violations_at_datasets = [];
-    NVIEW_Results.(Grid_List{I}).bus_deviations = nan(3,3);  
+    NVIEW_Results.(Grid_List{I}).bus_deviations = nan(No_Scenarios,3,3);  
     
     NVIEW_Results.(Grid_List{I}).branch_violations = [];
     NVIEW_Results.(Grid_List{I}).branch_statistics = [];
     NVIEW_Results.(Grid_List{I}).loss_statistics = [];
 
     
-     for J = 1 : numel(handles.NVIEW_Control.Result_Files)         
+     for J = 1 : numel(handles.NVIEW_Control.Result_Files)      
+         % Number of scenarios
          if handles.NVIEW_Control.Simulation_Options.Voltage_Analysis == 1
              NVIEW_Results.(Grid_List{I}).bus_violations(:,J) = ...
                  Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_violations(:,1);
@@ -94,20 +66,16 @@ for I = 1 : numel(Grid_List)
              NVIEW_Results.(Grid_List{I}).bus_violated_at_datasets(:,J) = ...
                  Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_summary.dataset_violated_nodes_numbers;
 
-             NVIEW_Results.(Grid_List{I}).bus_deviations(1,:) = ...
-                 nanmax([NVIEW_Results.(Grid_List{I}).bus_deviations(1,:);
-                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(1,:)]);
+             NVIEW_Results.(Grid_List{I}).bus_deviations(J,1,:) = ...
+                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(1,:);
 
-             NVIEW_Results.(Grid_List{I}).bus_deviations(2,:) = ...
-                 nanmean([NVIEW_Results.(Grid_List{I}).bus_deviations(2,:);
-                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(2,:)]); 
+             NVIEW_Results.(Grid_List{I}).bus_deviations(J,2,:) = ...
+                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(2,:);
              
-             NVIEW_Results.(Grid_List{I}).bus_deviations(3,:) = ...
-                 nanmin([NVIEW_Results.(Grid_List{I}).bus_deviations(3,:);
-                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(3,:)]);             
+             NVIEW_Results.(Grid_List{I}).bus_deviations(J,3,:) = ...
+                 Scenario_Structure.(['Scenario_', int2str(J)]).(Grid_List{I}).bus_deviations(3,:);
              % 2d array, first dim. are the max, mean, min values, second
              % dim. are the phases - MERGED FOR ALL SCENARIOS
-
          end
          
          if handles.NVIEW_Control.Simulation_Options.Overcurrent_Analysis == 1
@@ -137,10 +105,12 @@ end
 % Get NVIEW Settings for possible NVIEW save!
 % --------------------------------------------------------------------
 NVIEW_Control.Result_Information_File = handles.NVIEW_Control.Result_Information_File;
-NVIEW_Control.Scen_Grid_Information_File = handles.NVIEW_Control.Scen_Grid_Information_File;
 NVIEW_Control.Simulation_Options = handles.NVIEW_Control.Simulation_Options;
 NVIEW_Control.Result_Files = handles.NVIEW_Control.Result_Files;
+NVIEW_Control.Result_Files_Paths = handles.NVIEW_Control.Result_Files_Paths;
 NVIEW_Control.Simulation_Description = handles.NVIEW_Control.Simulation_Description;
+NVIEW_Control.Display_Options.Scenarios = handles.NVIEW_Control.Display_Options.Scenarios;
+NVIEW_Control.Display_Options.Variants  = handles.NVIEW_Control.Display_Options.Variants;
 
 % --------------------------------------------------------------------
 % Store NVIEW result filename
@@ -149,7 +119,7 @@ NVIEW_Control.Simulation_Description = handles.NVIEW_Control.Simulation_Descript
 file = [];
 file.Path = handles.NVIEW_Control.NVIEW_Result_Information_File.Path;
 file.Name = [];
-exclude_text = 'information';
+exclude_text = 'Settings';
 if strcmp(handles.NVIEW_Control.Result_Information_File.Name(end-size(exclude_text,2)+1:end), exclude_text)
     file.Name = [handles.NVIEW_Control.Result_Information_File.Name(1: end-size(exclude_text,2)),'NVIEW'];
 end
@@ -157,7 +127,6 @@ file.Exte = handles.NVIEW_Control.NVIEW_Result_Information_File.Exte;
 
 % Store path to NVIEW result file, update handles structure!
 handles.NVIEW_Control.NVIEW_Result_Information_File = file;
-
 
 % Store information to function output
 NVIEW_Control.NVIEW_Result_Information_File = handles.NVIEW_Control.NVIEW_Result_Information_File;

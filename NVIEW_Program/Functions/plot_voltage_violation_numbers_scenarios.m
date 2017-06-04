@@ -7,6 +7,8 @@ BarhYtick = 1 : numel(Table.ColumnName);
 BarhYtickLabel = flipud(Table.ColumnName);
 BarhXLabel = Table.Name;
 BarhLegend = Table.RowName;
+BarhLegend = strrep(BarhLegend,'_',' ');
+
 BarhFigureName = Table.Description;
 % Define figure with computer resolution size
 figure('name',BarhFigureName,'Renderer',handles.System.Graphics.Renderer); hold on; grid on; box on

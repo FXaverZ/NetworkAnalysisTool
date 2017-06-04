@@ -10,12 +10,6 @@ handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
 handles.NVIEW_Control.Result_Information_File.Name = [];
 handles.NVIEW_Control.Result_Information_File.Exte = '.mat';
 
-% Scenario/grid overview
-handles.NVIEW_Control.Scen_Grid_Information_File.Path = handles.System.Main_Path;
-handles.NVIEW_Control.Scen_Grid_Information_File.Name = [];
-handles.NVIEW_Control.Scen_Grid_Information_File.Exte = '.txt';
-
-
 % Directory for processed result files (export data to)
 if ~isdir([handles.System.Main_Path,filesep,'NVIEW results'])
 	mkdir([handles.System.Main_Path,filesep,'NVIEW results']);

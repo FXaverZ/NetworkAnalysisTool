@@ -231,7 +231,7 @@ classdef Branch < handle
         function current = update_current_branch_LF_USYM (obj)
 			%update_current_branch_LF_USYM    
 			for i = 1:numel(obj)
-				current = zeros(1,4); % This was originally set to (1,3) ?
+				current = zeros(1,4); 
 				LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 1);
                 if ~isempty(LFBranchResultLoad)
                     current(1,1) = LFBranchResultLoad.get('Item','I1');

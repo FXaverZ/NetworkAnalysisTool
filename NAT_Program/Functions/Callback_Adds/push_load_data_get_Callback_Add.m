@@ -30,7 +30,21 @@ end
 switch answer
 	case 'Load- and Infeed-Database'
 		handles = get_input_from_database(handles);
-		helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+		if ~isempty(handles.NAT_Data.Load_Infeed_Data)
+			if handles.Current_Settings.Start_Simulation_after_Extraction
+				% Refresh the GUI:
+				handles = refresh_display_NAT_main_gui(handles);
+				% Update the handles-structure:
+				guidata(hObject, handles);
+				% start calculation:
+				push_network_calculation_start_Callback_Add (hObject, handles);
+				return;
+			else
+				helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+			end
+		else
+			return;
+		end
 	case 'Simulationresults'
 		% User has to specify, which results he want's to use...
 		file = handles.Current_Settings.Files.Load.Result;
@@ -113,7 +127,17 @@ switch answer
 		handles.Current_Settings.Files.Load.Result = file;
 		[handles, error] = get_input_from_results(handles);
 		if ~error
-			helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+			if handles.Current_Settings.Start_Simulation_after_Extraction
+				% Refresh the GUI:
+				handles = refresh_display_NAT_main_gui(handles);
+				% Update the handles-structure:
+				guidata(hObject, handles);
+				% start calculation:
+				push_network_calculation_start_Callback_Add (hObject, handles);
+				return;
+			else
+				helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+			end
 		end
 	case 'Orginal Data'
 		errordlg('Currently not supported!');

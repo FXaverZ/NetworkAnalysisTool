@@ -3,6 +3,21 @@ function Table = get_data_input_scenarios(handles)
 % Transfer handles substructures to internal structures
 d = handles.NVIEW_Results.Input_Data;
 s = handles.NVIEW_Control;
+%----------------------------------------------------------------------------
+% Limit the observations to selected lists in <s> and <d>!
+Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
+Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+
+% Limit scenarios to the selected list in <d>. Remove non-relevant columns in d
+Data_List = fields(d);
+for H = 1 : numel(Data_List)
+    d.(Data_List{H}) = d.(Data_List{H})(:,Selected_Scenarios);
+end
+% Limit scenarios to the selected list in <s>
+s.Simulation_Description.Scenario = s.Simulation_Description.Scenario(Selected_Scenarios,:);
+s.Simulation_Options.Number_of_Scenarios = size(Selected_Scenarios,1);
+%----------------------------------------------------------------------------
+
 
 cs = s.Simulation_Options.Number_of_Scenarios;
 cd = s.Simulation_Options.Number_of_datasets;

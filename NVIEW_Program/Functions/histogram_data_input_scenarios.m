@@ -3,16 +3,24 @@ function histogram_data_input_scenarios(handles,ext_inp)
 % Transfer handles substructures to internal structures
 s = handles.NVIEW_Control;
 
+%----------------------------------------------------------------------------
+% Limit the observations to selected lists in <s> and <d>!
+Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+
+% Limit scenarios to the selected list in <s>
+s.Simulation_Description.Scenario = s.Simulation_Description.Scenario(Selected_Scenarios,:);
+s.Simulation_Options.Number_of_Scenarios = size(Selected_Scenarios,1);
+%----------------------------------------------------------------------------
+
+
 cs = s.Simulation_Options.Number_of_Scenarios;
 cd = s.Simulation_Options.Number_of_datasets;
-cg = s.Simulation_Description.Variants;
+css = s.Simulation_Description.Scenario(:,1);
 
 Data_List = fields(ext_inp);
 for H = 1 : numel(Data_List)
     clear  nBins binEdges aj bj cj count LineStyle_* b nj binIdx i Hist*
-
     
-
     % Create histogram
     nBins = 50; % 50 bin histogram!
     % Bin edges from 0 to max_edge
@@ -42,7 +50,7 @@ for H = 1 : numel(Data_List)
         nj = calc_bin_numbers(binIdx,nBins,binEdges);
         % Draw histogram
         b=bar(cj,100*nj/sum(nj),'style','hist');
-        if i <= numel(cg)/2
+        if i <= cs/2
             set(b,'EdgeColor','none','FaceColor',handles.System.Graphics.Colormap(i,:),'LineWidth',1.5,'FaceAlpha',min([0.2+ i/10,0.7]));
             %     set(gca,'Xtick',binEdges,'XLim',[binEdges(1) binEdges(end)]);
         else
@@ -58,10 +66,11 @@ for H = 1 : numel(Data_List)
     % Axis formatting values
     HistXLabel = ext_inp.(Data_List{H}).RowName;
     HistYLabel = 'Relative frequency in %';
-    HistLegend = cg;
-    for i = 1 : numel(HistLegend)
-        if size(HistLegend{i},2) > 12
-            HistLegend{i} = [HistLegend{i}(1:12),'...'];
+    HistLegend = css;
+    HistLegend = strrep(HistLegend,'_',' ');
+    for i = 1 : size(HistLegend,1)
+        if size(HistLegend{i,1},2) > 12
+            HistLegend{i,1} = [HistLegend{i}(1:12),'...'];
         end
     end
 

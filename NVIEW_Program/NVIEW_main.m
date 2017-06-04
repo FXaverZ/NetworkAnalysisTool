@@ -77,13 +77,20 @@ function menu_import_nat_results_Callback(hObject, eventdata, handles)
 
 % Clear NVIEW Control and Result fields
 handles.NVIEW_Control = [];
+
 handles = get_default_values_NVIEW(handles);
 handles = refresh_display_NVIEW_main_gui (handles);
 % Clear NVIEW_Results if existing
 if isfield(handles,'NVIEW_Results')
     handles = rmfield(handles,'NVIEW_Results');
 end
-        
+% Clear table if existing
+if isfield(handles,'table_results')
+    set(handles.table_results,'Visible','off');
+    set(handles.table_results,'Data',[])
+    set(handles.table_results,'ColumnName',[],'RowName',[])
+end
+
 % Set default location for UI get file to open at (handles >> System)
 handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
 
@@ -110,18 +117,6 @@ end
 file.Path = file.Path(1:end-1);
 % Update NVIEW settings result information
 handles.NVIEW_Control.Result_Information_File = file;
-% Match Scenario/Grid details path with result information file
-handles.NVIEW_Control.Scen_Grid_Information_File.Path = file.Path;
-% Check for scenario/grid detail log file
-file = []; file = dir([...
-    handles.NVIEW_Control.Result_Information_File.Path,filesep,...
-    'Scen_',handles.NVIEW_Control.Result_Information_File.Name(1+size('Res_',2):end - size(' - information',2)+1),'*.txt']);
- 
-% Alter the file properties to match the txt log file
-if ~isempty(file)
-    [~, file.Name, ~] = fileparts(file.name);
-    handles.NVIEW_Control.Scen_Grid_Information_File.Name = file.Name;
-end
 
 % Load result information database
 handles = load_result_information(handles);
@@ -130,16 +125,16 @@ handles = load_result_information(handles);
 handles = refresh_display_NVIEW_main_gui (handles);
 % Update handles structure
 
-user_response = questdlg(sprintf(['NVIEW Result conversion and processing! ',...
-                                   '\nContinue conversion to NVIEW Result File?']),...
-                                   'NVIEW Result conversion',...
-                                   'Yes And Save to NVIEW Result File',...
-                                   'Yes But Don''t Save',...
-                                   'Cancel NVIEW Conversion','Yes And Save to NVIEW Result File');
+user_response = questdlg([sprintf(['The program must convert NAT results to NVIEW format for result analysis.\n\n',...
+                                   'Do you want to save the converted NVIEW Result File for later use?'])],...
+                                   'NVIEW Result Processing and Conversion',...
+                                   'Save NVIEW Result File',...
+                                   'Don''t Save NVIEW Result File',...
+                                   'Cancel','Save NVIEW Result File');
 
 % select user response and act accordingly
 switch user_response
-    case 'Yes And Save to NVIEW Result File'
+    case 'Save NVIEW Result File'
         % Save file
         handles = update_NVIEW_control_panel_busy(handles);
         
@@ -150,13 +145,13 @@ switch user_response
         
         handles.NVIEW_Results = NVIEW_Results;
         handles = refresh_display_NVIEW_main_gui (handles);
-    case 'Yes But Don''t Save'
+    case 'Don''t Save NVIEW Result File'
         % Do not save as NVIEW file
         handles = update_NVIEW_control_panel_busy(handles);
         [~,NVIEW_Results,NVIEW_Control] = convert_nat_results_to_nview(handles);
         handles.NVIEW_Results = NVIEW_Results;
         handles = refresh_display_NVIEW_main_gui (handles);
-    case 'Cancel NVIEW Conversion'
+    case 'Cancel'
         handles.NVIEW_Control = [];
         handles = get_default_values_NVIEW(handles);
         handles = refresh_display_NVIEW_main_gui (handles);
@@ -166,8 +161,8 @@ switch user_response
         end
 end
  guidata(hObject, handles);
-
 % --------------------------------------------------------------------
+
 function menu_import_nview_results_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_import_nview_results (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -179,7 +174,12 @@ handles = refresh_display_NVIEW_main_gui (handles);
 if isfield(handles,'NVIEW_Results')
     handles = rmfield(handles,'NVIEW_Results');
 end
-
+% Clear table if existing
+if isfield(handles,'table_results')
+    set(handles.table_results,'Visible','off');
+    set(handles.table_results,'Data',[])
+    set(handles.table_results,'ColumnName',[],'RowName',[])
+end
 
 % Set default location for UI get file to open at (handles >> System)
 handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
@@ -207,7 +207,7 @@ end
 file.Path = file.Path(1:end-1);
 
 % Load NVIEW result files
-load([file.Path,filesep,file.Name]);
+load([file.Path,filesep,file.Name,file.Exte]);
 % Update imported NVIEW_Result_Information_File data!
 NVIEW_Control.NVIEW_Result_Information_File = file;
 
@@ -552,9 +552,11 @@ function menu_show_load_table_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 Table_Inp = get_data_input_scenarios(handles);
+sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = strrep(sc_id,' ','');
 
 % UI Table results update
-if ~strcmp(handles.System.Graphics.Table,'Load/Infeed analysis')    
+if ~strcmp(handles.System.Graphics.Table,['Load/Infeed analysis_',sc_id])    
     handles = clear_table_results(handles);  
     Table = create_load_infeed_table(handles,Table_Inp);
     handles = draw_load_infeed_table(handles,Table);
@@ -569,4 +571,38 @@ function menu_export_analysis_to_xls_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 handles = write_to_excel(handles);
+guidata(hObject, handles);
 
+% --------------------------------------------------------------------
+function menu_merge_nat_results_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_merge_nat_results (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = merge_simulation_runs(handles);
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function pushtool_SelectGrid_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_SelectGrid (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+Selected_List = listbox_selection(handles,'Select grid variants');
+% Set all to zero, followed by setting the selected grid variants to one
+handles.NVIEW_Control.Display_Options.Variants = zeros(size(handles.NVIEW_Control.Display_Options.Variants));
+handles.NVIEW_Control.Display_Options.Variants(Selected_List) = 1;
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function pushtool_SelectScenario_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_SelectScenario (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+Selected_List = listbox_selection(handles,'Select scenarios');
+% Set all to zero, followed by setting the selected scenarios to one
+handles.NVIEW_Control.Display_Options.Scenarios = zeros(size(handles.NVIEW_Control.Display_Options.Scenarios));
+handles.NVIEW_Control.Display_Options.Scenarios(Selected_List) = 1;
+guidata(hObject, handles);

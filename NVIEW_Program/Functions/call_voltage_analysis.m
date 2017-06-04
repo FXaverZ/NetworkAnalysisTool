@@ -5,8 +5,13 @@ function handles = call_voltage_analysis(handles,selection_input)
 d = handles.NVIEW_Results;
 s = handles.NVIEW_Control;
 
+sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = strrep(sc_id,' ','');
+gv_id = int2str(handles.NVIEW_Control.Display_Options.Variants');
+gv_id = strrep(gv_id,' ','');
+
 % UI Table results update
-if ~strcmp(handles.System.Graphics.Table,'Voltage analysis')
+if ~strcmp(handles.System.Graphics.Table,['Voltage analysis_',sc_id,'_',gv_id])
     handles = clear_table_results(handles);  
     Table = create_voltage_violation_table(handles,d,s);
     handles = draw_voltage_violation_table(handles,Table);

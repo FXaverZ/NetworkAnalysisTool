@@ -27,6 +27,7 @@ if ischar(Main_Path)
 	% try to load data:
 	handles.Current_Settings.Simulation.Scenarios_Path = Main_Path;
 	handles.Current_Settings.Simulation.Use_Scenarios = 1;
+	handles.Current_Settings.Simulation.Scenarios_Selection = [];
 	[handles, error] = load_input_last_settings(handles);
 else
 	disp('Error during loading scenario-data:');
@@ -37,6 +38,8 @@ if error
 	% if no valid scenario-data is available, skip, restore current settings and restet
 	% scenario-data information:
 	handles.Current_Settings = curr_set;
+else
+	helpdlg('Data successfully loaded!')
 end
 
 % Anzeige aktualisieren:

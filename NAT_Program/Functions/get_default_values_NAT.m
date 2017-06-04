@@ -2,9 +2,9 @@ function handles = get_default_values_NAT(handles)
 %GET_DEFAULT_VALUES   loads the default values for all setting for the NAT
 %   Detailed explanation goes here
 
-% Version:                 4.3
+% Version:                 5.1
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
 
 %------------------------------------------------------------------------------------
 % System-Werte - sollten sich während der Systemlaufzeit nicht ändern!
@@ -138,6 +138,12 @@ Scenario.Description = ...
 Scenario.Filename = '01_Default_Settings';
 Scenario.Data_is_divided = 0;   % indicates, if file-parts are presten (=1) or not (=0)
 Scenario.Data_number_parts = 1; % number of file-parts for the scenariodata (only valid, when ...Scenario.Data_is_divided = 1)
+Scenario.Data_content = [];     % Array with number of datasets within the specified file part
+
+Time.Season = [];         % current sesason of the sceanrio (possible ones: see handles.System.seasons{1,:})
+Time.Weekday = [];        % current weekday of the sceanrio (possible ones: see handles.System.weekdays{1,:})
+Scenario.Time = Time;           % settings in the time domain of the scenario
+
 Solar.Number = [50, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 Solar.Power_sgl = 5000;         % mittlere Leistung der Anlagen [Wp]
 Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
@@ -210,12 +216,12 @@ Files.Auto_Load_Feed_Data.Exte = '.mat';
 Current_Settings.Files = Files;
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
-data_settings.Time_Resolution = 1;    % zeitliche Auflösung
-data_settings.Timepoints_per_dataset = 1440; % Number of Timepoints per dataset (is 
+data_settings.Time_Resolution = 4;    % zeitliche Auflösung
+data_settings.Timepoints_per_dataset = 144; % Number of Timepoints per dataset (is 
 % depending on handles.Current_Settings.Data_Extract.Time_Resolution and time series 
 % settings) 
-data_settings.get_Sample_Value = 1;   % Sample-Werte ermitteln bzw. speichern.
-data_settings.get_Mean_Value = 0;     % Mittelwerte ermitteln bzw. speichern.
+data_settings.get_Sample_Value = 0;   % Sample-Werte ermitteln bzw. speichern.
+data_settings.get_Mean_Value = 1;     % Mittelwerte ermitteln bzw. speichern.
 data_settings.get_Min_Value = 0;      % Minimalwerte ermitteln bzw. speichern.
 data_settings.get_Max_Value = 0;      % Maximalwerte ermitteln bzw. speichern.
 data_settings.get_95_Quantile_Value = 0; % Ermitteln des 95%-Quantils
@@ -257,7 +263,7 @@ Current_Settings.Table_Network = [];
 
 % Definieren der Simulations-Parameter:
 Simulation.Parameters = {...
-	'Calculation_method', 'LF_RST',...  % Unsymmetrischer Lastfluss
+	'Calculation_method', 'LF_RST',...   % Unsymmetrischer Lastfluss (RST)
 	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
 	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
 	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
@@ -275,8 +281,9 @@ Simulation.Use_Grid_Variants = 0;
 % Root path to the folder, in which the single Networks of the grid variants are stored...
 Simulation.Grids_Path = Files.Main_Path;
 % Should the tool calculate different scenarios (if avaliable)?
-Simulation.Use_Scenarios = 0;
+Simulation.Use_Scenarios = 1;
 Simulation.Scenarios_Path = Files.Main_Path;
+Simulation.Scenarios_Selection = [];
 
 Simulation.Voltage_Violation_Analysis = 0; 
 % 1 = Voltage violation analysis function is used
@@ -297,6 +304,9 @@ Simulation.Save_Power_Loss_Results = 0;
 % 1 = Power Loss data is saved
 % 0 = Power Loss data is not saved
 Current_Settings.Simulation = Simulation;
+
+% should the grid simulation be started after the data extraction is finished (1 = Yes, 0 = No)?
+Current_Settings.Start_Simulation_after_Extraction = 0;
 
 % Anzahl der unterschiedlichen Input-Datensätze (entspricht
 % handles.Current_Settings.Simulation.Number_Runs zum Extraktionszeitpunkt):

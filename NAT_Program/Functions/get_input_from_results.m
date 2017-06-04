@@ -110,7 +110,7 @@ end
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if isempty(handles.Current_Settings.Simulation.Grid_List)
 	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
-		handles.Current_Settings.Files.Grid.Name,'_files'];
+		handles.Current_Settings.Files.Grid.Name,'_nat'];
 else
 	path = handles.Current_Settings.Simulation.Grids_Path;
 end

@@ -50,6 +50,8 @@ for i = 1:num_set
 	if save_part_files && i >= ((file_part_count+1) * handles.System.number_max_datasets)
 		% save a part-file:
 		file_part_count = file_part_count + 1;
+		% Save the number of datasets in this file part:
+		handles.NAT_Data.Simulation.Active_Scenario.Data_content(file_part_count) = handles.System.number_max_datasets;
 		% save the extracted data within a seperate file in the grid variants
 		% folder:
 		fprintf(['\t\t\tSave file part no. ',num2str(file_part_count),'\n']);
@@ -69,11 +71,16 @@ for i = 1:num_set
 	end
 end
 % save last file-part:
-if save_part_files && i > ((file_part_count) * handles.System.number_max_datasets)
+if save_part_files && i > (file_part_count * handles.System.number_max_datasets)
 	file_part_count = file_part_count + 1;
+	% Save the number of datasets in this file part:
+	handles.NAT_Data.Simulation.Active_Scenario.Data_content(file_part_count) = ...
+		i - (file_part_count-1) * handles.System.number_max_datasets;
+	
 	fprintf(['\t\t\tSave file part no. ',num2str(file_part_count)]);
 	name = [handles.NAT_Data.Simulation.Active_Scenario.Filename,'_',num2str(file_part_count,'%03.0f')];
 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
+	
 	save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
 		'Load_Infeed_Data');
 	clear('Load_Infeed_Data');
