@@ -6,18 +6,18 @@ if ~isfield(handles,'NVIEW_Results')
 end
 
 % Check if NVIEW_Processed exists
-if isfield(handles,'NVIEW_Processed')
-    % NVIEW_Processed exists, check if Analysis selection equals current
-    % settings
-    Analysis_Selection_Id = define_analysis_selection_id(handles.NVIEW_Analysis_Selection);
-    if strcmp(handles.NVIEW_Processed.Control.ID,Analysis_Selection_Id)
-        % NVIEW_Processed already encompasses the selected settings
-        return;
-    else
-       % NVIEW_Processed must be recalculated for new analysis selection
-        handles = rmfield(handles,'NVIEW_Processed');
-    end
-end
+  if isfield(handles,'NVIEW_Processed')
+     % NVIEW_Processed exists, check if Analysis selection equals current
+     % settings
+      Analysis_Selection_Id = define_analysis_selection_id(handles.NVIEW_Analysis_Selection);
+      if strcmp(handles.NVIEW_Processed.Control.ID,Analysis_Selection_Id)
+          % NVIEW_Processed already encompasses the selected settings
+          return;
+      else
+         % NVIEW_Processed must be recalculated for new analysis selection
+          handles = rmfield(handles,'NVIEW_Processed');
+      end
+  end
 
 % Busy display
 handles = update_NVIEW_control_panel_busy(handles);

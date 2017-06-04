@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 08-May-2014 16:05:34
+% Last Modified by GUIDE v2.5 24-Jul-2014 17:48:20
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -486,7 +486,11 @@ catch ME
 end
 
 % Logo anzeigen:
-logo=imread('Figures\siemenslogo.jpg','jpg');   % Einlesen der Grafik
+if strcmpi(getComputerName, 'eeapc14')
+	logo=imread('Figures\institutslogo.jpg','jpg');   % Einlesen der Grafik
+else
+	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
+end
 image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
 axis off;                                         % Achsenbezeichnung ausschalten
@@ -1029,3 +1033,27 @@ end
 
 
 % --- Executes on button press in push_network_scenario_show_settings.
+
+
+% --- Executes on button press in check_controller_emob_charge_active_all.
+function check_controller_emob_charge_active_all_Callback(hObject, eventdata, handles)
+% hObject    handle to check_controller_emob_charge_active_all (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+idx = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'EMob Ctr.');
+data = handles.Current_Settings.Table_Network.Data;
+if get(hObject,'Value')
+	data(:,idx) = num2cell(true(size(data,1),1));
+else
+	data(:,idx) = num2cell(false(size(data,1),1));
+end
+
+handles.Current_Settings.Table_Network.Data = data;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+

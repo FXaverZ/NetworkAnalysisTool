@@ -10,7 +10,9 @@ Table.Values = [];
 for i = 1 : numel(cg)
     Table.Values(:,i) = d.(cg{i}).branch_statistics(Observed_Row,:);
 end
-Table.Values = 100*sum(Table.Values,1)/(cs*cd*size(d.(cg{i}).bus,1));
+%Changelog 2014-09-17 1.1 FZ Start
+Table.Values = 100*sum(Table.Values,1)/(cs*cd*size(d.(cg{i}).branch,1));
+%Changelog 2014-09-17 1.1 FZ End
 Table.Name = '% of branches with overcurrents';
 Table.ColumnName = d.Control.Simulation_Description.Variants;
 for i = 1 : numel(Table.ColumnName)

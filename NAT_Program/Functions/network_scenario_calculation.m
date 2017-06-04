@@ -14,8 +14,6 @@ if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
 	return;
 end
 
-handles.Error = 0;
-
 % clear previous results:
 handles.NAT_Data.Result = [];
 
@@ -117,10 +115,6 @@ for i=1:scenar.Number;
 			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
 					handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
 				handles = network_calculation_MV_controller_active(handles);
-			end
-			
-			if handles.Error
-				return;
 			end
 			
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis

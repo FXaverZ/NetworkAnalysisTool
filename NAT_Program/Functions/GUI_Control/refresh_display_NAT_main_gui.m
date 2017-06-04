@@ -360,8 +360,10 @@ set(handles.check_controller_emob_charge_active, ...
 	'Value', handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active);
 if handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
 	set(handles.push_controller_emob_charge_settings, 'Enable', 'on');
+	set(handles.check_controller_emob_charge_active_all, 'Enable', 'on');
 else
 	set(handles.push_controller_emob_charge_settings, 'Enable', 'off');
+	set(handles.check_controller_emob_charge_active_all, 'Enable', 'off');
 end
 end
 

@@ -75,6 +75,9 @@ Input_Data_Timepoints = Input_Data_Timepoints(:);
 NVIEW_Results.Input_Data.Households = NVIEW_Results.Input_Data.Households(Input_Data_Timepoints,Selected_Scenarios);
 NVIEW_Results.Input_Data.Solar = NVIEW_Results.Input_Data.Solar(Input_Data_Timepoints,Selected_Scenarios);
 NVIEW_Results.Input_Data.El_mobility = NVIEW_Results.Input_Data.El_mobility(Input_Data_Timepoints,Selected_Scenarios);
+% CHANGELOG 1.1, FZ Start
+NVIEW_Results.Input_Data.LV_Grid_Input = NVIEW_Results.Input_Data.LV_Grid_Input(Input_Data_Timepoints,Selected_Scenarios);
+% CHANGELOG 1.1, FZ End
 
 NVPRO_Control = []; % Nview processed control
 NVPRO_Control.Simulation_Options = NVIEW_Control.Simulation_Options;

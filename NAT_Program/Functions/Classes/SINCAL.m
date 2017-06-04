@@ -371,7 +371,7 @@ classdef SINCAL < handle
 			end
 		end
 		
-		function start_calculation(obj)
+		function start_calculation(obj, varargin)
 			%START_CALCULATION    initiert eine Berechnung
 			%    SINCAL.START_CALCULATION startet eine Berechnung innerhalb des
 			%    SINCAL.Simulation-Objekts gemäß den zuvor defnierten Einstellungen
@@ -379,13 +379,22 @@ classdef SINCAL < handle
 			%    Berechnung kommt, erfolgt eine detailierte Ausgabe des Fehlers in
 			%    der MATLAB-Konsole.
 			
+			%    SINCAL.START_CALCULATION( MELDUNGSMODE ) regelt, welche Meldungen im
+			%    Fehlerfall ausgegeben werden.
+			%        MELDUNGSMODE = 'Silent' ... Es werden keine Meldungen ausgegeben.
+			
 			% Starten der Lastflussrechnung:
 			obj.Simulation.Start(obj.Settings.Calculation_method);
 			% War Lastfluss erfolgreich?
 			if obj.Simulation.StatusID ~= obj.Constants.SimulationOK
 				% Im Fehlerfall, genauere Informationen zum Stand der Berechnung
 				% ausgeben:
-				obj.disp_messages('all', 1);
+				if nargin > 1 && strcmpi(varargin{1}, 'silent')
+					% no messages at all
+				else
+					% DEFAULT: Give all possible information!
+					obj.disp_messages('all', 1);
+				end
 				exception = MException('SINCAL:SimulationFailed',...
 					'SINCAL Calculation failded!');
 				throw(exception);
@@ -636,11 +645,16 @@ classdef SINCAL < handle
 										cell2mat(...
 										data(:,strcmp('Element_ID',names)))==obj_ID,...
 										strcmp('Name',names)));
-									name = strtrim(name);
-									disp([...
-										'        Obj_ID: ',...
-										num2str(msg.ObjectIdAt(j),'%04.0f'),...
-										'    Name: ',name]);
+									if ~isempty(name)
+										name = strtrim(name);
+										disp([...
+											'        Obj_ID: ',...
+											num2str(msg.ObjectIdAt(j),'%04.0f'),...
+											'    Name: ',name]);
+									else
+										disp(...
+											'        unknown Obj ?!?');
+									end
 								end
 							end
 						end
@@ -655,11 +669,16 @@ classdef SINCAL < handle
 										cell2mat(data(:,...
 										strcmp('Element_ID',names)))==obj_ID,...
 										strcmp('Name',names)));
-									name = strtrim(name);
-									disp([...
-										'        Obj_ID: ',...
-										num2str(msg.ObjectIdAt(j)),...
-										'    Name: ',name]);
+									if ~isempty(name)
+										name = strtrim(name);
+										disp([...
+											'        Obj_ID: ',...
+											num2str(msg.ObjectIdAt(j)),...
+											'    Name: ',name]);
+									else
+										disp(...
+											'        unknown Obj ?!?');
+									end
 								end
 							end
 						end

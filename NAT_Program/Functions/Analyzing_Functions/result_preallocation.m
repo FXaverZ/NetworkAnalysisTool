@@ -6,12 +6,12 @@ function handles = result_preallocation(handles,cg)
 
 % Version:                 1.3
 % Erstellt von:            Matej Rejc      - 17.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 07.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 11.09.2013
 
 % Access to the data-Object:
 d = handles.NAT_Data;
 % how many data_sets are in the current input data available:
-num_data_set = numel(fields(d.Load_Infeed_Data));
+num_data_set = handles.Current_Settings.Simulation.Number_Runs;
 
 % Online analysis function preallocations **
 % Online voltage violation analysis will be performed.

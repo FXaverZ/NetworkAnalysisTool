@@ -28,7 +28,7 @@ classdef Charge_Controller < SG_Controller
 				mode = varargin{1};
 			end
 
-			[obj.Controller_Active] = deal(false);
+% 			[obj.Controller_Active] = deal(false);
 			
 			for i=1:numel(obj)
 				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:) = zeros(1,6);
@@ -36,15 +36,15 @@ classdef Charge_Controller < SG_Controller
 				obj(i).Values_Last_Step.Changes_Vals = zeros(4,6);
 				obj(i).Values_Last_Step.Changes_Idx = 0;
 				obj(i).Values_Last_Step.Cyle_Number = 0;
-%                 obj(i).Controller_Active = false;
+                obj(i).Controller_Active = false;
 			end
 				
 			switch lower(mode)
 				case 'total'
-					[obj.Shifted_Energy] = deal(zeros(1,6));
-%                     for i=1:numel(obj)
-%                         obj(i).Shifted_Energy = zeros(1,6);
-%                     end
+% 					[obj.Shifted_Energy] = deal(zeros(1,6));
+                    for i=1:numel(obj)
+                        obj(i).Shifted_Energy = zeros(1,6);
+                    end
 				case 'in_simulation'
 				otherwise
 					% Error, unknown reset mode!
@@ -53,6 +53,52 @@ classdef Charge_Controller < SG_Controller
 		
 		function success = check_success(~, varargin)
 			success = true;
+		end
+		
+		function full_load_reduction(obj, varargin)
+			% This function is called, if the load-flow did not converege in the previous
+			% attempt. So the controlled load is reduced by the maximum possible value, to
+			% try, if this is sufficient enough to overcome this problem...
+			for i=1:numel(obj)
+				% Calculate the controlled power:
+				pow_grd_l = zeros(1,6);
+				
+				% get the possible power reduction (equals the power consumption
+				% of the controlled unit):
+				pow_pos = obj(i).Connection_Point.P_Q_Act(obj(i).Controlled_Unit.P_Q_Act_idx,:)*1e6;
+				pow_grd_r = -pow_pos;
+				
+				% set the flag that the powers have changed:
+				obj(i).Connection_Point.powers_changed = true;
+				obj(i).Control_happened = true;
+				
+				% indexes in the last values (off by one due to modulo
+				% operation):
+				idx_c = obj(i).Values_Last_Step.Changes_Idx;
+				idx_n = mod(...
+					obj(i).Values_Last_Step.Changes_Idx + 1,...
+					size(obj(i).Values_Last_Step.Changes_Vals,1)...
+					);
+				% update the cycle informations:
+				obj(i).Values_Last_Step.Cyle_Number = obj(i).Values_Last_Step.Cyle_Number + 1;
+				obj(i).Values_Last_Step.Changes_Idx = idx_n;
+				
+				% calculate power changes:
+				pow_cha = ...
+					pow_grd_r - obj(i).Values_Last_Step.Power_Vals(1,:) - ...
+					pow_grd_l + obj(i).Values_Last_Step.Power_Vals(2,:);
+				obj(i).Values_Last_Step.Changes_Vals(idx_c+1,:) = pow_cha;
+				
+				% Save the last values (for further use):
+				obj(i).Values_Last_Step.Power_Vals = [pow_grd_r;pow_grd_l];
+				% Update the power array of the connection point:
+				obj(i).Connection_Point.P_Q_Act(obj(i).P_Q_Act_idx,:) = (pow_grd_r + pow_grd_l)/1e6;
+				
+				% first Controll-Cycle, set controller active:
+				if any(abs(pow_grd_r) > 1)
+					obj(i).Controller_Active = true;
+				end
+			end
 		end
 		
 		function regulate(obj, varargin)
@@ -72,12 +118,6 @@ classdef Charge_Controller < SG_Controller
 				
 				% how much apparent power is over the limit?
 				apow_ov = branch.Apparent_Power(1:3) - branch.App_Power_Limits*obj(i).Limit_Factor / 3;
-				
-				if any((obj(i).Shifted_Energy(1:2:end) > 0) & (apow_ov < -10))
-					% calculate the remaining capacity based on the current and shifting
-					% factor:
-					apow_pos = -apow_ov;
-				end
 				
 				if any(apow_ov > 0) || ...
 						any((obj(i).Shifted_Energy(1:2:end) > 0) & (apow_ov < -10)) || ...
@@ -130,17 +170,22 @@ classdef Charge_Controller < SG_Controller
 					% calculate the remaining capacity based on the current and shifting
 					% factor:
 					apow_chrg = sqrt(obj(i).Values_Last_Step.Power_Vals(2,1:2:end).^2 +obj(i).Values_Last_Step.Power_Vals(2,2:2:end).^2);
-					apow_pos = -apow_ov;
+					% Calculate the power consumption according to the storage level:
+					apow_ene = sqrt(obj(i).Shifted_Energy(1:2:end).^2 +obj(i).Shifted_Energy(2:2:end).^2);
+					
 					% what would be the maximum possible power for discharge:
+					apow_pos = -apow_ov;
 					amax_pow = obj(i).Max_Power*obj(i).Shifting_Factor;
 					amax_pow = sqrt(amax_pow(1:2:end).^2 + amax_pow(2:2:end).^2);
 					amax_pow = amax_pow - apow_chrg;
 					% if the remaining capacity exceeds the maximum power it is limited to
 					% the maximum power:
 					apow_pos(apow_pos > amax_pow) = amax_pow(apow_pos > amax_pow);
+					% The remaining capacity is also limited by the storage level (if in
+					% this timestep the starage can be discharged fully!):
+					amax_pow = apow_ene - apow_chrg;
+					apow_pos(apow_pos > amax_pow - 1) = amax_pow(apow_pos > amax_pow - 1);
 					
-					% Calculate the power consumption according to the storage level:
-					apow_ene = sqrt(obj(i).Shifted_Energy(1:2:end).^2 +obj(i).Shifted_Energy(2:2:end).^2);
 					fac = apow_pos./apow_ene;
 					fac(fac > 1) = 1;
 					pow_grd_l(1:2:end) = fac.*obj(i).Shifted_Energy(1:2:end);

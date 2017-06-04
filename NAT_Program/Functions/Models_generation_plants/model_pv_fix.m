@@ -9,9 +9,9 @@ function data_phase = model_pv_fix(plant, content, data_cloud_factor, ...
 %    Die Anlagenparamerter, nach der diese Berechnung durchgeführt wird, sind in der
 %    Struktur PLANT enthalten.
 
-% Version:                 1.1.2
+% Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 28.06.2012
-% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
+% Letzte Änderung durch:   Franz Zeilinger - 15.05.2013
 
 % Daten auslesen, zuerst die Zeit (ist für alle Orientierungen und Neigungen gleich,
 % daher wird diese nur vom ersten Element ausgelesen):

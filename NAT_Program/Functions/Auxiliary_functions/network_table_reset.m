@@ -74,7 +74,7 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	idx = strcmp(ColumnName, 'El. Mob?');
 	data(:,idx) = num2cell(false(size(data,1),1));
 	idx = strcmp(ColumnName, 'EMob Ctr.');
-	data(:,idx) = num2cell(false(size(data,1),1));
+	data(:,idx) = num2cell(true(size(data,1),1));
 	
 	Table_Network.Data = data;
 	Table_Network.Additional_Data = [];

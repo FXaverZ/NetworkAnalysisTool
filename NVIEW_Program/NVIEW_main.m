@@ -54,6 +54,7 @@ handles = refresh_display_NVIEW_main_gui(handles);
 set(handles.panel_result_details,'Title','NVIEW Content Panel');
 % SIEMENS-Logo set to nview_axes_logo:
 logo=imread('Figures\Siemens_Logo.jpg','jpg');   % Einlesen der Grafik
+% logo=imread('Figures\institutslogo.jpg','jpg');
 image(logo,'Parent',handles.nview_axes_logo);   % Darstellen des Logos
 axis image;                                     % Grafik entzerren
 axis off;                                       % Achsenbezeichnung ausschalten

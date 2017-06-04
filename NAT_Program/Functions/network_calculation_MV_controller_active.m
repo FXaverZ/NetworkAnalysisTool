@@ -4,9 +4,7 @@ function handles = network_calculation_MV_controller_active(handles)
 
 % Version:                 1.0
 % Erstellt von:            Franz Zeilinger - 16.06.2014
-% Letzte Änderung durch:   Franz Zeilinger - 01.07.2014
-
-handles.Error = 0;
+% Letzte Änderung durch:   Franz Zeilinger - 11.09.2014
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
@@ -64,6 +62,7 @@ num_data_set = cur_set.Data_Extract.Number_Data_Sets;
 
 for i=1:numel(Grid_List)
 	cur_set.Files.Grid.Name = Grid_List{i}(1:end-4);
+	handles.Current_Settings = cur_set;
     
 	% load the network data:
 	handles = network_load (handles);
@@ -72,7 +71,7 @@ for i=1:numel(Grid_List)
 	cg = handles.sin.Settings.Grid_name;
 	
 	fprintf(['Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
-		' (',Grid_List{i},')\n']);
+		' (',cg,')\n']);
 	
 	% create an empty network substrucure for the results:
 	d.Result.(cg) = [];
@@ -118,39 +117,39 @@ for i=1:numel(Grid_List)
 		cur_set.Table_Network = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =		
-		% Debug: generate debug input data:
-		if j==1
-			factor = 1;
-		elseif j==2;
-			factor = 1.25;
-		else
-			factor = 3;
-		end
-		
-		% Debug: set all Values to zero:
-		Load_Data = zeros(size(Load_Data));
-		Sola_Data = zeros(size(Sola_Data));
-		Elmo_Data = zeros(size(Elmo_Data));
-		LVGr_Data = zeros(size(LVGr_Data));
-		
-		idx = 0:15;
-		
-		idx_1 = [(0:71),(72:-1:1)]';
-		idx_1 = idx_1 / max(idx_1);
-		idx_2 = [(71:-1:0),(1:1:72)]';
-		idx_2 = idx_2 / max(idx_2);
-		idx_3 = [idx_1(50:end);idx_1(1:49)];
-% 		figure;plot([idx_1,idx_2,idx_3]);
-		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
-		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
-		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
-% 		figure;plot(Elmo_Data(:,[1 3 5]+18));
-		
-		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		LVGr_Data = Load_Data + Elmo_Data;
-% 		figure;plot(LVGr_Data(:,[1 3 5]));
+% 		% Debug: generate debug input data:
+% 		if j==1
+% 			factor = 1;
+% 		elseif j==2;
+% 			factor = 1.25;
+% 		else
+% 			factor = 3;
+% 		end
+% 		
+% 		% Debug: set all Values to zero:
+% 		Load_Data = zeros(size(Load_Data));
+% 		Sola_Data = zeros(size(Sola_Data));
+% 		Elmo_Data = zeros(size(Elmo_Data));
+% 		LVGr_Data = zeros(size(LVGr_Data));
+% 		
+% 		idx = 0:15;
+% 		
+% 		idx_1 = [(0:71),(72:-1:1)]';
+% 		idx_1 = idx_1 / max(idx_1);
+% 		idx_2 = [(71:-1:0),(1:1:72)]';
+% 		idx_2 = idx_2 / max(idx_2);
+% 		idx_3 = [idx_1(50:end);idx_1(1:49)];
+% % 		figure;plot([idx_1,idx_2,idx_3]);
+% 		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
+% 		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
+% 		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
+% % 		figure;plot(Elmo_Data(:,[1 3 5]+18));
+% 		
+% 		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		LVGr_Data = Load_Data + Elmo_Data;
+% % 		figure;plot(LVGr_Data(:,[1 3 5]));
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =	
 
 		if ~isempty(Load_Data)
@@ -184,8 +183,7 @@ for i=1:numel(Grid_List)
 		
 		if isempty(LVGr_Data) && isempty(Load_Data)
 			errordlg('Not enough input-Data for simulation!');
-			fprintf('\nNo load data found! Abort simulation...\n');
-			handles.Error = 1;
+			fprintf('\nNo load data found! Abort simulation...\n')
 			return;
 		end
 		
@@ -303,13 +301,6 @@ for i=1:numel(Grid_List)
 		clear obj k Elmo_Data num_grds branch idx_br lv_grd idx_lv controler_counter
 		clear Contr_selector idx_emob_ctr
 		
-		if isempty(d.Grid.(cg).Controller.Elmob)
-			fprintf('\nNo controller active! Abort Simulation...');
-			fprintf('\n================================== \n');
-			handles.Error = 1;
-			return;
-		end
-		
 		%----------------------------------------------------------------------------
 		% Netzberechnungen durchführen:
 		%----------------------------------------------------------------------------
@@ -321,13 +312,19 @@ for i=1:numel(Grid_List)
 		fprintf(['\t\tLoadprofile No. ',num2str(j),' of ',...
 			num2str(num_data_set),...
 			' (',num2str(cur_set.Data_Extract.Timepoints_per_dataset),...
-			' Timepoints)']);
+			' Timepoints) - Controller Active ']);
 		
 		% Complete reset of the controllers:
 		d.Grid.(cg).Controller.Elmob.reset_controller('total');
 		
 		for k=1:sim_set.Timepoints
 			try
+				
+				% Set a value for the control-cycle-counter that shows, that no control action
+				% took place...
+				count = -1;
+				
+				problem_solved = false;
                 % aktuellen Zeipunkt speichern:
 				d.Simulation.Current_timepoint = k;
 				% reset the controllers:
@@ -341,7 +338,23 @@ for i=1:numel(Grid_List)
 				d.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, d);
 				
 				% Lastfluss rechnen:
-				handles.sin.start_calculation;
+				try
+					handles.sin.start_calculation('silent');
+				catch ME
+					if strcmp(ME.identifier, 'SINCAL:SimulationFailed')
+						% Loadflow maybe not convereged, therefore try measures, to allow
+						% a solution:
+						d.Grid.(cg).Controller.Elmob.full_load_reduction;
+						handles.sin.start_calculation;
+						problem_solved = true;
+					else
+						rethrow(ME)
+					end
+				end
+				
+				if problem_solved
+					test = 0;
+				end
 				
 				% let the controller work
 				d.Grid.(cg).Controller.Elmob.regulate;
@@ -416,6 +429,7 @@ for i=1:numel(Grid_List)
 				
 				fprintf(['\t\t\t', strrep(ME.message, sprintf('\n'),'')]);
 				fprintf(['\t\t\t\tCurrently simulating timepoint ',num2str(ct),'\n']);
+				fprintf(['\t\t\t\t\t\t\t\t\t\t\t\t\tControl Cycle No. ',num2str(count),'\n']);
 				for l=1:3
 					fprintf(['\t\t\t\tfile: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...
 						'; name: ',ME.stack(l).name,...

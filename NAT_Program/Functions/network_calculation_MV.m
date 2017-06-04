@@ -4,7 +4,7 @@ function handles = network_calculation_MV(handles)
 
 % Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 16.06.2014
+% Letzte Änderung durch:   Franz Zeilinger - 11.09.2014
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
@@ -62,15 +62,17 @@ num_data_set = cur_set.Data_Extract.Number_Data_Sets;
 
 for i=1:numel(Grid_List)
 	cur_set.Files.Grid.Name = Grid_List{i}(1:end-4);
-    
+    handles.Current_Settings = cur_set;
+	
 	% load the network data:
 	handles = network_load (handles);
+	
 	
 	% current grid name
 	cg = handles.sin.Settings.Grid_name;
 	
 	fprintf(['Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
-		' (',Grid_List{i},')\n']);
+		' (',cg,')\n']);
 	
 	% create an empty network substrucure for the results:
 	d.Result.(cg) = [];

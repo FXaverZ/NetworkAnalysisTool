@@ -2,9 +2,9 @@ function handles = get_data_szenarios_load_infeed(handles)
 %GET_DATA_SZENARIOS_LOAD_INFEED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.5.1
+% Version:                 1.5
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 07.07.2014
+% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if handles.Current_Settings.Simulation.Use_Grid_Variants && ~isempty(handles.Current_Settings.Simulation.Grid_List)
@@ -30,14 +30,6 @@ diary([handles.Current_Settings.Simulation.Scenarios_Path,filesep,...
 	' - Log.txt']);
 
 fprintf('\nErstelle Szenariendaten...\n');
-
-% Save the Settings (the current active settings, later maybe altered settings are saved): 
-% Create variables for saving:
-Scenarios_Settings = handles.Current_Settings.Simulation.Scenarios; %#ok<NASGU>
-Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
-System = handles.System; %#ok<NASGU>
-save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
-	'Scenarios_Settings', 'Data_Extract', 'System');
 
 % Mark the type of the grid for this data:
 handles.Current_Settings.Data_Extract.Grid_type = handles.Current_Settings.Grid.Type;
@@ -99,7 +91,7 @@ Scenarios_Settings = scen_new; %#ok<NASGU>
 Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 System = handles.System; %#ok<NASGU>
 
-% Save the Settings (again):
+% Save the Settings:
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
 	'Scenarios_Settings', 'Data_Extract', 'System');
 
