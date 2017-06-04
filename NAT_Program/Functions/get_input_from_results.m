@@ -10,6 +10,9 @@ error = 0;
 % Reload the data extraktion settings:
 handles.Current_Settings.Data_Extract = Result_Settings.Data_Extract;
 
+% Update this settings with the current settings:
+handles.Current_Settings.Data_Extract.Number_Data_Sets = handles.Current_Settings.Simulation.Number_Runs;
+
 % Reset the network table:
 [handles.Current_Settings.Table_Network, ...
 	handles.Current_Settings.Data_Extract] = network_table_reset(handles);

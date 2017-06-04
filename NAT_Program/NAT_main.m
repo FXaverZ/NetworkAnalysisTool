@@ -1,10 +1,10 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 5.1
+% Version:                 5.3
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 03-Dec-2013 14:25:31
+% Last Modified by GUIDE v2.5 04-Dec-2013 14:42:30
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -548,6 +548,13 @@ function push_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
 NAT_main_gui_CloseRequestFcn(hObject, eventdata, handles);
 
+function push_input_data_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_input_data_merge (see GCBO)
+% ~          reserved - eventdata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_input_data_merge_Callback_Add (hObject, handles)
+
 function push_load_data_get_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_load_data_get (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -673,6 +680,23 @@ function push_network_simulation_settings_Callback(hObject, eventdata, handles)
 % hObject    handle to push_network_simulation_settings (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+function push_pqnode_pv_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_pv_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function push_pqnode_wi_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_wi_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function push_results_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_results_merge (see GCBO)
+% ~          reserved - evendata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_results_merge_Callback_Add (hObject, handles)
 
 function push_set_path_database_Callback(hObject, ~, handles)  %#ok<DEFNU>
 % hObject    Link zur Grafik push_set_path_database (siehe GCBO)
@@ -855,11 +879,6 @@ function edit_pqnode_pv_installed_power_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-function push_pqnode_pv_parameters_Callback(hObject, eventdata, handles)
-% hObject    handle to push_pqnode_pv_parameters (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 function popup_pqnode_wi_typ_Callback(hObject, eventdata, handles)
 % hObject    handle to popup_pqnode_wi_typ (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -867,11 +886,6 @@ function popup_pqnode_wi_typ_Callback(hObject, eventdata, handles)
 
 function edit_pqnode_wi_installed_power_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_pqnode_wi_installed_power (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-function push_pqnode_wi_parameters_Callback(hObject, eventdata, handles)
-% hObject    handle to push_pqnode_wi_parameters (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 

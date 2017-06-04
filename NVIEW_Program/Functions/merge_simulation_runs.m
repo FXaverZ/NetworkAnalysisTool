@@ -1,21 +1,28 @@
 function handles = merge_unpart_simulation_runs(handles)
 
-helpdlg_condition = 0;
-while helpdlg_condition == 0;
-    user_response = questdlg(sprintf([...
-        'SELECT DIFFERENT NAT RESULT INFORMATION FILES FOR MERGER.\n',...
-        'The process will merge NAT result information files, which can be later accessed through Import (Unprocessed) NAT Results.\n\n',...
-        'Press cancel in the file selection menu to end selection process!\n\n',...
-        'WARNING: Result files must have the same simulation options and grid variants must be analysed!']),...
-        'Merge different NAT Result information files ?',...
-        'Ok',...
-        'Ok');
-    switch user_response
-        case 'Ok'
-            helpdlg_condition = 1;
+if handles.System.Settings.First_Run_Merge_Results == 1
+    helpdlg_condition = 0;
+    while helpdlg_condition == 0;
+        user_response = questdlg(sprintf([...
+            'SELECT DIFFERENT NAT RESULT INFORMATION FILES FOR MERGER.\n',...
+            'The process will merge NAT result information files, which can be later accessed through Import (Unprocessed) NAT Results.\n\n',...
+            'Press cancel in the file selection menu to end selection process!\n\n',...
+            'WARNING: Result files must have the same simulation options and grid variants must be analysed!']),...
+            'Merge different NAT Result information files ?',...
+            'Ok','Don''t show this message again',...
+            'Ok');
+        switch user_response
+            case 'Ok'
+                handles.System.Settings.First_Run_Merge_Results = 0;
+                helpdlg_condition = 1;
+            case 'Don''t show this message again'
+                handles.System.Settings.First_Run_Merge_Results = 0;
+                set_config_settings(handles);
+                helpdlg_condition = 1;
+        end
     end
+    clear user_response helpdlg_condition
 end
-clear user_response helpdlg_condition
 % --------------------------------------------------------------------------
 % Get list of "Setting" Files
 [Selected_Settings.Path,Selected_Settings.Files,qdlg_Text,break_condition] = get_files_for_merger(handles);
@@ -145,7 +152,7 @@ switch user_response
         clear i j files filelist search_id
         
         % Merged folder definition
-        Merged_Settings.Path = [handles.NVIEW_Control.NVIEW_Result_Information_File.Path,'\Merged NAT Files\'];
+        Merged_Settings.Path = [handles.System.Main_Path,filesep,'Merged NAT Files\'];
         if isdir(Merged_Settings.Path)==0
             mkdir(Merged_Settings.Path);
         end

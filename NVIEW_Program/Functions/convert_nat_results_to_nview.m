@@ -109,9 +109,6 @@ NVIEW_Control.Simulation_Options = handles.NVIEW_Control.Simulation_Options;
 NVIEW_Control.Result_Files = handles.NVIEW_Control.Result_Files;
 NVIEW_Control.Result_Files_Paths = handles.NVIEW_Control.Result_Files_Paths;
 NVIEW_Control.Simulation_Description = handles.NVIEW_Control.Simulation_Description;
-NVIEW_Control.Display_Options.Scenarios = handles.NVIEW_Control.Display_Options.Scenarios;
-NVIEW_Control.Display_Options.Variants  = handles.NVIEW_Control.Display_Options.Variants;
-
 % --------------------------------------------------------------------
 % Store NVIEW result filename
 % --------------------------------------------------------------------
@@ -130,4 +127,5 @@ handles.NVIEW_Control.NVIEW_Result_Information_File = file;
 
 % Store information to function output
 NVIEW_Control.NVIEW_Result_Information_File = handles.NVIEW_Control.NVIEW_Result_Information_File;
+
 end

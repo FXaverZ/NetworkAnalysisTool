@@ -15,7 +15,7 @@ System.version = '4.3';
 
 % maximum number of a whole dataset, if this number is exceeded, partial
 % files are created: 
-System.number_max_datasets = 500;
+System.number_max_datasets = 7;
 
 % reset of RPC-server (SINCAL-connection) after this number of profiles (due to problems
 % with a permanently open connection with the RPC-Server. After the this number of

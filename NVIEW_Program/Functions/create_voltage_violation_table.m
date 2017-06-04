@@ -5,7 +5,7 @@ voltage_violation_numbers_overall = get_voltage_violation_numbers_overall(handle
 voltage_violation_numbers_scenarios = get_voltage_violation_numbers_scenarios(handles,d,s);
 violated_node_numbers_overall = get_violated_node_numbers_overall(handles,d,s);
 violated_node_numbers_scenarios = get_violated_node_numbers_scenarios(handles,d,s);
-node_voltage_deviations = get_node_voltage_deviations(handles,d,s); %$
+node_voltage_deviations = get_node_voltage_deviations(handles,d,s); 
 
 % Values ID
 Table = []; RoundEps = 1e-2;
@@ -102,11 +102,12 @@ for rowIdx = 1 : numel(rowIdx_loop)
     end
 end
 
-sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = int2str(handles.NVIEW_Analysis_Selection.Scenarios');
 sc_id = strrep(sc_id,' ','');
-gv_id = int2str(handles.NVIEW_Control.Display_Options.Variants');
+gv_id = int2str(handles.NVIEW_Analysis_Selection.Variants');
 gv_id = strrep(gv_id,' ','');
+td_id = handles.NVIEW_Analysis_Selection.SelectedTime_Id;
 
-Table.Description =['Voltage analysis_',sc_id,'_',gv_id];
+Table.Description =['Voltage analysis_',sc_id,'_',gv_id,'_',td_id];
 
 end

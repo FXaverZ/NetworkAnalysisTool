@@ -108,6 +108,8 @@ for i=1:numel(Grid_List)
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_95P_Quantil;
 		end
 		
+		[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
+		
 		% Die Daten an SINCAL anpassen (Leistungen in MW und pos. bei Verbrauch):
 		Load_Data = Load_Data/1e6;
 		Elmo_Data = Elmo_Data/1e6;

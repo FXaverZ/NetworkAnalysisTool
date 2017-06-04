@@ -2,8 +2,8 @@ function Table = get_voltage_violation_numbers_scenarios(handles,d,s)
 
 %----------------------------------------------------------------------------
 % Limit the observations to selected lists in <s> and <d>!
-Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
-Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+Selected_Variants = find(handles.NVIEW_Analysis_Selection.Variants);
+Selected_Scenarios = find(handles.NVIEW_Analysis_Selection.Scenarios);
 
 % Get list of grid variants and select the ones from the list
 SelectedVariantList = s.Simulation_Description.Variants;
@@ -29,7 +29,7 @@ for H = 1 : numel(Data_List)
     d.(Data_List{H}).bus_violations_at_datasets = d.(Data_List{H}).bus_violations_at_datasets(:,Selected_Scenarios);
     d.(Data_List{H}).branch_violations = d.(Data_List{H}).branch_violations(:,Selected_Scenarios);
     d.(Data_List{H}).branch_statistics = d.(Data_List{H}).branch_statistics(:,Selected_Scenarios);
-    d.(Data_List{H}).loss_statistics = d.(Data_List{H}).loss_statistics(:,Selected_Scenarios);
+%     d.(Data_List{H}).loss_statistics = d.(Data_List{H}).loss_statistics(:,Selected_Scenarios);
 end
 
 

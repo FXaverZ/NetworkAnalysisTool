@@ -5,6 +5,7 @@ function handles = get_default_values_NVIEW(handles)
 [handles.System.Graphics.Screensize,handles.System.Graphics.Colormap] = set_graphical_values('color10');
 handles.System.Graphics.FontSize = set_fontsize_values('default');
 handles.System.Graphics.Renderer = 'OpenGL'; %'OpenGL','zbuffer'-if errors occur or 'painter'-MATLAB default
+
 % Result information file data
 handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
 handles.NVIEW_Control.Result_Information_File.Name = [];
@@ -14,8 +15,12 @@ handles.NVIEW_Control.Result_Information_File.Exte = '.mat';
 if ~isdir([handles.System.Main_Path,filesep,'NVIEW results'])
 	mkdir([handles.System.Main_Path,filesep,'NVIEW results']);
 end
-handles.System.Export_Path = ...
-    [handles.System.Main_Path,filesep,'NVIEW results'];
+handles.System.Export_Path = [handles.System.Main_Path,filesep,'NVIEW results'];
+
+if ~isdir([handles.System.Export_Path,filesep,'Time domain results'])
+    mkdir([handles.System.Export_Path,filesep,'Time domain results']);
+end
+handles.System.Time_Domain_Path = [handles.System.Export_Path,filesep,'Time domain results'];
 
 % Processed result information file data
 handles.NVIEW_Control.NVIEW_Result_Information_File.Path = handles.System.Export_Path;

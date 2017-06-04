@@ -1,12 +1,20 @@
 function Table = get_data_input_scenarios(handles)
 
 % Transfer handles substructures to internal structures
-d = handles.NVIEW_Results.Input_Data;
+nas = handles.NVIEW_Analysis_Selection;
+ 
+% Use default time period or the selected time period
+if strcmp(nas.SelectedTime_Id, nas.DefaultTime_Id)
+    d = handles.NVIEW_Results.Input_Data;
+else
+    d = handles.NVIEW_Appended_Results.(['TD_',nas.SelectedTime_Id]).Input_Data;
+end
 s = handles.NVIEW_Control;
+
 %----------------------------------------------------------------------------
 % Limit the observations to selected lists in <s> and <d>!
-Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
-Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+Selected_Variants = find(handles.NVIEW_Analysis_Selection.Variants);
+Selected_Scenarios = find(handles.NVIEW_Analysis_Selection.Scenarios);
 
 % Limit scenarios to the selected list in <d>. Remove non-relevant columns in d
 Data_List = fields(d);

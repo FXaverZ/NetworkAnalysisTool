@@ -5,7 +5,7 @@ s = handles.NVIEW_Control;
 
 %----------------------------------------------------------------------------
 % Limit the observations to selected lists in <s> and <d>!
-Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+Selected_Scenarios = find(handles.NVIEW_Analysis_Selection.Scenarios);
 
 % Limit scenarios to the selected list in <s>
 s.Simulation_Description.Scenario = s.Simulation_Description.Scenario(Selected_Scenarios,:);

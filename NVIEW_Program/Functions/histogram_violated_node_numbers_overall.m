@@ -2,8 +2,8 @@ function histogram_violated_node_numbers_overall(handles,d,s)
 
 %----------------------------------------------------------------------------
 % Limit the observations to selected lists in <s> and <d>!
-Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
-Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+Selected_Variants = find(handles.NVIEW_Analysis_Selection.Variants);
+Selected_Scenarios = find(handles.NVIEW_Analysis_Selection.Scenarios);
 
 % Get list of grid variants and select the ones from the list
 SelectedVariantList = s.Simulation_Description.Variants;

@@ -44,6 +44,8 @@ addpath(genpath(Path));
 handles.System.Main_Path = Path;
 % Set default settings >> default settings are defined in "get_default_values_NVIEW"
 handles = get_default_values_NVIEW(handles);
+% Read config.ini settings
+handles = get_config_settings(handles);
 
 % Refresh display NVIEW main GUI
 handles = refresh_display_NVIEW_main_gui(handles);
@@ -83,6 +85,9 @@ handles = refresh_display_NVIEW_main_gui (handles);
 % Clear NVIEW_Results if existing
 if isfield(handles,'NVIEW_Results')
     handles = rmfield(handles,'NVIEW_Results');
+end
+if isfield(handles,'NVIEW_Appended_Results')
+    handles = rmfield(handles,'NVIEW_Appended_Results');
 end
 % Clear table if existing
 if isfield(handles,'table_results')
@@ -125,6 +130,7 @@ handles = load_result_information(handles);
 handles = refresh_display_NVIEW_main_gui (handles);
 % Update handles structure
 
+% select user response and act accordingly
 user_response = questdlg([sprintf(['The program must convert NAT results to NVIEW format for result analysis.\n\n',...
                                    'Do you want to save the converted NVIEW Result File for later use?'])],...
                                    'NVIEW Result Processing and Conversion',...
@@ -132,24 +138,27 @@ user_response = questdlg([sprintf(['The program must convert NAT results to NVIE
                                    'Don''t Save NVIEW Result File',...
                                    'Cancel','Save NVIEW Result File');
 
-% select user response and act accordingly
 switch user_response
     case 'Save NVIEW Result File'
         % Save file
-        handles = update_NVIEW_control_panel_busy(handles);
-        
-        [handles,NVIEW_Results,NVIEW_Control] = convert_nat_results_to_nview(handles);
+        handles = update_NVIEW_control_panel_busy(handles);        
+        [handles,NVIEW_Results,NVIEW_Control] = convert_nat_results_to_nview(handles); 
+        handles.NVIEW_Results = NVIEW_Results;
+        % Set default scenarios/variants/timestamp values
+        handles = set_default_analysis_selection(handles);
+        % Refresh display
+        handles = refresh_display_NVIEW_main_gui (handles);
         % Save processed results
         file = []; file = NVIEW_Control.NVIEW_Result_Information_File;
         save([file.Path,filesep,file.Name,file.Exte],'NVIEW_Results', 'NVIEW_Control');
-        
-        handles.NVIEW_Results = NVIEW_Results;
-        handles = refresh_display_NVIEW_main_gui (handles);
     case 'Don''t Save NVIEW Result File'
         % Do not save as NVIEW file
         handles = update_NVIEW_control_panel_busy(handles);
         [~,NVIEW_Results,NVIEW_Control] = convert_nat_results_to_nview(handles);
         handles.NVIEW_Results = NVIEW_Results;
+        % Set default scenarios/variants/timestamp values
+        handles = set_default_analysis_selection(handles);
+        % Refresh display
         handles = refresh_display_NVIEW_main_gui (handles);
     case 'Cancel'
         handles.NVIEW_Control = [];
@@ -173,6 +182,9 @@ handles = refresh_display_NVIEW_main_gui (handles);
 % Clear NVIEW_Results if existing
 if isfield(handles,'NVIEW_Results')
     handles = rmfield(handles,'NVIEW_Results');
+end
+if isfield(handles,'NVIEW_Appended_Results')
+    handles = rmfield(handles,'NVIEW_Appended_Results');
 end
 % Clear table if existing
 if isfield(handles,'table_results')
@@ -203,7 +215,6 @@ end
 
 % Selected file and location are valid.
 [~, file.Name, file.Exte] = fileparts(file.Name);
-
 file.Path = file.Path(1:end-1);
 
 % Load NVIEW result files
@@ -212,12 +223,56 @@ load([file.Path,filesep,file.Name,file.Exte]);
 NVIEW_Control.NVIEW_Result_Information_File = file;
 
 % Update NVIEW control and results
+handles.NVIEW_Results = [];
+handles.NVIEW_Control = [];
 handles.NVIEW_Control = NVIEW_Control;
 handles.NVIEW_Results = NVIEW_Results;
 clear NVIEW_Control NVIEW_Results
 
+cond_missing_nat_files = 0;
+% Check if NVIEW file has accurate paths and NAT file locations
+for i = 1: size(handles.NVIEW_Control.Result_Files,1)
+    if ischar(handles.NVIEW_Control.Result_Files_Paths{i,1})
+        if exist([handles.NVIEW_Control.Result_Files_Paths{i,1},filesep,handles.NVIEW_Control.Result_Files{i,1},'.mat'],'file') ~=2
+            % Path or file does not exist in NVIEW result file, must recreate result file !
+            cond_missing_nat_files = 1;
+        end
+    else
+        for j = 1 : numel(handles.NVIEW_Control.Result_Files_Paths{i,1})
+            if exist([handles.NVIEW_Control.Result_Files_Paths{i,1}{1,j},filesep,handles.NVIEW_Control.Result_Files{i,1}{1,j},'.mat'],'file') ~=2
+                % Path or file does not exist in NVIEW result file, must recreate result file !
+                cond_missing_nat_files = 1;
+                break;
+            end
+        end
+    end
+end
+
+if cond_missing_nat_files == 1
+    % Remove idents
+    handles.NVIEW_Control.Result_Files_Paths = [];
+    handles.NVIEW_Control.Result_Files = [];
+    
+    helpdlg_condition = 0;
+    while helpdlg_condition == 0;
+        user_response = questdlg(sprintf([...
+            'Can''t find NAT result files defined in the selected NVIEW processed result file!\n\n',...
+            'If TIME DOMAIN result files are available, time period selection is possible. If time domain result files are not available, time period selection will be disabled.\n']),...
+            'Can''t find NAT result files!',...
+            'Ok','Ok');
+        switch user_response
+            case 'Ok'
+                helpdlg_condition = 1;
+        end
+    end
+    clear user_response helpdlg_condition
+end
+
+% Set default scenarios/variants/timestamp values
+handles = set_default_analysis_selection(handles);
+
 % Update GUI display with new values
-handles = refresh_display_NVIEW_main_gui (handles);
+handles = refresh_display_NVIEW_main_gui(handles);
 % Update handles structure
 guidata(hObject, handles);
 
@@ -237,7 +292,6 @@ guidata(hObject, handles);
          close(check_active_figures);
          delete(handles.NVIEW_main_gui);
  end       
-guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function menu_help_Callback(hObject, eventdata, handles)
@@ -305,7 +359,7 @@ function menu_load_analysis_all_Callback(hObject, eventdata, handles)
 % Close existing figures
 
 % Analysis subfunction call
-handles = call_load_analysis(handles);
+handles = call_load_analysis(handles,1);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -532,16 +586,7 @@ function menu_show_voltage_analysis_table_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Transfer handles substructures to internal structures
-d = handles.NVIEW_Results;
-s = handles.NVIEW_Control;
-
-% UI Table results update
-if ~strcmp(handles.System.Graphics.Table,'Voltage analysis')
-    handles = clear_table_results(handles);    
-    Table = create_voltage_violation_table(handles,d,s);
-    handles = draw_voltage_violation_table(handles,Table);
-end
+handles = call_voltage_analysis(handles,-1);
 guidata(hObject, handles);
 
 
@@ -551,16 +596,8 @@ function menu_show_load_table_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-Table_Inp = get_data_input_scenarios(handles);
-sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
-sc_id = strrep(sc_id,' ','');
-
-% UI Table results update
-if ~strcmp(handles.System.Graphics.Table,['Load/Infeed analysis_',sc_id])    
-    handles = clear_table_results(handles);  
-    Table = create_load_infeed_table(handles,Table_Inp);
-    handles = draw_load_infeed_table(handles,Table);
-end
+% Analysis subfunction call
+handles = call_load_analysis(handles,0);
 guidata(hObject, handles);
 
 
@@ -589,11 +626,14 @@ function pushtool_SelectGrid_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 Selected_List = listbox_selection(handles,'Select grid variants');
-% Set all to zero, followed by setting the selected grid variants to one
-handles.NVIEW_Control.Display_Options.Variants = zeros(size(handles.NVIEW_Control.Display_Options.Variants));
-handles.NVIEW_Control.Display_Options.Variants(Selected_List) = 1;
-guidata(hObject, handles);
 
+if ~isempty(Selected_List)
+    % Set all to zero, followed by setting the selected grid variants to one
+    handles.NVIEW_Analysis_Selection.Variants = zeros(size(handles.NVIEW_Analysis_Selection.Variants));
+    handles.NVIEW_Analysis_Selection.Variants(Selected_List) = 1;    
+    handles = update_NVIEW_control_panel_display_options(handles);
+end
+guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function pushtool_SelectScenario_ClickedCallback(hObject, eventdata, handles)
@@ -602,7 +642,150 @@ function pushtool_SelectScenario_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 Selected_List = listbox_selection(handles,'Select scenarios');
-% Set all to zero, followed by setting the selected scenarios to one
-handles.NVIEW_Control.Display_Options.Scenarios = zeros(size(handles.NVIEW_Control.Display_Options.Scenarios));
-handles.NVIEW_Control.Display_Options.Scenarios(Selected_List) = 1;
+
+if ~isempty(Selected_List)
+    % Set all to zero, followed by setting the selected scenarios to one
+    handles.NVIEW_Analysis_Selection.Scenarios = zeros(size(handles.NVIEW_Analysis_Selection.Scenarios));
+    handles.NVIEW_Analysis_Selection.Scenarios(Selected_List) = 1;
+    handles = update_NVIEW_control_panel_display_options(handles);
+end
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function pushtool_SelectTimePeriod_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_SelectTimePeriod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% -------------------------------------------------------------------------
+% First time warning!
+if handles.System.Settings.First_Run_Select_Time_Period == 1    
+    helpdlg_condition = 0;
+    while helpdlg_condition == 0;
+        user_response = questdlg(sprintf([...
+            'WARNING: For time-period domain result analysis NAT results must be available!\r\n\n',...
+            'For faster time-domain analysis, enable time-domain result file saving.']),...
+            'Select time-period for analysis',...
+            'Ok','Don''t show this message again',...
+            'Ok');
+        switch user_response
+            case 'Ok'
+                handles.System.Settings.First_Run_Select_Time_Period = 0;
+                helpdlg_condition = 1;
+            case 'Don''t show this message again'
+                handles.System.Settings.First_Run_Select_Time_Period = 0;
+                set_config_settings(handles);
+                helpdlg_condition = 1;                
+        end
+    end
+    clear user_response helpdlg_condition    
+end
+% -------------------------------------------------------------------------
+
+if ~isfield(handles.NVIEW_Analysis_Selection,'Appended_External_Results')
+    handles.NVIEW_Analysis_Selection.Appended_External_Results = 0;
+end
+
+cond_missing_nat_files = 0;
+if numel(handles.NVIEW_Control.Result_Files) == 0
+    cond_missing_nat_files = 1;
+end
+
+% -------------------------------------------------------------------------
+if cond_missing_nat_files == 0 
+    % NAT results found, select timeperiod
+    handles = select_timeperiod(handles);
+else
+    if handles.NVIEW_Analysis_Selection.Appended_External_Results == 0
+        % Missing NAT Result files
+        helpdlg_condition = 0;
+        while helpdlg_condition == 0;
+            
+            user_response = questdlg(sprintf([...
+                'Can''t find NAT result files defined in the selected NVIEW processed result file!\n\n',...
+                'If TIME DOMAIN result files are available, time period selection is possible. \n\nPush ''Select time domain result file path'' to append time domain results.\n']),...
+                'Can''t find NAT result files!',...
+                'Cancel time domain analysis','Select time domain result file path','Cancel time domain analysis');
+            switch user_response
+                case 'Cancel time domain analysis'
+                    helpdlg_condition = 1;
+                case 'Select time domain result file path'
+                    handles = find_external_time_domain_results(handles);
+                    helpdlg_condition = 1;
+            end
+        end
+        clear user_response helpdlg_condition
+    end
+end
+
+if handles.NVIEW_Analysis_Selection.Appended_External_Results == 1        
+     set(handles.static_text_result_details, 'String', ...
+         sprintf(handles.NVIEW_Analysis_Selection.Appended_External_Results_Text));
+    
+    % Select timeperiod for analysis
+    [Selected_Timestamp_Id, Selected_Timestamps, Selected_Hours] = timeperiod_user_selection(handles);
+    
+    if ~isempty(Selected_Hours)
+        if ~strcmp(Selected_Timestamp_Id,handles.NVIEW_Analysis_Selection.DefaultTime_Id)
+            
+            if isfield(handles.NVIEW_Appended_Results,['TD_',Selected_Timestamp_Id])
+                handles.NVIEW_Analysis_Selection.Hours = [];
+                handles.NVIEW_Analysis_Selection.Timepoints = [];
+                handles.NVIEW_Analysis_Selection.SelectedTime_Id = [];
+                
+                handles.NVIEW_Analysis_Selection.Hours = Selected_Hours;
+                handles.NVIEW_Analysis_Selection.Timepoints = Selected_Timestamps;
+                handles.NVIEW_Analysis_Selection.SelectedTime_Id = Selected_Timestamp_Id;
+                
+                handles = update_NVIEW_control_panel_display_options(handles);
+                handles = clear_table_results(handles);
+            else
+                text_output = ['Time domain results for the selected time period do not exist!'];
+                set(handles.static_text_result_details, 'String', ...
+                    sprintf(text_output));
+            end
+        end
+    end
+end
+
+guidata(hObject, handles);
+ 
+% --------------------------------------------------------------------
+function menu_settings_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_settings (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% --------------------------------------------------------------------
+function menu_save_time_domain_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_save_time_domain (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+save_time_domain = get(hObject,'Label');
+if strcmp(save_time_domain,'Disable time-domain files saving')
+    handles.System.Settings.Save_Time_Domain = 0;
+    set(hObject,'Label','Enable time-domain files saving');
+    % Write to config.ini
+    set_config_settings(handles);    
+else
+    set(hObject,'Label','Disable time-domain files saving');
+    handles.System.Settings.Save_Time_Domain = 1;
+    % Write to config.ini
+    set_config_settings(handles);
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_debug_mode_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_debug_mode (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+dbstop in NVIEW_main at 788;
+fprintf(1,'Debugging mode enabled\n');
+fprintf(1,''); % Stop at this line
+% -----------------------------------
+dbclear in NVIEW_main at 788;
 guidata(hObject, handles);

@@ -26,10 +26,11 @@ s_path = handles.Current_Settings.Simulation.Scenarios_Path;
 if isempty(handles.Current_Settings.Simulation.Grid_List)
 	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
 		handles.Current_Settings.Files.Grid.Name];
+	r_path = [path,'_nat',filesep,'Results'];
 else
 	path = handles.Current_Settings.Simulation.Grids_Path;
+	r_path = [path,filesep,'Results'];
 end
-r_path = [path,'_nat',filesep,'Results'];
 if ~isdir(r_path);
 	mkdir(r_path);
 end
@@ -57,25 +58,9 @@ if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 	scenar = scen_new;
 end
 
-fprintf('\nBerechne die Szenarien...\n');
+fprintf('\nCalculation of the scenarios...\n');
 for i=1:scenar.Number;
-	% 	if i == 1
-	% 		% The log file and matlab scenario information is created at first
-	% 		% calculation
-	%
-	% 		% write_scenario_log - create info txt file about the scenarios
-	% 		handles.Current_Settings.Files.Save.Result.Log_file = ...
-	% 			['Res_',simdatestr,' - Scen_log.txt'];
-	% 		write_scenario_log(handles,'create');
-	%
-	% 		% create_scenario_information - Creates .mat file with all relevant
-	% 		% information regarding the simulation - necessary for final result
-	% 		% comparisons and analyses
-	% 		handles.Current_Settings.Files.Save.Result.Scen_info = ...
-	% 			['Res_',simdatestr,' - information'];
-	% 		create_scenario_information(handles);
-	% 	end
-	
+	% get the current scenario:
 	cur_scen = scenar.Names{i};
 	fprintf([cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
@@ -87,12 +72,12 @@ for i=1:scenar.Number;
 	
 	% Check, if the data is partinioted
 	if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-		fprintf(['\n\tTeildatei 1 von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+		fprintf(['\n\tFilepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 	end
 	for j = 1:scenar.(['Sc_',num2str(i)]).Data_number_parts
 		if j > 1
 			% load the next data set
-			fprintf(['\n\tTeildatei ',num2str(j),' von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			fprintf(['\n\tFilepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 			load([s_path,filesep,cur_scen,'_',num2str(j,'%03.0f'),'.mat']);
 			% set the data-object to initial state:
 			d.Load_Infeed_Data = [];
@@ -123,7 +108,7 @@ for i=1:scenar.Number;
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen,'_',num2str(j,'%03.0f')];
 		end
 		if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-			fprintf(['\t\tSpeichere Ergebnisse von Teildatensatz ',num2str(j),' von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			fprintf(['\t\tSaving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 		end
 		handles = save_simulation_data(handles);
 	end

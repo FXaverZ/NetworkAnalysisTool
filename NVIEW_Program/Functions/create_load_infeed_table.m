@@ -5,8 +5,8 @@ s = handles.NVIEW_Control;
 
 %----------------------------------------------------------------------------
 % Limit the observations to selected lists in <s> and <d>!
-Selected_Variants = find(handles.NVIEW_Control.Display_Options.Variants);
-Selected_Scenarios = find(handles.NVIEW_Control.Display_Options.Scenarios);
+Selected_Variants = find(handles.NVIEW_Analysis_Selection.Variants);
+Selected_Scenarios = find(handles.NVIEW_Analysis_Selection.Scenarios);
 
 % Limit scenarios to the selected list in <s>
 s.Simulation_Description.Scenario = s.Simulation_Description.Scenario(Selected_Scenarios,:);
@@ -71,8 +71,10 @@ for rowIdx = 1 : numel(rowIdx_loop)
     end
 end
 
-sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = int2str(handles.NVIEW_Analysis_Selection.Scenarios');
 sc_id = strrep(sc_id,' ','');
-Table.Description =['Load/Infeed analysis_', sc_id];
+td_id = handles.NVIEW_Analysis_Selection.SelectedTime_Id;
+
+Table.Description =['Load/Infeed analysis_', sc_id,'_',td_id];
 
 end

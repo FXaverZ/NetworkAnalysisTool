@@ -2,16 +2,25 @@ function handles = call_voltage_analysis(handles,selection_input)
 % Voltage violation analysis subroutine
 
 % Transfer handles substructures to internal structures
-d = handles.NVIEW_Results;
+nas = handles.NVIEW_Analysis_Selection;
+
+% Use default time period or the selected time period
+if strcmp(nas.SelectedTime_Id, nas.DefaultTime_Id)
+    d = handles.NVIEW_Results;
+else
+    d = handles.NVIEW_Appended_Results.(['TD_',nas.SelectedTime_Id]);
+end
 s = handles.NVIEW_Control;
 
-sc_id = int2str(handles.NVIEW_Control.Display_Options.Scenarios');
+sc_id = int2str(nas.Scenarios');
 sc_id = strrep(sc_id,' ','');
-gv_id = int2str(handles.NVIEW_Control.Display_Options.Variants');
+gv_id = int2str(nas.Variants');
 gv_id = strrep(gv_id,' ','');
+td_id = nas.SelectedTime_Id;
+
 
 % UI Table results update
-if ~strcmp(handles.System.Graphics.Table,['Voltage analysis_',sc_id,'_',gv_id])
+if ~strcmp(handles.System.Graphics.Table,['Voltage analysis_',sc_id,'_',gv_id,'_',td_id])
     handles = clear_table_results(handles);  
     Table = create_voltage_violation_table(handles,d,s);
     handles = draw_voltage_violation_table(handles,Table);
@@ -44,8 +53,9 @@ elseif selection_input == 3 % Show histograms
     histogram_violated_node_numbers_overall(handles,d,s);
 elseif selection_input == 4 % Show voltage deviations
     plot_node_voltage_deviations(handles,node_voltage_deviations);
+elseif selection_input == -1 % Only table
+    return;
 end
-
 
 end
 

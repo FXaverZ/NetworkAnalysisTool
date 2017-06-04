@@ -74,8 +74,9 @@ handles.NVIEW_Control.Simulation_Options = Simulation_Options;
 % get the result filenames, first search for all files in the current location along with
 % the scenario description
 files = dir(file.Path);
+
 files = struct2cell(files);
-files = files(1,3:end);
+files = files(1,cell2mat(files(3,:)) ~= 0);
 % reset the files-list:
 handles.NVIEW_Control.Result_Files = {};
 handles.NVIEW_Control.Result_Files_Paths = {};
@@ -146,9 +147,5 @@ else
     return;
 end
 handles.NVIEW_Control.Simulation_Description.Variants = variant_details;
-
-% Default display option: show all scenario comparisons!
-handles.NVIEW_Control.Display_Options.Scenarios = ones(handles.NVIEW_Control.Simulation_Options.Number_of_Scenarios,1);
-handles.NVIEW_Control.Display_Options.Variants  = ones(handles.NVIEW_Control.Simulation_Options.Number_of_Variants,1);
 
 return
