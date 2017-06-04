@@ -63,9 +63,9 @@ classdef Connection_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
-	% Version:                 1.4
+	% Version:                 1.4.1
 	% Erstellt von:            Franz Zeilinger - 14.01.2013
-	% Letzte Änderung durch:   Franz Zeilinger - 07.04.2014
+	% Letzte Änderung durch:   Franz Zeilinger - 03.06.2014
 	
 	properties
 		
@@ -145,7 +145,7 @@ classdef Connection_Point < handle
 			obj.Node_Name = obj.Node_Obj.get('Item','TOPO.Name');
 		end
 		
-		function p_q = update_power(obj, cg, cd, ct, d)
+		function p_q = update_power(obj)%, cg, cd, ct, d)
 			% Auswahl aller Objekte, für die eine Änderung in der Leistungsaufnahme
 			% vorliegt:
 			obj_s = obj([obj.powers_changed]);
@@ -154,7 +154,7 @@ classdef Connection_Point < handle
 			for i=1:numel(obj_s)
 				p_q = obj_s(i).P_Q_Act(obj_s(i).P_Q_Act_active,:);
 				p_q = sum(p_q,1);
-                d.Debug.(cg).P_Q_Input_tot(cd,ct,i,:) = p_q;             
+%                 d.Debug.(cg).P_Q_Input_tot(cd,ct,i,:) = p_q;             
                 obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));
 				obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
 				obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
@@ -216,6 +216,7 @@ classdef Connection_Point < handle
 			% connected to an existing grid):
 			for i = 1:numel(obj)
 				obj(i).P_Q_Act = zeros(0,6);
+				obj(i).P_Q_Act_active = true(0,1);
 				obj(i).Num_Units_Connected = 0;
 				obj(i).powers_changed = false;
 			end

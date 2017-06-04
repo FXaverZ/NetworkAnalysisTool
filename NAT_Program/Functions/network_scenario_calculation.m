@@ -14,6 +14,8 @@ if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
 	return;
 end
 
+handles.Error = 0;
+
 % clear previous results:
 handles.NAT_Data.Result = [];
 
@@ -106,7 +108,21 @@ for i=1:scenar.Number;
 				handles = adapt_input_data_new_timesettings(handles);
 			end
 			
-			handles = network_calculation(handles);
+			% start the calculation
+			if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+				handles = network_calculation_LV(handles);
+			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
+					~handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+				handles = network_calculation_MV(handles);
+			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
+					handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+				handles = network_calculation_MV_controller_active(handles);
+			end
+			
+			if handles.Error
+				return;
+			end
+			
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 				handles = post_voltage_violation_report(handles);
 			end

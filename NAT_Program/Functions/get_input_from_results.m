@@ -266,7 +266,7 @@ for i=1:scen_new.Number
 	Load_Infeed_Data_old = Load_Infeed_Data;
 	Load_Infeed_Data = [];
 	
-	% Load the data the grid variant, which should be used:
+	% Load the data of the grid variant, which should be used:
 	for j=1:numel(LV_Grids_List)
 		act_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[1,5,9]));
 		rea_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[2,6,10]));
@@ -303,12 +303,37 @@ for i=1:scen_new.Number
 		end
 		
 		% get the underlying Load- and Infeedinformation, first householdloads:
-		if ~isempty(Load_Infeed_Data_old.Set_1.Households.(['Data',data_typ]))
-			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Simulation.Timepoints,3);
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.Households.(['Data',data_typ]))
+			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_hou = act_power_hou;
 			
 			for k=1:Result_Settings.Simulation.Number_Runs
 				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
+				
+				Hous_Data = set.Households.(['Data',data_typ]);
+				hhs = set.Households.Number;
+				idx_hh = strcmp(set.Table_Network.ColumnName, 'Housh.type');
+				data_hou = zeros(size(Hous_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					hh_typ = set.Table_Network.Data{l,idx_hh};
+					idx = find(strcmp(hh_typ,set.Households.Content));
+					idx = idx(hhs.(hh_typ).Number)-1;
+					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+					data_hou = data_hou + Hous_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_hou(k,:,:) = data_hou(:,[1 3 5]);
+				rea_power_hou(k,:,:) = data_hou(:,[2 4 6]);
+			end
+			clear Hous_Data hhs idx_hh data_hou hh_typ idx data_hou k l
+			
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Households.(['Data',data_typ]))
+			
+			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_hou = act_power_hou;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
 				
 				Hous_Data = set.Households.(['Data',data_typ]);
 				hhs = set.Households.Number;
@@ -332,8 +357,8 @@ for i=1:scen_new.Number
 		end
 		
 		% Solar-Infeed:
-		if ~isempty(Load_Infeed_Data_old.Set_1.Solar.(['Data',data_typ]))
-			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Simulation.Timepoints,3);
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.Solar.(['Data',data_typ]))
+			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_sol = act_power_sol;
 			
 			for k=1:Result_Settings.Simulation.Number_Runs
@@ -359,18 +384,68 @@ for i=1:scen_new.Number
 				rea_power_sol(k,:,:) = data_sol(:,[2 4 6]);
 			end
 			clear set Sola_Data add_data idx_pv_add plants data_sol l k gen_unit_name idx
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Solar.(['Data',data_typ]))
+			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_sol = act_power_sol;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
+				
+				Sola_Data = set.Solar.(['Data',data_typ]);
+				add_data = set.Table_Network.Additional_Data;
+				idx_pv_add = strcmp(set.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+				plants =  set.Solar.Plants;
+				data_sol = zeros(size(Sola_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					gen_unit_name = add_data{l,idx_pv_add};
+					if isempty(gen_unit_name)
+						continue;
+					end
+					idx = find(strcmp(gen_unit_name,set.Solar.Content));
+					idx = idx(plants.(gen_unit_name).Number) - 1;
+					plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
+					data_sol = data_sol + Sola_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_sol(k,:,:) = data_sol(:,[1 3 5]);
+				rea_power_sol(k,:,:) = data_sol(:,[2 4 6]);
+			end
+			clear set Sola_Data add_data idx_pv_add plants data_sol l k gen_unit_name
 		else
 			act_power_sol = [];
 			rea_power_sol = [];
 		end
 		
 		% Elektromobility
-		if ~isempty(Load_Infeed_Data_old.Set_1.El_Mobility.(['Data',data_typ]))
-			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Simulation.Timepoints,3);
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.El_Mobility.(['Data',data_typ]))
+			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_elm = act_power_elm;
 			
 			for k=1:Result_Settings.Simulation.Number_Runs
 				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
+				
+				Elmo_Data = set.El_Mobility.(['Data',data_typ]);
+				elm_count = 0;
+				idx_em = strcmp(set.Table_Network.ColumnName, 'El. Mob.');
+				data_elm = zeros(size(Elmo_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					elmoby = set.Table_Network.Data{l,idx_em};
+					for m=1:elmoby
+						data_elm = data_elm + Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6); % Lastgang des Last
+						elm_count = elm_count + 1;
+					end
+				end
+				act_power_elm(k,:,:) = data_elm(:,[1 3 5]);
+				rea_power_elm(k,:,:) = data_elm(:,[2 4 6]);
+			end
+			clear set Elmo_Data elm_count idx_em data_elm elmoby k l m elm_num
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.El_Mobility.(['Data',data_typ]))
+			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_elm = act_power_elm;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
 				
 				Elmo_Data = set.El_Mobility.(['Data',data_typ]);
 				elm_count = 0;

@@ -2,6 +2,10 @@ function handles = get_input_from_database(handles)
 %GET_INPUT_FROM_DATABASE Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.2
+% Erstellt von:            Franz Zeilinger - 24.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 26.06.2013
+
 % Lastdaten einlesen und in Struktur speichern:
 if handles.Current_Settings.Simulation.Use_Scenarios
 	handles = get_data_szenarios_load_infeed(handles);
@@ -11,6 +15,18 @@ else
 	handles.NAT_Data.Simulation = [];
 	% Save the extraction-moment:
 	handles.Current_Settings.Data_Extract.Date_Extraktion = now();
+	% Speicherort = aktulles Netzfile
+	file = handles.Current_Settings.Files.Auto_Load_Feed_Data;
+	% Check, if a Subfolder for input-data is avaliable:
+	file.Path = [handles.Current_Settings.Files.Grid.Path,filesep,...
+		handles.Current_Settings.Files.Grid.Name,'_nat',filesep,...
+		'Load_Infeed_Data',filesep,...
+		datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS')];
+	if ~isdir([file.Path])
+		mkdir([file.Path]);
+	end
+	handles.Current_Settings.Files.Auto_Load_Feed_Data = file;
+	
 	% Check, if the data has to be partitioned:
 	if handles.Current_Settings.Simulation.Number_Runs > handles.System.number_max_datasets
 		% The data has to be partitioned!
@@ -26,21 +42,13 @@ else
 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
 	% Speicherort = aktulles Netzfile
 	file = handles.Current_Settings.Files.Auto_Load_Feed_Data;
-	% Check, if a Subfolder for input-data is avaliable:
-	file.Path = [handles.Current_Settings.Files.Grid.Path,filesep,...
-		handles.Current_Settings.Files.Grid.Name,'_nat',filesep,...
-		'Load_Infeed_Data',filesep,...
-		datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS')];
-	if ~isdir([file.Path])
-		mkdir([file.Path]);
-	end
-	% Save the files (on load-infeed file and one settings file:
+	% Save the files (one load-infeed file and one settings file):
 	save([file.Path,filesep,file.Name,file.Exte],...
 		'Load_Infeed_Data');
 	Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 	System = handles.System; %#ok<NASGU>
 	save([file.Path,filesep,'Data_Settings.mat'],'Data_Extract','System');
-	handles.Current_Settings.Files.Auto_Load_Feed_Data = file;
+	diary('off');
 end
 end
 

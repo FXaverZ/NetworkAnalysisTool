@@ -2,8 +2,9 @@ function handles = loaddata_get(handles, varargin)
 %LOADDATA_GET Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
 
 % prepare the functions arguments:
 if nargin == 2
@@ -31,6 +32,9 @@ tic; %Zeitmessung start
 file_part_count = 0;
 set_count = 0;
 for i = 1:num_set
+	% Avoid Matlab "hang":
+	drawnow(); pause(0.05);
+	
 	% Zufällige Zuordnung treffen:
 	handles = load_random_allocation(handles);
 	

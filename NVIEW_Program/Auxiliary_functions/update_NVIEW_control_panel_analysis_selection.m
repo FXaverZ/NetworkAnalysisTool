@@ -67,9 +67,10 @@ List_field = handles.NVIEW_Control.Simulation_Description.Variants;
 % Branches selected
 cond_branches = 0;
 for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
-    
-    if sum(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i})) ~= size(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i}))
-        cond_branches = cond_branches + 1;
+    % Changelog - Zeilinger - 14.07.2014
+    if sum(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i})) ~= size(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i}),1)
+    % Changelog - Zeilinger - 14.07.2014
+		cond_branches = cond_branches + 1;
     end
 end
 

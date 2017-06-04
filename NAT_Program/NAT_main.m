@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 05-May-2014 12:09:18
+% Last Modified by GUIDE v2.5 08-May-2014 16:05:34
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -658,6 +658,13 @@ else
 	helpdlg('Kein Netz geladen!','Öffnen des akutellen Netzes...');
 end
 
+function push_network_scenario_show_settings_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_network_scenario_show_settings (see GCBO)
+% ~          reserved - eventdata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_network_scenario_show_settings_Callback_Add(hObject, handles);
+
 function push_network_select_scenario_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to push_network_select_scenario (see GCBO)
 % ~          reserved - eventdata not needed
@@ -1020,3 +1027,5 @@ end
 
 % --- Executes on button press in push_controller_emob_charge_settings.
 
+
+% --- Executes on button press in push_network_scenario_show_settings.

@@ -302,11 +302,9 @@ for i=1:Simulation.Scenarios.Number
 			else
 				cur_grd = Grid_List{k};
 			end
-			if k==1
-				Load_Infeed_Data = res.Load_Infeed_Data; %#ok<NASGU>
-			end
 			if isfield(res.Result,cur_grd)
 				Result.(cur_grd) = res.Result.(cur_grd); %#ok<STRNU>
+				Load_Infeed_Data.(cur_grd) = res.Load_Infeed_Data; %#ok<STRNU>
 				Grid.(cur_grd) = res.Grid.(cur_grd); %#ok<STRNU>
 				if isfield(res, 'Debug');
 					Debug.(cur_grd) = res.Debug.(cur_grd); %#ok<STRNU>
@@ -317,7 +315,7 @@ for i=1:Simulation.Scenarios.Number
 	% Save the new merged Scenario-File
 	save([Main_Path,filesep,...
 		'Res_',simdatestr,' - ',Simulation.Scenarios.(['Sc_',num2str(i)]).Filename,'.mat'],...
-		'Result', 'Grid', 'Load_Infeed_Data', 'Debug');
+		'Result', 'Grid', 'Load_Infeed_Data','-v7.3');
 end
 
 % Update the Current_Settings with the settings for the merged data:
@@ -327,7 +325,7 @@ Current_Settings.Files.Grid = Files_Grid;
 Current_Settings.Files.Save.Result.Simdate = simdate;
 
 % Save the Current_Settings
-save([Main_Path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
+save([Main_Path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings','-v7.3');
 
 % Inform the user:
 helpdlg('Data successfully merged!', title_str);

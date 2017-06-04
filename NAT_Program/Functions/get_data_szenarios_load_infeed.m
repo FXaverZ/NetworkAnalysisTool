@@ -2,11 +2,9 @@ function handles = get_data_szenarios_load_infeed(handles)
 %GET_DATA_SZENARIOS_LOAD_INFEED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.4
+% Version:                 1.5.1
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
-
-fprintf('\nErstelle Szenariendaten...\n');
+% Letzte Änderung durch:   Franz Zeilinger - 07.07.2014
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if handles.Current_Settings.Simulation.Use_Grid_Variants && ~isempty(handles.Current_Settings.Simulation.Grid_List)
@@ -26,6 +24,20 @@ handles.Current_Settings.Simulation.Scenarios_Path = [...
 	datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
 	];
 mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
+
+diary([handles.Current_Settings.Simulation.Scenarios_Path,filesep,...
+	datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
+	' - Log.txt']);
+
+fprintf('\nErstelle Szenariendaten...\n');
+
+% Save the Settings (the current active settings, later maybe altered settings are saved): 
+% Create variables for saving:
+Scenarios_Settings = handles.Current_Settings.Simulation.Scenarios; %#ok<NASGU>
+Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
+System = handles.System; %#ok<NASGU>
+save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
+	'Scenarios_Settings', 'Data_Extract', 'System');
 
 % Mark the type of the grid for this data:
 handles.Current_Settings.Data_Extract.Grid_type = handles.Current_Settings.Grid.Type;
@@ -87,13 +99,14 @@ Scenarios_Settings = scen_new; %#ok<NASGU>
 Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 System = handles.System; %#ok<NASGU>
 
-% Save the Settings:
+% Save the Settings (again):
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
 	'Scenarios_Settings', 'Data_Extract', 'System');
 
 % Update the Current settings:
 handles.Current_Settings.Simulation.Scenarios = scen_old;
 
+diary('off');
 
 
 

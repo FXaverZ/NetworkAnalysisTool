@@ -225,20 +225,20 @@ d1 = r.Load_Infeed_Data.Set_1.LV_Grid_Input.Data_Mean(:,[1 3 5]+66);
 d2 = r.Load_Infeed_Data.Set_2.LV_Grid_Input.Data_Mean(:,[1 3 5]+66);
 figure;plot(d1);
 figure;plot(d2);
-idx_tr = strcmp('T_7272P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
-vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+idx_tr = strcmp('T_7272P',handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_values(1,:,:,idx_tr,:));
 s1 = squeeze(vals(1,:,[1 5 9]+2));
 s2 = squeeze(vals(2,:,[1 5 9]+2));
 figure;plot(s1);
 figure;plot(s2);
-idx_tr = strcmp('T_9317P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
-vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+idx_tr = strcmp('T_9317P',handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_values(1,:,:,idx_tr,:));
 s1 = squeeze(vals(1,:,[1 5 9]+2));
 s2 = squeeze(vals(2,:,[1 5 9]+2));
 figure;plot(s1);
 figure;plot(s2);
-idx_tr = strcmp('T_7393P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
-vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+idx_tr = strcmp('T_7393P',handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_ist_schem_red_20140314.branch_values(1,:,:,idx_tr,:));
 s1 = squeeze(vals(1,:,[1 5 9]+2));
 s2 = squeeze(vals(2,:,[1 5 9]+2));
 figure;plot(s1);
@@ -487,6 +487,9 @@ for i = 1 : numel(check_active_figures)
 	Figure_Name = strrep(Figure_Name, 'current','curr');
 	Figure_Name = strrep(Figure_Name, 'Current','Curr');
 	Figure_Name = strrep(Figure_Name, 'histogram','hist');
+% 	if ~isempty(strfind(Figure_Name,'hist'))
+% 		Figure_Name = [Figure_Name,'_',num2str(i)];
+% 	end
 	%Changelog 1.5 FZ End
     
 	Figure_Name = strrep(Figure_Name, ' ', '_');

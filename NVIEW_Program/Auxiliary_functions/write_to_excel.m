@@ -238,7 +238,7 @@ for sheetIdx = 1 : numSheets
                 int2str(Highlight_Table_Voltage_Rows(i))]).Interior.ColorIndex = 17;
         end
     
-    elseif strcmp(sheetName,Sheet_Descr_Loss) && loss_an_pres 
+    elseif loss_an_pres && strcmp(sheetName,Sheet_Descr_Loss)
         % What rows must be highlighted (2x scenario+overall tables and 3x
         % L1, L2, L3 phase tables
         Highlight_Table_Voltage_Rows = 3 + 1  ;
@@ -320,7 +320,7 @@ for sheetIdx = 1 : numSheets
         hWorksheet.Range(['A3:', Excel_Column_ID{size(Table_Current_Violation_All.Values,2)}, '3']).Interior.ColorIndex = 24;
         hWorksheet.Range(['A4:', Excel_Column_ID{size(Table_Current_Violation_All.Values,2)}, '4']).Interior.ColorIndex = 47;
        
-    elseif strcmp(sheetName,Table_Electric_Losses_All.Description) && loss_an_pres 
+    elseif loss_an_pres && strcmp(sheetName,Table_Electric_Losses_All.Description)  
         hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
         for nc = 1 : size(Table_Electric_Losses_All.Values,2)
             hWorksheet.Columns.Item(nc).columnWidth = 20; %first column

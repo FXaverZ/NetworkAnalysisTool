@@ -36,11 +36,15 @@ classdef Charge_Controller < SG_Controller
 				obj(i).Values_Last_Step.Changes_Vals = zeros(4,6);
 				obj(i).Values_Last_Step.Changes_Idx = 0;
 				obj(i).Values_Last_Step.Cyle_Number = 0;
+%                 obj(i).Controller_Active = false;
 			end
 				
 			switch lower(mode)
 				case 'total'
-					[obj.Shifted_Energy] = deal(zeros(1,6));		
+					[obj.Shifted_Energy] = deal(zeros(1,6));
+%                     for i=1:numel(obj)
+%                         obj(i).Shifted_Energy = zeros(1,6);
+%                     end
 				case 'in_simulation'
 				otherwise
 					% Error, unknown reset mode!

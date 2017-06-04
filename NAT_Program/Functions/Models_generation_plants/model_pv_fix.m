@@ -9,9 +9,9 @@ function data_phase = model_pv_fix(plant, content, data_cloud_factor, ...
 %    Die Anlagenparamerter, nach der diese Berechnung durchgeführt wird, sind in der
 %    Struktur PLANT enthalten.
 
-% Version:                 1.1
+% Version:                 1.1.2
 % Erstellt von:            Franz Zeilinger - 28.06.2012
-% Letzte Änderung durch:   Franz Zeilinger - 15.05.2013
+% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
 
 % Daten auslesen, zuerst die Zeit (ist für alle Orientierungen und Neigungen gleich,
 % daher wird diese nur vom ersten Element ausgelesen):
@@ -97,7 +97,7 @@ for i=1:plant.Number
 	% Leistungseinspeisung berechnen:
 	power_active(:,phase_idx) = repmat(rad_total*...
 		plant.Power_Installed*plant.Rel_Size_Collector*...
-		plant.Efficiency * plant.Performance_Ratio/powr_factor,powr_factor,[])';
+		plant.Efficiency * plant.Performance_Ratio/powr_factor,powr_factor,1)';
 	% die Daten speichern, [P_L1, Q_L1, P_L2, ...]:
 	data_phase(:,(1:2:6)+6*(i-1)) = power_active;
 	data_phase(:,(2:2:6)+6*(i-1)) = power_reacti;

@@ -37,7 +37,12 @@ if adapt_input_data_time
 end
 
 % start the calculation
-handles = network_calculation(handles);
+if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+	handles = network_calculation_LV(handles);
+elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
+	handles = network_calculation_MV(handles);
+end
+
 if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 	handles = post_voltage_violation_report(handles);
 end

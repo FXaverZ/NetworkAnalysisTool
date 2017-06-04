@@ -144,7 +144,7 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	% -----------------------------------------------------------------------------------
 	% Elektrofahrzeugen einfügen:
 	% -----------------------------------------------------------------------------------
-	% Where are the pv-plants in the Table_Network data:
+	% Where are the emobility-settings in the Table_Network data:
 	idx_em = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'El. Mob.');
 	% Get the settings:
 	El_Mobility = d.Simulation.Active_Scenario.El_Mobility;
@@ -193,18 +193,19 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 		eq_lv = handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Equipment_Share;
 		idx_emobc = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'EMob Ctr.');
 		
-		if eq_lv > 0 
+		if eq_lv > 0
 			Table_Data(:,idx_emobc) = num2cell(rand(1,size(Table_Data,1)).*100 <= eq_lv);
 		elseif eq_lv <= 0
 			Table_Data(:,idx_emobc) = num2cell(false(1,size(Table_Data,1)));
 		end
+	end
+	
+	if used_default
+		% If default values were used, erase the created field, that it will
+		% not occur further:
+		d.Simulation = rmfield(d.Simulation, 'Active_Scenario');
+	end
 end
+
+% Save the altered Table Data:
 handles.Current_Settings.Table_Network.Data = Table_Data;
-
-if used_default
-	% If default values were used, erase the created field, that it will
-	% not occur further:
-	d.Simulation = rmfield(d.Simulation, 'Active_Scenario');
-end
-end
-
