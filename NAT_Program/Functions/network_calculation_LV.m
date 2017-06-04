@@ -75,11 +75,16 @@ for i=1:numel(Grid_List)
 	
 	% create an empty network substrucure for the results:
 	d.Result.(cg) = [];
-	% Clear the previous simulation information:
-	cur_scen = d.Simulation.Scenario;
-	d.Simulation = [];
-	d.Simulation.Scenario = cur_scen;
-	clear cur_scen;
+	if handles.Current_Settings.Simulation.Use_Scenarios
+		% Clear the previous simulation information:
+		cur_scen = d.Simulation.Scenario;
+		d.Simulation = [];
+		d.Simulation.Scenario = cur_scen;
+		clear cur_scen;
+	else
+		d.Simulation = [];
+		d.Simulation.Scenario = 'No_Scenario';
+	end
 	
 	tic; %Zeitmessung start
 	reset_counter = 1;
@@ -104,64 +109,64 @@ for i=1:numel(Grid_List)
 		Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]);
 		cur_set.Table_Network = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
 		
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-		% 		% Debug: generate debug input data:
-		% 		if j==1
-		% 			factor = 1;
-		% 		elseif j==2;
-		% 			factor = 1.25;
-		% 		else
-		% 			factor = 3;
-		% 		end
-		%
-		% 		% Debug: set all Values to zero:
-		% 		Load_Data = zeros(size(Load_Data));
-		% 		Sola_Data = zeros(size(Sola_Data));
-		% 		Elmo_Data = zeros(size(Elmo_Data));
-		% 		LVGr_Data = zeros(size(LVGr_Data));
-		%
-		% 		idx = 0:15;
-		%
-		% 		idx_1 = [(0:71),(72:-1:1)]';
-		% 		idx_1 = idx_1 / max(idx_1);
-		% 		idx_2 = [(71:-1:0),(1:1:72)]';
-		% 		idx_2 = idx_2 / max(idx_2);
-		% 		idx_3 = [idx_1(50:end);idx_1(1:49)];
-		% % 		figure;plot([idx_1,idx_2,idx_3]);
-		% 		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
-		% 		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
-		% 		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
-		% % 		figure;plot(Elmo_Data(:,[1 3 5]+18));
-		%
-		% 		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		% 		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		% 		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-		% 		LVGr_Data = Load_Data + Elmo_Data;
-		% % 		figure;plot(LVGr_Data(:,[1 3 5]));
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% 		% Debug: generate debug input data:
+% 		if j==1
+% 			factor = 1;
+% 		elseif j==2;
+% 			factor = 1.25;
+% 		else
+% 			factor = 3;
+% 		end
+% 		
+% 		% Debug: set all Values to zero:
+% 		Load_Data = zeros(size(Load_Data));
+% 		Sola_Data = zeros(size(Sola_Data));
+% 		Elmo_Data = zeros(size(Elmo_Data));
+% 		LVGr_Data = zeros(size(LVGr_Data));
+% 		
+% 		idx = 0:15;
+% 		
+% 		idx_1 = [(0:71),(72:-1:1)]';
+% 		idx_1 = idx_1 / max(idx_1);
+% 		idx_2 = [(71:-1:0),(1:1:72)]';
+% 		idx_2 = idx_2 / max(idx_2);
+% 		idx_3 = [idx_1(50:end);idx_1(1:49)];
+% 		%figure;plot([idx_1,idx_2,idx_3]);
+% 		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
+% 		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
+% 		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
+% 		%figure;plot(Elmo_Data(:,[1 3 5]+18));
+% 		
+% 		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+% 		LVGr_Data = Load_Data + Elmo_Data;
+% 		%figure;plot(LVGr_Data(:,[1 3 5]));
+% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		
 		if ~isempty(Load_Data)
 			[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
 		end
 		
-		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
-		% few hours:
-		curtailed_data = false;
-		if size(Load_Data,1) > 86000
-			curtailed_data = true;
-			% section of day to be simulated in h:
-			time_start = 7;
-			time_end = time_start + 6;
-			time_start = time_start*60*60;
-			time_end = time_end*60*60;
-			Load_Data = Load_Data(time_start:time_end,:);
-			cur_set.Data_Extract.Time_Series.Date_Start = time_start/(24*60*60);
-			cur_set.Data_Extract.Time_Series.Duration = (time_end - time_start)/(24*60*60);
-			cur_set.Data_Extract.Timepoints_per_dataset = size(Load_Data,1);
-		end
-		cur_set.Data_Extract.Time_Series.curtailed_data = curtailed_data;
-		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		% 		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
+% 		% few hours:
+% 		curtailed_data = false;
+% 		if size(Load_Data,1) > 86000
+% 			curtailed_data = true;
+% 			% section of day to be simulated in h:
+% 			time_start = 7;
+% 			time_end = time_start + 6;
+% 			time_start = time_start*60*60;
+% 			time_end = time_end*60*60;
+% 			Load_Data = Load_Data(time_start:time_end,:);
+% 			cur_set.Data_Extract.Time_Series.Date_Start = time_start/(24*60*60);
+% 			cur_set.Data_Extract.Time_Series.Duration = (time_end - time_start)/(24*60*60);
+% 			cur_set.Data_Extract.Timepoints_per_dataset = size(Load_Data,1);
+% 		end
+% 		cur_set.Data_Extract.Time_Series.curtailed_data = curtailed_data;
+% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		
 		% Save the maybe altered Data for the NVIEW-Programm:
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.(['Data',data_typ]) = Load_Data;
@@ -214,7 +219,7 @@ for i=1:numel(Grid_List)
 		hh_conten = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content;
 		% total number of present households:
 		hh_num_to = numel(hh_conten);
-		% numper of households per typ:
+		% number of households per typ:
 		hh_number = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
 		% where are the PQ-Node names in the network table?
 		idx_pq_na = strcmp(cur_set.Table_Network.ColumnName, 'Names');
@@ -258,8 +263,8 @@ for i=1:numel(Grid_List)
 					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6)); % Lastgang des Last
 				d.Grid.(cg).Load.Loads(load_counter) = obj;
 				
-				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
-					,hh_typ,'(',num2str(l),')']);
+% 				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
+% 					,hh_typ,'(',num2str(l),')']);
 				
 				%incread counter for load objects and decrease number of households of
 				%this typ to be connected:
@@ -379,6 +384,15 @@ for i=1:numel(Grid_List)
 					online_power_loss_analysis(handles);
 					% An additional condition for power loss saving is
 					% inside the online function
+				end
+				
+				if mod(k,100) == 0
+					% Statusinfo zum Gesamtfortschritt an User:
+					t = toc;
+					fprintf([num2str(k),' Timepoints calculated. Elapsed time: ',...
+						sec2str(t),...
+						'. Remaining time: ',...
+						sec2str(t/(k/sim_set.Timepoints) - t),'\n']);
 				end
 			catch ME
 				d = handles.NAT_Data;

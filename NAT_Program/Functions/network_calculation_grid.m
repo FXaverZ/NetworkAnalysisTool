@@ -22,18 +22,20 @@ handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - Data'];
 diary([r_path,filesep,'Res_',simdate,' - log.txt']);
 diary('on');
 
-% Check the settings if adaption of the input data is neccesary and possible:
-adapt_input_data_time = [];
-if isempty (adapt_input_data_time)
-	[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
-	if error
-		return;
+if handles.Current_Settings.Simulation.Use_Scenarios
+	% Check the settings if adaption of the input data is neccesary and possible:
+	adapt_input_data_time = [];
+	if isempty (adapt_input_data_time)
+		[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
+		if error
+			return;
+		end
 	end
-end
-
-% when needed, adapt the input data according to the new simulation settings:
-if adapt_input_data_time
-	handles = adapt_input_data_new_timesettings(handles);
+	
+	% when needed, adapt the input data according to the new simulation settings:
+	if adapt_input_data_time
+		handles = adapt_input_data_new_timesettings(handles);
+	end
 end
 
 % start the calculation

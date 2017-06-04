@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2014
 
-% Last Modified by GUIDE v2.5 18-Dec-2014 14:12:09
+% Last Modified by GUIDE v2.5 02-Feb-2015 14:17:11
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -356,6 +356,12 @@ function push_controller_emob_charge_settings_Callback(hObject, eventdata, handl
 % handles    structure with handles and user data (see GUIDATA)
 
 open get_controller_settings.m
+
+function push_input_data_loadsimulation_load_direct_Callback(hObject, eventdata, handles)
+% hObject    handle to push_input_data_loadsimulation_load_direct (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+push_input_data_loadsimulation_load_direct_Callback_Add(hObject, eventdata, handles);
 
 function push_input_data_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
 push_input_data_merge_Callback_Add (hObject, handles)
@@ -744,3 +750,4 @@ function edit_pqnode_hh_number_CreateFcn(hObject, eventdata, handles) %#ok<INUSD
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+

@@ -256,7 +256,7 @@ Files.Auto_Load_Feed_Data.Exte = '.mat';
 Current_Settings.Files = Files;
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
-data_settings.Time_Resolution = 600;    % zeitliche Auflösung
+data_settings.Time_Resolution = 150;    % zeitliche Auflösung
 data_settings.Timepoints_per_dataset = 144; % Number of Timepoints per dataset (is 
 % depending on handles.Current_Settings.Data_Extract.Time_Resolution and time series 
 % settings) 
