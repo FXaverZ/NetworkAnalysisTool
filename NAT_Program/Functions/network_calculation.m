@@ -156,12 +156,13 @@ for i=1:numel(Grid_List)
             d.Result.(cg).Error_Counter = zeros(num_data_set, handles.Current_Settings.Simulation.Timepoints);
         end        
 		
-		%--------------------------------------------------------------------------------
-		% Lasten ins Netz einfügen:
-		%--------------------------------------------------------------------------------
+		
 		d.Grid.(cg).Load.Loads = Unit_Time_Dependent.empty(0,numel(d.Grid.(cg).P_Q_Node.ids));
+		
 		if strcmp(handles.Current_Settings.Grid.Type, 'LV')
-			
+			%------------------------------------------------------------------------
+			% Haushalts-Lasten ins Netz einfügen:
+			%------------------------------------------------------------------------
 			hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
 			idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
 			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
@@ -177,9 +178,66 @@ for i=1:numel(Grid_List)
 				% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
 				d.Grid.(cg).Load.Loads(k) = obj;
 			end
+			%------------------------------------------------------------------------
+			% Elektrofahrzeuge einfügen:
+			%------------------------------------------------------------------------
+			if ~isempty(Elmo_Data)
+				elm_num = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Number;
+				elm_count = 0;
+				d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,elm_num);
+				idx_em = strcmp(...
+					handles.Current_Settings.Table_Network.ColumnName,...
+					'El. Mob.');
+				for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
+					% Wieviele Fahrzeuge sollen hier angeschlossen werden?
+					elmoby = handles.Current_Settings.Table_Network.Data{k,idx_em};
+					% Elektromobilitätsinstanz erzeugen:
+					for l=1:elmoby
+						obj = Unit_Time_Dependent(...
+							d.Grid.(cg).P_Q_Node.Points(k),...             % Anschlusspunkt-Objekt
+							Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6)); % Lastgang des Last
+						elm_count = elm_count + 1;
+						d.Grid.(cg).Load.Elmob(elm_count) = obj;
+					end
+				end
+			else
+				d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,0);
+			end
+			%------------------------------------------------------------------------
+			% Erzeuger einfügen
+			%------------------------------------------------------------------------
+			if ~isempty(Sola_Data)
+				add_data = handles.Current_Settings.Table_Network.Additional_Data;
+				idx_pv_add = strcmp(...
+					handles.Current_Settings.Table_Network.Additional_Data_Content,...
+					'PV_Plant_Name');
+				num_unit = size(Sola_Data,2)/6;
+				d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,num_unit);
+				plants =  d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Plants;
+				gen_count = 1;
+				for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
+					gen_unit_name = add_data{k,idx_pv_add};
+					if isempty(gen_unit_name)
+						continue;
+					end
+					idx = find(strcmp(gen_unit_name,d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Content));
+					idx = idx(plants.(gen_unit_name).Number) - 1;
+					plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
+					% Last-Instanz erzeugen:
+					obj = Unit_Time_Dependent(...
+						d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
+						Sola_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
+					d.Grid.(cg).Sola.Gen_Units(gen_count) = obj;
+					gen_count = gen_count + 1;
+				end
+			else
+				d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,0);
+			end
 			
 		elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
-			
+			%--------------------------------------------------------------------------------
+			% Integrate LV-Grids
+			%--------------------------------------------------------------------------------
 			% update the grid-numbers:
 			idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
 			data = handles.Current_Settings.Table_Network.Data(:,idx_lv);
@@ -188,7 +246,7 @@ for i=1:numel(Grid_List)
 			for k=1:numel(LV_Grids_List)
 				LV_Grids_Number(k) = sum(strcmp(data,LV_Grids_List{k}));
 			end
-
+			
 			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
 				% Which lv grid should be connected
 				lv_grd = handles.Current_Settings.Table_Network.Data{k,idx_lv};
@@ -208,58 +266,12 @@ for i=1:numel(Grid_List)
 				% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
 				d.Grid.(cg).Load.Loads(k) = obj;
 			end
-		end
-		%----------------------------------------------------------------------------
-		% Elektrofahrzeuge einfügen:
-		%----------------------------------------------------------------------------
-		if ~isempty(Elmo_Data)
-			elm_num = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Number;
-			elm_count = 0;
-			d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,elm_num);
-			idx_em = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'El. Mob.');
-			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
-				% Wieviele Fahrzeuge sollen hier angeschlossen werden?
-				elmoby = handles.Current_Settings.Table_Network.Data{k,idx_em};
-				% Elektromobilitätsinstanz erzeugen:
-				for l=1:elmoby
-					obj = Unit_Time_Dependent(...
-						d.Grid.(cg).P_Q_Node.Points(k),...             % Anschlusspunkt-Objekt
-						Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6)); % Lastgang des Last
-					elm_count = elm_count + 1;
-					d.Grid.(cg).Load.Elmob(elm_count) = obj;
-				end
-			end
-		else
+			
+			% add needed empty fields:
+			d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,0);
 			d.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,0);
 		end
-		%----------------------------------------------------------------------------
-		% Erzeuger einfügen
-		%----------------------------------------------------------------------------
-		if ~isempty(Sola_Data)
-			add_data = handles.Current_Settings.Table_Network.Additional_Data;
-			idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
-			num_unit = size(Sola_Data,2)/6;
-			d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,num_unit);
-			plants =  d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Plants;
-			gen_count = 1;
-			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
-				gen_unit_name = add_data{k,idx_pv_add};
-				if isempty(gen_unit_name)
-					continue;
-				end
-				idx = find(strcmp(gen_unit_name,d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Content));
-				idx = idx(plants.(gen_unit_name).Number) - 1;
-				plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
-				% Last-Instanz erzeugen:
-				obj = Unit_Time_Dependent(...
-					d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
-					Sola_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
-				d.Grid.(cg).Sola.Gen_Units(gen_count) = obj;
-				gen_count = gen_count + 1;
-			end
-		else
-			d.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,0);
-		end
+		
 		%----------------------------------------------------------------------------
 		% Netzberechnungen durchführen:
 		%----------------------------------------------------------------------------
@@ -355,10 +367,5 @@ for i=1:numel(Grid_List)
 	% select again the first grid (because here the load-& infeeeddata is
 	% stored):
 	handles.Current_Settings.Files.Grid.Name = Grid_List{1}(1:end-4);
-	
-	% % make additional calculation to prepare the data for displaying with the
-	% % data explorer:
-	% % handles = adopt_data_for_display(handles);
-	
 end
 

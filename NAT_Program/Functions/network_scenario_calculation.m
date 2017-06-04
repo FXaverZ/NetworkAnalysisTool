@@ -91,7 +91,7 @@ for i=1:scenar.Number;
 			clear('Load_Infeed_Data');
 		end
 		% perform the network calculations:
-		try
+% 		try
 			handles = network_calculation(handles);
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 				handles = post_voltage_violation_report(handles);
@@ -102,11 +102,11 @@ for i=1:scenar.Number;
 			if handles.Current_Settings.Simulation.Power_Loss_Analysis
 				handles = post_active_power_loss_report(handles);
 			end
-		catch ME
-			disp('An error occurred:');
-			disp(ME.message);
-			continue;
-		end
+% 		catch ME
+% 			disp('An error occurred:');
+% 			disp(ME.message);
+% 			continue;
+% 		end
 		% save the results:
 		if j == 1
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen];

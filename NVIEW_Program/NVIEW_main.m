@@ -208,6 +208,17 @@ function menu_debug_mode_Callback(hObject, eventdata, handles)
 dbstop in NVIEW_main at 210;
 fprintf(1,'Debugging mode enabled\n');
 fprintf(1,''); % Stop at this line
+
+% idx = find(strcmp(handles.NVIEW_Results.josefstadt_soll_schematisch_20140210.branch_name,'T_JOS'));
+% ILim = handles.NVIEW_Results.josefstadt_soll_schematisch_20140210.branch(idx,7);
+% dim_res = size(handles.NVIEW_Results.josefstadt_soll_schematisch_20140210.branch_values);
+% 
+% % Values saved in W, VAr, VA and A: [P1 Q1 S1 I1 P2 Q2 S2 I2 P3 Q3 S3 I3 Pe Qe Se Ie]
+% % (4 values per phase and phase-ground)
+% vals = squeeze(handles.NVIEW_Results.josefstadt_soll_schematisch_20140210.branch_values(1,:,:,idx,[4 8 12 16]));
+% vals_avg = squeeze(sum(vals)/size(vals,1));
+% figure;
+% plot (vals_avg)
 % -----------------------------------
 dbclear in NVIEW_main at 210;
 guidata(hObject, handles);

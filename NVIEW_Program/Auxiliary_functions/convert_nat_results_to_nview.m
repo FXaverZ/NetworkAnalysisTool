@@ -68,6 +68,9 @@ for J = 1 : numel(handles.NVIEW_Control.Result_Files)
     NVIEW_Results.Input_Data.Households(:,J) = Scenario_Structure.(['Scenario_', int2str(J)]).Input_Data.Households;
     NVIEW_Results.Input_Data.Solar(:,J) = Scenario_Structure.(['Scenario_', int2str(J)]).Input_Data.Solar;
     NVIEW_Results.Input_Data.El_mobility(:,J) = Scenario_Structure.(['Scenario_', int2str(J)]).Input_Data.El_mobility;
+	% CHANGELOG 1.2, FZ Start
+	NVIEW_Results.Input_Data.LV_Grid_Input(:,J) = Scenario_Structure.(['Scenario_', int2str(J)]).Input_Data.LV_Grid_Input;
+	% CHANGELOG 1.2, FZ End
 end
 % --------------------------------------------------------------------
 % Get NVIEW Settings 

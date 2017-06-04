@@ -16,6 +16,11 @@ for H = 1 : numel(Data_List)
         case 'Households'
             Table.(Data_List{H}).Description = 'Household active power consumption histogram';
             Table.(Data_List{H}).RowName =  'Household active power consumption (kW)';
+		% CHANGELOG 1.2, FZ Start
+		case 'LV_Grid_Input'
+			Table.(Data_List{H}).Description = 'Low voltage grid active power consumption histogram';
+            Table.(Data_List{H}).RowName =  'Low voltage grid power consumption (kW)';
+		% CHANGELOG 1.2, FZ End
         case 'Solar'
             Table.(Data_List{H}).Description = 'Solar power plants active power injection histogram';
             Table.(Data_List{H}).RowName =  'Solar power plants active power injection (kW)';

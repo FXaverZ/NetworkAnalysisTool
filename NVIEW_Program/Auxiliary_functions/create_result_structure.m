@@ -51,11 +51,17 @@ dt = handles.NVIEW_Control.Simulation_Options.Input_values_used;
 Scenario_Output.Input_Data.Households = [];
 Scenario_Output.Input_Data.Solar = [];
 Scenario_Output.Input_Data.El_mobility = [];
+% CHANGELOG 1.2, FZ Start
+Scenario_Output.Input_Data.LV_Grid_Input = [];
+% CHANGELOG 1.2, FZ End
 for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_datasets
     households = []; 
     solar = []; 
     el_mobility = [];
-    
+	% CHANGELOG 1.2, FZ Start
+	lv_grid_da = [];
+    % CHANGELOG 1.2, FZ End
+	
     households = data.Load_Infeed_Data.(['Set_', int2str(i)]).Households.(dt);
 	% CHANGELOG 1.1, FZ Start
 	% If there is no households-data, check if lv-grid data is present. If
@@ -67,9 +73,18 @@ for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_datasets
     solar = data.Load_Infeed_Data.(['Set_', int2str(i)]).Solar.(dt);
     el_mobility = data.Load_Infeed_Data.(['Set_', int2str(i)]).El_Mobility.(dt);
     
-    if isempty(solar)
-        solar = zeros(size(households));
-    end
+	% CHANGELOG 1.2, FZ Start
+	lv_grid_da = data.Load_Infeed_Data.(['Set_', int2str(i)]).LV_Grid_Input.(dt);
+	if isempty(lv_grid_da)
+		lv_grid_da = zeros(size(households));
+	end
+	Scenario_Output.Input_Data.LV_Grid_Input = [Scenario_Output.Input_Data.LV_Grid_Input;
+		sum( lv_grid_da(:,1:6:end) + lv_grid_da(:,2:6:end) + lv_grid_da(:,3:6:end),2)];
+	% CHANGELOG 1.2, FZ End
+    
+	if isempty(solar)
+		solar = zeros(size(households));
+	end
     if isempty(el_mobility)
         el_mobility = zeros(size(households));
     end
