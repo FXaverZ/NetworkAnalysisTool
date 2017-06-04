@@ -4,3 +4,5 @@
 *.cfg
 *.emf
 *.xls
+*.tmp
+*.lnk

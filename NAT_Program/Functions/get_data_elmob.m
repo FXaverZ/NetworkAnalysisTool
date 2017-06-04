@@ -49,7 +49,7 @@ if settin.El_Mobility.Number == 0
 end
 
 % zeitliche Auflösung ermitteln:
-time_res = system.time_resolutions{settin.Time_Resolution,2};
+time_res = settin.Time_Resolution;
 
 % Daten laden (Variable "data_charge")
 load([db_fil.Path,filesep,db_fil.Name,filesep,'Chargin_Profiles.mat']);
@@ -70,6 +70,10 @@ for i = 1:settin.El_Mobility.Number
 	% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
 	% nicht mehr gezogen werden kann):
 	pool(fortu) = [];
+	% if pool has ran out of profiles, reset it...
+	if isempty(pool)
+		pool = 1:num_data_sets;
+	end
 end
 
 % Daten auslesen und aufbereiten (Ausgangsdaten in kW!):

@@ -1,10 +1,10 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 5.1
+% Version:                 5.3
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 25.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 03-Dec-2013 14:25:31
+% Last Modified by GUIDE v2.5 24-Jul-2014 17:48:20
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -106,6 +106,13 @@ handles = refresh_display_NAT_main_gui(handles);
 % Update handles structure
 guidata(hObject, handles);
 
+function check_controller_emob_charge_active_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to check_controller_emob_charge_active (see GCBO)
+% ~          reserved - not used
+% handles    structure with handles and user data (see GUIDATA)
+
+check_controller_emob_charge_active_Callback_Add(hObject, handles);
+
 function check_extract_05_quantile_value_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_extract_05_quantile_value (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -190,6 +197,22 @@ function check_pqnode_active_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    structure with handles and user data (see GUIDATA)
 
 check_pqnode_active_Callback_Add (hObject, handles);
+
+function check_pqnode_emob_present_Callback(~, ~, ~) %#ok<DEFNU>
+% hObject    handle to check_pqnode_emob_present (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Update the handles-structure:
+guidata(hObject, handles);
+
+function check_pqnode_pv_present_Callback(~, ~, ~) %#ok<DEFNU>
+% hObject    handle to check_pqnode_pv_present (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Update the handles-structure:
+guidata(hObject, handles);
 
 function check_simulation_start_after_data_extraction_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to check_simulation_start_after_data_extraction (see GCBO)
@@ -438,8 +461,6 @@ set(handles.popup_time_resolution, 'String', handles.System.time_resolutions(:,1
 % Worst-Cases:
 set(handles.popup_hh_worstcase, 'String', handles.System.wc_households(:,1));
 set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation(:,1));
-% Haushaltstypen:
-set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
 
 % Versuch, die Einstellungen des letzen Durchlaufs zu laden:
 try
@@ -465,7 +486,11 @@ catch ME
 end
 
 % Logo anzeigen:
-logo=imread('Figures\siemenslogo.jpg','jpg');   % Einlesen der Grafik
+if strcmpi(getComputerName, 'eeapc14')
+	logo=imread('Figures\institutslogo.jpg','jpg');   % Einlesen der Grafik
+else
+	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
+end
 image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
 axis off;                                         % Achsenbezeichnung ausschalten
@@ -511,7 +536,7 @@ function popup_pqnode_hh_typ_Callback(hObject, ~, handles) %#ok<DEFNU>
 
 popup_pqnode_hh_typ_Callback_Add (hObject, handles);
 
-function popup_pqnode_pv_typ_Callback(hObject, ~, handles)
+function popup_pqnode_pv_typ_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to popup_pqnode_pv_typ (see GCBO)
 % ~          reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -547,6 +572,20 @@ function push_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 NAT_main_gui_CloseRequestFcn(hObject, eventdata, handles);
+
+function push_controller_emob_charge_settings_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    handle to push_controller_emob_charge_settings (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+open get_controller_settings.m
+
+function push_input_data_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_input_data_merge (see GCBO)
+% ~          reserved - eventdata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_input_data_merge_Callback_Add (hObject, handles)
 
 function push_load_data_get_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_load_data_get (siehe GCBO)
@@ -591,25 +630,7 @@ function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<D
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Tabelle mit Default-Werten befüllen:
-[handles.Current_Settings.Table_Network, ...
-    handles.Current_Settings.Data_Extract] = network_table_reset(handles);
-
-% Anzahl der jeweiligen Haushalte ermitteln:
-if ~isempty(handles.Current_Settings.Table_Network)
-	for i=1:size(handles.System.housholds,1)
-		handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-			sum(strcmp(...
-			handles.System.housholds{i,1},...
-			handles.Current_Settings.Table_Network.Data(:,strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Haush. Typ'))));
-	end
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+push_network_load_allocation_reset_Callback_Add(hObject, handles)
 
 function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_load (siehe GCBO)
@@ -623,14 +644,7 @@ function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
-handles = load_random_allocation(handles);
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+ push_network_load_random_allocation_Callback_Add (hObject, handles)
 
 function push_network_open_Callback(hObject, ~, handles) %#ok<INUSL,DEFNU>
 % hObject    Link zur Grafik NAT_main_gui (siehe GCBO)
@@ -647,6 +661,13 @@ if isfield(handles, 'sin');
 else
 	helpdlg('Kein Netz geladen!','Öffnen des akutellen Netzes...');
 end
+
+function push_network_scenario_show_settings_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_network_scenario_show_settings (see GCBO)
+% ~          reserved - eventdata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_network_scenario_show_settings_Callback_Add(hObject, handles);
 
 function push_network_select_scenario_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to push_network_select_scenario (see GCBO)
@@ -673,6 +694,23 @@ function push_network_simulation_settings_Callback(hObject, eventdata, handles)
 % hObject    handle to push_network_simulation_settings (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+
+function push_pqnode_pv_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_pv_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function push_pqnode_wi_parameters_Callback(hObject, eventdata, handles)
+% hObject    handle to push_pqnode_wi_parameters (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function push_results_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to push_results_merge (see GCBO)
+% ~          reserved - evendata not needed
+% handles    structure with handles and user data (see GUIDATA)
+
+push_results_merge_Callback_Add (hObject, handles)
 
 function push_set_path_database_Callback(hObject, ~, handles)  %#ok<DEFNU>
 % hObject    Link zur Grafik push_set_path_database (siehe GCBO)
@@ -855,11 +893,6 @@ function edit_pqnode_pv_installed_power_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-function push_pqnode_pv_parameters_Callback(hObject, eventdata, handles)
-% hObject    handle to push_pqnode_pv_parameters (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 function popup_pqnode_wi_typ_Callback(hObject, eventdata, handles)
 % hObject    handle to popup_pqnode_wi_typ (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -867,11 +900,6 @@ function popup_pqnode_wi_typ_Callback(hObject, eventdata, handles)
 
 function edit_pqnode_wi_installed_power_Callback(hObject, eventdata, handles)
 % hObject    handle to edit_pqnode_wi_installed_power (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-function push_pqnode_wi_parameters_Callback(hObject, eventdata, handles)
-% hObject    handle to push_pqnode_wi_parameters (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -996,3 +1024,36 @@ function edit_network_number_variants_CreateFcn(hObject, eventdata, handles) %#o
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in check_controller_emob_charge_active.
+
+
+% --- Executes on button press in push_controller_emob_charge_settings.
+
+
+% --- Executes on button press in push_network_scenario_show_settings.
+
+
+% --- Executes on button press in check_controller_emob_charge_active_all.
+function check_controller_emob_charge_active_all_Callback(hObject, eventdata, handles)
+% hObject    handle to check_controller_emob_charge_active_all (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+idx = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'EMob Ctr.');
+data = handles.Current_Settings.Table_Network.Data;
+if get(hObject,'Value')
+	data(:,idx) = num2cell(true(size(data,1),1));
+else
+	data(:,idx) = num2cell(false(size(data,1),1));
+end
+
+handles.Current_Settings.Table_Network.Data = data;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+

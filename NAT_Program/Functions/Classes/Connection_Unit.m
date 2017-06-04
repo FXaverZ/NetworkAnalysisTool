@@ -22,13 +22,14 @@ classdef Connection_Unit < handle
 	
 	methods
 		
-		function obj = Connection_Unit(cn_point)
+		function obj = Connection_Unit(cn_point, P_Q_active)
 			%CONNECTION_UNIT    Konstruktor der Klasse CONNECTION_UNIT
 			obj.Connection_Point = cn_point;
 			obj.P_Q_Act_idx = size(obj.Connection_Point.P_Q_Act,1) + 1;
 			obj.Connection_Point.P_Q_Act(obj.P_Q_Act_idx,:) = zeros(1,6);
 			obj.Connection_Point.Num_Units_Connected = ...
 				obj.Connection_Point.Num_Units_Connected + 1;
+			obj.Connection_Point.P_Q_Act_active(obj.P_Q_Act_idx,1) = logical(P_Q_active);
 		end
 		
 	end

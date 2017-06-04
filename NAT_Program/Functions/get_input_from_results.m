@@ -1,30 +1,164 @@
 function [handles, error] = get_input_from_results(handles)
-%GET_INPUT_FROM_RESULTS Summary of this function goes here
+%GET_INPUT_FROM_RESULTS    creates input for MV-Grid out of LV-Grid-Simulation Results
 %   Detailed explanation goes here
 
 Result_Settings = handles.Result_Settings;
 
 warning_user = 0;
-error = 0; 
+error = 0;
+
+% get impoortant setting:
+LV_Grids_List = handles.Current_Settings.Data_Extract.LV_Grids_List;
+Number_Data_Sets = handles.Current_Settings.Simulation.Number_Runs;
+MV_input_generation_in_progress = handles.Current_Settings.Data_Extract.MV_input_generation_in_progress;
 
 % Reload the data extraktion settings:
 handles.Current_Settings.Data_Extract = Result_Settings.Data_Extract;
 
-% Reset the network table:
-[handles.Current_Settings.Table_Network, ...
-	handles.Current_Settings.Data_Extract] = network_table_reset(handles);
-% Adapt the householdnumbers
-if ~isempty(handles.Current_Settings.Table_Network)
-	for i=1:size(handles.System.housholds,1)
-		handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-			sum(strcmp(...
-			handles.System.housholds{i,1},...
-			handles.Current_Settings.Table_Network.Data(:,strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type'))));
+% Update this settings with the current settings in the GUI:
+handles.Current_Settings.Data_Extract.Number_Data_Sets = Number_Data_Sets;
+
+if handles.Current_Settings.Data_Extract.get_Sample_Value
+	data_typ = '_Sample';
+end
+if handles.Current_Settings.Data_Extract.get_Mean_Value
+	data_typ = '_Mean';
+end
+if handles.Current_Settings.Data_Extract.get_Max_Value
+	data_typ = '_Max';
+end
+if handles.Current_Settings.Data_Extract.get_Min_Value
+	data_typ = '_Max';
+end
+if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
+	data_typ = '_05P_Quantil';
+end
+if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
+	data_typ = '_95P_Quantil';
+end
+
+
+% % Reset the network table:
+% [handles.Current_Settings.Table_Network, ...
+% 	handles.Current_Settings.Data_Extract] = network_table_reset(handles);
+
+% just quick check, if the correct kind of grid is present:
+if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+	fprintf('Wrong destination grid!');
+	return;
+end
+
+% update the grid-numbers:
+idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+data = handles.Current_Settings.Table_Network.Data(:,idx_lv);
+LV_Grids_Number = zeros(numel(LV_Grids_List),1);
+for i=1:numel(LV_Grids_List)
+	LV_Grids_Number(i) = sum(strcmp(data,LV_Grids_List{i}));
+end
+clear data idx_lv
+
+% User dialog to get information about the generation-process:
+if 	~MV_input_generation_in_progress && ...
+		(isempty(LV_Grids_List) || sum(LV_Grids_Number) == 0)
+	% no grid allocation is present
+	answer = questdlg({'Another question:';...
+		'';...
+		[...
+		'Do you want the allocation of the lv-grids be generated randomly, ',...
+		'or do you want to make the allocation previously (just load ',...
+		'the the available lv-grids)?'...
+		];...
+		'';...
+		'Please specify desired procedure:'},...
+		'Specifying data generation procedure',...
+		'Random allo.', 'Make allo.', 'Make allo.');
+elseif MV_input_generation_in_progress &&...
+		(isempty(LV_Grids_List) || sum(LV_Grids_Number) == 0)
+	errordlg({'No valid lv-grid-allocation found!';...
+		'Please specify the lv-grid allocation in the main-GUI!'},...
+		'Specifying data generation procedure');
+	error = 1;
+	return;
+elseif 	~MV_input_generation_in_progress
+	answer = questdlg({'Another question:';...
+		'';...
+		[...
+		'Do you want the allocation of the lv-grids be generated randomly, ',...
+		'should the current allocation in the main-GUI be used (column "LV-Grid" in ',...
+		'Node-Table) or do you want to make the allocation previously (just load ',...
+		'the the available lv-grids)?'...
+		];...
+		'';...
+		'Please specify desired procedure:'},...
+		'Specifying data generation procedure',...
+		'Random allo.', 'Use GUI allo.', 'Make allo.', 'Use GUI allo.');
+end
+
+if 	~MV_input_generation_in_progress
+	% load first scenario (for grid properties):
+	load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{1}]);
+	% delete the not needed data:
+	clear Debug Load_Infeed_Data Result 
+	
+	% Get the simulated grid names:
+	LV_Grids_List = fields(Grid);
+	if numel(LV_Grids_List) > 1
+		[Grid_Sel,Scen_ok] = listdlg(...
+			'ListString',LV_Grids_List,...
+			'Name','Selection of the grid variants to be used',...
+			'PromptString',...
+			{...
+			'Selection of the grid variants, which should be available for ';...
+			' allocation (multiple selection possible):';...
+			},...
+			'CancelString','Vorgang abbr.',...
+			'ListSize', [320, 300]);
+		if ~Scen_ok
+			error = 1;
+			return;
+		end
+	else
+		Grid_Sel = 1;
+	end
+	
+	% Save the Grid-List for later allocation of the single grids to MV-Connection points:
+	LV_Grids_List = LV_Grids_List(Grid_Sel);
+	
+	% Update the pull-down-menues of the network-table and handles-structure
+	idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+	handles.Current_Settings.Table_Network.ColumnFormat{idx_lv} = [handles.System.lv_grids(1,2),LV_Grids_List'];
+	handles.Current_Settings.Data_Extract.LV_Grids_List = LV_Grids_List;
+	handles.Current_Settings.Data_Extract.LV_Grids_Number = LV_Grids_Number;
+	
+	if strcmp(answer, 'Make allo.')
+		% the user wants to go back to the main GUI to make the allocation of the lv-grids
+		% manually, so leave this function:
+		handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 1;
+		return;
+	end
+	
+	if strcmp(answer, 'Random allo.')
+		idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+		num_dif_grds = numel(LV_Grids_List);
+		for i=1:numel(handles.Current_Settings.Table_Network.Data(:,idx_lv))
+			% draw a random number
+			sel = floor(rand()*num_dif_grds)+1;
+			handles.Current_Settings.Table_Network.Data{i,idx_lv} = LV_Grids_List{sel};
+		end
 	end
 end
 
+% update the grid-numbers:
+idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+data = handles.Current_Settings.Table_Network.Data(:,idx_lv);
+LV_Grids_Number = zeros(numel(LV_Grids_List),1);
+for i=1:numel(LV_Grids_List)
+	LV_Grids_Number(i) = sum(strcmp(data,LV_Grids_List{i}));
+end
+clear data idx_lv
+
 % User dialogs to select the desired settings of Data
-[Scen_Sel,Scen_ok] = listdlg(...
+[Scen_Sel,Scen_ok] = listdlg (...
 	'ListString',Result_Settings.Simulation.Scenarios.Names,...
 	'Name','Auswahl der zu extrahierenden Szenarios',...
 	'PromptString',{'Auswahl der zu extrahierenen Szenarios';...
@@ -32,7 +166,7 @@ end
 	'CancelString','Vorgang abbr.',...
 	'ListSize', [320, 300]);
 if ~Scen_ok
-	error = 1; 
+	error = 1;
 	return;
 end
 
@@ -46,48 +180,30 @@ for i=1:scen_new.Number
 end
 scen_new.Data_avaliable = 1;
 handles.Current_Settings.Simulation.Scenarios = scen_new;
+% mark all scenarios as active for simulation:
+handles.Current_Settings.Simulation.Scenarios_Selection = [];
+clear i scen_old Scen_ok
 
-% load first scenario (for grid properties):
+% load first selected scenario (for grid properties):
 load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(1)}]);
 % delete the not needed data:
-clear('Debug','Load_Infeed_Data');
-
-% Get the simulated grid names:
-Grid_List = fields(Grid);
-if numel(Grid_List) > 1
-	[Grid_Sel,Scen_ok] = listdlg(...
-		'ListString',Grid_List,...
-		'Name','Auswahl der zu verwendenden Netz-Varianten',...
-		'PromptString',{'Auswahl der zu berücksichtigten Netz Varianten';...
-		' (Mehrfachauswahl möglich):';...
-		'';...
-		'Bei Mehrfachauswahl werden zufällig Netzvarainten den ';...
-		'korrespndierenden Netzanschlusspunkten zugeordnet...'},...
-		'CancelString','Vorgang abbr.',...
-		'ListSize', [320, 300]);
-	if ~Scen_ok
-		error = 1; 
-		return;
-	end
-else
-	Grid_Sel = 1;
-end
+clear Debug 
 
 % let the user select the point of each grid, from where the Power Data
 % should be used (Transformers):
-for i=1:numel(Grid_List(Grid_Sel))
-	Transf.(Grid_List{i}) = ...
-		{Grid.(Grid_List{i}).Branches.Transf.Branch_Name};
+for i=1:numel(LV_Grids_List)
+	Transf.(LV_Grids_List{i}) = ...
+		{Grid.(LV_Grids_List{i}).Branches.Transf.Branch_Name};
 	% When only one Transformer is parent in the grid.
-	if numel(Transf.(Grid_List{i})) == 1
+	if numel(Transf.(LV_Grids_List{i})) == 1
 		% use this one:
-		Transf.(Grid_List{i}) = ...
-			Grid.(Grid_List{i}).Branches.Transf(1).Branch_ID;
+		Transf.(LV_Grids_List{i}) = ...
+			Grid.(LV_Grids_List{i}).Branches.Transf(1).Branch_ID;
 	else
 		[Tran_Sel,Tran_ok] = listdlg(...
-			'ListString',Transf.(Grid_List{i}),...
+			'ListString',Transf.(LV_Grids_List{i}),...
 			'Name','Selection of the Transformer' ,...
-			'PromptString',{'Selection of the Transformer of Grid ';['"',Grid_List{i},'"']; ...
+			'PromptString',{'Selection of the Transformer of Grid ';['"',LV_Grids_List{i},'"']; ...
 			' which power flow is used for input creation';...
 			' (only single selection is possible):';...
 			''},...
@@ -95,16 +211,16 @@ for i=1:numel(Grid_List(Grid_Sel))
 			'CancelString','Cancel',...
 			'ListSize', [320, 300]);
 		if ~Tran_ok
-			error = 1; 
+			error = 1;
 			return;
 		end
-		Transf.(Grid_List{i}) = ...
-			Grid.(Grid_List{i}).Branches.Transf(Tran_Sel).Branch_ID;
+		Transf.(LV_Grids_List{i}) = ...
+			Grid.(LV_Grids_List{i}).Branches.Transf(Tran_Sel).Branch_ID;
 	end
 	% create index selection of the results:
-	Sel_idx.(Grid_List{i}) = ...
-		vertcat(Grid.(Grid_List{i}).Branches.Grouped.Branch_ID) == ...
-		Transf.(Grid_List{i});
+	Sel_idx.(LV_Grids_List{i}) = ...
+		vertcat(Grid.(LV_Grids_List{i}).Branches.Grouped.Branch_ID) == ...
+		Transf.(LV_Grids_List{i});
 end
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
@@ -126,47 +242,45 @@ handles.Current_Settings.Simulation.Scenarios_Path = [...
 	];
 mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
 
+% Flag, if user once seleced, when to few LV grid simulation
+% data is available that the allready used profiles should be used
+% again:
+repeat = 0;
 
 % Now process the scenario data:
 for i=1:scen_new.Number
+	% The data of the first sceanrio is already loaded, so load the scenario data for
+	% the other ones:
 	if i>1
-		% The data of the first sceanrio is already loaded, so load the scenario data for
-		% the other ones:
 		load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(i)}]);
 		% delete the not needed data:
-		clear('Debug','Load_Infeed_Data');
+		clear('Debug');
 	end
 	
 	if scen_new.(['Sc_',num2str(i)]).Data_is_divided
-		errordlg('Partitioned input-files are currently not supported!'); 
-		error = 1; 
+		errordlg('Partitioned input-files are currently not supported!');
+		error = 1;
 		return;
-	else
-		% Get the data out of the secenarios:
-		% First, preallocate array for the input data out of each grid variant:
-		act_power_total = zeros(...
-			numel(Grid_List(Grid_Sel))*Result_Settings.Simulation.Number_Runs,...
-			Result_Settings.Data_Extract.Timepoints_per_dataset,...
-			3);
-		rea_power_total = act_power_total;
-		% Load the data of all the grid variants, which should be used:
-		for j=1:numel(Grid_List(Grid_Sel))
-			act_power = squeeze(Result.(Grid_List{j}).Branch_Values(:,:,Sel_idx.(Grid_List{j}),[1,5,9]));
-			rea_power = squeeze(Result.(Grid_List{j}).Branch_Values(:,:,Sel_idx.(Grid_List{j}),[2,6,10]));
-			% invert the powers, to get the correct power behavior:
-			act_power = act_power *-1;
-			rea_power = rea_power *-1;
-			% add the data to the final arrays:
-			act_power_total((j-1)*Result_Settings.Simulation.Number_Runs+1:j*Result_Settings.Simulation.Number_Runs,:,:) = act_power;
-			rea_power_total((j-1)*Result_Settings.Simulation.Number_Runs+1:j*Result_Settings.Simulation.Number_Runs,:,:) = rea_power;
-		end
+	end
+	
+	Load_Infeed_Data_old = Load_Infeed_Data;
+	Load_Infeed_Data = [];
+	
+	% Load the data of the grid variant, which should be used:
+	for j=1:numel(LV_Grids_List)
+		act_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[1,5,9]));
+		rea_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[2,6,10]));
+		% 		% invert the powers, to get the correct power behavior:
+		% 		act_power = act_power *-1;
+		% 		rea_power = rea_power *-1;
+		
 		% Ceck if NANs are present in the data - remove the respective profiles:
-		idx = find(isnan(act_power_total));
+		idx = find(isnan(act_power));
 		if ~isempty(idx)
-			[idx,~,~] = ind2sub(size(act_power_total),idx);
+			[idx,~,~] = ind2sub(size(act_power),idx);
 			idx = unique(idx);
-			act_power_total(idx,:,:) = [];
-			rea_power_total(idx,:,:) = [];
+			act_power(idx,:,:) = [];
+			rea_power(idx,:,:) = [];
 			% inform user:
 			if ~warning_user
 				helpdlg({...
@@ -176,96 +290,372 @@ for i=1:scen_new.Number
 				warning_user = 1;
 			end
 		end
-		
 		% When all data is currupted --> Error!
-		if isempty(act_power_total)
+		if isempty(act_power)
 			errordlg({...
 				'Fehler!';...
 				['Keine Daten ohne fehlerhafte Einträge (NANs) für Szenario "',...
-				scen_new.(['Sc_',num2str(i)]).Filename,...
+				scen_new.(['Sc_',num2str(i)]).Filename,' und Netz "',...
+				LV_Grids_List{j},...
 				'" vorhanden! Datenzusammenstellung wird abgebrochen!"']});
-			error = 1; 
+			error = 1;
 			return;
 		end
 		
+		% get the underlying Load- and Infeedinformation, first householdloads:
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.Households.(['Data',data_typ]))
+			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_hou = act_power_hou;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
+				
+				Hous_Data = set.Households.(['Data',data_typ]);
+				hhs = set.Households.Number;
+				idx_hh = strcmp(set.Table_Network.ColumnName, 'Housh.type');
+				data_hou = zeros(size(Hous_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					hh_typ = set.Table_Network.Data{l,idx_hh};
+					idx = find(strcmp(hh_typ,set.Households.Content));
+					idx = idx(hhs.(hh_typ).Number)-1;
+					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+					data_hou = data_hou + Hous_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_hou(k,:,:) = data_hou(:,[1 3 5]);
+				rea_power_hou(k,:,:) = data_hou(:,[2 4 6]);
+			end
+			clear Hous_Data hhs idx_hh data_hou hh_typ idx data_hou k l
+			
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Households.(['Data',data_typ]))
+			
+			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_hou = act_power_hou;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
+				
+				Hous_Data = set.Households.(['Data',data_typ]);
+				hhs = set.Households.Number;
+				idx_hh = strcmp(set.Table_Network.ColumnName, 'Housh.type');
+				data_hou = zeros(size(Hous_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					hh_typ = set.Table_Network.Data{l,idx_hh};
+					idx = find(strcmp(hh_typ,set.Households.Content));
+					idx = idx(hhs.(hh_typ).Number)-1;
+					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+					data_hou = data_hou + Hous_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_hou(k,:,:) = data_hou(:,[1 3 5]);
+				rea_power_hou(k,:,:) = data_hou(:,[2 4 6]);
+			end
+			clear Hous_Data hhs idx_hh data_hou hh_typ idx data_hou k l
+		else
+			act_power_hou = [];
+			rea_power_hou = [];
+		end
+		
+		% Solar-Infeed:
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.Solar.(['Data',data_typ]))
+			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_sol = act_power_sol;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
+				
+				Sola_Data = set.Solar.(['Data',data_typ]);
+				add_data = set.Table_Network.Additional_Data;
+				idx_pv_add = strcmp(set.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+				plants =  set.Solar.Plants;
+				data_sol = zeros(size(Sola_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					gen_unit_name = add_data{l,idx_pv_add};
+					if isempty(gen_unit_name)
+						continue;
+					end
+					idx = find(strcmp(gen_unit_name,set.Solar.Content));
+					idx = idx(plants.(gen_unit_name).Number) - 1;
+					plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
+					data_sol = data_sol + Sola_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_sol(k,:,:) = data_sol(:,[1 3 5]);
+				rea_power_sol(k,:,:) = data_sol(:,[2 4 6]);
+			end
+			clear set Sola_Data add_data idx_pv_add plants data_sol l k gen_unit_name idx
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Solar.(['Data',data_typ]))
+			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_sol = act_power_sol;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
+				
+				Sola_Data = set.Solar.(['Data',data_typ]);
+				add_data = set.Table_Network.Additional_Data;
+				idx_pv_add = strcmp(set.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+				plants =  set.Solar.Plants;
+				data_sol = zeros(size(Sola_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					gen_unit_name = add_data{l,idx_pv_add};
+					if isempty(gen_unit_name)
+						continue;
+					end
+					idx = find(strcmp(gen_unit_name,set.Solar.Content));
+					idx = idx(plants.(gen_unit_name).Number) - 1;
+					plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
+					data_sol = data_sol + Sola_Data(:,(idx*6)+1:(idx*6)+6);
+				end
+				act_power_sol(k,:,:) = data_sol(:,[1 3 5]);
+				rea_power_sol(k,:,:) = data_sol(:,[2 4 6]);
+			end
+			clear set Sola_Data add_data idx_pv_add plants data_sol l k gen_unit_name
+		else
+			act_power_sol = [];
+			rea_power_sol = [];
+		end
+		
+		% Elektromobility
+		if isfield(Load_Infeed_Data_old,'Set_1') && ~isempty(Load_Infeed_Data_old.Set_1.El_Mobility.(['Data',data_typ]))
+			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_elm = act_power_elm;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
+				
+				Elmo_Data = set.El_Mobility.(['Data',data_typ]);
+				elm_count = 0;
+				idx_em = strcmp(set.Table_Network.ColumnName, 'El. Mob.');
+				data_elm = zeros(size(Elmo_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					elmoby = set.Table_Network.Data{l,idx_em};
+					for m=1:elmoby
+						data_elm = data_elm + Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6); % Lastgang des Last
+						elm_count = elm_count + 1;
+					end
+				end
+				act_power_elm(k,:,:) = data_elm(:,[1 3 5]);
+				rea_power_elm(k,:,:) = data_elm(:,[2 4 6]);
+			end
+			clear set Elmo_Data elm_count idx_em data_elm elmoby k l m elm_num
+		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.El_Mobility.(['Data',data_typ]))
+			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
+			rea_power_elm = act_power_elm;
+			
+			for k=1:Result_Settings.Simulation.Number_Runs
+				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
+				
+				Elmo_Data = set.El_Mobility.(['Data',data_typ]);
+				elm_count = 0;
+				idx_em = strcmp(set.Table_Network.ColumnName, 'El. Mob.');
+				data_elm = zeros(size(Elmo_Data,1),6);
+				
+				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
+					elmoby = set.Table_Network.Data{l,idx_em};
+					for m=1:elmoby
+						data_elm = data_elm + Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6); % Lastgang des Last
+						elm_count = elm_count + 1;
+					end
+				end
+				act_power_elm(k,:,:) = data_elm(:,[1 3 5]);
+				rea_power_elm(k,:,:) = data_elm(:,[2 4 6]);
+			end
+			clear set Elmo_Data elm_count idx_em data_elm elmoby k l m elm_num
+		else
+			act_power_elm = [];
+			rea_power_elm = [];
+		end
+		
+		% How many grids have to be treated?
+		num_grd = LV_Grids_Number(j);
+		
 		% Now all the power-consumption data is available, construct with this data according
-		% to the current settings a Input-Data-Set "Households" with the combined
+		% to the current settings a Input-Data-Set "LV_Grid_Input" with the combined
 		% Load-Infeed-Data:
-		Households.Content = handles.Current_Settings.Table_Network.Data(:,...
-			strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type'));
-		Load_Infeed_Data = [];
-		for j=1:handles.Current_Settings.Simulation.Number_Runs
-			Households.Data_Sample = [];
-			Households.Data_Mean = [];
-			Households.Data_Min = [];
-			Households.Data_Max = [];
-			Households.Data_05P_Quantil = [];
-			Households.Data_95P_Quantil = [];
-			% How many connectionpoints have to be treated?
-			num_points = handles.Current_Settings.Data_Extract.Households.(Households.Content{1}).Number;
-			% Draw a random number of profiles out of the pool (without repetition):
-			pool = 1:size(rea_power_total,1);
-			idx = zeros(1,num_points);
-			for k=1:num_points
+		for k=1:handles.Current_Settings.Simulation.Number_Runs
+			if ~isfield(Load_Infeed_Data, ['Set_',num2str(k)])
+				%First create empty Datastructures:
+				if isempty(act_power_hou)
+					Households.Data_Sample = [];
+				else
+					% Save the data first in this field, later follows reordering!
+					Households.Data_Sample = zeros(...
+						Result_Settings.Data_Extract.Timepoints_per_dataset,...
+						sum(LV_Grids_Number)*6);
+				end
+				Households.Data_Mean = [];
+				Households.Data_Min = [];
+				Households.Data_Max = [];
+				Households.Data_05P_Quantil = [];
+				Households.Data_95P_Quantil = [];
+				Households.Content = {};
+				Load_Infeed_Data.(['Set_',num2str(k)]).Households = Households;
+				Load_Infeed_Data.(['Set_',num2str(k)]).Table_Network = handles.Current_Settings.Table_Network;
+				
+				if isempty(act_power_sol)
+					Solar.Data_Sample = [];
+				else
+					% Save the data first in this field, later follows reordering!
+					Solar.Data_Sample = zeros(...
+						Result_Settings.Data_Extract.Timepoints_per_dataset,...
+						sum(LV_Grids_Number)*6);
+				end
+				Solar.Data_Mean = [];
+				Solar.Data_Min = [];
+				Solar.Data_Max = [];
+				Solar.Data_05P_Quantil = [];
+				Solar.Data_95P_Quantil = [];
+				Solar.Plants = [];
+				Load_Infeed_Data.(['Set_',num2str(k)]).Solar = Solar;
+				
+				if isempty(act_power_elm)
+					El_Mobility.Data_Sample = [];
+				else
+					% Save the data first in this field, later follows reordering!
+					El_Mobility.Data_Sample = zeros(...
+						Result_Settings.Data_Extract.Timepoints_per_dataset,...
+						sum(LV_Grids_Number)*6);
+				end
+				El_Mobility.Data_Mean = [];
+				El_Mobility.Data_Min = [];
+				El_Mobility.Data_Max = [];
+				El_Mobility.Data_05P_Quantil = [];
+				El_Mobility.Data_95P_Quantil = [];
+				El_Mobility.Number = 0;
+				Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility = El_Mobility;
+				
+				% Save the data first in this field, later follows reordering!
+				LV_Grid_Input.Data_Sample = zeros(...
+					Result_Settings.Data_Extract.Timepoints_per_dataset,...
+					sum(LV_Grids_Number)*6);
+				
+				LV_Grid_Input.Data_Mean = [];
+				LV_Grid_Input.Data_Min = [];
+				LV_Grid_Input.Data_Max = [];
+				LV_Grid_Input.Data_05P_Quantil = [];
+				LV_Grid_Input.Data_95P_Quantil = [];
+				LV_Grid_Input.Content = cell(1,sum(LV_Grids_Number));
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input = LV_Grid_Input;
+			end
+			
+			if j>1
+				grd_count = sum(LV_Grids_Number(1:j-1));
+			else
+				grd_count = 0;
+			end
+			
+			pool = 1:size(act_power,1);
+			
+			for l=1:num_grd
+				if isempty(pool) && ~ repeat
+					answer = questdlg({...
+						'To few LV grid simulation data available than needed!';...
+						'';...
+						'Should the allready used data be used again?'},...
+						'Running out of LV grid simulation data...',...
+						'Yes','Abort','Abort');
+					if strcmp(answer, 'Yes')
+						repeat = 1;
+					else
+						error = 1;
+						return;
+					end
+				end
+				
+				if isempty(pool) && repeat
+					pool = 1:size(act_power,1);
+				end
+				
 				fortu = floor(rand()*(numel(pool)))+1;
-				idx(k) = pool(fortu);
+				idx = pool(fortu);
 				pool(fortu) = [];
+				
+				grd_count = grd_count + 1;
+				
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+1) = ...
+					act_power(idx,:,1);
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+3) = ...
+					act_power(idx,:,2);
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+5) = ...
+					act_power(idx,:,3);
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+2) = ...
+					rea_power(idx,:,1);
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+4) = ...
+					rea_power(idx,:,2);
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample(:,(grd_count-1)*6+6) = ...
+					rea_power(idx,:,3);
+				
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Content{grd_count} = LV_Grids_List{j};
+				
+				% Add the additional Load-Infeed-Information:
+				if ~isempty(act_power_hou)
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+1) = ...
+						act_power_hou(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+3) = ...
+						act_power_hou(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+5) = ...
+						act_power_hou(idx,:,3);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+2) = ...
+						rea_power_hou(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+4) = ...
+						rea_power_hou(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample(:,(grd_count-1)*6+6) = ...
+						rea_power_hou(idx,:,3);
+				end
+				
+				if ~isempty(act_power_sol)
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+1) = ...
+						act_power_sol(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+3) = ...
+						act_power_sol(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+5) = ...
+						act_power_sol(idx,:,3);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+2) = ...
+						rea_power_sol(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+4) = ...
+						rea_power_sol(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample(:,(grd_count-1)*6+6) = ...
+						rea_power_sol(idx,:,3);
+				end
+				
+				if ~isempty(act_power_elm)
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+1) = ...
+						act_power_elm(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+3) = ...
+						act_power_elm(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+5) = ...
+						act_power_elm(idx,:,3);
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+2) = ...
+						rea_power_elm(idx,:,1);
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+4) = ...
+						rea_power_elm(idx,:,2);
+					Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample(:,(grd_count-1)*6+6) = ...
+						rea_power_elm(idx,:,3);
+				end
 			end
-			% get this data and reconstruct it in the needed way (i.e. {P_L1, Q_L1, P_L2, ...
-			% and all points arranged in columns):
-			power = zeros(Result_Settings.Data_Extract.Timepoints_per_dataset,num_points*6);
-			power(:,1:6:num_points*6) = squeeze(act_power_total(idx,:,1))';
-			power(:,3:6:num_points*6) = squeeze(act_power_total(idx,:,2))';
-			power(:,5:6:num_points*6) = squeeze(act_power_total(idx,:,3))';
-			power(:,2:6:num_points*6) = squeeze(rea_power_total(idx,:,1))';
-			power(:,4:6:num_points*6) = squeeze(rea_power_total(idx,:,2))';
-			power(:,6:6:num_points*6) = squeeze(rea_power_total(idx,:,3))';
-			
-			% According to the data extraction settings also treat here the data to the
-			% correct substructure
-			if handles.Current_Settings.Data_Extract.get_Sample_Value
-				Households.Data_Sample = power;
-			end
-			if handles.Current_Settings.Data_Extract.get_Mean_Value
-				Households.Data_Mean = power;
-			end
-			if handles.Current_Settings.Data_Extract.get_Max_Value
-				Households.Data_Max = power;
-			end
-			if handles.Current_Settings.Data_Extract.get_Min_Value
-				Households.Data_Min = power;
-			end
-			if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
-				Households.Data_05P_Quantil = power;
-			end
-			if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
-				Households.Data_95P_Quantil = power;
-			end
-			% also store the number of different "households" (the allocation) for later
-			% use - here dummy values:
-			Households.Number = handles.Current_Settings.Data_Extract.Households;
-			% save the created structure along with the current network table:
-			Load_Infeed_Data.(['Set_',num2str(j)]).Households = Households;
-			Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network = handles.Current_Settings.Table_Network;
-			
-			% for the other possible times series fill them with empty arrays:
-			Solar.Data_Sample = [];
-			Solar.Data_Mean = [];
-			Solar.Data_Min = [];
-			Solar.Data_Max = [];
-			Solar.Data_05P_Quantil = [];
-			Solar.Data_95P_Quantil = [];
-			% store the plants strukture for later use:
-			Solar.Plants = handles.Current_Settings.Data_Extract.Solar.Plants;
-			Load_Infeed_Data.(['Set_',num2str(j)]).Solar = Solar;
-			El_Mobility.Data_Sample = [];
-			El_Mobility.Data_Mean = [];
-			El_Mobility.Data_Min = [];
-			El_Mobility.Data_Max = [];
-			El_Mobility.Data_05P_Quantil = [];
-			El_Mobility.Data_95P_Quantil = [];
-			El_Mobility.Number = handles.Current_Settings.Data_Extract.El_Mobility.Number;
-			Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility = El_Mobility;
+		end
+	end
+	
+	clear Result Load_Infeed_Data_old
+	
+	% According to the data extraction settings also treat here the data to the
+	% correct substructure
+	for k=1:handles.Current_Settings.Simulation.Number_Runs
+		if ~strcmp(data_typ,'_Sample')
+			Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.(['Data',data_typ]) = ...
+				Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample;
+			Load_Infeed_Data.(['Set_',num2str(k)]).LV_Grid_Input.Data_Sample = [];
+			Load_Infeed_Data.(['Set_',num2str(k)]).Households.(['Data',data_typ]) = ...
+				Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample;
+			Load_Infeed_Data.(['Set_',num2str(k)]).Households.Data_Sample = [];
+			Load_Infeed_Data.(['Set_',num2str(k)]).Solar.(['Data',data_typ]) = ...
+				Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample;
+			Load_Infeed_Data.(['Set_',num2str(k)]).Solar.Data_Sample = [];
+			Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.(['Data',data_typ]) = ...
+				Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample;
+			Load_Infeed_Data.(['Set_',num2str(k)]).El_Mobility.Data_Sample = [];
 		end
 	end
 	
@@ -275,8 +665,13 @@ for i=1:scen_new.Number
 		'Load_Infeed_Data');
 end
 
-handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
 % Update the settings:
+handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+handles.Current_Settings.Data_Extract.LV_Grids_List = LV_Grids_List;
+handles.Current_Settings.Data_Extract.LV_Grids_Number = LV_Grids_Number;
+handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
+
+% Save the settings:
 Scenarios_Settings = handles.Current_Settings.Simulation.Scenarios; %#ok<NASGU>
 Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...

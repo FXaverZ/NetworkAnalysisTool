@@ -52,6 +52,9 @@ handles = network_load (handles);
 [handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
 	network_table_reset(handles);
 
+% clear grids list:
+handles.Current_Settings.Data_Extract.LV_Grids_List = {};
+
 % Anzeige des Hauptfensters aktualisieren:
 handles = refresh_display_NAT_main_gui (handles);
 

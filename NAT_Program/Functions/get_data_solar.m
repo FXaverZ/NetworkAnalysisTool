@@ -23,7 +23,7 @@ sep = db_fil.files.sep;    % Trenner im Dateinamen (' - ')
 season = system.seasons{settin.Season,1};
 
 % zeitliche Auflösung ermitteln:
-time_res = system.time_resolutions{settin.Time_Resolution,2};
+time_res = settin.Time_Resolution;
 % Ergebnis-Arrays initialisieren:
 Solar.Data_Sample = [];
 Solar.Data_Mean = [];

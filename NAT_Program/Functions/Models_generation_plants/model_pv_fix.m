@@ -97,7 +97,7 @@ for i=1:plant.Number
 	% Leistungseinspeisung berechnen:
 	power_active(:,phase_idx) = repmat(rad_total*...
 		plant.Power_Installed*plant.Rel_Size_Collector*...
-		plant.Efficiency * plant.Performance_Ratio/powr_factor,powr_factor,[])';
+		plant.Efficiency * plant.Performance_Ratio/powr_factor,powr_factor,1)';
 	% die Daten speichern, [P_L1, Q_L1, P_L2, ...]:
 	data_phase(:,(1:2:6)+6*(i-1)) = power_active;
 	data_phase(:,(2:2:6)+6*(i-1)) = power_reacti;

@@ -3,6 +3,10 @@ function push_network_select_scenario_Callback_Add (hObject, handles)
 % hObject    handle to push_network_select_scenario (see GCBO)
 % handles    structure with handles and user data (see GUIDATA)
 
+if isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
+	handles.Current_Settings.Simulation.Scenarios_Selection = 1:handles.Current_Settings.Simulation.Scenarios.Number;
+end
+
 [Scenarios_Selection,Scen_ok] = listdlg(...
 	'ListString',handles.Current_Settings.Simulation.Scenarios.Names,...
 	'Name','Selection of Scenarios...',...

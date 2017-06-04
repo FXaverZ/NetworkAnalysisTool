@@ -13,12 +13,11 @@ else
 	handles = network_calculation_grid(handles);
 end
 
-% Anzeige aktualisieren:
+% update GUI:
 handles = refresh_display_NAT_main_gui(handles);
 set(handles.push_cancel, 'Enable', 'off');
 
-% handles-Structure aktualisieren:
+% update handles structure:
 guidata(hObject, handles);
-
 end
 

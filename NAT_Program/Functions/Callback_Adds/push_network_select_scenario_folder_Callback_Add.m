@@ -5,7 +5,7 @@ function push_network_select_scenario_folder_Callback_Add (hObject, handles)
 % Keep the Current Settings:
 curr_set = handles.Current_Settings;
 
-% Userabfrage nach neuen Datenbankpfad:
+% Ask user for path of scenario data:
 Main_Path = uigetdir(handles.Current_Settings.Simulation.Scenarios_Path,...
 	'Selcet folder with scenario input data...');
 if ischar(Main_Path)
@@ -15,7 +15,7 @@ if ischar(Main_Path)
 	files = files(1,3:end);
 	idx = find(strcmp(files,'Scenario_Settings.mat'),1);
 	
-	% If not, tell user and abort funstion:
+	% If not, tell user and abort function:
 	if isempty(idx)
 		errordlg({'No valid scenario input data found at the given location!','',...
 			['Hint: A file ''Scenario_Settings.mat'' should be present in the selcted ',...

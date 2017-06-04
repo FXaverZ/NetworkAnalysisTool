@@ -20,6 +20,8 @@ if ~isfield(handles, 'sin')
 	sin.open_database;
 else
 	sin = handles.sin;
+	sin.close_database;
+	pause(0.05);
 	sin.update_settings(settin.Simulation.Parameters{:},...
 		'Grid_name', settin.Files.Grid.Name,...
 		'Grid_path', settin.Files.Grid.Path);

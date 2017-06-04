@@ -2,8 +2,9 @@ function handles = loaddata_get(handles, varargin)
 %LOADDATA_GET Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 12.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
 
 % prepare the functions arguments:
 if nargin == 2
@@ -31,13 +32,20 @@ tic; %Zeitmessung start
 file_part_count = 0;
 set_count = 0;
 for i = 1:num_set
+	% Avoid Matlab "hang":
+	drawnow(); pause(0.05);
+	
 	% Zufällige Zuordnung treffen:
 	handles = load_random_allocation(handles);
+	
 	% Daten auslesen und dem Input-Datensatz hinzufügen:
 	set_count = set_count + 1;
 	get_data_households(handles, set_count);
 	get_data_solar(handles, set_count);
 	get_data_elmob(handles, set_count);
+	% create dummy values of not needed input data
+	get_empty_data_lvgrids(handles, set_count);
+	
 	if num_set > 1
 		% Infos to the console:
 		fprintf(['\t\tSatz ',num2str(i),' von ',num2str(num_set),' erledigt... ']);

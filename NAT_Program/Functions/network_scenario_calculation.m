@@ -26,10 +26,11 @@ s_path = handles.Current_Settings.Simulation.Scenarios_Path;
 if isempty(handles.Current_Settings.Simulation.Grid_List)
 	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
 		handles.Current_Settings.Files.Grid.Name];
+	r_path = [path,'_nat',filesep,'Results'];
 else
 	path = handles.Current_Settings.Simulation.Grids_Path;
+	r_path = [path,filesep,'Results'];
 end
-r_path = [path,'_nat',filesep,'Results'];
 if ~isdir(r_path);
 	mkdir(r_path);
 end
@@ -57,42 +58,41 @@ if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 	scenar = scen_new;
 end
 
-fprintf('\nBerechne die Szenarien...\n');
+% write_scenario_log(handles,'close');
+% Save the current Settings of the tool:
+Current_Settings = handles.Current_Settings;
+Current_Settings.Simulation.Scenarios = scenar;
+save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
+
+fprintf('\nCalculation of the scenarios...\n');
+adapt_input_data_time = [];
 for i=1:scenar.Number;
-	% 	if i == 1
-	% 		% The log file and matlab scenario information is created at first
-	% 		% calculation
-	%
-	% 		% write_scenario_log - create info txt file about the scenarios
-	% 		handles.Current_Settings.Files.Save.Result.Log_file = ...
-	% 			['Res_',simdatestr,' - Scen_log.txt'];
-	% 		write_scenario_log(handles,'create');
-	%
-	% 		% create_scenario_information - Creates .mat file with all relevant
-	% 		% information regarding the simulation - necessary for final result
-	% 		% comparisons and analyses
-	% 		handles.Current_Settings.Files.Save.Result.Scen_info = ...
-	% 			['Res_',simdatestr,' - information'];
-	% 		create_scenario_information(handles);
-	% 	end
-	
+	% get the current scenario:
 	cur_scen = scenar.Names{i};
-	fprintf([cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
+	fprintf([cur_scen,', Scenario ',num2str(i),' of ',num2str(scenar.Number)]);
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
 	% set the data-object to initial state:
 	d.Load_Infeed_Data = [];
 	d.Load_Infeed_Data = Load_Infeed_Data;
+	d.Simulation.Scenario = scenar.(['Sc_',num2str(i)]);
 	clear('Load_Infeed_Data');
+	% Check the settings if adaption of the input data is neccesary and possible:
+	if isempty (adapt_input_data_time)
+		[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
+		if error
+			return;
+		end
+	end
 	
-	% Check, if the data is partinioted
+	% Check, if the data is partitioned
 	if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-		fprintf(['\n\tTeildatei 1 von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+		fprintf(['\n\tFilepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 	end
 	for j = 1:scenar.(['Sc_',num2str(i)]).Data_number_parts
 		if j > 1
 			% load the next data set
-			fprintf(['\n\tTeildatei ',num2str(j),' von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			fprintf(['\n\tFilepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 			load([s_path,filesep,cur_scen,'_',num2str(j,'%03.0f'),'.mat']);
 			% set the data-object to initial state:
 			d.Load_Infeed_Data = [];
@@ -100,8 +100,23 @@ for i=1:scenar.Number;
 			clear('Load_Infeed_Data');
 		end
 		% perform the network calculations:
-		try
-			handles = network_calculation(handles);
+% 		try
+			% when needed, adapt the input data according to the new simulation settings:
+			if adapt_input_data_time
+				handles = adapt_input_data_new_timesettings(handles);
+			end
+			
+			% start the calculation
+			if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+				handles = network_calculation_LV(handles);
+			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
+					~handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+				handles = network_calculation_MV(handles);
+			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
+					handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+				handles = network_calculation_MV_controller_active(handles);
+			end
+			
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 				handles = post_voltage_violation_report(handles);
 			end
@@ -111,11 +126,11 @@ for i=1:scenar.Number;
 			if handles.Current_Settings.Simulation.Power_Loss_Analysis
 				handles = post_active_power_loss_report(handles);
 			end
-		catch ME
-			disp('An error occurred:');
-			disp(ME.message);
-			continue;
-		end
+% 		catch ME
+% 			disp('An error occurred:');
+% 			disp(ME.message);
+% 			continue;
+% 		end
 		% save the results:
 		if j == 1
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen];
@@ -123,7 +138,7 @@ for i=1:scenar.Number;
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen,'_',num2str(j,'%03.0f')];
 		end
 		if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-			fprintf(['\t\tSpeichere Ergebnisse von Teildatensatz ',num2str(j),' von ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			fprintf(['\t\tSaving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 		end
 		handles = save_simulation_data(handles);
 	end
@@ -131,7 +146,7 @@ for i=1:scenar.Number;
 	
 end
 % write_scenario_log(handles,'close');
-% Save the current Settings of the tool:
+% update the saved current settings of the tool:
 Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
