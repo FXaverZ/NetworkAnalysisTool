@@ -297,7 +297,11 @@ for i=1:Simulation.Scenarios.Number
 		res = load([Main_Path,filesep,files_to_load{j},' - ',Simulation.Scenarios.(['Sc_',num2str(i)]).Filename,'.mat']);
 		for k=1:numel(Grid_List)
 			% read in current gridname (without fileending)
-			cur_grd = Grid_List{k}(1:end-4);
+			if ~isempty(strfind(Grid_List{k},'.sin'))
+				cur_grd = Grid_List{k}(1:end-4);
+			else
+				cur_grd = Grid_List{k};
+			end
 			if k==1
 				Load_Infeed_Data = res.Load_Infeed_Data; %#ok<NASGU>
 			end

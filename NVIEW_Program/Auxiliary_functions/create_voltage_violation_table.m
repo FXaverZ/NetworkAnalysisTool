@@ -87,6 +87,20 @@ end
 Table.Values_Str = [Table.RowName, Table.Values_Str];
 Table.Excel_table = Table.Values_Str; % Excel output
 
+%Changelog 1.5 FZ Start
+% convert strings containing numbers to number format (for correct
+% representation in excel):
+for i=1:size(Table.Excel_table,1)
+	for j=2:numel(Table.Excel_table(i,:))
+		num = sscanf(Table.Excel_table{i,j},'%f');
+		if ~isempty(num)
+			Table.Excel_table{i,j} = num;
+		end
+	end
+end
+clear i j num
+%Changelog 1.5 FZ Start
+
 % Select "identifier" and "overall" row and define html bold to the text
 rowIdx_loop = [1,2,2+size([ voltage_violation_numbers_overall.Values;
                         voltage_violation_numbers_scenarios.Values;

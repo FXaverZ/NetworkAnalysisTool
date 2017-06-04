@@ -11,7 +11,9 @@ for i = 1 : numel(cg)
     Table.Values(:,i) = d.(cg{i}).branch_statistics(Observed_Row,:);
 end
 Table.Values = 100*sum(Table.Values,1)/(cs*ct*cd);
-Table.Name = 'Voltage violations in % of time';
+%Changelog 1.5 FZ Start
+Table.Name = 'Current violations in % of time';
+%Changelog 1.5 FZ Start
 Table.ColumnName = d.Control.Simulation_Description.Variants;
 for i = 1 : numel(Table.ColumnName)
     if size(Table.ColumnName{i},2) > 12

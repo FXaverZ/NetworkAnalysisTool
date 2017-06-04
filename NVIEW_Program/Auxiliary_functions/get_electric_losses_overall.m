@@ -5,6 +5,8 @@ cd = d.Control.Simulation_Options.Number_of_datasets;
 ct = d.Control.Simulation_Options.Timepoints_per_dataset;
 cg = d.Control.Simulation_Description.Variants;
 
+
+
 Table.Values = [];
 for i = 1 : numel(cg)
     Table.Values(:,i) = nansum(nansum(d.(cg{i}).electric_losses_at_dataset,1))/1000;

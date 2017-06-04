@@ -440,7 +440,11 @@ function pushtool_SaveFig_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
-file_format = 'emf'; % Enhanced meta file
+file_format_1 = 'emf'; % Enhanced meta file
+
+%Changelog 1.5 FZ Start
+file_format_2 = 'png'; % "Thumbnail" for quick checking of contents of figures...
+%Changelog 1.5 FZ End
 
 for i = 1 : numel(check_active_figures)
     Figure_Name = [];
@@ -452,11 +456,25 @@ for i = 1 : numel(check_active_figures)
     Figure_Name = strrep(Figure_Name, 'affected','aff');
     Figure_Name = strrep(Figure_Name, 'voltage','volt');
     Figure_Name = strrep(Figure_Name, 'violations','viol');
-    Figure_Name = strrep(Figure_Name, ' ', '_');               
-    Figure_Name = [Figure_Name,'.',file_format];
+	
+	%Changelog 1.5 FZ Start
+	Figure_Name = strrep(Figure_Name, 'violation','viol');
+	Figure_Name = strrep(Figure_Name, 'currents','curr');
+	Figure_Name = strrep(Figure_Name, 'current','curr');
+	Figure_Name = strrep(Figure_Name, 'Current','Curr');
+	Figure_Name = strrep(Figure_Name, 'histogram','hist');
+	%Changelog 1.5 FZ End
+    
+	Figure_Name = strrep(Figure_Name, ' ', '_');
+	%Changelog 1.5 FZ Start
+    Figure_Name_1 = [Figure_Name,'.',file_format_1];
+	Figure_Name_2 = [Figure_Name,'.',file_format_2];
     % Add filepath to file name
-    Figure_Name = [handles.System.Export_Path,filesep,Figure_Name];    
-    saveas(check_active_figures(i),Figure_Name,file_format)
+    Figure_Name = [handles.System.Export_Path,filesep,Figure_Name_1];    
+    saveas(check_active_figures(i),Figure_Name,file_format_1)
+	Figure_Name = [handles.System.Export_Path,filesep,Figure_Name_2]; 
+	saveas(check_active_figures(i),Figure_Name,file_format_2)
+	%Changelog 1.5 FZ End
 end
 
 % --------------------------------------------------------------------
@@ -897,7 +915,9 @@ function menu_branch_loading_time_graph_scenario_total_Callback(hObject, eventda
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
 % Analysis subfunction call
-handles = call_current_violation_time_graph(handles,7);
+% Changelog FZ 1.3 Start
+handles = call_current_violation_time_graph(handles,8);
+% Changelog FZ 1.3 End
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -907,7 +927,9 @@ function menu_branch_loading_time_graph_grid_total_Callback(hObject, eventdata, 
 % handles    structure with handles and user data (see GUIDATA)
 handles = process_nat_results_as(handles); % Process results
 % Analysis subfunction call
-handles = call_current_violation_time_graph(handles,8);
+% Changelog FZ 1.3 Start
+handles = call_current_violation_time_graph(handles,7);
+% Changelog FZ 1.3 End
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------

@@ -10,8 +10,8 @@ for i = 1 : numel(Data_List)
             Table.(Data_List{i}).RowName =  'Household active power consumption (kW)';
 		% CHANGELOG 1.2, FZ Start
 		case 'LV_Grid_Input'
-			Table.(Data_List{H}).Description = 'Low voltage grid active power consumption timeline';
-            Table.(Data_List{H}).RowName =  'Low voltage grid power consumption (kW)';
+			Table.(Data_List{i}).Description = 'Low voltage grid active power consumption timeline';
+            Table.(Data_List{i}).RowName =  'Low voltage grid power consumption (kW)';
 		% CHANGELOG 1.2, FZ End
         case 'Solar'
             Table.(Data_List{i}).Description = 'Solar power plants active power injection timeline';

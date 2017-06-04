@@ -30,10 +30,12 @@ figure_data_id{18,1} = 'Total_Electrical_Losses_Timeline_Scen';
 % function menu_load_analysis_all_Callback
 figure_name = get(active_figure,'Name');
 
-if strcmp(figure_name,'Household active power consumption timeline') || strcmp(figure_name,'Solar power plants active power injection timeline') || strcmp(figure_name,'E-mobility active power consumption timeline') || strcmp(figure_name,'System balance active power timeline')
+% CHANGELOG 1.2, FZ Start
+if strcmp(figure_name,'Household active power consumption timeline') || strcmp(figure_name,'Solar power plants active power injection timeline') || strcmp(figure_name,'E-mobility active power consumption timeline') || strcmp(figure_name,'System balance active power timeline') || strcmp(figure_name,'Low voltage grid active power consumption timeline')
     output = 1;
-elseif strcmp(figure_name,'Household average active power consumption timeline') || strcmp(figure_name,'Solar power plants average active power injection timeline') ||  strcmp(figure_name,'E-mobility average active power consumption timeline') || strcmp(figure_name,'System balance average active power timeline')
+elseif strcmp(figure_name,'Household average active power consumption timeline') || strcmp(figure_name,'Solar power plants average active power injection timeline') ||  strcmp(figure_name,'E-mobility average active power consumption timeline') || strcmp(figure_name,'System balance average active power timeline') || strcmp(figure_name,'Low voltage grid average active power consumption timeline')
    output = 2;   
+% CHANGELOG 1.2, FZ End
 elseif strncmp(figure_name,'Voltage violations at',21) && strncmp(figure_name(end-7:end),'timeline',8)
     output = 3;
 elseif strncmp(figure_name,'Voltage violations timeline at grids',36) 

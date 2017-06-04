@@ -5,7 +5,7 @@ Excel_Column_ID = [{'A'},{'B'},{'C'},{'D'},{'E'},{'F'},{'G'},{'H'},{'I'},{'J'},{
 % Transfer handles substructures to internal structures
 d = handles.NVIEW_Processed;
 Analysis_Selection_Id = define_analysis_selection_id(handles.NVIEW_Analysis_Selection);
-
+loss_an_pres = handles.NVIEW_Control.Simulation_Options.Loss_Analysis;
 
 % --------------------------------------------------------------
 % Load tables and read handles
@@ -15,7 +15,14 @@ Table_Load.Description = strrep(Table_Load.Description,'/','-');
 clear Table_Inp
 Table_Voltage = create_voltage_violation_table(handles,d);
 Table_Current = create_current_table(handles,d);
-Table_Losses = create_loss_table(handles,d);
+
+% Changelog FZ 1.6 Start
+% Check of, loss-data is avaliable:
+if loss_an_pres
+	Table_Losses = create_loss_table(handles,d);
+end
+% Changelog FZ 1.6 End
+
 Table_Node_List = get_violated_node_list(d);
 Table_Branch_List = get_violated_branch_list(d);
 
@@ -25,7 +32,12 @@ Table_Branch_List = get_violated_branch_list(d);
 Grid_List = d.Control.Simulation_Description.Variants;
 Table_Voltage_Violation_All = reformat_voltage_violation_for_xls_sheet(d,Grid_List);
 Table_Current_Violation_All = reformat_current_violation_for_xls_sheet(d,Grid_List);
-Table_Electric_Losses_All = reformat_electric_losses_for_xls_sheet(d,Grid_List);
+
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	Table_Electric_Losses_All = reformat_electric_losses_for_xls_sheet(d,Grid_List);
+end
+% Changelog FZ 1.6 End
 
 Table_Simulation.Excel_table = ...
     [{'SIMULATION DESCRIPTION AND PARAMETERS USED'};
@@ -56,10 +68,14 @@ Table_Current.Excel_Header{1,1} = 'CURRENT VIOLATION SUMMARY REPORT';
 Table_Current.Excel_table = [Table_Current.Excel_Header;Table_Current.Excel_table];
 Table_Current.Excel_table(3,:) = Table_Current.ColumnName; % Add ID header
 
-Table_Losses.Excel_Header = cell(3,size(Table_Losses.Excel_table,2));
-Table_Losses.Excel_Header{1,1} = 'ELECTRIC LOSSES SUMMARY REPORT';
-Table_Losses.Excel_table = [Table_Losses.Excel_Header;Table_Losses.Excel_table];
-Table_Losses.Excel_table(3,:) = Table_Losses.ColumnName; % Add ID header
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	Table_Losses.Excel_Header = cell(3,size(Table_Losses.Excel_table,2));
+	Table_Losses.Excel_Header{1,1} = 'ELECTRIC LOSSES SUMMARY REPORT';
+	Table_Losses.Excel_table = [Table_Losses.Excel_Header;Table_Losses.Excel_table];
+	Table_Losses.Excel_table(3,:) = Table_Losses.ColumnName; % Add ID header
+end
+% Changelog FZ 1.6 End
 
 Table_Node_List.Excel_Header = cell(2,size(Table_Node_List.Values_Excel,2)); 
 Table_Node_List.Excel_Header{1,1} = 'NODES AFFECTED BY VOLTAGE VIOLATIONS';
@@ -75,9 +91,12 @@ Table_Voltage_Violation_All.Excel_table{1,1} = Table_Voltage_Violation_All.Main_
 Table_Current_Violation_All.Excel_table = [Table_Current_Violation_All.Excel_Header; Table_Current_Violation_All.Values_Cell];
 Table_Current_Violation_All.Excel_table{1,1} = Table_Current_Violation_All.Main_Header;
 
-Table_Electric_Losses_All.Excel_table = [Table_Electric_Losses_All.Excel_Header; Table_Electric_Losses_All.Values_Cell];
-Table_Electric_Losses_All.Excel_table{1,1} = Table_Electric_Losses_All.Main_Header;
-
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	Table_Electric_Losses_All.Excel_table = [Table_Electric_Losses_All.Excel_Header; Table_Electric_Losses_All.Values_Cell];
+	Table_Electric_Losses_All.Excel_table{1,1} = Table_Electric_Losses_All.Main_Header;
+end
+% Changelog FZ 1.6 End
 
 % --------------------------------------------------------------
 % Write to excel
@@ -97,26 +116,47 @@ end
 Sheet_Descr_Load = Table_Load.Description(1:find(Table_Load.Description=='_')-1);
 Sheet_Descr_Volt = Table_Voltage.Description(1:find(Table_Voltage.Description=='_')-1);
 Sheet_Descr_Curr = Table_Current.Description(1:find(Table_Current.Description=='_')-1);
-Sheet_Descr_Loss = Table_Losses.Description(1:find(Table_Losses.Description=='_')-1);
+
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	Sheet_Descr_Loss = Table_Losses.Description(1:find(Table_Losses.Description=='_')-1);
+end
+% Changelog FZ 1.6 End
+
 Sheet_Descr_Nodes = 'Nodes aff. by volt. viol.'; 
 Sheet_Descr_Branches = 'Branches aff. by overcurr.'; 
 
 Sheet_Descr_Volt_Viol_All = Table_Voltage_Violation_All.Description;
 Sheet_Descr_Curr_Viol_All = Table_Current_Violation_All.Description;
-Sheet_Descr_Elec_Loss_All = Table_Electric_Losses_All.Description;
 
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	Sheet_Descr_Elec_Loss_All = Table_Electric_Losses_All.Description;
+end
+% Changelog FZ 1.6 End
 
 xlswrite(file,Table_Simulation.Excel_table,Table_Simulation.Description);
 xlswrite(file,Table_Load.Excel_table,Sheet_Descr_Load);
 xlswrite(file,Table_Voltage.Excel_table,Sheet_Descr_Volt);
 xlswrite(file,Table_Current.Excel_table,Sheet_Descr_Curr);
-xlswrite(file,Table_Losses.Excel_table,Sheet_Descr_Loss);
+
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	xlswrite(file,Table_Losses.Excel_table,Sheet_Descr_Loss);
+end
+% Changelog FZ 1.6 End
+
 xlswrite(file,Table_Node_List.Excel_table,Sheet_Descr_Nodes);
 xlswrite(file,Table_Branch_List.Excel_table,Sheet_Descr_Branches);
 
 xlswrite(file,Table_Voltage_Violation_All.Excel_table,Sheet_Descr_Volt_Viol_All);
 xlswrite(file,Table_Current_Violation_All.Excel_table,Sheet_Descr_Curr_Viol_All);
-xlswrite(file,Table_Electric_Losses_All.Excel_table,Sheet_Descr_Elec_Loss_All);
+
+% Changelog FZ 1.6 Start
+if loss_an_pres
+	xlswrite(file,Table_Electric_Losses_All.Excel_table,Sheet_Descr_Elec_Loss_All);
+end
+% Changelog FZ 1.6 End
 
 % Clear default sheets
 hExcel = actxserver('Excel.Application');
@@ -198,7 +238,7 @@ for sheetIdx = 1 : numSheets
                 int2str(Highlight_Table_Voltage_Rows(i))]).Interior.ColorIndex = 17;
         end
     
-    elseif strcmp(sheetName,Sheet_Descr_Loss)
+    elseif strcmp(sheetName,Sheet_Descr_Loss) && loss_an_pres 
         % What rows must be highlighted (2x scenario+overall tables and 3x
         % L1, L2, L3 phase tables
         Highlight_Table_Voltage_Rows = 3 + 1  ;
@@ -280,7 +320,7 @@ for sheetIdx = 1 : numSheets
         hWorksheet.Range(['A3:', Excel_Column_ID{size(Table_Current_Violation_All.Values,2)}, '3']).Interior.ColorIndex = 24;
         hWorksheet.Range(['A4:', Excel_Column_ID{size(Table_Current_Violation_All.Values,2)}, '4']).Interior.ColorIndex = 47;
        
-    elseif strcmp(sheetName,Table_Electric_Losses_All.Description)
+    elseif strcmp(sheetName,Table_Electric_Losses_All.Description) && loss_an_pres 
         hWorksheet = hWorkbook.Sheets.Item(sheetIdx);
         for nc = 1 : size(Table_Electric_Losses_All.Values,2)
             hWorksheet.Columns.Item(nc).columnWidth = 20; %first column
