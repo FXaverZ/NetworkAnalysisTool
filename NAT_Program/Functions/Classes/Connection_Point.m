@@ -63,9 +63,9 @@ classdef Connection_Point < handle
 	%                P_L3 
 	%                Q_L3 	
 	
-	% Version:                 1.3
+	% Version:                 1.4
 	% Erstellt von:            Franz Zeilinger - 14.01.2013
-	% Letzte Änderung durch:   Franz Zeilinger - 29.04.2013
+	% Letzte Änderung durch:   Franz Zeilinger - 07.04.2014
 	
 	properties
 		
@@ -88,6 +88,17 @@ classdef Connection_Point < handle
 	%        aktuelle Leistung im VZPS --> P > 0: entpr. Leistungsaufnahme (Last):
 	%        Aufbau des Arrays [m,6], m = OBJ.NUM_UNITS_CONNECTED:
 	%            [P_L1, Q_L1, P_L2, Q_L2, P_L3, Q_L3])
+	%        jedes angeschlossene ELement schreibt seine aktuellen Leistungswerte in
+	%        eine eigene Zeile dieses Arrays. Zum Berechnungszeitpunkt wird die Summe
+	%        über dieses Array gebildet um die gesamte Leistungsaufnahme zu
+	%        ermitteln.
+	    P_Q_Act_active = true(0,1)
+	%        Angabe, ob der Eintrag in der P_Q_Act - Matrix für die Berechnung
+	%        herangezogen werden sollen.
+	%            obj.P_Q_Act_active(m,1) = true ... Leistung des Elements m wird
+	%                                               berücksichtigt
+	%            obj.P_Q_Act_active(m,1) = false ... Leistung des Elements m wird
+	%                                                nicht berücksichtigt
 		Num_Units_Connected = 0;
 	%        Anzahl an angeschlossenen Einheiten an diesem Knotenpunkt.
 		Voltage = zeros(1,3);
@@ -141,7 +152,7 @@ classdef Connection_Point < handle
 			% Über diese Elemente iterieren, das Berechnungsobjekt "Last"
 			% aktualisieren sowie dies in OBJ.POWERS_CHANGED festhalten:
 			for i=1:numel(obj_s)
-				p_q = obj_s(i).P_Q_Act;
+				p_q = obj_s(i).P_Q_Act(obj_s(i).P_Q_Act_active,:);
 				p_q = sum(p_q,1);
                 d.Debug.(cg).P_Q_Input_tot(cd,ct,i,:) = p_q;             
                 obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));

@@ -242,6 +242,11 @@ handles.Current_Settings.Simulation.Scenarios_Path = [...
 	];
 mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
 
+% Flag, if user once seleced, when to few LV grid simulation
+% data is available that the allready used profiles should be used
+% again:
+repeat = 0;
+
 % Now process the scenario data:
 for i=1:scen_new.Number
 	% The data of the first sceanrio is already loaded, so load the scenario data for
@@ -467,7 +472,27 @@ for i=1:scen_new.Number
 			end
 			
 			pool = 1:size(act_power,1);
+			
 			for l=1:num_grd
+				if isempty(pool) && ~ repeat
+					answer = questdlg({...
+						'To few LV grid simulation data available than needed!';...
+						'';...
+						'Should the allready used data be used again?'},...
+						'Running out of LV grid simulation data...',...
+						'Yes','Abort','Abort');
+					if strcmp(answer, 'Yes')
+						repeat = 1;
+					else
+						error = 1;
+						return;
+					end
+				end
+				
+				if isempty(pool) && repeat
+					pool = 1:size(act_power,1);
+				end
+				
 				fortu = floor(rand()*(numel(pool)))+1;
 				idx = pool(fortu);
 				pool(fortu) = [];

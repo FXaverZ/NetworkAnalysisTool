@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 21-Jan-2014 12:21:20
+% Last Modified by GUIDE v2.5 05-May-2014 12:09:18
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -105,6 +105,13 @@ handles = refresh_display_NAT_main_gui(handles);
 
 % Update handles structure
 guidata(hObject, handles);
+
+function check_controller_emob_charge_active_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to check_controller_emob_charge_active (see GCBO)
+% ~          reserved - not used
+% handles    structure with handles and user data (see GUIDATA)
+
+check_controller_emob_charge_active_Callback_Add(hObject, handles);
 
 function check_extract_05_quantile_value_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik check_extract_05_quantile_value (siehe GCBO)
@@ -562,6 +569,13 @@ function push_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 
 NAT_main_gui_CloseRequestFcn(hObject, eventdata, handles);
 
+function push_controller_emob_charge_settings_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    handle to push_controller_emob_charge_settings (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+open get_controller_settings.m
+
 function push_input_data_merge_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to push_input_data_merge (see GCBO)
 % ~          reserved - eventdata not needed
@@ -999,3 +1013,10 @@ function edit_network_number_variants_CreateFcn(hObject, eventdata, handles) %#o
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in check_controller_emob_charge_active.
+
+
+% --- Executes on button press in push_controller_emob_charge_settings.
+

@@ -49,7 +49,7 @@ if settin.El_Mobility.Number == 0
 end
 
 % zeitliche Auflösung ermitteln:
-time_res = system.time_resolutions{settin.Time_Resolution,2};
+time_res = settin.Time_Resolution;
 
 % Daten laden (Variable "data_charge")
 load([db_fil.Path,filesep,db_fil.Name,filesep,'Chargin_Profiles.mat']);

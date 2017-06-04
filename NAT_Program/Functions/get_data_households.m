@@ -3,7 +3,7 @@ function get_data_households (handles, varargin)
 
 % Version:                 2.1 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 14.02.2012
-% Letzte Änderung durch:   Franz Zeilinger - 19.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
 
 system = handles.System;                             % Systemvariablen
 settin = handles.Current_Settings.Data_Extract;      % aktuelle Einstellungen
@@ -41,7 +41,7 @@ sep = db_fil.files.sep;    % Trenner im Dateinamen (' - ')
 season = system.seasons{settin.Season,1};
 weekda = system.weekdays{settin.Weekday,1};
 % zeitliche Auflösung ermitteln:
-time_res = system.time_resolutions{settin.Time_Resolution,2};
+time_res = settin.Time_Resolution;
 
 % die einzelnen Haushaltsklassen durchgehen:
 for i=1:size(system.housholds,1)

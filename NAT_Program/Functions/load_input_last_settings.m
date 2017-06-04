@@ -4,7 +4,7 @@ function [handles, error] = load_input_last_settings(handles)
 
 % Version:                 1.0
 % Erstellt von:            Franz Zeilinger - 04.11.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
 
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
@@ -18,6 +18,9 @@ try
 		% try to load the last scenario-data-sets:
 		load([settin.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat']);
 		settin.Simulation.Scenarios = Scenarios_Settings;
+		% Deactivate a maybe given scenario selection (because the old scenarios are not
+		% present any more):
+		handles.Current_Settings.Simulation.Scenarios_Selection = [];
 		% load the data of the first scenario (% loading of 'Load_Infeed_Data' and
 		% 'Data_Extract'):
 		load([settin.Simulation.Scenarios_Path,filesep, settin.Simulation.Scenarios.Names{1},'.mat']);

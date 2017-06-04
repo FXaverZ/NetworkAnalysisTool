@@ -11,7 +11,7 @@ Debug = handles.NAT_Data.Debug;
 
 file = handles.Current_Settings.Files.Save.Result;
 save([file.Path,filesep,file.Name,file.Exte],'Result', 'Grid',...
-	'Load_Infeed_Data', 'Debug');
+	'Load_Infeed_Data','Debug','-v7.3');
 
 % % Append info to log file what scenario was calculated
 % if handles.Current_Settings.Simulation.Use_Scenarios

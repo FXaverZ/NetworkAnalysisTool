@@ -2,10 +2,9 @@ function popup_time_resolution_Callback_Add (hObject, handles)
 %POPUP_TIME_RESOLUTION_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
-handles.Current_Settings.Data_Extract.Time_Resolution = get(hObject,'Value');
-
 % get the Duration of the simulation stepsize in seconds:
 secs = handles.System.time_resolutions{get(hObject,'Value'),2};
+handles.Current_Settings.Data_Extract.Time_Resolution = secs;
 
 % adjust the Timpoints_per_dataset:
 if ~handles.Current_Settings.Data_Extract.get_Time_Series

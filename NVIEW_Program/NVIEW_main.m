@@ -219,6 +219,30 @@ fprintf(1,''); % Stop at this line
 % vals_avg = squeeze(sum(vals)/size(vals,1));
 % figure;
 % plot (vals_avg)
+
+r = load([handles.NVIEW_Control.Result_Files_Paths{1},filesep,handles.NVIEW_Control.Result_Files{1},'.mat']);
+d1 = r.Load_Infeed_Data.Set_1.LV_Grid_Input.Data_Mean(:,[1 3 5]+66);
+d2 = r.Load_Infeed_Data.Set_2.LV_Grid_Input.Data_Mean(:,[1 3 5]+66);
+figure;plot(d1);
+figure;plot(d2);
+idx_tr = strcmp('T_7272P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+s1 = squeeze(vals(1,:,[1 5 9]+2));
+s2 = squeeze(vals(2,:,[1 5 9]+2));
+figure;plot(s1);
+figure;plot(s2);
+idx_tr = strcmp('T_9317P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+s1 = squeeze(vals(1,:,[1 5 9]+2));
+s2 = squeeze(vals(2,:,[1 5 9]+2));
+figure;plot(s1);
+figure;plot(s2);
+idx_tr = strcmp('T_7393P',handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_name);
+vals = squeeze(handles.NVIEW_Results.josefstadt_schematisch_red_ist_20140220.branch_values(1,:,:,idx_tr,:));
+s1 = squeeze(vals(1,:,[1 5 9]+2));
+s2 = squeeze(vals(2,:,[1 5 9]+2));
+figure;plot(s1);
+figure;plot(s2);
 % -----------------------------------
 dbclear in NVIEW_main at 210;
 guidata(hObject, handles);

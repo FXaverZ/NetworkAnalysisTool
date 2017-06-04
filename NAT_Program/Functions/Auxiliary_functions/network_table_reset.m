@@ -57,8 +57,6 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	%create an empty cell array:
 	data = cell(numel({handles.NAT_Data.Grid.(cg).P_Q_Node.Points.P_Q_Name}'),numel(handles.System.table_settings.mv.ColumnName));
 	
-	
-	
 	% node names:
 	idx = strcmp(ColumnName, 'Names');
 	data(:,idx) = {handles.NAT_Data.Grid.(cg).P_Q_Node.Points.P_Q_Name}';
@@ -74,6 +72,8 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	idx = strcmp(ColumnName, 'PV?');
 	data(:,idx) = num2cell(false(size(data,1),1));
 	idx = strcmp(ColumnName, 'El. Mob?');
+	data(:,idx) = num2cell(false(size(data,1),1));
+	idx = strcmp(ColumnName, 'EMob Ctr.');
 	data(:,idx) = num2cell(false(size(data,1),1));
 	
 	Table_Network.Data = data;

@@ -65,18 +65,27 @@ Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
 fprintf('\nCalculation of the scenarios...\n');
+adapt_input_data_time = [];
 for i=1:scenar.Number;
 	% get the current scenario:
 	cur_scen = scenar.Names{i};
-	fprintf([cur_scen,', Szenario ',num2str(i),' von ',num2str(scenar.Number)]);
+	fprintf([cur_scen,', Scenario ',num2str(i),' of ',num2str(scenar.Number)]);
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
 	% set the data-object to initial state:
 	d.Load_Infeed_Data = [];
 	d.Load_Infeed_Data = Load_Infeed_Data;
+	d.Simulation.Scenario = scenar.(['Sc_',num2str(i)]);
 	clear('Load_Infeed_Data');
+	% Check the settings if adaption of the input data is neccesary and possible:
+	if isempty (adapt_input_data_time)
+		[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
+		if error
+			return;
+		end
+	end
 	
-	% Check, if the data is partinioted
+	% Check, if the data is partitioned
 	if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
 		fprintf(['\n\tFilepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
 	end
@@ -92,6 +101,11 @@ for i=1:scenar.Number;
 		end
 		% perform the network calculations:
 % 		try
+			% when needed, adapt the input data according to the new simulation settings:
+			if adapt_input_data_time
+				handles = adapt_input_data_new_timesettings(handles);
+			end
+			
 			handles = network_calculation(handles);
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 				handles = post_voltage_violation_report(handles);

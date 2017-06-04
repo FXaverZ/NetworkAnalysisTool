@@ -4,7 +4,7 @@ function handles = refresh_display_NAT_main_gui(handles)
 
 % Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 12.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %      Einstellungen - Auslesen der Daten
@@ -47,8 +47,9 @@ else
 end
 
 % update the pop-up-menues:
+tim_res_sel = find(cell2mat(handles.System.time_resolutions(:,2)) == handles.Current_Settings.Data_Extract.Time_Resolution);
 set(handles.popup_time_resolution, 'Value',...
-	handles.Current_Settings.Data_Extract.Time_Resolution);
+	tim_res_sel);
 set(handles.popup_pqnode_pv_typ, 'String',  ...
 	handles.Current_Settings.Data_Extract.Solar.Selectable(:,1));
 set(handles.popup_pqnode_wi_typ, 'String',  ...
@@ -353,6 +354,14 @@ if strcmp(handles.Current_Settings.Grid.Type,'LV')
 elseif  strcmp(handles.Current_Settings.Grid.Type,'MV')
 	set(handles.radio_network_type_lv, 'Value', 0);
 	set(handles.radio_network_type_mv, 'Value', 1);
+end
+
+set(handles.check_controller_emob_charge_active, ...
+	'Value', handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active);
+if handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+	set(handles.push_controller_emob_charge_settings, 'Enable', 'on');
+else
+	set(handles.push_controller_emob_charge_settings, 'Enable', 'off');
 end
 end
 

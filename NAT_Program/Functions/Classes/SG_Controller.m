@@ -35,7 +35,7 @@ classdef SG_Controller < Connection_Unit
 			%SG_CONTROLLER    Konstruktor der Klasse SG_CONTROLLER
 			
 			% Zunächst ein Anschlussobjekt erzeugen: 
-			obj = obj@Connection_Unit(cn_point);
+			obj = obj@Connection_Unit(cn_point, 1);
 			% Regelerfolg des Anschlusspunktes ist nicht erfüllt:
 			obj.Connection_Point.controller_finished = false;
 			% Weitere Parameter abarbeiten:
@@ -91,7 +91,6 @@ classdef SG_Controller < Connection_Unit
 		
 		function update_parameter(obj, varargin)
 			%UPDATE_PARAMETER    aktualisiert die Parameter des Objekts
-			
 			obj.update_settings(varargin{:})
 		end
 		

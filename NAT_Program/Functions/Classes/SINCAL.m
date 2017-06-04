@@ -382,7 +382,7 @@ classdef SINCAL < handle
 			% Starten der Lastflussrechnung:
 			obj.Simulation.Start(obj.Settings.Calculation_method);
 			% War Lastfluss erfolgreich?
-			if obj.Simulation.StatusID ~=obj.Constants.SimulationOK
+			if obj.Simulation.StatusID ~= obj.Constants.SimulationOK
 				% Im Fehlerfall, genauere Informationen zum Stand der Berechnung
 				% ausgeben:
 				obj.disp_messages('all', 1);

@@ -187,6 +187,17 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 		idx = find( fortu <= dis_grds, 1);
 		Table_Data{i,idx_lv} = handles.Current_Settings.Data_Extract.LV_Grids_List{idx,1};
 	end
+	
+	% randomly allocate controllers:
+	if handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
+		eq_lv = handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Equipment_Share;
+		idx_emobc = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'EMob Ctr.');
+		
+		if eq_lv > 0 
+			Table_Data(:,idx_emobc) = num2cell(rand(1,size(Table_Data,1)).*100 <= eq_lv);
+		elseif eq_lv <= 0
+			Table_Data(:,idx_emobc) = num2cell(false(1,size(Table_Data,1)));
+		end
 end
 handles.Current_Settings.Table_Network.Data = Table_Data;
 

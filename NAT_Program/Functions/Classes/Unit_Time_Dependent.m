@@ -50,10 +50,10 @@ classdef Unit_Time_Dependent < Connection_Unit
 	
 	methods
 		
-		function obj = Unit_Time_Dependent(cn_point, P_Q_t)
+		function obj = Unit_Time_Dependent(cn_point, P_Q_active, P_Q_t)
 			%UNIT_TIME_DEPENDENT    Konstruktor der Klasse UNIT_TIME_DEPENDENT
 			
-			obj = obj@Connection_Unit(cn_point);
+			obj = obj@Connection_Unit(cn_point, P_Q_active);
 			obj.P_Q_t = P_Q_t;
 		end
 		
