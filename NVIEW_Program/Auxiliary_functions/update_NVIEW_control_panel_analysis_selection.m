@@ -62,6 +62,37 @@ Voltage_limit_selection_details = ['Voltage violation limits:','\n',...
 Current_limit_selection_details = ['Current limits:','\n',...
                                    '- Limit set to ', int2str(handles.NVIEW_Analysis_Selection.Ilim) ,' %% of thermal value'];
 
+
+List_field = handles.NVIEW_Control.Simulation_Description.Variants;
+% Branches selected
+cond_branches = 0;
+for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
+    
+    if sum(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i})) ~= size(handles.NVIEW_Analysis_Selection.SelectedBranches.(List_field{i}))
+        cond_branches = cond_branches + 1;
+    end
+end
+
+if cond_branches > 0
+    Branch_selection_details = 'Branches observed defined by user';
+else
+    Branch_selection_details = 'All branches observed';
+end
+
+% Nodes selected
+cond_nodes = 0;
+for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
+    
+    if sum(handles.NVIEW_Analysis_Selection.SelectedNodes.(List_field{i})) ~= size(handles.NVIEW_Analysis_Selection.SelectedNodes.(List_field{i}))
+        cond_nodes = cond_nodes + 1;
+    end
+end
+
+if cond_nodes > 0
+    Node_selection_details = 'Nodes observed defined by user';
+else
+    Node_selection_details = 'All nodes observed';
+end
 %------------------------------------------------------------------------------------------------
 
 % Update static text result details - NVIEW Content panel
@@ -70,7 +101,9 @@ text_output = [text_input,'User result selection:\n',...
     '- ', Scenario_selection_details, '\n',...
     '- ', Timeperiod_selection_details, ' \n',...
     Voltage_limit_selection_details,'\n',...
-    Current_limit_selection_details];
+    Current_limit_selection_details,'\n',...
+    '- ', Node_selection_details,'\n',...
+    '- ', Branch_selection_details];
 
 set(handles.static_text_result_details, 'String', ...
     sprintf(text_output));

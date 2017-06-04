@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2013
 
-% Last Modified by GUIDE v2.5 04-Dec-2013 14:42:30
+% Last Modified by GUIDE v2.5 21-Jan-2014 12:21:20
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -190,6 +190,22 @@ function check_pqnode_active_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    structure with handles and user data (see GUIDATA)
 
 check_pqnode_active_Callback_Add (hObject, handles);
+
+function check_pqnode_emob_present_Callback(~, ~, ~) %#ok<DEFNU>
+% hObject    handle to check_pqnode_emob_present (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Update the handles-structure:
+guidata(hObject, handles);
+
+function check_pqnode_pv_present_Callback(~, ~, ~) %#ok<DEFNU>
+% hObject    handle to check_pqnode_pv_present (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Update the handles-structure:
+guidata(hObject, handles);
 
 function check_simulation_start_after_data_extraction_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to check_simulation_start_after_data_extraction (see GCBO)
@@ -438,8 +454,6 @@ set(handles.popup_time_resolution, 'String', handles.System.time_resolutions(:,1
 % Worst-Cases:
 set(handles.popup_hh_worstcase, 'String', handles.System.wc_households(:,1));
 set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation(:,1));
-% Haushaltstypen:
-set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
 
 % Versuch, die Einstellungen des letzen Durchlaufs zu laden:
 try
@@ -511,7 +525,7 @@ function popup_pqnode_hh_typ_Callback(hObject, ~, handles) %#ok<DEFNU>
 
 popup_pqnode_hh_typ_Callback_Add (hObject, handles);
 
-function popup_pqnode_pv_typ_Callback(hObject, ~, handles)
+function popup_pqnode_pv_typ_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to popup_pqnode_pv_typ (see GCBO)
 % ~          reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -598,25 +612,7 @@ function push_network_load_allocation_reset_Callback(hObject, ~, handles) %#ok<D
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Tabelle mit Default-Werten befüllen:
-[handles.Current_Settings.Table_Network, ...
-    handles.Current_Settings.Data_Extract] = network_table_reset(handles);
-
-% Anzahl der jeweiligen Haushalte ermitteln:
-if ~isempty(handles.Current_Settings.Table_Network)
-	for i=1:size(handles.System.housholds,1)
-		handles.Current_Settings.Data_Extract.Households.(handles.System.housholds{i,1}).Number = ...
-			sum(strcmp(...
-			handles.System.housholds{i,1},...
-			handles.Current_Settings.Table_Network.Data(:,strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Haush. Typ'))));
-	end
-end
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+push_network_load_allocation_reset_Callback_Add(hObject, handles)
 
 function push_network_load_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik push_network_load (siehe GCBO)
@@ -630,14 +626,7 @@ function push_network_load_random_allocation_Callback(hObject, ~, handles) %#ok<
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% Zufällige Zuordnung der Haushalte zu den Anschlusspunkten treffen:
-handles = load_random_allocation(handles);
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
+ push_network_load_random_allocation_Callback_Add (hObject, handles)
 
 function push_network_open_Callback(hObject, ~, handles) %#ok<INUSL,DEFNU>
 % hObject    Link zur Grafik NAT_main_gui (siehe GCBO)

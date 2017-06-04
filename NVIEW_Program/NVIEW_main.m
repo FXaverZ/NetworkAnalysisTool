@@ -550,6 +550,51 @@ end
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
+function pushtool_setNodes_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_setNodes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Selected_List = listbox_selection_topology(handles,'Select nodes');
+
+if listbox_topology_ctc_bn(Selected_List,handles.NVIEW_Analysis_Selection.SelectedNodes)
+    % Set all to zero, followed by setting the selected elements to one
+    Field_List = handles.NVIEW_Control.Simulation_Description.Variants;
+    
+    for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
+        handles.NVIEW_Analysis_Selection.SelectedNodes.(Field_List{i}) = zeros(size(handles.NVIEW_Analysis_Selection.SelectedNodes.(Field_List{i})));
+        
+        handles.NVIEW_Analysis_Selection.SelectedNodes.(Field_List{i})(Selected_List.(Field_List{i})) = 1;
+    end
+        
+    handles = update_NVIEW_control_panel_analysis_selection(handles,[]);   
+    handles = clear_table_results(handles);     
+end
+guidata(hObject, handles);
+
+% --------------------------------------------------------------------
+function pushtool_setBranches_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to pushtool_setBranches (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Selected_List = listbox_selection_topology(handles,'Select branches');
+
+if listbox_topology_ctc_bn(Selected_List,handles.NVIEW_Analysis_Selection.SelectedBranches)
+    % Set all to zero, followed by setting the selected elements to one
+    Field_List = handles.NVIEW_Control.Simulation_Description.Variants;
+    
+    for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
+        handles.NVIEW_Analysis_Selection.SelectedBranches.(Field_List{i}) = zeros(size(handles.NVIEW_Analysis_Selection.SelectedBranches.(Field_List{i})));
+        
+        handles.NVIEW_Analysis_Selection.SelectedBranches.(Field_List{i})(Selected_List.(Field_List{i})) = 1;
+    end
+        
+    handles = update_NVIEW_control_panel_analysis_selection(handles,[]);   
+    handles = clear_table_results(handles);     
+end
+guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
 function menu_voltage_analysis_all_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_voltage_analysis_all (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB

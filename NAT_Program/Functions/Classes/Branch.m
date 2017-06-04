@@ -254,7 +254,7 @@ classdef Branch < handle
                 reactive_power = zeros(1,4);
                 apparent_power = zeros(1,4);                
                 
-                LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 1);
+                LFBranchResultLoad = obj(i).Branch_Obj.Result('ULFBranchResult', 2);
                 if ~isempty(LFBranchResultLoad)
                     
                     active_power(1,1) = LFBranchResultLoad.get('Item','P1');

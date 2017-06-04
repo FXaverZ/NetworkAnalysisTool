@@ -228,22 +228,33 @@ classdef SINCAL < handle
 		end
 		
 		function gui_select_element(obj, el_id)
-			if obj.Valid_Document
-				obj.Document.SelectNetworkObject(...
-					obj.Constants.Application.AutoSelResetAll, 0);
-				obj.Document.SelectNetworkObject(...
-					obj.Constants.Application.AutoSelElement, ...
-					el_id);
-				obj.Document.SelectNetworkObject(...
-					obj.Constants.Application.AutoSelUpdateAll, 0);
+			try
+				if obj.Valid_Document
+					obj.Document.SelectNetworkObject(...
+						obj.Constants.Application.AutoSelResetAll, 0);
+					obj.Document.SelectNetworkObject(...
+						obj.Constants.Application.AutoSelElement, ...
+						el_id);
+					obj.Document.SelectNetworkObject(...
+						obj.Constants.Application.AutoSelUpdateAll, 0);
+				end
+			catch ME
+				disp('Error during calling gui_select_element');
+				disp(ME.Message);
+				obj.Valid_Document = 0;
 			end
 		end
 		
 		function close_file(obj)
-			if obj.Valid_Document
-				obj.Document = [];
-				obj.Application.CloseDocument(obj.Database.SINfilename);
+			try
+				if obj.Valid_Document
+					obj.Document = [];
+					obj.Application.CloseDocument(obj.Database.SINfilename);
+					obj.Valid_Document = false;
+				end
+			catch ME
 				obj.Valid_Document = false;
+				obj.Document = [];
 			end
 		end
 		

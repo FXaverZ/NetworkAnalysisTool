@@ -112,7 +112,12 @@ for i = 1 : numel(Grid_List)
             for d = 1 : size(bus_voltages,2) % dataset
                 for t = 1 : size(bus_voltages,3) % timepoint
                     voltage_statistics = [];
-                    voltage_statistics = squeeze(bus_voltages(s,d,t,:,:))./ repmat(bus_info(:,3),1,3);
+                    if size(bus_voltages,4) ~= 1
+                        voltage_statistics = squeeze(bus_voltages(s,d,t,:,:))./ repmat(bus_info(:,3),1,3);
+                    else
+                        voltage_statistics = squeeze(bus_voltages(s,d,t,:,:))'./ repmat(bus_info(:,3),1,3);
+                    end
+                    
                     bus_deviations(s,counter + (1:size(voltage_statistics,1)),:) = voltage_statistics;
                     counter = max(counter + (1:size(voltage_statistics,1)));
                 end
@@ -198,8 +203,13 @@ for i = 1 : numel(Grid_List)
         for s = 1 : size(branch_values,1) % scenario
             for d = 1 : size(branch_currents,2)
                 for t = 1 : size(branch_currents,3)  
-                    branch_loading_analysis(s,d,t) = ...
+                    if size(branch_limits,1) ~= 1
+                        branch_loading_analysis(s,d,t) = ...
                         nanmean(nanmean( 100* squeeze(branch_currents(s,d,t,:,:)) ./ repmat(branch_limits,1,3),2));
+                    else
+                        branch_loading_analysis(s,d,t) = ...
+                        nanmean(nanmean( 100* squeeze(branch_currents(s,d,t,:,:))' ./ repmat(branch_limits,1,3),2));
+                    end
                 end
             end
         end

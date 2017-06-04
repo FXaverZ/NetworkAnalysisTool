@@ -153,12 +153,13 @@ for i=1:numel(File_Sel)
 						else
 							grd_lst{end+1,idx,1} = grds{k}; %#ok<AGROW>
 						end
-						grd_lst{end,  idx,2} = valid_results{File_Sel(i)}; %#ok<AGROW>
+						grd_lst{end,idx,2} = valid_results{File_Sel(i)}; %#ok<AGROW>
 					end
 				end
 			else
 				% New scenario, add it:
-				Simulation.Scenarios.(['Sc_',num2str(Simulation.Scenarios.Number+j)])=...
+				Simulation.Scenarios.Number = Simulation.Scenarios.Number + 1;
+				Simulation.Scenarios.(['Sc_',num2str(Simulation.Scenarios.Number)])=...
 					sim.Scenarios.(['Sc_',num2str(j)]);
 				% add the scenario name to names field:
 				Simulation.Scenarios.Names{end+1} = sim.Scenarios.Names{j};
@@ -176,12 +177,20 @@ for i=1:numel(File_Sel)
 			end
 		end
 	end
-	% adapt the number of available scenarios:
-	Simulation.Scenarios.Number = sim.Scenarios.Number;
 end
 
-% Save the generated Grid-List:
-Grid_Allocation = grd_lst;
+% Sort the scnearios according to their names:
+
+Grid_Allocation = cell(size(grd_lst));
+scen_old = Simulation.Scenarios;
+scen_new.Number = scen_old.Number;
+[scen_new.Names,IX] = sort(scen_old.Names);
+for i=1:scen_new.Number
+	scen_new.(['Sc_',num2str(i)]) = scen_old.(['Sc_',num2str(IX(i))]);
+	Grid_Allocation(:,i,:) = grd_lst(:,IX(i),:);
+end
+scen_new.Data_avaliable = 1;
+Simulation.Scenarios = scen_new;
 
 if Simulation.Scenarios.Number > 1
 	% Ask user, which scenarios should be merged:
@@ -234,7 +243,7 @@ grd_lst = reshape(grd_lst,[],Simulation.Scenarios.Number,2);
 % final list with the unique grids:
 Grid_List = unique(grd_lst(:,:,1))';
 if isempty(Grid_List)
-	errordlg({['No matching grid simulation found all scenario data!',...
+	errordlg({['No matching grid simulation found in all scenario data!',...
 		' Data can''t be merged!'];'';...
 		'At least one grid should be simulated in every scenario'},title_str);
 	return;
@@ -287,7 +296,8 @@ for i=1:Simulation.Scenarios.Number
 	for j=1:numel(files_to_load)
 		res = load([Main_Path,filesep,files_to_load{j},' - ',Simulation.Scenarios.(['Sc_',num2str(i)]).Filename,'.mat']);
 		for k=1:numel(Grid_List)
-			cur_grd = Grid_List{k};
+			% read in current gridname (without fileending)
+			cur_grd = Grid_List{k}(1:end-4);
 			if k==1
 				Load_Infeed_Data = res.Load_Infeed_Data; %#ok<NASGU>
 			end

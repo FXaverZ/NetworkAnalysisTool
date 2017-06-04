@@ -57,6 +57,13 @@ for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_datasets
     el_mobility = [];
     
     households = data.Load_Infeed_Data.(['Set_', int2str(i)]).Households.(dt);
+	% CHANGELOG 1.1, FZ Start
+	% If there is no households-data, check if lv-grid data is present. If
+	% so, use this data for further investigations:
+	if isempty(households) && isfield(data.Load_Infeed_Data.(['Set_', int2str(i)]),'LV_Grid_Input') 
+		 households = data.Load_Infeed_Data.(['Set_', int2str(i)]).LV_Grid_Input.(dt);
+	end
+	% CHANGELOG 1.1, FZ End
     solar = data.Load_Infeed_Data.(['Set_', int2str(i)]).Solar.(dt);
     el_mobility = data.Load_Infeed_Data.(['Set_', int2str(i)]).El_Mobility.(dt);
     

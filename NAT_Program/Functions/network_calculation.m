@@ -71,49 +71,68 @@ for i=1:numel(Grid_List)
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Max;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Max;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Max;
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_Max;
 		end
 		if handles.Current_Settings.Data_Extract.get_Min_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Min;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Min;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Min;
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_Min;
 		end
 		if handles.Current_Settings.Data_Extract.get_Sample_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Sample;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Sample;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Sample;
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_Sample;
 		end
 		if handles.Current_Settings.Data_Extract.get_Mean_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_Mean;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_Mean;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_Mean;
-% 			DEBUG: linear increasing Load, only active Power
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_Mean;
+% 			% DEBUG: linear increasing Load, only active Power
 % 			Load_Data = zeros(size(Load_Data));
 % 			Load_Data(:,1:2:end) =...
 % 				repmat((500:(3000-500)/(size(Load_Data,1)):3000-1),size(Load_Data,2)/2,1)';
-% 			
+% 			Load_Data(:,1:6:end) = Load_Data(:,1:6:end) * 0.2;
+% 			Load_Data(:,3:6:end) = Load_Data(:,1:6:end) * 1;
+% 			Load_Data(:,5:6:end) = Load_Data(:,1:6:end) * 0.3;
+% 			Sola_Data = [];
 % 			Sola_Data = zeros(size(Sola_Data));
 % % 			Sola_Data(:,1:2:end)=...
 % % 				repmat((0:2000/size(Sola_Data,1):2000-1),size(Sola_Data,2)/2,1)';
 % 			
 % 			Elmo_Data = zeros(size(Sola_Data));
+%             Elmo_Data = [];
 		end
 		if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_05P_Quantil;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_05P_Quantil;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_05P_Quantil;
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_05P_Quantil;
 		end
 		if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
 			Load_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Data_95P_Quantil;
 			Sola_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Data_95P_Quantil;
 			Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Data_95P_Quantil;
+			LVGr_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Data_95P_Quantil;
 		end
 		
-		[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
-		
 		% Die Daten an SINCAL anpassen (Leistungen in MW und pos. bei Verbrauch):
-		Load_Data = Load_Data/1e6;
+		if ~isempty(Load_Data)
+			[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
+			Load_Data = Load_Data/1e6;
+		elseif ~isempty(LVGr_Data)
+			Load_Data = LVGr_Data/1e6;
+		else
+			errordlg('Not enough input-Data for simulation!');
+			fprintf('\nNo load data found! Abort simulation...\n')
+			return;
+		end
+		clear('LVGr_Data');
 		Elmo_Data = Elmo_Data/1e6;
 		Sola_Data = Sola_Data/-1e6; %Einspeiser negativ!
+		
 		% Wieviele Zeitpunkte werden berechnet?
 		handles.Current_Settings.Simulation.Timepoints = size(Load_Data,1);
 		
@@ -141,20 +160,54 @@ for i=1:numel(Grid_List)
 		% Lasten ins Netz einfügen:
 		%--------------------------------------------------------------------------------
 		d.Grid.(cg).Load.Loads = Unit_Time_Dependent.empty(0,numel(d.Grid.(cg).P_Q_Node.ids));
-		hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
-		idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
-		for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
-			% Welcher Haushaltstyp soll angeschlossen werden?
-			hh_typ = handles.Current_Settings.Table_Network.Data{k,idx_hh};
-			idx = find(strcmp(hh_typ,d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content));
-			idx = idx(hhs.(hh_typ).Number)-1;
-			hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
-			% Last-Instanz erzeugen:
-			obj = Unit_Time_Dependent(...
-				d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
-				Load_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
-			% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
-			d.Grid.(cg).Load.Loads(k) = obj;
+		if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+			
+			hhs = d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
+			idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
+			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
+				% Welcher Haushaltstyp soll angeschlossen werden?
+				hh_typ = handles.Current_Settings.Table_Network.Data{k,idx_hh};
+				idx = find(strcmp(hh_typ,d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content));
+				idx = idx(hhs.(hh_typ).Number)-1;
+				hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+				% Last-Instanz erzeugen:
+				obj = Unit_Time_Dependent(...
+					d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
+					Load_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
+				% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
+				d.Grid.(cg).Load.Loads(k) = obj;
+			end
+			
+		elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
+			
+			% update the grid-numbers:
+			idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+			data = handles.Current_Settings.Table_Network.Data(:,idx_lv);
+			LV_Grids_List = handles.Current_Settings.Data_Extract.LV_Grids_List;
+			LV_Grids_Number = zeros(numel(LV_Grids_List),1);
+			for k=1:numel(LV_Grids_List)
+				LV_Grids_Number(k) = sum(strcmp(data,LV_Grids_List{k}));
+			end
+
+			for k=1:numel(d.Grid.(cg).P_Q_Node.ids)
+				% Which lv grid should be connected
+				lv_grd = handles.Current_Settings.Table_Network.Data{k,idx_lv};
+				% find theses grids in the content list
+				idx = find(strcmp(lv_grd,d.Load_Infeed_Data.(['Set_',num2str(j)]).LV_Grid_Input.Content));
+				% how many grids are left?
+				num_grds = LV_Grids_Number(strcmp(lv_grd,LV_Grids_List));
+				% select the last one of these grids:
+				idx = idx(num_grds);
+				% reduce the number of these grids by one (so the previous grid will be
+				% used in the next iteration...)
+				LV_Grids_Number(strcmp(lv_grd,LV_Grids_List)) = num_grds - 1;
+				% create the load-object
+				obj = Unit_Time_Dependent(...
+					d.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
+					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6));       % Lastgang des Last
+				% 	disp([Grid.P_Q_Node.Points(i).P_Q_Name,' --> ',hh_typ]);
+				d.Grid.(cg).Load.Loads(k) = obj;
+			end
 		end
 		%----------------------------------------------------------------------------
 		% Elektrofahrzeuge einfügen:

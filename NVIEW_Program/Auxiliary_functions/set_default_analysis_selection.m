@@ -18,4 +18,16 @@ handles.NVIEW_Analysis_Selection.SelectedTime_Id = strrep(int2str(SelectedTime_I
 handles.NVIEW_Analysis_Selection.Umin = 90;  % 0.9 pu
 handles.NVIEW_Analysis_Selection.Umax = 110; % 1.1 pu
 handles.NVIEW_Analysis_Selection.Ilim = 100; % 100 %
+
+
+% Set all branches and nodes for observation
+for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_Variants
+    handles.NVIEW_Analysis_Selection.SelectedNodes.( handles.NVIEW_Control.Simulation_Description.Variants{i})(:,1) = ...
+        ones(size(handles.NVIEW_Results.( handles.NVIEW_Control.Simulation_Description.Variants{i}).bus,1),1);
+
+    handles.NVIEW_Analysis_Selection.SelectedBranches.( handles.NVIEW_Control.Simulation_Description.Variants{i})(:,1) = ...
+        ones(size(handles.NVIEW_Results.( handles.NVIEW_Control.Simulation_Description.Variants{i}).branch,1),1);
+end
+
+
 end

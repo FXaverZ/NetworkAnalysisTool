@@ -15,7 +15,7 @@ System.version = '4.3';
 
 % maximum number of a whole dataset, if this number is exceeded, partial
 % files are created: 
-System.number_max_datasets = 7;
+System.number_max_datasets = 500;
 
 % reset of RPC-server (SINCAL-connection) after this number of profiles (due to problems
 % with a permanently open connection with the RPC-Server. After the this number of
@@ -51,6 +51,9 @@ System.housholds = {... % Definition der Haushaltskategorien:
 % 	'flat_2',  'Wohnung - 2 Bewohner'         ;...
 % 	'flat_3',  'Wohnung - 3 Bewohner'         ;...
 % 	'fla_4p',  'Wohnung - 4 und mehr Bewohner';...
+	};
+System.lv_grids = {...
+	'lv_def', 'No LV-Grid data';...
 	};
 
 % mögliche Zeitauflösungen:
@@ -166,7 +169,8 @@ System.default_scenario = Scenario;
 % Settings for LV-Grids
 System.table_settings.lv.ColumnName = {'Names', 'Active', 'Housh.type', 'PV-Plant', 'El. Mob.'};
 % 'Names' = Name of the PQ-Node (Connection Point)
-% 'Active' = is this node active (if not
+% 'Active' = is this node active (if not, no load change is performed during simulation)
+System.table_settings.mv.ColumnName = {'Names', 'Active', 'LV-Grid', 'PV?', 'El. Mob?'};
 System.table_settings.lv.ColumnFormat = {...
 	'char', ...
 	'logical', ...
@@ -176,6 +180,18 @@ System.table_settings.lv.ColumnFormat = {...
 System.table_settings.lv.ColumnEditable = [false, true, true, true, true];
 % Content of the additional data array
 System.table_settings.lv.Additional_Data_Content = {'PV_Plant_Name', 'Wind_Plant_Name'};
+System.table_settings.lv.ColumnWidth = 'auto';
+
+% Settings for MV-Grids
+System.table_settings.mv.ColumnName = {'Names', 'Active', 'LV-Grid', 'PV?', 'El. Mob?'};
+System.table_settings.mv.ColumnFormat = {...
+	'char', ...
+	'logical', ...
+	System.lv_grids(:,2)', ...
+    'logical',...
+    'logical'};
+System.table_settings.mv.ColumnEditable = [false, true, true, false, false];
+System.table_settings.mv.ColumnWidth = {'auto', 40, 150, 60, 60};
 
 % Systemeinstellungen speichern
 handles.System = System; 
@@ -250,6 +266,9 @@ Current_Settings.Data_Extract.Worstcase_Generation = 1;
 % Erzeugungsanlagen:
 Current_Settings.Data_Extract.Solar.Selectable = System.sola.Selectable;
 Current_Settings.Data_Extract.Wind.Selectable = System.wind.Selectable;
+Current_Settings.Data_Extract.LV_Grids_List = {};
+Current_Settings.Data_Extract.LV_Grids_Number = [];
+Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
 
 Current_Settings.Grid.Type = 'LV';
 
@@ -263,7 +282,7 @@ Current_Settings.Table_Network = [];
 
 % Definieren der Simulations-Parameter:
 Simulation.Parameters = {...
-	'Calculation_method', 'LF_RST',...   % Unsymmetrischer Lastfluss (RST)
+	'Calculation_method', 'LF_USYM',...   % Unsymmetrischer Lastfluss (RST)
 	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
 	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
 	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 

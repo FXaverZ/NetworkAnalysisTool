@@ -98,57 +98,89 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 	row = handles.Current_Settings.Table_Network.Selected_Row;
 	% Where are the names of the PQ-Nodes:
 	idx_na = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Names');
-	% Where is the additional data?
-	idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
-	% Where are the households?
-	idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
 	% Where is the "active"-Flag Column:
 	idx_ac = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Active');
-	
-	% Get the PV-Plant Information:
-	plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{idx_pv_add,1};
-	sel_pv = find(strcmp(plant_pv_name,...
-		handles.Current_Settings.Data_Extract.Solar.Selectable(:,2)));
-	if isempty(sel_pv)
-		sel_pv = 1;
-	end
 	
 	% Update the gui elements (activate them + show the information of the currently
 	% selected PQ-node):
 	set(handles.uipanel_detail_component,...
 		'Title', ['Details for ',...
 		handles.Current_Settings.Table_Network.Data{row,idx_na},':']);
-	set(handles.text_pqnode_hh_typ, 'Visible', 'on');
-	set(handles.popup_pqnode_hh_typ,...
-		'Visible', 'on',...
-		'Value', find(strcmp(...
-		    handles.Current_Settings.Table_Network.Data{row,idx_hh},...
-		    handles.System.housholds(:,1))));
-	set(handles.text_pqnode_pv_typ, 'Visible', 'on');
-	set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
-	set(handles.edit_pqnode_pv_installed_power, 'Visible', 'on');
-	set(handles.text_pqnode_pv_installed_power_unit, 'Visible', 'on');
-	set(handles.push_pqnode_pv_parameters, 'Visible', 'on');
-	if sel_pv > 1
-		set(handles.edit_pqnode_pv_installed_power, 'Enable', 'on',...
-			'String', ...
-			handles.Current_Settings.Data_Extract.Solar.Plants.(plant_pv_name).Power_Installed);
-		set(handles.push_pqnode_pv_parameters, 'Enable', 'on');
-	else
-		set(handles.push_pqnode_pv_parameters, 'Enable', 'off');
-		set(handles.edit_pqnode_pv_installed_power, 'Enable', 'off');
-	end
-	set(handles.popup_pqnode_wi_typ, 'Visible', 'on');
-	set(handles.text_pqnode_wi_typ, 'Visible', 'on');
-	set(handles.popup_pqnode_wi_typ, 'Visible', 'on');
-	set(handles.edit_pqnode_wi_installed_power, 'Visible', 'on');
-	set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'on');
-	set(handles.push_pqnode_wi_parameters, 'Visible', 'on');
 	set(handles.check_pqnode_active, ...
-		'Visible', 'on',...
-		'Enable',  'on',...
-		'Value',   handles.Current_Settings.Table_Network.Data{row,idx_ac});
+			'Visible', 'on',...
+			'Enable',  'on',...
+			'Value',   handles.Current_Settings.Table_Network.Data{row,idx_ac});
+	set(handles.text_pqnode_hh_typ, 'Visible', 'on');
+	set(handles.popup_pqnode_hh_typ,'Visible', 'on');
+	set(handles.text_pqnode_wi_typ, 'Visible', 'on');
+	set(handles.text_pqnode_pv_typ, 'Visible', 'on');
 	
+	if strcmp(handles.Current_Settings.Grid.Type,'LV')
+		% Where is the additional data?
+		idx_pv_add = strcmp(handles.Current_Settings.Table_Network.Additional_Data_Content, 'PV_Plant_Name');
+		% Where are the households?
+		idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
+		
+		% Get the PV-Plant Information:
+		plant_pv_name = handles.Current_Settings.Table_Network.Additional_Data{idx_pv_add,1};
+		sel_pv = find(strcmp(plant_pv_name,...
+			handles.Current_Settings.Data_Extract.Solar.Selectable(:,2)));
+		if isempty(sel_pv)
+			sel_pv = 1;
+		end
+		
+		set(handles.text_pqnode_hh_typ, 'String', 'Hh. Type');
+		set(handles.popup_pqnode_hh_typ, 'String', handles.System.housholds(:,1));
+		set(handles.popup_pqnode_hh_typ,...
+			'Value', find(strcmp(...
+			handles.Current_Settings.Table_Network.Data{row,idx_hh},...
+			handles.System.housholds(:,1))));
+		set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
+		set(handles.text_pqnode_pv_installed_power_unit, 'Visible', 'on');
+		set(handles.edit_pqnode_pv_installed_power, 'Visible', 'on');
+
+		set(handles.push_pqnode_pv_parameters, 'Visible', 'on');
+		if sel_pv > 1
+			set(handles.edit_pqnode_pv_installed_power, 'Enable', 'on',...
+				'String', ...
+				handles.Current_Settings.Data_Extract.Solar.Plants.(plant_pv_name).Power_Installed);
+			set(handles.push_pqnode_pv_parameters, 'Enable', 'on');
+		else
+			set(handles.push_pqnode_pv_parameters, 'Enable', 'off');
+			set(handles.edit_pqnode_pv_installed_power, 'Enable', 'off');
+		end
+		set(handles.popup_pqnode_wi_typ, 'Visible', 'on');
+		set(handles.text_pqnode_pv_typ, 'String', 'PV Gen.');
+		set(handles.popup_pqnode_wi_typ, 'Visible', 'on');
+		set(handles.edit_pqnode_wi_installed_power, 'Visible', 'on');
+		set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'on');
+		set(handles.push_pqnode_wi_parameters, 'Visible', 'on');
+		set(handles.text_pqnode_wi_typ, 'String', 'Wind Gen.');
+		
+	elseif strcmp(handles.Current_Settings.Grid.Type,'MV')
+		% Where are the LV-grids?
+		idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+		
+		set(handles.text_pqnode_hh_typ, 'String', 'LV Grid');
+		set(handles.text_pqnode_pv_typ, 'String', 'PV?');
+		set(handles.text_pqnode_wi_typ, 'String', 'El. Mob.?');
+		set(handles.popup_pqnode_hh_typ, 'String', handles.Current_Settings.Table_Network.ColumnFormat{idx_lv});
+		set(handles.popup_pqnode_hh_typ,...
+			'Value', find(strcmp(...
+			handles.Current_Settings.Table_Network.Data{row,idx_lv},...
+			handles.Current_Settings.Table_Network.ColumnFormat{idx_lv})));
+		set(handles.check_pqnode_emob_present, 'Visible', 'on');
+		set(handles.check_pqnode_pv_present, 'Visible', 'on');
+		
+		set(handles.popup_pqnode_pv_typ, 'Visible', 'off');
+		set(handles.edit_pqnode_pv_installed_power, 'Visible', 'off');
+		set(handles.text_pqnode_pv_installed_power_unit, 'Visible', 'off');
+		set(handles.push_pqnode_pv_parameters, 'Visible', 'off');
+		set(handles.popup_pqnode_wi_typ, 'Visible', 'off');
+		set(handles.edit_pqnode_wi_installed_power, 'Visible', 'off');
+		set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'off');
+		set(handles.push_pqnode_wi_parameters, 'Visible', 'off');
+	end
 else
 	set(handles.check_pqnode_active, 'Visible', 'off');
 	set(handles.popup_pqnode_hh_typ, 'Visible', 'off');
@@ -166,6 +198,8 @@ else
 	set(handles.edit_pqnode_wi_installed_power, 'Visible', 'off');
 	set(handles.text_pqnode_wi_installed_power_unit, 'Visible', 'off');
 	set(handles.push_pqnode_wi_parameters, 'Visible', 'off');
+	set(handles.check_pqnode_emob_present, 'Visible', 'off');
+	set(handles.check_pqnode_pv_present, 'Visible', 'off');
 end
 
 
@@ -181,14 +215,19 @@ if ~isempty(handles.Current_Settings.Files.Grid.Name)
 		end
 	end
 	set(handles.static_text_network_path_name, 'String', str);
+	if strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
+			isempty(handles.Current_Settings.Data_Extract.LV_Grids_List)
+		set(handles.push_network_load_random_allocation, 'Enable','off');
+	else
+		set(handles.push_network_load_random_allocation, 'Enable','on');
+
+	end
 	set(handles.push_network_load_allocation_reset, 'Enable','on');
-	set(handles.push_network_load_random_allocation, 'Enable','on');
 	set(handles.push_load_data_get,'Enable','on');
 	set(handles.check_simulation_start_after_data_extraction,'Enable','on');
 else
 	set(handles.static_text_network_path_name, 'String', 'No grid loaded!');
 	set(handles.uipanel_detail_component,'Title','No grid loaded!');
-	set(handles.push_network_calculation_start, 'Enable','off');
 	set(handles.push_network_load_allocation_reset, 'Enable','off');
 	set(handles.push_network_load_random_allocation, 'Enable','off');
 	set(handles.push_load_data_get,'Enable','off');
@@ -203,6 +242,7 @@ if ~isempty(handles.Current_Settings.Table_Network)
 		'ColumnName', ntw.ColumnName,...
 		'ColumnFormat', ntw.ColumnFormat,...
 		'ColumnEditable', ntw.ColumnEditable,...
+		'ColumnWidth', ntw.ColumnWidth,...
 		'RowName', ntw.RowName);
 	set(handles.push_load_data_get,'Enable','on');
 	set(handles.check_simulation_start_after_data_extraction,'Enable','on');
@@ -215,22 +255,22 @@ end
 if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 	% activate simulation-button when
 	% - in the handles-structure a field named 'sin' is available (that means, that a
-	%   communication to SINCAL is there) 
+	%   communication to SINCAL is there)
 	% and when
-	%   + no scenarios should be simulated, one data-set is there 
+	%   + no scenarios should be simulated, one data-set is there
 	%   or
 	%   + when scenarios should be simulated, the data available-flag is set
 	if isfield(handles, 'sin') && ...
-		(...
+			(...
 			( ~handles.Current_Settings.Simulation.Use_Scenarios && ...
-			  (isfield(handles.NAT_Data.Load_Infeed_Data, 'Households') || ...
-			   isfield(handles.NAT_Data.Load_Infeed_Data.Set_1, 'Households'))...
+			(isfield(handles.NAT_Data.Load_Infeed_Data, 'Households') || ...
+			isfield(handles.NAT_Data.Load_Infeed_Data.Set_1, 'Households'))...
 			)...
 			|| ...
 			( handles.Current_Settings.Simulation.Use_Scenarios && ...
-			  handles.Current_Settings.Simulation.Scenarios.Data_avaliable...
+			handles.Current_Settings.Simulation.Scenarios.Data_avaliable...
 			)...
-		)
+			)
 		set(handles.push_network_calculation_start, 'Enable','on');
 	else
 		set(handles.push_network_calculation_start, 'Enable','off');
@@ -253,7 +293,11 @@ end
 
 set(handles.check_use_scenarios, 'Value', handles.Current_Settings.Simulation.Use_Scenarios);
 if handles.Current_Settings.Simulation.Use_Scenarios
-	set(handles.push_load_data_get,'String', 'Load Scenariodata...');
+	if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+		set(handles.push_load_data_get,'String', 'Resume loading...');
+	else
+		set(handles.push_load_data_get,'String', 'Load Scenariodata...');
+	end
 	set(handles.push_network_select_scenario,'Enable', 'on');
 	if isempty(handles.Current_Settings.Simulation.Scenarios_Selection);
 		set(handles.edit_simulation_number_scenarios,'String',...
@@ -263,7 +307,11 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 			num2str(sum(handles.Current_Settings.Simulation.Scenarios_Selection>=1)));
 	end
 else
-	set(handles.push_load_data_get,'String', 'Load Loaddata...');
+	if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+		set(handles.push_load_data_get,'String', 'Resume loading...');
+	else
+		set(handles.push_load_data_get,'String', 'Load Loaddata...');
+	end
 	set(handles.edit_simulation_number_scenarios,'String','Singlesim.');
 	set(handles.push_network_select_scenario,'Enable', 'off');
 end

@@ -6,7 +6,26 @@ set(handles.push_load_data_get, 'Enable', 'off');
 set(handles.push_cancel, 'Enable', 'on');
 pause(.01);
 % Ask User, from which Source the Data should be derived:
-if handles.Current_Settings.Load_Database.valid
+if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+	answer = questdlg({...
+		'Resume the started input data generation?',...
+		;'';},...
+		'Specifying data source',...
+		'Yes', 'Abort', 'Yes');
+	switch answer
+		case 'Yes'
+			answer = 'Simulationresults_resume';
+		otherwise
+			handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
+			% Refresh the GUI:
+			handles = refresh_display_NAT_main_gui(handles);
+			set(handles.push_cancel, 'Enable', 'off');
+			set(handles.push_load_data_get, 'Enable', 'on');
+			% Update the handles-structure:
+			guidata(hObject, handles);
+			return;
+	end		
+elseif handles.Current_Settings.Load_Database.valid && strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	answer = questdlg({[...
 		'Should the data be loaded from the load- and infeed-database, ',...
 		'should it be newly created out of simulation results (MV input out of LV ',...
@@ -16,15 +35,26 @@ if handles.Current_Settings.Load_Database.valid
 		'Please specify desired data source:'},...
 		'Specifying data source',...
 		'Load- and Infeed-Database', 'Simulationresults', 'Orginal Data', 'Simulationresults');
-else
+elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	answer = questdlg({[...
 		'Should the data be newly created out of simulation results (MV input out of LV ',...
-		'input) or should the orginal input data from a previous simulation be loaded?'...
+		'results) or should the orginal input data from a previous simulation be loaded?'...
 		];...
 		'';...
 		'Please specify desired data source:'},...
 		'Specifying data source',...
 		'Simulationresults', 'Orginal Data', 'Simulationresults');
+elseif handles.Current_Settings.Load_Database.valid
+	answer = questdlg({[...
+		'Should the data be loaded from the load- and infeed-database, ',...
+		'or should the orginal input data from a previous simulation be loaded?'...
+		];...
+		'';...
+		'Please specify desired data source:'},...
+		'Specifying data source',...
+		'Load- and Infeed-Database', 'Orginal Data', 'Load- and Infeed-Database');
+else
+	answer = 'Orginal Data';
 end
 % According to this, use different function for input-data creation:
 switch answer
@@ -61,15 +91,14 @@ switch answer
 			set(handles.push_load_data_get, 'Enable', 'on');
 			% update the handles-structure:
 			guidata(hObject, handles);
-			if ~isequal(file.Path,0)
-				% If there's a valid path, save this for later (programm
-				% will look here first...) :
-				handles.Current_Settings.Files.Load.Result.Path = file.Path;
-				% Update the handles-structure:
-				guidata(hObject, handles);
-			end
 			% leave the function:
 			return;
+		elseif ~isequal(file.Path,0)
+			% If there's a valid path, save this for later (programm
+			% will look here first...) :
+			handles.Current_Settings.Files.Load.Result.Path = file.Path;
+			% Update the handles-structure:
+			guidata(hObject, handles);
 		end
 		% a valid file was selected, get the needed information:
 		[~, file.Name, file.Exte] = fileparts(file.Name);
@@ -127,16 +156,43 @@ switch answer
 		handles.Current_Settings.Files.Load.Result = file;
 		[handles, error] = get_input_from_results(handles);
 		if ~error
-			if handles.Current_Settings.Start_Simulation_after_Extraction
-				% Refresh the GUI:
-				handles = refresh_display_NAT_main_gui(handles);
-				% Update the handles-structure:
-				guidata(hObject, handles);
-				% start calculation:
-				push_network_calculation_start_Callback_Add (hObject, handles);
-				return;
+			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+				warndlg(['Gridlist successfully loaded, please specify grid allocation ',...
+					'and resume input data generation via button "Load Sceanriodata"!'],...
+					'Laden der Input-Daten...');
 			else
-				helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+				if handles.Current_Settings.Start_Simulation_after_Extraction
+					% Refresh the GUI:
+					handles = refresh_display_NAT_main_gui(handles);
+					% Update the handles-structure:
+					guidata(hObject, handles);
+					% start calculation:
+					push_network_calculation_start_Callback_Add (hObject, handles);
+					return;
+				else
+					helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+				end
+			end
+		end
+	case 'Simulationresults_resume'
+		[handles, error] = get_input_from_results(handles);
+		if ~error
+			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+				warndlg(['Gridlist successfully loaded, please specify grid allocation ',...
+					'and resume input data generation via button "Resume loading..."!'],...
+					'Laden der Input-Daten...');
+			else
+				if handles.Current_Settings.Start_Simulation_after_Extraction
+					% Refresh the GUI:
+					handles = refresh_display_NAT_main_gui(handles);
+					% Update the handles-structure:
+					guidata(hObject, handles);
+					% start calculation:
+					push_network_calculation_start_Callback_Add (hObject, handles);
+					return;
+				else
+					helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+				end
 			end
 		end
 	case 'Orginal Data'

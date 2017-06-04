@@ -6,13 +6,18 @@ sel = get(hObject,'Value');
 str = get(hObject,'String');
 str = str{sel};
 
-% Where are the households in the network table?
-idx_hh = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
+if strcmp(handles.Current_Settings.Grid.Type, 'LV')
+	% Where are the households in the network table?
+	idx = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'Housh.type');
+else
+	% Where are the LV-Grids?
+	idx = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
+end
 % Which row is currently selected:
 row = handles.Current_Settings.Table_Network.Selected_Row;
 
 % Adapt the selection in the network table:
-handles.Current_Settings.Table_Network.Data{row,idx_hh} = str;
+handles.Current_Settings.Table_Network.Data{row,idx} = str;
 
 % update GUI:
 handles = refresh_display_NAT_main_gui(handles);

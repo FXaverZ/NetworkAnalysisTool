@@ -70,6 +70,10 @@ for i = 1:settin.El_Mobility.Number
 	% gezogenen Datensatz aus der Auswahlmöglickeit entfernen (damit er
 	% nicht mehr gezogen werden kann):
 	pool(fortu) = [];
+	% if pool has ran out of profiles, reset it...
+	if isempty(pool)
+		pool = 1:num_data_sets;
+	end
 end
 
 % Daten auslesen und aufbereiten (Ausgangsdaten in kW!):

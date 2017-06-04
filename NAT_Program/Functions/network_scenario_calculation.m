@@ -58,6 +58,12 @@ if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 	scenar = scen_new;
 end
 
+% write_scenario_log(handles,'close');
+% Save the current Settings of the tool:
+Current_Settings = handles.Current_Settings;
+Current_Settings.Simulation.Scenarios = scenar;
+save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
+
 fprintf('\nCalculation of the scenarios...\n');
 for i=1:scenar.Number;
 	% get the current scenario:
@@ -116,7 +122,7 @@ for i=1:scenar.Number;
 	
 end
 % write_scenario_log(handles,'close');
-% Save the current Settings of the tool:
+% update the saved current settings of the tool:
 Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');

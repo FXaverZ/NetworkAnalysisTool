@@ -33,11 +33,15 @@ set_count = 0;
 for i = 1:num_set
 	% Zufällige Zuordnung treffen:
 	handles = load_random_allocation(handles);
+	
 	% Daten auslesen und dem Input-Datensatz hinzufügen:
 	set_count = set_count + 1;
 	get_data_households(handles, set_count);
 	get_data_solar(handles, set_count);
 	get_data_elmob(handles, set_count);
+	% create dummy values of not needed input data
+	get_empty_data_lvgrids(handles, set_count);
+	
 	if num_set > 1
 		% Infos to the console:
 		fprintf(['\t\tSatz ',num2str(i),' von ',num2str(num_set),' erledigt... ']);
