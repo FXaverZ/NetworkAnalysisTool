@@ -4,7 +4,7 @@ classdef MESSAGE_text_handler < handle
 
 	% Version:                 1.0
 	% Created by:              Franz Zeilinger - 01.10.2015
-	% Last change by:          
+	% Last change by:          Franz Zeilinger - 07.12.2016
 
 	properties
 		Current_Text_to_Display = {}
@@ -83,12 +83,41 @@ classdef MESSAGE_text_handler < handle
 			end
 		end
 		
-		function obj = add_line(obj, add_string)
+		function obj = add_lines(obj, add_cell)
+			if ~iscell(add_cell)
+				exception = MException('MESSAGEtestHandler:WrongInput',...
+					'Only cells can be proczessed!');
+				throw(exception);
+			end
+			if ~ndims(add_cell) == 2
+				exception = MException('MESSAGEtestHandler:WrongInput',...
+					'Only two dimensional cells can be processed!');
+				throw(exception);
+			end
+			s = size (add_cell);
+			for i=1:s(1)
+				obj.add_line(add_cell{i,:});
+			end
+		end
+		
+		function obj = add_line(obj, add_string, varargin)
 			if obj.Line_Count_Display >= obj.MAX_Lines
 				obj.rem_first_line();
 			end
 			
-			add_string = [blanks(obj.Current_Level*obj.Blanks_per_Level),add_string];
+			if nargin > 2
+				for i=1:nargin-2
+					str = varargin{i};
+					if isnumeric(str)
+						str = num2str(str);
+					end
+					add_string = [add_string, str]; %#ok<AGROW>
+				end
+			end
+			
+			add_string = strrep(add_string,'\','\\');
+			add_string = sprintf([blanks(obj.Current_Level*obj.Blanks_per_Level),add_string]);
+			
 			obj.Current_Text_to_Save{end+1} = add_string;
 			obj.Line_Count_Overall = obj.Line_Count_Overall + 1;
 			
@@ -126,15 +155,23 @@ classdef MESSAGE_text_handler < handle
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
 		end
 		
-		function obj = level_up(obj)
-			obj.Current_Level = obj.Current_Level - 1;
+		function obj = level_up(obj, varargin)
+			if nargin > 1
+				obj.Current_Level = obj.Current_Level - varargin{1};
+			else
+				obj.Current_Level = obj.Current_Level - 1;
+			end
 			if obj.Current_Level < 0
 				obj.Current_Level = 0;
 			end
 		end
 		
-		function obj = level_down(obj)
-			obj.Current_Level = obj.Current_Level + 1;
+		function obj = level_down(obj, varargin)
+			if nargin > 1
+				obj.Current_Level = obj.Current_Level + varargin{1};
+			else
+				obj.Current_Level = obj.Current_Level + 1;
+			end
 		end
 		
 		function obj = save_message_text(obj)
@@ -147,6 +184,7 @@ classdef MESSAGE_text_handler < handle
 				obj.OutputFile_handle = fopen(obj.OutputFile,'w');
 			end
 			for i=1:numel(obj.Current_Text_to_Save)
+				obj.Current_Text_to_Save{i} = strrep(obj.Current_Text_to_Save{i},'\','\\');
 				fprintf(obj.OutputFile_handle,[obj.Current_Text_to_Save{i},'\n']);
 			end
 			
