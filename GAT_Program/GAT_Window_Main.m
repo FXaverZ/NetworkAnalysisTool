@@ -22,7 +22,7 @@ function varargout = GAT_Window_Main(varargin)
 
 % Edit the above text to modify the response to help GAT_Window_Main
 
-% Last Modified by GUIDE v2.5 01-Oct-2015 13:04:41
+% Last Modified by GUIDE v2.5 02-Oct-2015 10:20:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,7 +72,9 @@ addpath(genpath(Path));
 handles.Current_Settings.Files.Main_Path = Path;
 %------------------------------------------------------------------------------------
 %---- Set up GUI --------------------------------------------------------------------
-handles.text_message_main_handler = MESSAGE_text_handler(handles.text_message_main);
+handles.text_message_main_handler = ...
+	MESSAGE_text_handler(handles.text_message_main ,...
+	'OutputFile',[pwd,filesep,'Log.txt']);
 
 
 %------------------------------------------------------------------------------------
@@ -103,12 +105,27 @@ function push_line_add_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+linecount = handles.text_message_main_handler.Line_Count_Overall;
+% str = ['Teststring as it is... Line No. ',num2str(linecount + 1)];
+
+str = ['Blanks : ',num2str(linecount+1)];
+if linecount+1 > numel(str)
+	str2 = blanks(linecount-numel(str));
+	str2 = [str2,'|'];
+	str = [str, str2];
+else
+	str(linecount+1)='|';
+end
+
+handles.text_message_main_handler.add_line(str);
+
 
 % --- Executes on button press in push_line_remove.
 function push_line_remove_Callback(hObject, eventdata, handles)
 % hObject    handle to push_line_remove (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.text_message_main_handler.rem_line();
 
 
 % --- Executes on button press in push_line_clear.
@@ -116,3 +133,27 @@ function push_line_clear_Callback(hObject, eventdata, handles)
 % hObject    handle to push_line_clear (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles.text_message_main_handler.reset_text();
+
+
+% --- Executes on button press in push_line_level_down.
+function push_line_level_down_Callback(hObject, eventdata, handles)
+% hObject    handle to push_line_level_down (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.text_message_main_handler.level_up();
+
+% --- Executes on button press in push_line_level_up.
+function push_line_level_up_Callback(hObject, eventdata, handles)
+% hObject    handle to push_line_level_up (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.text_message_main_handler.level_down();
+
+
+% --- Executes on button press in push_text_save.
+function push_text_save_Callback(hObject, eventdata, handles)
+% hObject    handle to push_text_save (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.text_message_main_handler.save_message_text();
