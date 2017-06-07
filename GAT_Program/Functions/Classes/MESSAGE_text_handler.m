@@ -66,7 +66,13 @@ classdef MESSAGE_text_handler < handle
 			
 			obj.handle_textfield.set('String','');
 		end
-			
+		
+		function delete(obj)
+			if ~isempty(obj.OutputFile_handle)
+				fclose(obj.OutputFile_handle);
+			end
+		end
+		
 		function obj = add_line(obj, add_string)
 			if obj.Line_Count_Display >= obj.MAX_Lines
 				obj.rem_first_line();
@@ -82,10 +88,10 @@ classdef MESSAGE_text_handler < handle
 			
 			obj.Current_Text_to_Display{end+1} = add_string;
 			obj.Line_Count_Display = obj.Line_Count_Display + 1;
-						
+			
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
 		end
-
+		
 		function obj = rem_line(obj)
 			obj.Current_Text_to_Display = obj.Current_Text_to_Display(1:end-1);
 			obj.Line_Count_Display = obj.Line_Count_Display - 1;
