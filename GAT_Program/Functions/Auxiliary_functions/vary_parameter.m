@@ -28,7 +28,9 @@ function out = vary_parameter(mean, sigma, varargin)
 %    Listenwerte an (die Gesamtsumme aller Einträge von PROBABILITY muss somit
 %    100% ergeben)
 
-%    Franz Zeilinger - 29.10.2010
+% Version:                 1.0
+% Created by:              Franz Zeilinger - 29.10.2010
+% Last change by:          
 
 if nargin == 3 && strcmpi(varargin{1},'list')
 	% Eintrag muss aus einer Liste ausgewählt werden

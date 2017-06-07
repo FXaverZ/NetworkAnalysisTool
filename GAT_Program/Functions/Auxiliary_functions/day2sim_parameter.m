@@ -33,8 +33,8 @@ function [season, weekd, parafilemname] = day2sim_parameter(Model, act_day)
 %   See also datenum, get_default_values_GAT
 
 % Version:                 1.0
-% Erstellt von:            Franz Zeilinger - 02.02.2015
-% Letzte Änderung durch:   Franz Zeilinger - 30.09.2015
+% Created by:              Franz Zeilinger - 02.02.2015
+% Last change by:          Franz Zeilinger - 30.09.2015
 
 % das aktuelle Jahr ermitteln:
 Current_Year = str2double(datestr(act_day,'yyyy'));

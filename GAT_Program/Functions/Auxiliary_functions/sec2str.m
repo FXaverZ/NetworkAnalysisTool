@@ -5,8 +5,9 @@ function str = sec2str(t)
 %    Zeitspanne werden keine Angaben zu HH und MM gemacht bzw. die Genauigkeit
 %    der Zahlendarstellung angepasst.
 
-% Erstellt von:            Franz Zeilinger - 11.08.2010
-% Letzte Änderung durch:   Franz Zeilinger - 27.02.2013
+% Version:                 1.0
+% Created by:              Franz Zeilinger - 11.08.2010
+% Last change by:          Franz Zeilinger - 27.02.2013
 
 sec_lin = datenum('1900-01-01 00:00:01')-datenum('1900-01-01 00:00:00');
 date = datenum('1900-01-01 00:00:00')+t*sec_lin;

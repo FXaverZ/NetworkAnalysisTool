@@ -6,7 +6,7 @@ function name = getComputerName()
 %
 %
 % See also SYSTEM, GETENV, ISPC, ISUNIX
-%
+
 % m j m a r i n j (AT) y a h o o (DOT) e s
 % (c) MJMJ/2007
 % MOD: MJMJ/2013
