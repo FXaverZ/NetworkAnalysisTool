@@ -59,9 +59,9 @@ function GAT_Window_Main_OpeningFcn(hObject, eventdata, handles, varargin)
 % Ordner, in dem "GAT_Window_Main.m" sich befindet, enth‰lt Programm:
 if ischar(Source_File)
 	fprintf([Source_File,' - Current Directory auf Datei setzen, in der sich ',...
-		'''NAT_main.m'' befindet!\n']);
+		'''GAT_Window_Main.m'' befindet!\n']);
 	% Fenster schlieﬂen:
-	delete(handles.NAT_main_gui);
+	delete(handles.GAT_main_gui);
 	return;
 end
 Path = fileparts(Source_File.Name);

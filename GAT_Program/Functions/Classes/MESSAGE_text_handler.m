@@ -52,17 +52,27 @@ classdef MESSAGE_text_handler < handle
 				end
 			else
 				% Fehler, weil Parameter nicht in Dreiergruppe übergeben wurde:
-				error('device:paramlist', ['Wrong inputarguments.',...
+				error('messagetexthandler:paramlist', ['Wrong inputarguments.',...
 					' Input looks like (''Parameter_Name'',',...
 					' Parameter Value)']);
 			end
 			
 			obj.handle_textfield.set('Units','points','FontName','Courier New');
-			
-			obj.MAX_Lines = floor(...
-				obj.handle_textfield.Position(4)/(obj.handle_textfield.get('FontSize')*1.1928));
-			obj.MAX_Colum = floor(...
-				obj.handle_textfield.Position(3)/(obj.handle_textfield.get('FontSize')*0.5988));
+			fs = get(obj.handle_textfield,'FontSize');
+			if (fs > 9.5) && (fs <= 10.5)
+				obj.MAX_Lines = floor(...
+					obj.handle_textfield.Position(4)/(fs*1.1928));
+				obj.MAX_Colum = floor(...
+					obj.handle_textfield.Position(3)/(fs*0.5988));
+			elseif (fs > 7.5) && (fs <= 8.5)
+				obj.MAX_Lines = ceil(...
+					obj.handle_textfield.Position(4)/(fs*1.3047));
+				obj.MAX_Colum = ceil(...
+					obj.handle_textfield.Position(3)/(fs*0.66))+1;
+			else
+				error('messagetexthandler:paramlist', ['Wrong fontsize.',...
+					' Currently only fontsizes of 10 and 8 points are supported!']);
+			end
 			
 			obj.handle_textfield.set('String','');
 		end
@@ -141,6 +151,14 @@ classdef MESSAGE_text_handler < handle
 			end
 			
 			obj.Current_Text_to_Save = {};
+		end
+		
+		function obj = divider(obj, charakter, varargin)
+			if nargin == 2
+				str = repmat(charakter,1,obj.MAX_Colum-1);
+			else
+			end
+			obj.add_line(str);
 		end
 	end
 	
