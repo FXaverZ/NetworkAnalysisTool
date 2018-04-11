@@ -112,7 +112,9 @@ Default_Plant.Rel_Size_Collector = 0.01;% Rel. Kollektorfläche     [m²/Wp]
 Default_Plant.Size_Collector = ...      % Kollektorfläche          [m²]
 	Default_Plant.Power_Installed * Default_Plant.Rel_Size_Collector;
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung[s] 
-% Zwei Anlagen werden per Default angeboten:
+Default_Plant.Phase_Allocation_Mode = 'auto';  % Modus zur Phasenzuordnung der Anlage [-]
+                                               % siehe handles.System.Phase_Modes_Generation
+Default_Plant.Max_Power_4_Single_Phase = 4.601;% Max. Leistung für einphasigen Anschluss [kW]
 System.sola.Default_Plant = Default_Plant;
 clear('Default_Plant');
 
@@ -137,6 +139,9 @@ Default_Plant.c_p =            [];      % Tabelle mit Leistungsbeiwerten bei
 %                                             aus Anlagenparameterdatei
 %                                             "get_wind_turbine_parameters").
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung        [s] 
+Default_Plant.Phase_Allocation_Mode = 'auto';  % Modus zur Phasenzuordnung der Anlage [-]
+                                               % siehe handles.System.Phase_Modes_Generation
+Default_Plant.Max_Power_4_Single_Phase = 4601; % Max. Leistung für einphasigen Anschluss [kW]
 System.wind.Default_Plant = Default_Plant;
 
 % Define a default scenario:

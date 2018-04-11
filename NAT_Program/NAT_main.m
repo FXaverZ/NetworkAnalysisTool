@@ -203,7 +203,7 @@ switch user_response
 		end
 		save([file.Path,filesep,file.Name,file.Exte],'Current_Settings','System');
 		if isfield(handles, 'sin')
-			handles.sin.close_file;
+			handles.sin.close_file_in_application;
 			handles.sin.close_database;
 		end
 		delete(handles.NAT_main_gui);

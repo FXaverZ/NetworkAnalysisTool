@@ -9,19 +9,22 @@ function data_phase = model_pv_fix_yearly_profiles(plant, content, data_cloud_fa
 %    Die Anlagenparamerter, nach der diese Berechnung durchgeführt wird, sind in der
 %    Struktur PLANT enthalten.
 
-% Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 19.02.2015
 % Letzte Änderung durch:   Franz Zeilinger - 19.02.2015
 
 % Daten auslesen, zuerst die Zeit (ist für alle Orientierungen und Neigungen gleich,
 % daher wird diese nur vom ersten Element ausgelesen):
-time = squeeze(radiation_data(day,1,1,1,:))';
+idx = strcmpi(content.dat_typ,'Time');
+time = squeeze(radiation_data(day,1,1,idx,:))';
 % Strahlungsdaten (für alle Orientierungen und Neigungen sowie nur jene Zeitpunkte,
 % die größer Null sind (= nicht vorhandene Elemente)):
-data_dir = squeeze(radiation_data(day,:,:,3,:));
-data_dif = squeeze(radiation_data(day,:,:,4,:));
+idx = strcmpi(content.dat_typ,'DirectClearSyk_Irradiance');
+data_dir = squeeze(radiation_data(day,:,:,idx,time>0));
+idx = strcmpi(content.dat_typ,'Diffuse_Irradiance');
+data_dif = squeeze(radiation_data(day,:,:,idx,time>0));
 % Temperatur:
 % temp = squeeze(Radiation_fixed_Plane(month,:,:,2,time>0));
+time = time(time > 0); % Zeitpunkte = 0 --> keine Daten sind vorhanden
 % Vektoren, mit den Stützstellen der Daten für die Interpolation erstellen:
 orienta = content.orienta;
 inclina = content.inclina;
