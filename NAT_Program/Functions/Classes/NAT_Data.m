@@ -35,9 +35,7 @@ classdef NAT_Data < handle
                 obj.Grid.(cg).Branches.Lines.remove_COM_objects;
                 obj.Grid.(cg).Branches.Transf.remove_COM_objects;
             end
-        end
-        
+		end 
 	end
-	
 end
 

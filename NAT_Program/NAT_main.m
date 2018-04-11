@@ -188,7 +188,7 @@ switch user_response
 	case 'Close'
 		% Kein speichern der akutellen Einstellungen, nur beenden des Programms:
 		if isfield(handles, 'sin')
-			handles.sin.close_file;
+			handles.sin.close_file_in_application;
 			handles.sin.close_database;
 		end
 		delete(handles.NAT_main_gui);

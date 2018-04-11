@@ -1,4 +1,3 @@
-% -- changelog v1.1b ##### (start) // 20130423
 classdef Connection_All_Point < handle
 	%CONNECTION_ALL_POINT 
 	%
@@ -61,7 +60,7 @@ classdef Connection_All_Point < handle
 	
 	methods
 		function obj = Connection_All_Point(sin_ext, node_id_ext)
-			%SG_CONTROLLER    Konstruktor der Klasse CONNECTION_POINT
+			%CONNECTION_ALL_POINT    Konstruktor der Klasse CONNECTION_ALL_POINT
 			
 			% ID nodes:
             obj.Node_ID = node_id_ext;

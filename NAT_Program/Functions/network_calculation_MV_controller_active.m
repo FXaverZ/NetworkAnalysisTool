@@ -83,7 +83,7 @@ for i=1:numel(Grid_List)
 	
 	tic; %Zeitmessung start
 	reset_counter = 1;
-	for j=1:num_data_set;
+	for j=1:num_data_set
 		% Reset auf RPC Connection after defnined number of profiles
 		% simulted (because of problems, if more profiles are simulated in
 		% one row! SINCAL chrushes then!)

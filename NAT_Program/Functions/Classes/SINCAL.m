@@ -8,46 +8,52 @@ classdef SINCAL < handle
 	
 	% Version:                 1.1
 	% Erstellt von:            Franz Zeilinger - 30.10.2012
-	% Letzte Änderung durch:   Franz Zeilinger - 29.01.2013
+	% Letzte Änderung durch:   Franz Zeilinger - 28.09.2016
 	
 	properties
-		Settings                
-	%        Struktur mit den aktuellen Einstellungen
-		Valid_Database = false  
-	%        Ist eine gültige Verbindung zu einer Datenbank aktiv?
-		Valid_Document = false  
-	%        Ist das aktuelle Netz in der SINCAL-Oberfläche aktiv?	
-		Tables                  
-	%        Struktur mit den bisher ausgelesenen Tabellen
+		Settings
+		%        Struktur mit den aktuellen Einstellungen
+		Valid_Database = false
+		%        Ist eine gültige Verbindung zu einer Datenbank aktiv?
+		Valid_Database_Connection = false
+		%        Ist eine gültige Verbindung mit der Quell-Datenbank (z.B. Access
+		%        Datenbank) des Netzmodells aktiv?
+		Valid_Document = false
+		%        Ist das aktuelle Netz in der SINCAL-Oberfläche aktiv?
+		Tables
+		%        Struktur mit den bisher ausgelesenen Tabellen
 	end
 	
 	properties (Hidden)
-		Constants               
-	%        Sammlung von notwendigen Konstanten
-		Database                
-	%        aktuelle Datenbank
-		new_database_path = 0   
-	%        Neuer Datenbankpfad wurde gesetzt.
-		new_database_name = 0   
-	%        Neuer Datenbankname wurde gesetzt.
-		SimulationSrv = [];     
-	%        COM-Objekt eines SINCAL-Simulationsservers (eigener Prozess)
-		Simulation = [];        
-	%        COM-Objekt einer SINCAL-Berechnung (eigentliches Objekt, über das
-	%        Lastflussrechnung gesteuert wird.
-		NetworkDataSource = []; 
-	%        COM-Objekt für Zugriff auf virtuelle Datenbank des aktuellen Netzes.
-		Application = []; 
-	%        COM-Objekt für Zugriff auf SINCAL Anwendung (GUI).	
-		Document = []; 
-	%        COM-Objekt für Zugriff Dokument in SINCAL-Oberfläche.		
+		Constants
+		%        Sammlung von notwendigen Konstanten
+		Database
+		%        aktuelle Datenbank
+		new_database_path = 0
+		%        Neuer Datenbankpfad wurde gesetzt.
+		new_database_name = 0
+		%        Neuer Datenbankname wurde gesetzt.
+		SimulationSrv = [];
+		%        COM-Objekt eines SINCAL-Simulationsservers (eigener Prozess)
+		Simulation = [];
+		%        COM-Objekt einer SINCAL-Berechnung (eigentliches Objekt, über das
+		%        Lastflussrechnung gesteuert wird.
+		Database_Connection = [];
+		%        COM-Object to an open database connection to the source database of the
+		%        SINCAL grid model.
+		NetworkDataSource = [];
+		%        COM-Objekt für Zugriff auf virtuelle Datenbank des aktuellen Netzes.
+		Application = [];
+		%        COM-Objekt für Zugriff auf SINCAL Anwendung (GUI).
+		Document = [];
+		%        COM-Objekt für Zugriff Dokument in SINCAL-Oberfläche.
 	end
 	
 	methods
 		
 		function obj = SINCAL (varargin)
 			%SINCAL    Konstruktor der SINCAL-Klasse
-			%    
+			%
 			%    Detaillierte Beschreibung fehlt noch!
 			%
 			%    Weiters wird innerhalb der SINCAL-Klasse eine Sub-Struktur
@@ -63,21 +69,33 @@ classdef SINCAL < handle
 			obj.Constants.Input_Mask.Loadflow        = '00000001'; %Daten für Lastfluss vorhanden
 			obj.Constants.Input_Mask.Short_Circiut   = '00000002'; %Daten für Kurzschluss vorhanden
 			obj.Constants.Input_Mask.Unsym_Loadflow  = '00000400'; %Unsymmetrischer Lastfluss
-			
+			obj.Constants.Input_Mask.Dynamic         = '00000200'; %Dynamik
+						
 			obj.Constants.Application.AutoSelResetAll  = 0;
 			obj.Constants.Application.AutoSelUpdateAll = 1;
 			obj.Constants.Application.AutoSelNode      = 2;
 			obj.Constants.Application.AutoSelElement   = 3;
 			
-			obj.Constants.Application.AutoUpdateResults    = 2;
-			obj.Constants.Application.AutoUpdateRedrawView = 4;
-			obj.Constants.Application.AutoCalcLF           = 38;
+			obj.Constants.Application.AutoUpdateBackground = 0; %Hintergrundgrafiken aktualisieren
+			obj.Constants.Application.AutoUpdateView       = 1; %Ansicht aktualisieren
+			obj.Constants.Application.AutoUpdateResults    = 2; %Ergebnisse aus der Datenbank laden
+			obj.Constants.Application.AutoUpdateInputData  = 3; %Eingabedaten aus der Datenbank laden
+			obj.Constants.Application.AutoUpdateRedrawView = 4; %Ansichtsgrafik aktualisieren
+			
+			obj.Constants.Application.AutoCalcLF           = 38;%Lastfluss lt. Einstellung in den Berechnungsparametern
+			
 			
 			% Default-Einstellungen:
 			obj.Settings.Calculation_method = 'LF_USYM';
 			obj.Settings.Batch_mode  = 4;
 			obj.Settings.Database_typ = 'DB_EL';
 			obj.Settings.Language = 'DE';
+			obj.Settings.Database_Connector = 'ACCESS12'; %connection type - currently supported: 'Access','Access12','SQL','Oracle'
+			obj.Settings.Database_Server_Name = [];       %name of server - not required for Access connection
+			obj.Settings.Database_User_ID = [];           %user id - added to connection string if provided
+			obj.Settings.Database_Password = [];          %password - added to connection string if provided
+			obj.Settings.Command_Timeout = 60;            %Commandtimeout in seconds (default=60 seconds if unspecified)
+			
 			% Angaben des aktuelle Netzes:
 			obj.Settings.Grid_name = [];
 			obj.Settings.Grid_path = [];
@@ -92,6 +110,7 @@ classdef SINCAL < handle
 			% Falls bereits eine Datenbank geöffnet ist, diese zuvor schließen:
 			if obj.Valid_Database
 				obj.close_database;
+				pause(0.05);
 			end
 			
 			% Überprüfen, ob eine Datenbank angegeben wurde:
@@ -117,9 +136,9 @@ classdef SINCAL < handle
 				% SINCAL-Simulationsobjekt als "in process server" erzeugt werden,
 				% d.h. innerhalb des MATLAB-Prozesses (Vorteil: Nutzung des
 				% gemeinsamen Arbeitsspeicherbereichs --> schnellerer
-                % Datenaustausch).
-%                 obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
-%                 obj.Simulation = obj.SimulationSrv.GetSimulation;
+				% Datenaustausch).
+				%                 obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
+				%                 obj.Simulation = obj.SimulationSrv.GetSimulation;
 				obj.Simulation = actxserver('Sincal.Simulation');
 			else
 				exception = MException(...
@@ -158,6 +177,11 @@ classdef SINCAL < handle
 					inputstate = ...
 						hex2dec(obj.Constants.Input_Mask.Loadflow) +...
 						hex2dec(obj.Constants.Input_Mask.Short_Circiut);
+				case 'NETO_STAB'
+					inputstate = ...
+						hex2dec(obj.Constants.Input_Mask.Loadflow) +...
+						hex2dec(obj.Constants.Input_Mask.Short_Circiut) +...
+						hex2dec(obj.Constants.Input_Mask.Dynamic);
 				otherwise
 					% Fehlermeldung, da die Berechnungsmethode noch nicht verarbeiter
 					% werden kann (z.B. weil die vorliegende SINCAL-Klasse dies noch
@@ -197,6 +221,62 @@ classdef SINCAL < handle
 					'Loading of the virtual database failed!');
 				throw(exception);
 			end
+			% Try to get also a direct connection to the database of the grid model
+			% (for direct manipulation):
+			% First create the needed connection string:
+			if strcmpi('ACCESS',obj.Settings.Database_Connector)
+				%Connect to Access database given by input db [added by Martin Furlan, ]
+				cnstr='PROVIDER=Microsoft.Jet.OLEDB.4.0;';
+				cnstr=[cnstr 'Data Source=' obj.Database.DBfilename ';'];
+			elseif strcmpi('SQL',obj.Settings.Database_Connector)
+				%Connect to SQL Database
+				cnstr='Provider=SQLOLEDB;';
+				cnstr=[cnstr 'Data Source=' obj.Settings.Database_Server_Name ';Initial Catalog=' db ';'];
+			elseif strcmpi('ORACLE',obj.Settings.Database_Connector)
+				%Connect to Oracle Database
+				cnstr='Provider=OraOLEDB.Oracle;';
+				cnstr=[cnstr 'Data Source=' obj.Database.DBfilename ';'];
+			elseif strcmpi('ACCESS12',obj.Settings.Database_Connector)
+				cnstr='PROVIDER=Microsoft.ACE.OLEDB.12.0;';
+				cnstr=[cnstr 'Data Source=' obj.Database.DBfilename ';'];
+			else
+				warning(['Open Connection to SINCAL database: Unknown type of ',...
+					'database connector was given!']);
+			end
+			%add uid and pwd if provided
+			if ~isempty(obj.Settings.Database_User_ID)
+				cnstr=[cnstr 'User Id=' obj.Settings.Database_User_ID ';'];
+			end
+			if ~isempty(obj.Settings.Database_Password)
+				cnstr=[cnstr 'Password=' obj.Settings.Database_Password ';'];
+			end
+			
+			try
+				%create activeX control
+				obj.Database_Connection = actxserver('ADODB.Connection');
+				set(obj.Database_Connection,'CursorLocation',3);
+				
+				%Open connection
+				invoke(obj.Database_Connection,'Open', cnstr);
+				
+				%Specify connection timeout
+				set(obj.Database_Connection,'CommandTimeout',obj.Settings.Command_Timeout);
+				
+				obj.Valid_Database_Connection = true;
+			catch e
+				warning(['Open Connection to SINCAL database: Could not open source ',...
+					'database']);
+				warning(e.message);
+				obj.Valid_Database_Connection = false;
+			end
+		end
+		
+		function update_database(obj)
+			if obj.Valid_Database
+				obj.close_database;
+				pause(0.05);
+				obj.open_database;
+			end
 		end
 		
 		function open_application_and_file(obj)
@@ -208,6 +288,9 @@ classdef SINCAL < handle
 			
 			obj.Application = actxserver('SIASincal.Application');
 			if isempty(obj.Application)
+				if reopen
+					obj.open_database
+				end
 				exception = MException('SINCAL:OpenApplication:Failed',...
 					'The opening of the SINCAL Application failed!');
 				throw(exception);
@@ -215,6 +298,9 @@ classdef SINCAL < handle
 			% Das Netz in der SINCAL-Oberfläche öffnen:
 			obj.Document = obj.Application.OpenDocument(obj.Database.SINfilename);
 			if isempty(obj.Document)
+				if reopen
+					obj.open_database
+				end
 				exception = MException('SINCAL:OpenDocument:Failed',...
 					'The opening of the specified SINCAL document failed!');
 				throw(exception);
@@ -225,6 +311,14 @@ classdef SINCAL < handle
 			end
 			
 			obj.Valid_Document = true;
+		end
+		
+		function close_file_in_application(obj)
+			if obj.Valid_Document
+				obj.Application.CloseDocument(obj.Database.SINfilename);
+				obj.Document = [];
+				obj.Valid_Document = false;
+			end
 		end
 		
 		function gui_select_element(obj, el_id)
@@ -245,17 +339,141 @@ classdef SINCAL < handle
 			end
 		end
 		
-		function close_file(obj)
-			try
-				if obj.Valid_Document
-					obj.Document = [];
-					obj.Application.CloseDocument(obj.Database.SINfilename);
-					obj.Valid_Document = false;
+		function [el_ids, el_names, el_typs] = gui_get_selected_element(obj)
+			% GUI_GET_SELECTED_ELEMENT    get information about selected objects in the SINCAL GUI
+			%    [EL_IDS, EL_NAMES, EL_TYPS] = SINCAL.GUI_GET_SELECTED_ELEMENT
+			%    returns informations about the currently selected objects in the GUI
+			%    of the SINCAL Application. For this, the Applicatio and the grid
+			%    model have to be opened with aid of the MATLAB SINCAL class.
+			%    Ohterwise no connection is present between the application and the
+			%    invoking MATLAB function.
+			%
+			%    Return Values:
+			%    --------------
+			%    EL_IDS (numerical)
+			%    Element_IDs of the selected objects. These values correspond with
+			%    the IDs of the SINCAL database.
+			%
+			%    EL_NAMES (cell)
+			%    Names of the selected objects
+			%
+			%    EL_TYPS (cell)
+			%    Typ of the selectd objects
+			
+			% Created by:              Franz Zeilinger - 28.09.2016
+			% Last changes by:
+			
+			el_ids = [];
+			el_names = [];
+			el_typs = [];
+			
+			if obj.Valid_Document
+				sel = obj.Document.GetSelection();
+				
+				el_ids = zeros(sel.Count,1);
+				for i = 1:sel.Count
+					it = sel.invoke('Item',i-1);
+					el_ids(i) = it.DB_ID;
 				end
-			catch ME
-				obj.Valid_Document = false;
-				obj.Document = [];
+				if ~isempty (el_ids)
+					el_names = obj.get_entry_element(el_ids,'Name');
+					el_typs = obj.get_entry_element(el_ids,'Typ');
+				end
 			end
+		end
+		
+		function gui_update_input_data(obj, updated_tables)
+			%GUI_UPDATE_INPUT_DATA    updates SINCAL Applicaton input data from database
+			%   Detailed explanation goes here
+			if obj.Valid_Document
+				
+				for i = 1:numel(updated_tables)
+					obj.Document.Reload(updated_tables{i});
+				end
+				obj.Document.UpdateData(...
+					obj.Constants.Application.AutoUpdateInputData, ...
+					obj.Constants.Application.AutoCalcLF);
+			end
+		end
+		
+		function entry = get_entry_table(obj,table_name,name_identifier,el_id,property_name)
+			
+			% Created by:              Franz Zeilinger - 08.11.2016
+			% Last changes by:
+			
+			% load the table "table_name" if not allready done
+			if ~isfield(obj.Tables, table_name)
+				obj.table_data_load(table_name);
+			end
+			% where are the element IDs? (column "Element_ID")
+			idx_el_id = strcmp(obj.Tables.(table_name)(1,:),name_identifier);
+			if isempty(idx_el_id)
+				exception = MException(...
+					'SINCAL:GetEntryElement:IdentiferNotFound',...
+					['The given identifier was not found in table "',table_name,'"!']);
+				throw(exception);
+			end
+			% where is the wanted propberty? (column with the same name)
+			if iscell(property_name)
+				idx_prope = [];
+				for i = 1:numel(property_name)
+					if isempty(idx_prope)
+						idx_prope = strncmpi(obj.Tables.(table_name)(1,:),property_name{i},length(property_name{i}));
+					else
+						idx_prope = idx_prope | strncmpi(obj.Tables.(table_name)(1,:),property_name{i},length(property_name{i}));
+					end
+				end
+			else
+				idx_prope = strncmpi(obj.Tables.(table_name)(1,:),property_name,length(property_name));
+			end
+			% check, if property was found. If not, return error messages:
+			if sum(idx_prope) < 1
+				exception = MException(...
+					'SINCAL:GetEntryElement:PropertyNotFound',...
+					['The given properties where not found in table "',table_name,'"!']);
+				throw(exception);
+			end
+			% return the wanted entry or entries of the table:
+			all_ids = [0;cell2mat(obj.Tables.(table_name)(2:end,idx_el_id))];
+			if isempty(el_id)
+				% if el_id is empty, return all entries (except first line = header!)
+				idx_elemt = true(size(all_ids));
+				idx_elemt(1) = false;
+			else
+				idx_elemt = zeros(size(all_ids));
+				for i=1:numel(el_id)
+					idx_elemt = idx_elemt | (all_ids == el_id(i));
+				end
+			end
+			entry = deblank(obj.Tables.(table_name)(idx_elemt,idx_prope));
+		end
+		
+		function entry = get_entry_element(obj,el_id,property_name)
+			%GET_ENTRY_ELEMENT    get entries out of table "Element" of SINCAL model
+			%    ENTRY = SINCAL.GET_ENTRY_ELEMENT(EL_ID,PROPERTY_NAME) returns
+			%    depending on the inputs the corresponding elements out of the table
+			%    "Element" of the SINCAL grid model.
+			%
+			%    Input Arguments:
+			%    ----------------
+			%    EL_ID (numerical)
+			%    determines, from which elements the entries are needed. The value
+			%    has to correspond with the database ID of SINCAL. If  EL_ID is
+			%    empty, than all entries are returned.
+			%
+			%    PROPERTY_NAME (string or 1-dim cell-array of strings)
+			%    determines, which property values should be returned
+			%
+			%    Return Values:
+			%    --------------
+			%    ENTRY (cell)
+			%    [n,m] cell-array with the requested entries. n depends on the number
+			%    of elements of EL_ID, m on the number of elements of PROPERTY_NAME
+			
+			% Created by:              Franz Zeilinger - 28.09.2016
+			% Last changes by:         Franz Zeilinger - 08.11.2016
+			
+			entry = obj.get_entry_table('Element','Element_ID',el_id,property_name);
 		end
 		
 		function update_settings(obj, varargin)
@@ -296,7 +514,7 @@ classdef SINCAL < handle
 					end
 				end
 			else
-				% Fehler, weil Parameter nicht in Dreiergruppe übergeben wurde:
+				% Fehler, weil Parameter nicht in Zweiergruppe übergeben wurde:
 				exception = MException(...
 					'SINCAL:UpdateSettings:WrongNumberArgs', ...
 					['Wrong number of inputarguments. Input looks like ',...
@@ -309,16 +527,27 @@ classdef SINCAL < handle
 			if obj.new_database_path || obj.new_database_name
 				obj.set_database_path;
 			end
+			
+			% Datenbank mit den neuen Einstellungen öffnen:
+			obj.open_database;
 		end
 		
-		function close_database(obj)
+		function close_database(obj, varargin)
 			%CLOSE_DATABASE    schließt offene SINCAL-COM-Objekte bzw. Applikationen
 			%   Detailierte Beschreibung fehlt!
-			
+			if nargin < 2
+				varargin{1} = 'not_all';
+			end
+			if strcmpi(varargin{1},'all')
+				obj.close_file_in_application();
+			end
 			obj.NetworkDataSource = [];
 			obj.Simulation = [];
 			obj.SimulationSrv = [];
 			obj.Valid_Database = false;
+			obj.Tables = [];
+			obj.Database_Connection = [];
+			obj.Valid_Database_Connection = false;
 		end
 		
 		function [data, names] = table_data_load (obj, tablename)
@@ -326,14 +555,14 @@ classdef SINCAL < handle
 			%    SINCAL.TABLE_DATA_LOAD (TABLENAME) lädt eine komplette Tabelle,
 			%    welche durch die Tabellenbezeichnung TABLENAME angegeben wird aus
 			%    der virtuellen SINCAL-Datenbank in die interne Daten-Struktur
-			%    SINCAL.TABLES. 
+			%    SINCAL.TABLES.
 			%    TABLE ist ein Cell-Array, das in der ersten Zeile die
-			%    Spaltenbezeichnung und in den darauffolgenden Zeilen die Inhalte der 
+			%    Spaltenbezeichnung und in den darauffolgenden Zeilen die Inhalte der
 			%    Tabelle wiedergibt. Diese Tabelle ist dann via
-			%    SINCAL.TABLES.TABLENAME verfügbar. 
+			%    SINCAL.TABLES.TABLENAME verfügbar.
 			%    Auch bei allen anderen Varianten des Aufrufs dieser Methode wird die
 			%    Tabelle in der internen Datenstruktur hinterlegt.
-			%    
+			%
 			%    TABLE = SINCAL.TABLE_DATA_LOAD (TABLENAME) lädt eine komplette
 			%    Tabelle TABLE und gibt diese zusätzlich zurück.
 			%
@@ -343,6 +572,10 @@ classdef SINCAL < handle
 			%        NAMES enthält die Spaltenbezeichnungen, ebenfalls als Cell-Array
 			%        von Strings.
 			
+			% If table allready exists, remove it
+			if isfield(obj.Tables,tablename)
+				obj.Tables = rmfield(obj.Tables,tablename);
+			end
 			% Auslesen der Tabelle:
 			table = obj.NetworkDataSource.GetRowObj(tablename);
 			table.Open();
@@ -401,6 +634,86 @@ classdef SINCAL < handle
 			end
 		end
 		
+		function QR = send_SQL_query(obj, sql_string)
+			% [QR] = SINCAL.send_SQL_query(sql_string)
+			%
+			% send_SQL_query    Executes the sql statement against the connection
+			% SINCAL.Database_Connection
+			%
+			% Inputs:
+			%   sql_string,    SQL statement to be executed
+			%
+			% Output
+			%   QR,            cell array of query results
+			%
+			% Notes: Convert cells to strings using char. Convert cells to numeric
+			% data using cell2mat() for ints or double(cell2mat()) for floats
+			%
+			% This code basis on Tim Myers code (oledb*.m) and use ADO OLE DB instead
+			% of OWC - Office Web Component
+			%
+			% Martin Furlan
+			% martin.furlan@iskra-ae.com
+			% January 2007
+			
+			%open recordset and run query
+			invoke(obj.Database_Connection,'BeginTrans');
+			try
+				r = invoke(obj.Database_Connection,'Execute',sql_string);
+				invoke(obj.Database_Connection,'CommitTrans');
+				sclSuccess = 1;
+			catch
+				invoke(obj.Database_Connection,'RollbackTrans');
+				sclSuccess = 0;
+			end
+			
+			%retrieve data from recordset
+			if sclSuccess && r.recordcount>0
+				QR=invoke(r,'getrows');
+				QR=QR';
+			else
+				QR=[];
+			end
+			
+			if sclSuccess
+				%release recordset
+				invoke(r,'release');
+			end
+		end
+		
+		function success = insert_SQL_query(obj, sql_string)
+			%success  = SINCAL.instert_SQL_query(sql_string)
+			%
+			% adodbinsert   Executes the sql statement against the connection cn
+			%
+			% Inputs:
+			%   sql_string,    SQL statement to be executed
+			%
+			% Output
+			%   success,       return: 1 - successful or 0 - unsuccessful
+			%
+			% Notes: Convert cells to strings using char. Convert cells to numeric
+			% data using cell2mat() for ints or double(cell2mat()) for floats
+			%
+			% This code basis on Tim Myers code (oledb*.m) and use ADO OLE DB instead
+			% of OWC - Office Web Component
+			%
+			% Martin Furlan
+			% martin.furlan@iskra-ae.com
+			% January 2007
+			
+			% Execute insert into database
+			invoke(obj.Database_Connection,'BeginTrans');
+			try
+				invoke(obj.Database_Connection,'Execute',sql_string);
+				invoke(obj.Database_Connection,'CommitTrans');
+				success = 1;
+			catch
+				invoke(obj.Database_Connection,'RollbackTrans');
+				success = 0;
+			end
+		end
+		
 	end
 	
 	methods (Hidden)
@@ -438,17 +751,13 @@ classdef SINCAL < handle
 				obj.Database.SINfilename = [path,filesep,name,'.sin'];
 				% Checken, ob die angegegbenen Dateien existieren
 				try
-					fileattrib(obj.Database.SINfilename);
-					fileattrib(obj.Database.DBfilename);
+					t = fileattrib(obj.Database.SINfilename);
+					t = fileattrib(obj.Database.DBfilename);
 					% Daten in Einstellungen übernehmen:
 					obj.Settings.Grid_name = name;
 					obj.Settings.Grid_path = path;
 					obj.new_database_path = 0;
 					obj.new_database_name = 0;
-					
-					% die neue Datenbank öffnen:
-					obj.open_database;
-
 				catch ME
 					% Wenn nicht --> Fehlermeldung
 					exception = MException('SINCAL:Database:FilesDontExist',...
@@ -492,6 +801,8 @@ classdef SINCAL < handle
 							''' has to be a string!']);
 						throw(exception);
 					end
+					obj.new_database_path = 1;
+					obj.new_database_name = 1;
 				case 'Batch_mode'
 					% Muss eine Zahl sein
 					if isnumeric (input)
@@ -507,6 +818,16 @@ classdef SINCAL < handle
 					% Muss ein String sein
 					if ischar (input)
 						obj.Settings.Database_typ = input;
+					else
+						exception = MException(...
+							'SINCAL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be a string!']);
+						throw(exception);
+					end
+				case 'Database_Connector'
+					if ischar (input)
+						obj.Settings.Database_Connector = input;
 					else
 						exception = MException(...
 							'SINCAL:UpdateParameter:WrongInput', ...
@@ -549,6 +870,46 @@ classdef SINCAL < handle
 							,''' has to be a string!']);
 						throw(exception);
 					end
+				case 'Database_Server_Name'
+					if ischar (input)
+						obj.Settings.Database_Server_Name = input;
+					else
+						exception = MException(...
+							'SINCAL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name...
+							,''' has to be a string!']);
+						throw(exception);
+					end
+				case 'Settings.Database_User_ID'
+					if ischar (input)
+						obj.Settings.Settings.Database_User_ID = input;
+					else
+						exception = MException(...
+							'SINCAL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name...
+							,''' has to be a string!']);
+						throw(exception);
+					end
+				case 'Database_Password'
+					if ischar (input)
+						obj.Settings.Database_Password = input;
+					else
+						exception = MException(...
+							'SINCAL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name...
+							,''' has to be a string!']);
+						throw(exception);
+					end
+				case 'Command_Timeout'
+					if isnumeric (input)
+						obj.Settings.Command_Timeout = input;
+					else
+						exception = MException(...
+							'SINCAL:UpdateParameter:WrongInput', ...
+							['Value for ''',parameter_name,...
+							''' has to be numeric!']);
+						throw(exception);
+					end
 				otherwise
 					exception = MException(...
 						'SINCAL:UpdateParameter:UnknownParameter', ...
@@ -562,11 +923,11 @@ classdef SINCAL < handle
 			%    SINCAL.DISP_MESSAGES(MODE) bringt die Statusmeldungen innerhalb
 			%    des SINCAL-Simulationsobjektes SIMULATION zur Anzeige in der
 			%    MATLAB-Konsole. Über den String MODE wird festgelegt, welche
-			%    Meldungen angezeigt werden: 
+			%    Meldungen angezeigt werden:
 			%        MODE = 'all'        Alle Meldungen werden angzeigt (Status,
 			%                                Infos, Warnungen und Fehler).
 			%        MODE = 'warning'    Nur Warnungen und Fehlermeldungen werden
-			%                                ausgegeben. 
+			%                                ausgegeben.
 			%        MODE = 'error'      Nur Fehlermeldungen werden ausgegeben.
 			%
 			%    SINCAL.DISP_MESSAGES(MODE, DETAILS) bringt zusätlich zu den Status-
@@ -577,7 +938,7 @@ classdef SINCAL < handle
 			%                                ausgegeben, auf die sich die Meldung
 			%                                bezieht (sofern möglich).
 			%        DETAILS = false     Es werden keine detailierten Informationen
-			%                                ausgegeben. 
+			%                                ausgegeben.
 			
 			% Argumentenliste überprüfen:
 			if nargin < 3;
@@ -588,14 +949,14 @@ classdef SINCAL < handle
 			end
 			
 			% Falls detailierte Infos gewünscht, zunächst die Daten der Elemente
-			% einlesen: 
+			% einlesen:
 			if details
 				% Objekt für die Virtuelle Datenbank auslesen (für Zugriff auf diese)
 				if isempty(obj.NetworkDataSource)
 					obj.NetworkDataSource = obj.Simulation.DB_EL;
 				end
 				% Auslesen der Elementtabelle (um die betroffenen Elemente angeben zu
-				% können): 
+				% können):
 				[data, names] = obj.table_data_load('Element');
 				% Überprüfung, ob Daten für eine detailierte Anzeige vorhanden sind:
 				if isempty(data)

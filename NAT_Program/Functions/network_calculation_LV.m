@@ -88,7 +88,7 @@ for i=1:numel(Grid_List)
 	
 	tic; %Zeitmessung start
 	reset_counter = 1;
-	for j=1:num_data_set;
+	for j=1:num_data_set
 		% Reset auf RPC Connection after defnined number of profiles
 		% simulted (because of problems, if more profiles are simulated in
 		% one row! SINCAL chrushes then!)
@@ -149,8 +149,8 @@ for i=1:numel(Grid_List)
 			[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
 		end
 		
-		% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		% 		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
+% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+% 		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
 % 		% few hours:
 % 		curtailed_data = false;
 % 		if size(Load_Data,1) > 86000
@@ -168,7 +168,7 @@ for i=1:numel(Grid_List)
 % 		cur_set.Data_Extract.Time_Series.curtailed_data = curtailed_data;
 % 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		
-		% Save the maybe altered Data for the NVIEW-Programm:
+		% Save the maybe altered Data for the OAT-Programm:
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.(['Data',data_typ]) = Load_Data;
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.(['Data',data_typ]) = Sola_Data;
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]) = Elmo_Data;

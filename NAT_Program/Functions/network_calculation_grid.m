@@ -5,7 +5,7 @@ function handles = network_calculation_grid(handles)
 % Because scenarios are not used create path to results (Grid_folder_nat\Results)
 r_path = [handles.Current_Settings.Files.Grid.Path,filesep,...
 		handles.Current_Settings.Files.Grid.Name,'_nat',filesep,'Results'];
-if ~isdir(r_path);
+if ~isdir(r_path)
 	mkdir(r_path);
 end
 handles.Current_Settings.Files.Save.Result.Path = r_path;

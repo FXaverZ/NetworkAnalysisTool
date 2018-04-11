@@ -120,7 +120,7 @@ classdef Connection_Point < handle
 	
 	methods
 		function obj = Connection_Point(sin_ext, p_q_id_ext)
-			%SG_CONTROLLER    Konstruktor der Klasse CONNECTION_POINT
+			%CONNECTION_POINT    Konstruktor der Klasse CONNECTION_POINT
 			
 			% ID des Leistungszugriffsobjekts speichern:
 			obj.P_Q_ID = p_q_id_ext;
