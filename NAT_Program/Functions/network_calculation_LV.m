@@ -38,22 +38,22 @@ cur_set.Files.Grid.Path = Grids_Path;
 clear Grids_Path
 
 % which data typ has to be simulated?
-if cur_set.Data_Extract.get_Sample_Value
+if cur_set.Simulation.use_Sample_Value
 	data_typ = '_Sample';
 end
-if cur_set.Data_Extract.get_Mean_Value
+if cur_set.Simulation.use_Mean_Value
 	data_typ = '_Mean';
 end
-if cur_set.Data_Extract.get_Max_Value
+if cur_set.Simulation.use_Max_Value
 	data_typ = '_Max';
 end
-if cur_set.Data_Extract.get_Min_Value
+if cur_set.Simulation.use_Min_Value
 	data_typ = '_Min';
 end
-if cur_set.Data_Extract.get_05_Quantile_Value
+if cur_set.Simulation.use_05_Quantile_Value
 	data_typ = '_05P_Quantil';
 end
-if cur_set.Data_Extract.get_95_Quantile_Value
+if cur_set.Simulation.use_95_Quantile_Value
 	data_typ = '_95P_Quantil';
 end
 

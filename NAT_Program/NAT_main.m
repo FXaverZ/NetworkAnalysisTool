@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 05.12.2014
 
-% Last Modified by GUIDE v2.5 02-Feb-2015 14:17:11
+% Last Modified by GUIDE v2.5 25-Apr-2018 15:02:53
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -279,11 +279,11 @@ catch ME
 end
 
 % Logo anzeigen:
-if strcmpi(getComputerName, 'eeapc14')
+% if strcmpi(getComputerName, 'eeapc14')
 	logo=imread('Figures\institutslogo.jpg','jpg');   % Einlesen der Grafik
-else
-	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
-end
+% else
+% 	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
+% end
 image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
 axis off;                                         % Achsenbezeichnung ausschalten
@@ -539,6 +539,108 @@ handles = refresh_display_NAT_main_gui(handles);
 % handles-Structure aktualisieren:
 guidata(hObject, handles);
 
+function radio_simulate_05q_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_05q_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 0;
+handles.Current_Settings.Simulation.use_Mean_Value = 0;
+handles.Current_Settings.Simulation.use_Max_Value = 0;
+handles.Current_Settings.Simulation.use_Min_Value = 0;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 1;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 0;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_simulate_95q_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_95q_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 0;
+handles.Current_Settings.Simulation.use_Mean_Value = 0;
+handles.Current_Settings.Simulation.use_Max_Value = 0;
+handles.Current_Settings.Simulation.use_Min_Value = 0;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 0;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 1;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_simulate_max_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_max_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 0;
+handles.Current_Settings.Simulation.use_Mean_Value = 0;
+handles.Current_Settings.Simulation.use_Max_Value = 1;
+handles.Current_Settings.Simulation.use_Min_Value = 0;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 0;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 0;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_simulate_mean_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_mean_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 0;
+handles.Current_Settings.Simulation.use_Mean_Value = 1;
+handles.Current_Settings.Simulation.use_Max_Value = 0;
+handles.Current_Settings.Simulation.use_Min_Value = 0;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 0;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 0;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_simulate_min_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_min_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 0;
+handles.Current_Settings.Simulation.use_Mean_Value = 0;
+handles.Current_Settings.Simulation.use_Max_Value = 0;
+handles.Current_Settings.Simulation.use_Min_Value = 1;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 0;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 0;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
+function radio_simulate_sample_value_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to radio_simulate_sample_value (see GCBO)
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.use_Sample_Value = 1;
+handles.Current_Settings.Simulation.use_Mean_Value = 0;
+handles.Current_Settings.Simulation.use_Max_Value = 0;
+handles.Current_Settings.Simulation.use_Min_Value = 0;
+handles.Current_Settings.Simulation.use_05_Quantile_Value = 0;
+handles.Current_Settings.Simulation.use_95_Quantile_Value = 0;
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+
+% handles-Structure aktualisieren:
+guidata(hObject, handles);
+
 function radio_weekday_1_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik radio_weekday_1 (siehe GCBO)
 % ~			 nicht benötigt (MATLAB spezifisch)
@@ -750,4 +852,3 @@ function edit_pqnode_hh_number_CreateFcn(hObject, eventdata, handles) %#ok<INUSD
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-

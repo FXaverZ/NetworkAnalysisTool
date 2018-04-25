@@ -16,6 +16,8 @@ end
 
 % bisherige Daten löschen:
 handles.NAT_Data.Load_Infeed_Data = [];
+% akutelle Einstellungen des Datenauslesens mitspeichern
+handles.NAT_Data.Data_Extract = handles.Current_Settings.Data_Extract;
 
 % Anzahl an auszulesenden Datensätzen:
 num_set = handles.Current_Settings.Simulation.Number_Runs;
@@ -68,10 +70,12 @@ for i = 1:num_set
 		else
 			name = [handles.NAT_Data.Simulation.Active_Scenario.Filename,'_',num2str(file_part_count,'%03.0f')];
 		end
-		Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
-		save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
-			'Load_Infeed_Data');
-		clear('Load_Infeed_Data');
+% 		Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
+% 		save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
+% 			'Load_Infeed_Data');
+% 		clear('Load_Infeed_Data');
+        handles.NAT_Data.save_LoadInfeedData_as_mat(...
+			handles.Current_Settings.Simulation.Scenarios_Path, name);
 		% delete the current data:
 		handles.NAT_Data.Load_Infeed_Data = [];
 		% reset the set-counter:
@@ -87,11 +91,12 @@ if save_part_files && i > (file_part_count * handles.System.number_max_datasets)
 	
 	fprintf(['\t\t\tSave file part no. ',num2str(file_part_count)]);
 	name = [handles.NAT_Data.Simulation.Active_Scenario.Filename,'_',num2str(file_part_count,'%03.0f')];
-	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
-	
-	save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
-		'Load_Infeed_Data');
-	clear('Load_Infeed_Data');
+% 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
+% 	save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
+% 		'Load_Infeed_Data');
+% 	clear('Load_Infeed_Data');
+	 handles.NAT_Data.save_LoadInfeedData_as_mat(...
+			handles.Current_Settings.Simulation.Scenarios_Path, name);
 end 
 if save_part_files
 	% Update the Scenario-Data:	

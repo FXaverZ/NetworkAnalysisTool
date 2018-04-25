@@ -23,7 +23,6 @@ else
 		handles = loaddata_get(handles);
 	end
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
-	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
 	% Speicherort = aktulles Netzfile
 	file = handles.Current_Settings.Files.Auto_Load_Feed_Data;
 	% Check, if a Subfolder for input-data is avaliable:
@@ -34,9 +33,9 @@ else
 	if ~isdir([file.Path])
 		mkdir([file.Path]);
 	end
-	% Save the files (on load-infeed file and one settings file:
-	save([file.Path,filesep,file.Name,file.Exte],...
-		'Load_Infeed_Data');
+	% Save the files (on load-infeed file and one settings file):
+	handles.NAT_Data.save_LoadInfeedData_as_mat(...
+			file.Path, file.Name);
 	Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 	System = handles.System; %#ok<NASGU>
 	save([file.Path,filesep,'Data_Settings.mat'],'Data_Extract','System');

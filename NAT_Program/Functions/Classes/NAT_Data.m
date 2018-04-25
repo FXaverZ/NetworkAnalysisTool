@@ -13,6 +13,9 @@ classdef NAT_Data < handle
 		Result
 	% Structure with the input data (loads and infeed)
 		Load_Infeed_Data
+	% Structure with the information settings at the extraction time of the
+	% Load_Infeed_Data
+	    Data_Extract
 	% Structure with data, which is neccesary during the running simulation:
 		Simulation
 	% Structure for saving debug information:
@@ -36,6 +39,13 @@ classdef NAT_Data < handle
                 obj.Grid.(cg).Branches.Transf.remove_COM_objects;
             end
 		end 
+		
+		function save_LoadInfeedData_as_mat (obj, path, name)
+			% save the Load_Infeed_Data to the specified path
+			Load_Infeed_Data = obj.Load_Infeed_Data; %#ok<NASGU,PROPLC>
+			save([path,filesep,name,'.mat'],'Load_Infeed_Data','-v7.3');
+			clear('Load_Infeed_Data');
+		end
 	end
 end
 

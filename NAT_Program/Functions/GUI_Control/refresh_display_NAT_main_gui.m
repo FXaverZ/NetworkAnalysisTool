@@ -108,9 +108,9 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		'Title', ['Details for ',...
 		handles.Current_Settings.Table_Network.Data{row,idx_na},':']);
 	set(handles.check_pqnode_active, ...
-			'Visible', 'on',...
-			'Enable',  'on',...
-			'Value',   handles.Current_Settings.Table_Network.Data{row,idx_ac});
+		'Visible', 'on',...
+		'Enable',  'on',...
+		'Value',   handles.Current_Settings.Table_Network.Data{row,idx_ac});
 	set(handles.text_pqnode_hh_typ, 'Visible', 'on');
 	set(handles.popup_pqnode_hh_typ,'Visible', 'on');
 	set(handles.text_pqnode_wi_typ, 'Visible', 'on');
@@ -159,7 +159,7 @@ if isfield(handles.Current_Settings.Table_Network, 'Selected_Row') && ...
 		set(handles.popup_pqnode_pv_typ, 'Visible', 'on', 'Value', sel_pv);
 		set(handles.text_pqnode_pv_installed_power_unit, 'Visible', 'on');
 		set(handles.edit_pqnode_pv_installed_power, 'Visible', 'on');
-
+		
 		set(handles.push_pqnode_pv_parameters, 'Visible', 'on');
 		if sel_pv > 1
 			set(handles.edit_pqnode_pv_installed_power, 'Enable', 'on',...
@@ -248,7 +248,7 @@ if ~isempty(handles.Current_Settings.Files.Grid.Name)
 	else
 		set(handles.push_network_load_random_allocation, 'Enable','on');
 		set(handles.push_network_table_import_export, 'Enable','on');
-
+		
 	end
 	set(handles.push_network_load_allocation_reset, 'Enable','on');
 	set(handles.push_load_data_get,'Enable','on');
@@ -282,6 +282,37 @@ end
 
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
 if ~isempty(handles.NAT_Data.Load_Infeed_Data)
+	% adopt possible selection of data typs based on available load- and infeed data:
+	if handles.NAT_Data.Data_Extract.get_Sample_Value
+		set(handles.radio_simulate_sample_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Sample_Value);
+	else
+		set(handles.radio_simulate_sample_value, 'Enable', 'off', 'Value', 0);
+	end
+	if handles.NAT_Data.Data_Extract.get_Mean_Value
+		set(handles.radio_simulate_mean_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Mean_Value);
+	else
+		set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
+	end
+	if handles.NAT_Data.Data_Extract.get_Max_Value
+		set(handles.radio_simulate_max_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Max_Value);
+	else
+		set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
+	end
+	if handles.NAT_Data.Data_Extract.get_Min_Value
+		set(handles.radio_simulate_min_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Min_Value);
+	else
+		set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
+	end
+	if handles.NAT_Data.Data_Extract.get_05_Quantile_Value
+		set(handles.radio_simulate_05q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_05_Quantile_Value);
+	else
+		set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
+	end
+	if handles.NAT_Data.Data_Extract.get_95_Quantile_Value
+		set(handles.radio_simulate_95q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_95_Quantile_Value);
+	else
+		set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
+	end
 	% activate simulation-button when
 	% - in the handles-structure a field named 'sin' is available (that means, that a
 	%   communication to SINCAL is there)
@@ -302,10 +333,25 @@ if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 			)
 		set(handles.push_network_calculation_start, 'Enable','on');
 	else
-		set(handles.push_network_calculation_start, 'Enable','off');
+		set(handles.push_network_calculation_start, 'Enable', 'off');
+		% Deactivate selection of data typs
+		set(handles.radio_simulate_sample_value, 'Enable', 'off', 'Value', 0);
+		set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
+		set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
+		set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
+		set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
+		set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
+		
 	end
 else
 	set(handles.push_network_calculation_start, 'Enable','off');
+	% Deactivate selection of data typs
+	set(handles.radio_simulate_sample_value, 'Enable', 'off', 'Value', 0);
+	set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
+	set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
+	set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
+	set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
+	set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
 end
 
 % Eingabefelder aktualisieren:
@@ -328,7 +374,7 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 		set(handles.push_load_data_get,'String', 'Load Scenariodata...');
 	end
 	set(handles.push_network_select_scenario,'Enable', 'on');
-	if isempty(handles.Current_Settings.Simulation.Scenarios_Selection);
+	if isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 		set(handles.edit_simulation_number_scenarios,'String',...
 			num2str(handles.Current_Settings.Simulation.Scenarios.Number));
 	else

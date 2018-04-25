@@ -337,6 +337,13 @@ Simulation.Grids_Path = Files.Main_Path;
 Simulation.Use_Scenarios = 1;
 Simulation.Scenarios_Path = Files.Main_Path;
 Simulation.Scenarios_Selection = [];
+% Datatyps to be used:
+Simulation.use_Sample_Value = 1;
+Simulation.use_Mean_Value = 0;
+Simulation.use_Max_Value = 0;
+Simulation.use_Min_Value = 0;
+Simulation.use_05_Quantile_Value = 0;
+Simulation.use_95_Quantile_Value = 0;
 
 Simulation.Voltage_Violation_Analysis = 0; 
 % 1 = Voltage violation analysis function is used
