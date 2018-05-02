@@ -2,6 +2,9 @@ function push_network_load_Callback_Add (hObject, handles)
 %PUSH_NETWORK_LOAD_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+handles.text_message_main_handler.add_line('"Load Grid..." pushed, loading single grid model into NAT:');
+handles.text_message_main_handler.level_up();
+
 % aktuellen Speicherort für Daten auslesen:
 file = handles.Current_Settings.Files.Grid;
 % Userabfrage nach Speicherort
@@ -32,6 +35,8 @@ switch user_response
 		% leave function ('Cancel' or 'abort')
 		return;
 end
+handles.text_message_main_handler.add_line(['Grid interpreted as type "',...
+	handles.Current_Settings.Grid.Type,'"']);
 
 % Entfernen der Dateierweiterung vom Dateinamen:
 [~, file.Name, file.Exte] = fileparts(file.Name);
@@ -46,17 +51,21 @@ handles.Current_Settings.Simulation.Grid_List = {};
 handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.Main_Path;
 
 % Netzdaten laden:
-handles = network_load (handles);
-
-% Tabelle mit Default-Werten befüllen:
-[handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
-	network_table_reset(handles);
-
-% clear grids list:
-handles.Current_Settings.Data_Extract.LV_Grids_List = {};
+try
+	handles = network_load (handles);
+	% Tabelle mit Default-Werten befüllen:
+	[handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
+		network_table_reset(handles);
+	% clear grids list:
+	handles.Current_Settings.Data_Extract.LV_Grids_List = {};
+catch ME
+	handles.text_message_main_handler.add_line('Error during loading of the grid:');
+	handles.text_message_main_handler.add_line(ME.message);
+end
 
 % Anzeige des Hauptfensters aktualisieren:
 handles = refresh_display_NAT_main_gui (handles);
+refresh_message_text_operation_finished (handles);
 
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);

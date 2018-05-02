@@ -2,6 +2,10 @@ function push_load_data_get_Callback_Add(hObject, handles)
 %PUSH_LOAD_DATA_GET_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+buttontext = get(handles.push_load_data_get, 'String');
+handles.text_message_main_handler.add_line('"',buttontext,'" pushed, loading loaddata into NAT:');
+handles.text_message_main_handler.level_up();
+
 set(handles.push_load_data_get, 'Enable', 'off');
 set(handles.push_cancel, 'Enable', 'on');
 pause(.01);
@@ -59,6 +63,8 @@ end
 % According to this, use different function for input-data creation:
 switch answer
 	case 'Load- and Infeed-Database'
+		handles.text_message_main_handler.add_line('Source: Load- and Infeed-Database "',...
+			handles.Current_Settings.Load_Database,'"');
 		handles = get_input_from_database(handles);
 		if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 			if handles.Current_Settings.Start_Simulation_after_Extraction
@@ -76,6 +82,7 @@ switch answer
 			return;
 		end
 	case 'Simulationresults'
+		handles.text_message_main_handler.add_line('Source: Simulationresults');
 		% User has to specify, which results he want's to use...
 		file = handles.Current_Settings.Files.Load.Result;
 		[file.Name,file.Path] = uigetfile([...
@@ -175,6 +182,7 @@ switch answer
 			end
 		end
 	case 'Simulationresults_resume'
+		handles.text_message_main_handler.add_line('Source: Simulationresults (resumed)');
 		[handles, error] = get_input_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
@@ -196,7 +204,10 @@ switch answer
 			end
 		end
 	case 'Orginal Data'
-		errordlg('Currently not supported!');
+		handles.text_message_main_handler.add_line('Source: Orginal Data');
+		errorstr = 'Currently not supported!';
+		errordlg(errorstr);
+		handles.text_message_main_handler.add_line('Error: ',errorstr);
 		%TODO: Extraction of Input-Data out of Simulation Resluts...
 	otherwise
 		% Do nothing...
@@ -206,6 +217,7 @@ end
 handles = refresh_display_NAT_main_gui(handles);
 set(handles.push_cancel, 'Enable', 'off');
 set(handles.push_load_data_get, 'Enable', 'on');
+refresh_message_text_operation_finished (handles);
 
 % Update the handles-structure:
 guidata(hObject, handles);

@@ -28,6 +28,14 @@ else
 % Ende Initializationscode - NICHT EDITIEREN!
 end
 
+function NAT_main_OpeningFcn(hObject, ~, handles, varargin)
+NAT_main_OpeningFcn_Impl(hObject, handles, varargin);
+
+function NAT_main_gui_CloseRequestFcn(hObject, ~, handles)
+NAT_main_gui_CloseRequestFcn_Impl(hObject, handles);
+
+function varargout = NAT_main_OutputFcn(hObject, eventdata, handles) %#ok<STOUT,INUSD>
+
 function check_analysis_branch_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
 check_analysis_Callback_Add (hObject, handles, 'branch_data_save');
 
@@ -173,128 +181,6 @@ function menue_data_save_Callback(hObject, ~, handles) %#ok<DEFNU>
 
 function menue_file_close_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 NAT_main_gui_CloseRequestFcn(hObject, eventdata, handles);
-
-function NAT_main_gui_CloseRequestFcn(hObject, ~, handles) %#ok<INUSL>
-% hObject    Link zur Grafik NAT_main_gui (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-
-user_response = questdlg(['Should the program be closed and all',...
-	' settings be saved for later use?'],'Beenden?',...
-	'Save & Close', 'Close', 'Cancel', 'Cancel');
-switch user_response
-	case 'Cancel'
-		% nichts unternehmen
-	case 'Close'
-		% Kein speichern der akutellen Einstellungen, nur beenden des Programms:
-		if isfield(handles, 'sin')
-			handles.sin.close_file_in_application;
-			handles.sin.close_database;
-		end
-		delete(handles.NAT_main_gui);
-	case 'Save & Close'
-		% Konfiguration speichern:
-		Current_Settings = handles.Current_Settings;
-		System = handles.System; %#ok<NASGU>
-		file = Current_Settings.Files.Last_Conf;
-		% Falls Pfad der Konfigurationsdatei nicht vorhanden ist, Ordner erstellen:
-		if ~isdir(file.Path)
-			mkdir(file.Path);
-		end
-		save([file.Path,filesep,file.Name,file.Exte],'Current_Settings','System');
-		if isfield(handles, 'sin')
-			handles.sin.close_file_in_application;
-			handles.sin.close_database;
-		end
-		delete(handles.NAT_main_gui);
-end
-
-function NAT_main_OpeningFcn(hObject, ~, handles, varargin)
-% Funktion wird vor Sichtbarwerden des Hauptfensters ausgeführt: 
-% hObject    Link zur Grafik NAT_main_gui (siehe GCBO)
-% ~			 nicht benötigt (MATLAB spezifisch)
-% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
-% varargin   Übergabevariablen an Access_Tool (see VARARGIN)
-
-% Wo ist "NAT_main.m" zu finden?
-[~, Source_File] = fileattrib('NAT_main.m');
-% Ordner, in dem "NAT_main.m" sich befindet, enthält Programm:
-if ischar(Source_File)
-	fprintf([Source_File,' - Current Directory auf Datei setzen, in der sich ',...
-		'''NAT_main.m'' befindet!\n']);
-	% Fenster schließen:
-	delete(handles.NAT_main_gui);
-	return;
-end
-Path = fileparts(Source_File.Name);
-
-% Subfolder in Search-Path aufnehmen (damit alle Funktionen gefunden werden
-% können)
-addpath(genpath(Path));
-handles.Current_Settings.Files.Main_Path = Path;
-
-% Default-Einstellungen laden
-handles = get_default_values_NAT(handles);
-% Load the Szenarios:
-handles = get_scenarios(handles);
-% create NAT_Data object, which is an instance of the NAT_Data-Class:
-handles.NAT_Data = NAT_Data();
-
-% GUI-Elemente mit Inhalten füllen:
-% Wochentage und Jahreszeiten anpassen:
-seas = handles.System.seasons;
-week = handles.System.weekdays;
-for i=1:3
-	set(handles.(['radio_season_',num2str(i)]),'String',seas{i,2});
-	set(handles.(['radio_weekday_',num2str(i)]),'String',week{i,2});
-end
-
-% Time resolutions:
-set(handles.popup_time_resolution, 'String', handles.System.time_resolutions(:,1));
-% Worst-Cases:
-set(handles.popup_hh_worstcase, 'String', handles.System.wc_households(:,1));
-set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation(:,1));
-
-% Versuch, die Einstellungen des letzen Durchlaufs zu laden:
-try
-	file = handles.Current_Settings.Files.Last_Conf;
-	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
-	handles.Current_Settings = Current_Settings;
-	handles.System = System;
-	try
-		% Netzdaten laden:
-		handles = network_load (handles);
-		% Tabelle mit Default-Werten befüllen:
-		[handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...
-			network_table_reset(handles);
-		% Lastdaten laden:
-		handles = load_input_last_settings(handles);
-	catch ME
-		disp('Fehler beim Laden des Netzes:');
-		disp(ME.message);
-	end
-catch ME
-	disp('Fehler beim Laden der Konfigurationsdatei:');
-	disp(ME.message);
-end
-
-% Logo anzeigen:
-% if strcmpi(getComputerName, 'eeapc14')
-	logo=imread('Figures\institutslogo.jpg','jpg');   % Einlesen der Grafik
-% else
-% 	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
-% end
-image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
-axis image;                                       % Grafik entzerren
-axis off;                                         % Achsenbezeichnung ausschalten
-
-% Anzeige des Hauptfensters aktualisieren:
-handles = refresh_display_NAT_main_gui (handles);
-
-% handles-Struktur aktualisieren:
-guidata(hObject, handles);
-
-function varargout = NAT_main_OutputFcn(hObject, eventdata, handles) %#ok<STOUT,INUSD>
 
 function popup_gen_worstcase_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    Link zur Grafik popup_hh_worstcase (siehe GCBO)

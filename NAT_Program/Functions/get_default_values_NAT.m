@@ -249,6 +249,10 @@ Files.Save.Result.Path = [Files.Main_Path,filesep,'Results'];
 Files.Save.Result.Name = 'Data';
 Files.Save.Result.Exte = '.mat';
 
+Files.Save.Log.Path = [Files.Main_Path,filesep,'Log'];
+Files.Save.Log.Name = 'NAT_Main_Log';
+Files.Save.Log.Exte = '.log';
+
 Files.Load.Result.Path = [Files.Main_Path,filesep,'Results'];
 Files.Load.Result.Name = 'Res_XXX - information';
 Files.Load.Result.Exte = '.mat';

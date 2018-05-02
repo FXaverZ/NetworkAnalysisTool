@@ -34,7 +34,14 @@ if ischar(Main_Path)
 		handles.Current_Settings.Simulation.Scenarios_Path = Main_Path;
 		handles.Current_Settings.Simulation.Use_Scenarios = 1;
 		handles.Current_Settings.Simulation.Scenarios_Selection = [];
-		[handles, error] = load_input_last_settings(handles);
+		try
+			handles = load_input_last_settings(handles);
+			error = 0;
+		catch ME
+			error = 1;
+			handles.text_message_main_handler.add_line('Error during loading of the current loaddata:');
+			handles.text_message_main_handler.add_line(ME.message);
+		end
 	else
 		load([Main_Path,filesep,'act_Load_Feed_Data.mat'])
 		handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;

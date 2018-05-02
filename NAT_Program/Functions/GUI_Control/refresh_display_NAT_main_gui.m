@@ -4,7 +4,7 @@ function handles = refresh_display_NAT_main_gui(handles)
 
 % Version:                 1.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 16.12.2014
+% Letzte Änderung durch:   Franz Zeilinger - 25.04.2018
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %      Einstellungen - Auslesen der Daten

@@ -9,6 +9,9 @@ function handles = network_load (handles)
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
 
+handles.text_message_main_handler.add_line('Try to load grid...');
+handles.text_message_main_handler.level_up();
+
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
 
@@ -29,6 +32,7 @@ end
 
 % Name of the current grid:
 cg = sin.Settings.Grid_name;
+handles.text_message_main_handler.add_line(['Loading Grid "',cg,'"...']);
 
 % Auslesen der aktuellen Tabelle mit den Elementdaten
 sin.table_data_load('Element');
@@ -107,5 +111,7 @@ d.Grid.(cg).Branches.Grouped = [d.Grid.(cg).Branches.Lines,...
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;
+handles.text_message_main_handler.add_line('... done');
+handles.text_message_main_handler.level_down();
 end
 
