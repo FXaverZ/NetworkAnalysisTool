@@ -260,7 +260,9 @@ Files.Load.Result.Exte = '.mat';
 % Name der automaisch gespeicherten Lastdaten (Pfad ist immer der Ordner des
 % jeweiligen Netzes): 
 Files.Auto_Load_Feed_Data.Name = 'act_Load_Feed_Data';
+Files.Auto_Load_Feed_Data.Data_Settings = 'Data_Settings';
 Files.Auto_Load_Feed_Data.Exte = '.mat';
+Files.Auto_Load_Feed_Data.Path = Files.Main_Path;
 
 Current_Settings.Files = Files;
 
@@ -321,9 +323,10 @@ Current_Settings.Table_Network = [];
 % Definieren der Simulations-Parameter:
 Simulation.Parameters = {...
 	'Calculation_method', 'LF_USYM',...   % Unsymmetrischer Lastfluss (RST)
-	'Batch_mode',          4,...         % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
-	'Database_typ',       'DB_EL',...    % Datenbanktyp "elektrisches Netz"
-	'Language',           'DE',...       % Ausgabe der Meldungen in Deutsch 
+	'Batch_mode',          4,...          % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
+	'Database_typ',       'DB_EL',...     % Datenbanktyp "elektrisches Netz"
+	'Language',           'US',...        % Ausgabe der Meldungen in Deutsch
+	'Database_Connector', 'ACCESS12',...  % Verwendeter Datenbankconnector (Hier: MS Access, .mdb
 	};
 % Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
 % Input-Datensätze sollen aus der Datenbank geladen werden?)

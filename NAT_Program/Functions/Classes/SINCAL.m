@@ -6,9 +6,9 @@ classdef SINCAL < handle
 	%    Die SINCAL-Instanz wird verwendet, um alle, mit dem Zugriff auf
 	%    SINCAL relevanten Variablen und Methoden zusammenzufassen.
 	
-	% Version:                 1.1
+	% Version:                 1.2
 	% Erstellt von:            Franz Zeilinger - 30.10.2012
-	% Letzte Änderung durch:   Franz Zeilinger - 28.09.2016
+	% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
 	
 	properties
 		Settings
@@ -122,31 +122,31 @@ classdef SINCAL < handle
 				throw(exception);
 			end
 			
-			% Je nach installierter MATLAB-Version das Simulationsobjekt erzeugen:
-			if strcmp(computer('arch'),'win64')
-				% Erzeugen eines SINCAL-Simulationsobjektes als "out of process
-				% server" (Anmerkung: Windows lässt nicht zu, dass eine 32-bit
-				% Anwendung (SINCAL) innerhalb einer 64-bit-Anwendung (MATLAB) als
-				% COM-Objekt aufgerufen werden kann. Daher muss ein eigener Prozess
-				% gestartet wereden!
+% 			% Je nach installierter MATLAB-Version das Simulationsobjekt erzeugen:
+% 			if strcmp(computer('arch'),'win64')
+% 				% Erzeugen eines SINCAL-Simulationsobjektes als "out of process
+% 				% server" (Anmerkung: Windows lässt nicht zu, dass eine 32-bit
+% 				% Anwendung (SINCAL) innerhalb einer 64-bit-Anwendung (MATLAB) als
+% 				% COM-Objekt aufgerufen werden kann. Daher muss ein eigener Prozess
+% 				% gestartet wereden!
 				obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
 				obj.Simulation = obj.SimulationSrv.GetSimulation;
-			elseif strcmp(computer('arch'),'win32')
-				% Auf 32-bit Systemen bzw. Installation von 32-bit MATLAB kann das
-				% SINCAL-Simulationsobjekt als "in process server" erzeugt werden,
-				% d.h. innerhalb des MATLAB-Prozesses (Vorteil: Nutzung des
-				% gemeinsamen Arbeitsspeicherbereichs --> schnellerer
-				% Datenaustausch).
-				%                 obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
-				%                 obj.Simulation = obj.SimulationSrv.GetSimulation;
-				obj.Simulation = actxserver('Sincal.Simulation');
-			else
-				exception = MException(...
-					'SINCAL:OpenDataBase:UnsuportedOperationSystem',...
-					['Not able to open a connection to SINCAL-Simulation ',...
-					'because of an unsupported operating system!']);
-				throw(exception);
-			end
+% 			elseif strcmp(computer('arch'),'win32')
+% 				% Auf 32-bit Systemen bzw. Installation von 32-bit MATLAB kann das
+% 				% SINCAL-Simulationsobjekt als "in process server" erzeugt werden,
+% 				% d.h. innerhalb des MATLAB-Prozesses (Vorteil: Nutzung des
+% 				% gemeinsamen Arbeitsspeicherbereichs --> schnellerer
+% 				% Datenaustausch).
+% 				%                 obj.SimulationSrv = actxserver('Sincal.SimulationSrv');
+% 				%                 obj.Simulation = obj.SimulationSrv.GetSimulation;
+% 				obj.Simulation = actxserver('Sincal.Simulation');
+% 			else
+% 				exception = MException(...
+% 					'SINCAL:OpenDataBase:UnsuportedOperationSystem',...
+% 					['Not able to open a connection to SINCAL-Simulation ',...
+% 					'because of an unsupported operating system!']);
+% 				throw(exception);
+% 			end
 			
 			% Setzen der Datenbankeinstellungen und Sprache:
 			obj.Simulation.Database ([...
@@ -225,7 +225,7 @@ classdef SINCAL < handle
 			% (for direct manipulation):
 			% First create the needed connection string:
 			if strcmpi('ACCESS',obj.Settings.Database_Connector)
-				%Connect to Access database given by input db [added by Martin Furlan, ]
+				%Connect to Access database given by input db
 				cnstr='PROVIDER=Microsoft.Jet.OLEDB.4.0;';
 				cnstr=[cnstr 'Data Source=' obj.Database.DBfilename ';'];
 			elseif strcmpi('SQL',obj.Settings.Database_Connector)
@@ -264,9 +264,10 @@ classdef SINCAL < handle
 				
 				obj.Valid_Database_Connection = true;
 			catch e
-				warning(['Open Connection to SINCAL database: Could not open source ',...
-					'database']);
-				warning(e.message);
+				warning('SINCAL:ConnectionSourceDatabase:Failed',...
+					['Could not connect to SINCAL source database. ',...
+					'Check installed database drivers.']);
+% 				warning(e.message);
 				obj.Valid_Database_Connection = false;
 			end
 		end

@@ -2,9 +2,13 @@ function handles = get_data_szenarios_load_infeed(handles)
 %GET_DATA_SZENARIOS_LOAD_INFEED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.5
+% Version:                 1.5.1
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
+% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
+
+mh = handles.text_message_main_handler;
+mh.add_line('Loading data for scenarios...');
+mh.level_up();
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if handles.Current_Settings.Simulation.Use_Grid_Variants && ~isempty(handles.Current_Settings.Simulation.Grid_List)

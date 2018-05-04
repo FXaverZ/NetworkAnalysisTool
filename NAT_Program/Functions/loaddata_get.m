@@ -2,9 +2,11 @@ function handles = loaddata_get(handles, varargin)
 %LOADDATA_GET Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.2
+% Version:                 1.3
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 04.07.2014
+% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
+
+mh = handles.text_message_main_handler;
 
 % prepare the functions arguments:
 if nargin == 2
@@ -24,11 +26,11 @@ num_set = handles.Current_Settings.Simulation.Number_Runs;
 
 if num_set == 1
 	% Ein einzelner Datensatz soll ausgelesen werden...
-	handles.text_message_main_handler.add_line('Auslesen der Lastdaten (für Einzeldurchlauf)...');
+	mh.add_line('Auslesen der Lastdaten (für Einzeldurchlauf)...');
 else
-	handles.text_message_main_handler.add_line('Auslesen der Lastdaten...');
+	mh.add_line('Auslesen der Lastdaten (',num_set,' Sets)...');
 end
-handles.text_message_main_handler.level_up();
+mh.level_up();
 
 % Diese erstellen:
 tic; %Zeitmessung start
@@ -48,17 +50,24 @@ for i = 1:num_set
 	get_data_elmob(handles, set_count);
 	% create dummy values of not needed input data
 	get_empty_data_lvgrids(handles, set_count);
-	
+	if i > 1
+		mh.remove_line(2);
+	end
 	if num_set > 1
 		% Infos to the console:
-		handles.text_message_main_handler.add_line('Satz ',i,' von ',num_set,' erledigt... ');
+		mh.add_line('Satz ',i,' von ',num_set,' erledigt... ');
 		t = toc;
 		progress = i/num_set;
 		time_elapsed = t/progress - t;
-		handles.text_message_main_handler.level_up();
-		handles.text_message_main_handler.add_line(' Laufzeit: ', sec2str(t),'. gesch. verbleibende Zeit: ',...
-			sec2str(time_elapsed));
-		handles.text_message_main_handler.level_down();
+		if i < num_set
+			mh.level_up();
+			mh.add_line(' Laufzeit: ', sec2str(t),'. Geschätzte verbleibende Zeit: ',...
+				sec2str(time_elapsed));
+			mh.level_down();
+		else
+			mh.remove_line;
+		end
+		mh.write_sub_logs();
 	end
 	if save_part_files && i >= ((file_part_count+1) * handles.System.number_max_datasets)
 		% save a part-file:
@@ -67,7 +76,7 @@ for i = 1:num_set
 		handles.NAT_Data.Simulation.Active_Scenario.Data_content(file_part_count) = handles.System.number_max_datasets;
 		% save the extracted data within a seperate file in the grid variants
 		% folder:
-		handles.text_message_main_handler.add_line('Save file part no. ',file_part_count);
+		mh.add_line('Save file part no. ',file_part_count);
 		if file_part_count == 1
 			name = handles.NAT_Data.Simulation.Active_Scenario.Filename;
 		else
@@ -88,7 +97,7 @@ if save_part_files && i > (file_part_count * handles.System.number_max_datasets)
 	handles.NAT_Data.Simulation.Active_Scenario.Data_content(file_part_count) = ...
 		i - (file_part_count-1) * handles.System.number_max_datasets;
 	
-	handles.text_message_main_handler.add_line('Save file part no. ',file_part_count);
+	mh.add_line('Save file part no. ',file_part_count);
 	name = [handles.NAT_Data.Simulation.Active_Scenario.Filename,'_',num2str(file_part_count,'%03.0f')];
 % 	Load_Infeed_Data = handles.NAT_Data.Load_Infeed_Data; %#ok<NASGU>
 % 	save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
@@ -103,6 +112,8 @@ if save_part_files
 	handles.NAT_Data.Simulation.Active_Scenario.Data_number_parts = file_part_count;
 end
 t = toc;
-handles.text_message_main_handler.add_line('--> erledigt (in ',sec2str(t),')!');
+mh.level_down();
+mh.add_line('... erledigt (in ',sec2str(t),')!');
+mh.level_down();
 end
 

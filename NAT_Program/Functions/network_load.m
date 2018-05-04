@@ -2,18 +2,26 @@ function handles = network_load (handles)
 %LOAD_NETWORK    Summary of this function goes here
 %    Detailed explanation goes here
 
-% Version:                 1.3
+% Version:                 1.4
 % Erstellt von:            Franz Zeilinger - 04.02.2013
-% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
 
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
-
-handles.text_message_main_handler.add_line('Try to load grid...');
-handles.text_message_main_handler.level_up();
-
+mh = handles.text_message_main_handler;
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
+
+mh.add_line('Try to load grid...');
+mh.level_up();
+
+% Name of the current grid:
+cg = settin.Files.Grid.Name;
+mh.add_line(['Loading Grid "',cg,'.sin" from "',settin.Files.Grid.Path,'"...']);
+
+% Catch Warnings:
+warning('off','SINCAL:ConnectionSourceDatabase:Failed');
+lastwarn('');
 
 if ~isfield(handles, 'sin')
 	% Erzeugen der SINCAL-Instanz:
@@ -30,9 +38,11 @@ else
 		'Grid_path', settin.Files.Grid.Path);
 end
 
-% Name of the current grid:
-cg = sin.Settings.Grid_name;
-handles.text_message_main_handler.add_line(['Loading Grid "',cg,'"...']);
+% Process occured warnings:
+[warnMsg, warnId] = lastwarn;
+if ~isempty(warnMsg)
+	mh.add_warning(warnMsg,'(ID: "',warnId,'")');
+end
 
 % Auslesen der aktuellen Tabelle mit den Elementdaten
 sin.table_data_load('Element');
@@ -66,10 +76,10 @@ d.Grid.(cg).P_Q_Node.Points = Connection_Point.empty(numel(d.Grid.(cg).P_Q_Node.
 for i=1:numel(d.Grid.(cg).P_Q_Node.ids)
 	d.Grid.(cg).P_Q_Node.Points(i) = Connection_Point(sin, d.Grid.(cg).P_Q_Node.ids(i));
 end
-% Allgemeine Knoten-Objekte erstellen: 
+% Allgemeine Knoten-Objekte erstellen:
 d.Grid.(cg).All_Node.Points = Connection_All_Point.empty(numel(d.Grid.(cg).All_Node.ids),0);
 for i=1:numel(d.Grid.(cg).All_Node.ids)
-    d.Grid.(cg).All_Node.Points(i) = Connection_All_Point(sin, d.Grid.(cg).All_Node.ids(i));
+	d.Grid.(cg).All_Node.Points(i) = Connection_All_Point(sin, d.Grid.(cg).All_Node.ids(i));
 end
 % Define Node-Voltage limits:
 d.Grid.(cg).All_Node.Points.define_voltage_limits;
@@ -77,7 +87,7 @@ d.Grid.(cg).All_Node.Points.define_voltage_limits;
 % Zugriffobjekte für alle Leitungen erstellen:
 d.Grid.(cg).Branches.Lines = Branch.empty(numel(d.Grid.(cg).Branches.line_ids),0);
 for i=1:numel(d.Grid.(cg).Branches.line_ids)
-    d.Grid.(cg).Branches.Lines(i) = Branch(sin, d.Grid.(cg).Branches.line_ids(i));
+	d.Grid.(cg).Branches.Lines(i) = Branch(sin, d.Grid.(cg).Branches.line_ids(i));
 end
 % Define branch-line limits
 d.Grid.(cg).Branches.Lines.define_branch_limits;
@@ -85,7 +95,7 @@ d.Grid.(cg).Branches.Lines.define_branch_limits;
 % Create object for access of transformer objects:
 d.Grid.(cg).Branches.Transf = Branch.empty(numel(d.Grid.(cg).Branches.tran_ids),0);
 for i=1:numel(d.Grid.(cg).Branches.tran_ids)
-    d.Grid.(cg).Branches.Transf(i) = Branch(sin, d.Grid.(cg).Branches.tran_ids(i));
+	d.Grid.(cg).Branches.Transf(i) = Branch(sin, d.Grid.(cg).Branches.tran_ids(i));
 end
 % Define branch-transf limits
 d.Grid.(cg).Branches.Transf.define_branch_limits;
@@ -111,7 +121,7 @@ d.Grid.(cg).Branches.Grouped = [d.Grid.(cg).Branches.Lines,...
 
 % SINCAL-Objekt speichern:
 handles.sin = sin;
-handles.text_message_main_handler.add_line('... done');
-handles.text_message_main_handler.level_down();
+mh.level_down();
+mh.add_line('... Grid successfully loaded!');
 end
 

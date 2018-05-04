@@ -29,6 +29,30 @@ else
 end
 
 function NAT_main_OpeningFcn(hObject, ~, handles, varargin)
+% Funktion wird vor Sichtbarwerden des Hauptfensters ausgeführt:
+% hObject    Link zur Grafik NAT_main_gui (siehe GCBO)
+% ~			 nicht benötigt (MATLAB spezifisch)
+% handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
+% varargin   Übergabevariablen an NAT (see VARARGIN)
+
+% Wo ist "NAT_main.m" zu finden?
+[~, Source_File] = fileattrib('NAT_main.m');
+% Ordner, in dem "NAT_main.m" sich befindet, enthält Programm:
+if ischar(Source_File)
+	fprintf([Source_File,' - Current Directory auf Datei setzen, in der sich ',...
+		'''NAT_main.m'' befindet!\n']);
+	% Fenster schließen:
+	delete(handles.NAT_main_gui);
+	return;
+end
+Path = fileparts(Source_File.Name);
+
+% Subfolder in Search-Path aufnehmen (damit alle Funktionen gefunden werden
+% können)
+addpath(genpath(Path));
+handles.Current_Settings.Files.Main_Path = Path;
+
+% Restliche OpeningFcn
 NAT_main_OpeningFcn_Impl(hObject, handles, varargin);
 
 function NAT_main_gui_CloseRequestFcn(hObject, ~, handles)

@@ -2,9 +2,10 @@ function push_load_data_get_Callback_Add(hObject, handles)
 %PUSH_LOAD_DATA_GET_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+mh = handles.text_message_main_handler;
 buttontext = get(handles.push_load_data_get, 'String');
-handles.text_message_main_handler.add_line('"',buttontext,'" pushed, loading loaddata into NAT:');
-handles.text_message_main_handler.level_up();
+mh.add_line('"',buttontext,'" pushed, loading loaddata into NAT:');
+mh.level_up();
 
 set(handles.push_load_data_get, 'Enable', 'off');
 set(handles.push_cancel, 'Enable', 'on');
@@ -63,8 +64,8 @@ end
 % According to this, use different function for input-data creation:
 switch answer
 	case 'Load- and Infeed-Database'
-		handles.text_message_main_handler.add_line('Source: Load- and Infeed-Database "',...
-			handles.Current_Settings.Load_Database,'"');
+		mh.add_line('Source: Load- and Infeed-Database "',...
+			handles.Current_Settings.Load_Database.Name,'"');
 		handles = get_input_from_database(handles);
 		if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 			if handles.Current_Settings.Start_Simulation_after_Extraction
@@ -76,13 +77,15 @@ switch answer
 				push_network_calculation_start_Callback_Add (hObject, handles);
 				return;
 			else
-				helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+				str = 'Daten erfolgreich geladen!';
+				mh.add_line(str);
+				helpdlg(str, 'Laden der Input-Daten...');
 			end
 		else
 			return;
 		end
 	case 'Simulationresults'
-		handles.text_message_main_handler.add_line('Source: Simulationresults');
+		mh.add_line('Source: Simulationresults');
 		% User has to specify, which results he want's to use...
 		file = handles.Current_Settings.Files.Load.Result;
 		[file.Name,file.Path] = uigetfile([...
@@ -182,7 +185,7 @@ switch answer
 			end
 		end
 	case 'Simulationresults_resume'
-		handles.text_message_main_handler.add_line('Source: Simulationresults (resumed)');
+		mh.add_line('Source: Simulationresults (resumed)');
 		[handles, error] = get_input_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
@@ -204,10 +207,10 @@ switch answer
 			end
 		end
 	case 'Orginal Data'
-		handles.text_message_main_handler.add_line('Source: Orginal Data');
+		mh.add_line('Source: Orginal Data');
 		errorstr = 'Currently not supported!';
 		errordlg(errorstr);
-		handles.text_message_main_handler.add_line('Error: ',errorstr);
+		mh.add_line('Error: ',errorstr);
 		%TODO: Extraction of Input-Data out of Simulation Resluts...
 	otherwise
 		% Do nothing...

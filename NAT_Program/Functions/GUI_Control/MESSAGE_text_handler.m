@@ -2,17 +2,20 @@ classdef MESSAGE_text_handler < handle
 	%MESSAGE_TEXT_HANDLER   Class to provide methods to manage GUI text fields
 	%   Detailed explanation goes here
 
-	% Version:                 1.0
+	% Version:                 1.1
 	% Created by:              Franz Zeilinger - 01.10.2015
-	% Last change by:          
+	% Last change by:          Franz Zeilinger - 04.05.2018
 
 	properties
 		Current_Text_to_Display = {}
 		Current_Text_to_Save = {}
 		MAX_Lines = 0
 		MAX_Colum = 0
+		
 		Line_Count_Display = 0
 		Line_Count_Overall = 0
+		Line_Count_Saved = 0
+		
 		handle_textfield
 		
 		OutputToConsole = false
@@ -23,6 +26,13 @@ classdef MESSAGE_text_handler < handle
 		Blanks_per_Level = 4;
 		
 		OutputFile_handle
+		
+		Sub_Log_Marker = {
+			'Line_Count_Overall';...
+			'Current_Level';...
+			'OutputFileHandle';...
+			'OutputFile';...
+			};
 	end
 	
 	methods
@@ -95,7 +105,7 @@ classdef MESSAGE_text_handler < handle
 				if ~ischar(str)
 					try
 						str = num2str(str);
-					catch ME
+					catch
 						str = '';
 					end
 				end
@@ -119,9 +129,26 @@ classdef MESSAGE_text_handler < handle
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
 		end
 		
-		function obj = rem_line(obj)
-			obj.Current_Text_to_Display = obj.Current_Text_to_Display(1:end-1);
-			obj.Line_Count_Display = obj.Line_Count_Display - 1;
+		function obj = add_error(obj, varargin)
+			obj.add_line('ERROR: ',varargin{:});
+		end
+		
+		function obj = add_warning(obj, varargin)
+			obj.add_line('WARNING: ',varargin{:});
+		end
+		
+		function obj = remove_line (obj, varargin)
+			if nargin == 1
+				lines_to_remove = 1;
+			elseif nargin == 2
+				lines_to_remove = varargin{1};
+			end
+			if lines_to_remove > obj.Line_Count_Display
+				obj.reset_text();
+				return;
+			end
+			obj.Current_Text_to_Display = obj.Current_Text_to_Display(1:end-lines_to_remove);
+			obj.Line_Count_Display = obj.Line_Count_Display - lines_to_remove;
 			if obj.Line_Count_Display < 0
 				obj.Line_Count_Display = 0;
 			end
@@ -158,6 +185,10 @@ classdef MESSAGE_text_handler < handle
 			obj.Current_Level = 0;
 		end
 		
+		function obj = set_OutputFile (obj, outputfilename)
+			obj.OutputFile = outputfilename;
+		end
+		
 		function obj = save_message_text(obj)
 			if isempty(obj.OutputFile)
 				warning('No outputfile was specified!');
@@ -167,12 +198,12 @@ classdef MESSAGE_text_handler < handle
 			if isempty(obj.OutputFile_handle)
 				obj.OutputFile_handle = fopen(obj.OutputFile,'a');
 			end
-			for i=1:numel(obj.Current_Text_to_Save)
-				obj.Current_Text_to_Save{i} = strrep(obj.Current_Text_to_Save{i},'\','\\');
-				fprintf(obj.OutputFile_handle,[obj.Current_Text_to_Save{i},'\n']);
+			for i=obj.Line_Count_Saved+1:numel(obj.Current_Text_to_Save)
+				savestr = strrep(obj.Current_Text_to_Save{i},'\','\\');
+				fprintf(obj.OutputFile_handle,[savestr,'\n']);
 			end
 			
-			obj.Current_Text_to_Save = {};
+			obj.Line_Count_Saved = obj.Line_Count_Overall;
 		end
 		
 		function obj = divider(obj, charakter, varargin)
@@ -182,6 +213,60 @@ classdef MESSAGE_text_handler < handle
 			else
 			end
 			obj.add_line(str);
+		end
+		
+		function obj = mark_sub_log (obj, outputfilename)
+			obj.clear_saved_text();
+			obj.Sub_Log_Marker{1,end+1} = obj.Line_Count_Overall;
+			obj.Sub_Log_Marker{2,end} = obj.Current_Level;
+			obj.Sub_Log_Marker{3,end} = fopen(outputfilename,'a');
+			obj.Sub_Log_Marker{4,end} = outputfilename;
+		end
+		
+		function obj = reset_sub_logs (obj)
+			obj.write_sub_logs();
+			for a = 2:size(obj.Sub_Log_Marker,2)
+				fclose(obj.Sub_Log_Marker{3,a});
+			end
+			obj.Sub_Log_Marker = {
+				'Line_Count_Overall';...
+				'Current_Level';...
+				'OutputFileHandle';...
+				'OutputFile';...
+				};
+			obj.clear_saved_text();
+		end
+		
+		function obj = stop_sub_log (obj, outputfilename)
+			idx = strcmp(outputfilename, obj.Sub_Log_Marker(4,:));
+			fclose(obj.Sub_Log_Marker{3,idx});
+			obj.Sub_Log_Marker = obj.Sub_Log_Marker(:,~idx);
+		end
+		
+		function obj = clear_saved_text(obj)
+			if obj.Line_Count_Saved == obj.Line_Count_Overall
+				obj.Line_Count_Saved = 0;
+				obj.Line_Count_Overall = 0;
+				obj.Current_Text_to_Save = {};
+			end
+			obj.Current_Text_to_Save = obj.Current_Text_to_Save(obj.Line_Count_Saved+1:obj.Line_Count_Overall);
+			obj.Line_Count_Overall = numel(obj.Current_Text_to_Save);
+			obj.Line_Count_Saved = 0;
+		end
+		
+		function write_sub_logs (obj)
+			for a = 2:size(obj.Sub_Log_Marker,2)
+				if obj.Sub_Log_Marker{1,a} >= obj.Line_Count_Overall
+					continue;
+				end
+				for b = obj.Sub_Log_Marker{1,a}+1:numel(obj.Current_Text_to_Save)
+					savestr = strrep(obj.Current_Text_to_Save{b},'\','\\');
+					savestr = savestr(obj.Blanks_per_Level*obj.Sub_Log_Marker{2,a}+1:end);
+					fprintf(obj.Sub_Log_Marker{3,a},[savestr,'\n']);
+				end
+				obj.Sub_Log_Marker{1,a} = obj.Line_Count_Overall;
+			end
+			obj.clear_saved_text();
 		end
 	end
 	

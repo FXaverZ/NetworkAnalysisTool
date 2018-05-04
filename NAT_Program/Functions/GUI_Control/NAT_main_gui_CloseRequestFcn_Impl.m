@@ -3,6 +3,8 @@ function NAT_main_gui_CloseRequestFcn_Impl(~, handles)
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+mh = handles.text_message_main_handler;
+
 user_response = questdlg(['Should the program be closed and all',...
 	' settings be saved for later use?'],'Beenden?',...
 	'Save & Close', 'Close', 'Cancel', 'Cancel');
@@ -10,16 +12,17 @@ switch user_response
 	case 'Cancel'
 		% nichts unternehmen
 	case 'Close'
-		handles.text_message_main_handler.add_line('Closing NAT without saving current configuration.');
+		mh.add_line('Closing NAT without saving current configuration.');
 		% Kein speichern der akutellen Einstellungen, nur beenden des Programms:
 		if isfield(handles, 'sin')
 			handles.sin.close_file_in_application;
 			handles.sin.close_database;
 		end
+		mh.reset_sub_logs();
 		refresh_message_text_operation_finished (handles);
 		delete(handles.NAT_main_gui);
 	case 'Save & Close'
-		handles.text_message_main_handler.add_line('Closing NAT. Saving current configuration...');
+		mh.add_line('Closing NAT. Saving current configuration...');
 		% Konfiguration speichern:
 		Current_Settings = handles.Current_Settings;
 		System = handles.System; %#ok<NASGU>
@@ -33,7 +36,8 @@ switch user_response
 			handles.sin.close_file_in_application;
 			handles.sin.close_database;
 		end
-		handles.text_message_main_handler.add_line('... done.');
+		mh.add_line('... done.');
+		mh.reset_sub_logs();
 		refresh_message_text_operation_finished (handles);
 		delete(handles.NAT_main_gui);
 end

@@ -2,8 +2,9 @@ function push_network_load_Callback_Add (hObject, handles)
 %PUSH_NETWORK_LOAD_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
-handles.text_message_main_handler.add_line('"Load Grid..." pushed, loading single grid model into NAT:');
-handles.text_message_main_handler.level_up();
+mh = handles.text_message_main_handler;
+mh.add_line('"Load Grid..." pushed, loading single grid model into NAT:');
+mh.level_up();
 
 % aktuellen Speicherort für Daten auslesen:
 file = handles.Current_Settings.Files.Grid;
@@ -16,8 +17,10 @@ file = handles.Current_Settings.Files.Grid;
 % Überprüfen, ob ungültiger Speicherort angegeben wurde:
 if isequal(file.Name,0) || isequal(file.Path,0)
 	% If not, return to calling function:
-	% Update main GUI
+	mh.add_line('Canceled by user.');
+	% Anzeige des Hauptfensters aktualisieren:
 	handles = refresh_display_NAT_main_gui (handles);
+	refresh_message_text_operation_finished (handles);
 	% update handles structure:
 	guidata(hObject, handles);
 	return;
@@ -35,7 +38,7 @@ switch user_response
 		% leave function ('Cancel' or 'abort')
 		return;
 end
-handles.text_message_main_handler.add_line(['Grid interpreted as type "',...
+mh.add_line(['Grid interpreted as type "',...
 	handles.Current_Settings.Grid.Type,'"']);
 
 % Entfernen der Dateierweiterung vom Dateinamen:
@@ -59,8 +62,7 @@ try
 	% clear grids list:
 	handles.Current_Settings.Data_Extract.LV_Grids_List = {};
 catch ME
-	handles.text_message_main_handler.add_line('Error during loading of the grid:');
-	handles.text_message_main_handler.add_line(ME.message);
+	mh.add_error(ME.message);
 end
 
 % Anzeige des Hauptfensters aktualisieren:
