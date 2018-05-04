@@ -26,6 +26,7 @@ if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 			handles = refresh_display_NAT_main_gui(handles);
 			set(handles.push_cancel, 'Enable', 'off');
 			set(handles.push_load_data_get, 'Enable', 'on');
+			mh.add_line('Canceled by user.');
 			% Update the handles-structure:
 			guidata(hObject, handles);
 			return;
@@ -214,6 +215,7 @@ switch answer
 		%TODO: Extraction of Input-Data out of Simulation Resluts...
 	otherwise
 		% Do nothing...
+		mh.add_line('Canceled by user.');
 end
 
 % Refresh the GUI:
