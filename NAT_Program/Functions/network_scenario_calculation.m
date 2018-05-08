@@ -6,6 +6,9 @@ function handles = network_scenario_calculation(handles)
 % Erstellt von:            Franz Zeilinger - 24.04.2013
 % Letzte Änderung durch:   Franz Zeilinger - 07.11.2013
 
+mh = handles.text_message_main_handler;
+mh.addline('Performing Scenario based grid simulations...');
+
 % check, if simulation makes sense:
 if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
 		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...

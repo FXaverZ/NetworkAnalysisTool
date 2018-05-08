@@ -8,6 +8,7 @@ function handles = network_calculation_LV(handles)
 
 % Zugriff auf Datenobjekt:
 d = handles.NAT_Data;
+mh = handles.text_message_main_handler;
 % Current Settings:
 cur_set = handles.Current_Settings;
 % Simulation Settings:
@@ -16,9 +17,13 @@ sim_set = cur_set.Simulation;
 if ~(sim_set.Voltage_Violation_Analysis || ...
 		sim_set.Branch_Violation_Analysis || ...
 		sim_set.Power_Loss_Analysis)
-	fprintf('\nNo active analysis function! Abort simulation...\n')
-	errordlg('No active analysis function! Abort simulation...');
-	return;
+	errorstr = 'No active analysis function! Abort simulation...';
+	mh.add_error(errorstr);
+	errordlg(errorstr);
+	exception = MException(...
+		'NAT:NetworkCalculationLV:NoAnalysisSpecified',...
+		errorstr);
+	throw(exception);
 end
 
 % getting infos about the grids to be simulated:
@@ -57,7 +62,8 @@ if cur_set.Simulation.use_95_Quantile_Value
 	data_typ = '_95P_Quantil';
 end
 
-fprintf('\nStart with Grid-Calculations...\n');
+mh.add_line('Start with Grid-Calculations...');
+mh.level_up;
 num_data_set = cur_set.Data_Extract.Number_Data_Sets;
 
 for i=1:numel(Grid_List)
@@ -70,8 +76,9 @@ for i=1:numel(Grid_List)
 	% current grid name
 	cg = handles.sin.Settings.Grid_name;
 	
-	fprintf(['Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
-		' (',cg,')\n']);
+	mh.add_line('Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
+		' (',cg,')');
+	mh.level_up;
 	
 	% create an empty network substrucure for the results:
 	d.Result.(cg) = [];
@@ -93,12 +100,18 @@ for i=1:numel(Grid_List)
 		% simulted (because of problems, if more profiles are simulated in
 		% one row! SINCAL chrushes then!)
 		if j > (reset_counter * handles.System.number_max_profiles_simulated)
-			fprintf('\t\t\tReset of RPC-Connection...');
+			mh.add_line('Reset of RPC-Connection...');
 			reset_counter = reset_counter + 1;
 			% re-load the network data:
 			handles = network_load (handles);
-			fprintf('\t done!\n');
+			mh.add_line('...done!');
 		end
+		
+		mh.add_line('Loadprofile No. ',j,' of ', num_data_set,...
+			' (',cur_set.Data_Extract.Timepoints_per_dataset,...
+			' Timepoints)');
+		mh.level_up();
+		drawnow();
 		
 		%----------------------------------------------------------------------------
 		% Übernehmen der akutell geladenen Daten:
@@ -109,64 +122,65 @@ for i=1:numel(Grid_List)
 		Elmo_Data = d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]);
 		cur_set.Table_Network = d.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
 		
-% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% 		% Debug: generate debug input data:
-% 		if j==1
-% 			factor = 1;
-% 		elseif j==2;
-% 			factor = 1.25;
-% 		else
-% 			factor = 3;
-% 		end
-% 		
-% 		% Debug: set all Values to zero:
-% 		Load_Data = zeros(size(Load_Data));
-% 		Sola_Data = zeros(size(Sola_Data));
-% 		Elmo_Data = zeros(size(Elmo_Data));
-% 		LVGr_Data = zeros(size(LVGr_Data));
-% 		
-% 		idx = 0:15;
-% 		
-% 		idx_1 = [(0:71),(72:-1:1)]';
-% 		idx_1 = idx_1 / max(idx_1);
-% 		idx_2 = [(71:-1:0),(1:1:72)]';
-% 		idx_2 = idx_2 / max(idx_2);
-% 		idx_3 = [idx_1(50:end);idx_1(1:49)];
-% 		%figure;plot([idx_1,idx_2,idx_3]);
-% 		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
-% 		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
-% 		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
-% 		%figure;plot(Elmo_Data(:,[1 3 5]+18));
-% 		
-% 		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-% 		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-% 		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
-% 		LVGr_Data = Load_Data + Elmo_Data;
-% 		%figure;plot(LVGr_Data(:,[1 3 5]));
-% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+		% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+		% 		% Debug: generate debug input data:
+		% 		if j==1
+		% 			factor = 1;
+		% 		elseif j==2;
+		% 			factor = 1.25;
+		% 		else
+		% 			factor = 3;
+		% 		end
+		%
+		% 		% Debug: set all Values to zero:
+		% 		Load_Data = zeros(size(Load_Data));
+		% 		Sola_Data = zeros(size(Sola_Data));
+		% 		Elmo_Data = zeros(size(Elmo_Data));
+		% 		LVGr_Data = zeros(size(LVGr_Data));
+		%
+		% 		idx = 0:15;
+		%
+		% 		idx_1 = [(0:71),(72:-1:1)]';
+		% 		idx_1 = idx_1 / max(idx_1);
+		% 		idx_2 = [(71:-1:0),(1:1:72)]';
+		% 		idx_2 = idx_2 / max(idx_2);
+		% 		idx_3 = [idx_1(50:end);idx_1(1:49)];
+		% 		%figure;plot([idx_1,idx_2,idx_3]);
+		% 		Elmo_Data(:,idx*6+1) = repmat(idx_1,1,size(Elmo_Data(:,idx*6+1),2))*25000*factor;
+		% 		Elmo_Data(:,idx*6+3) = repmat(idx_2,1,size(Elmo_Data(:,idx*6+3),2))*25000*factor;
+		% 		Elmo_Data(:,idx*6+5) = repmat(idx_3,1,size(Elmo_Data(:,idx*6+5),2))*25000*factor;
+		% 		%figure;plot(Elmo_Data(:,[1 3 5]+18));
+		%
+		% 		Load_Data(:,1:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+		% 		Load_Data(:,3:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+		% 		Load_Data(:,5:6:end) = ones(size(Load_Data(:,1:6:end))) * 30000;
+		% 		LVGr_Data = Load_Data + Elmo_Data;
+		% 		%figure;plot(LVGr_Data(:,[1 3 5]));
+		% 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		
 		if ~isempty(Load_Data)
+			mh.add_line('Adapting Input data.');
 			[Load_Data, Sola_Data, Elmo_Data] = adapt_input_data(Load_Data, Sola_Data, Elmo_Data);
 		end
 		
-% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% 		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
-% 		% few hours:
-% 		curtailed_data = false;
-% 		if size(Load_Data,1) > 86000
-% 			curtailed_data = true;
-% 			% section of day to be simulated in h:
-% 			time_start = 7;
-% 			time_end = time_start + 6;
-% 			time_start = time_start*60*60;
-% 			time_end = time_end*60*60;
-% 			Load_Data = Load_Data(time_start:time_end,:);
-% 			cur_set.Data_Extract.Time_Series.Date_Start = time_start/(24*60*60);
-% 			cur_set.Data_Extract.Time_Series.Duration = (time_end - time_start)/(24*60*60);
-% 			cur_set.Data_Extract.Timepoints_per_dataset = size(Load_Data,1);
-% 		end
-% 		cur_set.Data_Extract.Time_Series.curtailed_data = curtailed_data;
-% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		% 		% Quick Add-in: If a day is simulated in seconds resolution, just simulate a
+		% 		% few hours:
+		% 		curtailed_data = false;
+		% 		if size(Load_Data,1) > 86000
+		% 			curtailed_data = true;
+		% 			% section of day to be simulated in h:
+		% 			time_start = 7;
+		% 			time_end = time_start + 6;
+		% 			time_start = time_start*60*60;
+		% 			time_end = time_end*60*60;
+		% 			Load_Data = Load_Data(time_start:time_end,:);
+		% 			cur_set.Data_Extract.Time_Series.Date_Start = time_start/(24*60*60);
+		% 			cur_set.Data_Extract.Time_Series.Duration = (time_end - time_start)/(24*60*60);
+		% 			cur_set.Data_Extract.Timepoints_per_dataset = size(Load_Data,1);
+		% 		end
+		% 		cur_set.Data_Extract.Time_Series.curtailed_data = curtailed_data;
+		% 		% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		
 		% Save the maybe altered Data for the OAT-Programm:
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).Households.(['Data',data_typ]) = Load_Data;
@@ -174,9 +188,13 @@ for i=1:numel(Grid_List)
 		d.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]) = Elmo_Data;
 		
 		if isempty(Load_Data) && isempty(Elmo_Data) && isempty(Sola_Data)
-			errordlg('Not enough input-Data for simulation!');
-			fprintf('\nNo load data found! Abort simulation...\n')
-			return;
+			errorstr = 'Not enough input-Data for simulation!';
+			errordlg(errorstr);
+			mh.add_error(errorstr);
+			exception = MException(...
+				'NAT:NetworkCalculationLV:NotEnoughInputData',...
+				errorstr);
+			throw(exception);
 		end
 		
 		% Die Daten an SINCAL anpassen (Leistungen in MW und pos. bei Verbrauch):
@@ -225,7 +243,7 @@ for i=1:numel(Grid_List)
 		idx_pq_na = strcmp(cur_set.Table_Network.ColumnName, 'Names');
 		% where are the number of households of the node?
 		idx_hh_nu = strcmp(cur_set.Table_Network.ColumnName, 'Hh. Number');
-		% where in the additional table are the household typs? 
+		% where in the additional table are the household typs?
 		idx_hh_ty = strcmp(cur_set.Table_Network.Additional_Data_Content, 'HHs_Selection');
 		
 		% create emtpy instances of the Class Unit_Time_Dependet according to the number
@@ -263,8 +281,8 @@ for i=1:numel(Grid_List)
 					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6)); % Lastgang des Last
 				d.Grid.(cg).Load.Loads(load_counter) = obj;
 				
-% 				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
-% 					,hh_typ,'(',num2str(l),')']);
+				% 				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
+				% 					,hh_typ,'(',num2str(l),')']);
 				
 				%incread counter for load objects and decrease number of households of
 				%this typ to be connected:
@@ -338,11 +356,6 @@ for i=1:numel(Grid_List)
 		d.Simulation.Grid_act = cg;
 		d.Simulation.Input_Data_act = j;
 		
-		fprintf(['\t\tLoadprofile No. ',num2str(j),' of ',...
-			num2str(num_data_set),...
-			' (',num2str(cur_set.Data_Extract.Timepoints_per_dataset),...
-			' Timepoints)']);
-		
 		for k=1:sim_set.Timepoints
 			try
 				% aktuellen Zeipunkt speichern:
@@ -389,10 +402,11 @@ for i=1:numel(Grid_List)
 				if mod(k,100) == 0
 					% Statusinfo zum Gesamtfortschritt an User:
 					t = toc;
-					fprintf([num2str(k),' Timepoints calculated. Elapsed time: ',...
+					mh.add_line(k,' Timepoints calculated. Elapsed time: ',...
 						sec2str(t),...
 						'. Remaining time: ',...
-						sec2str(t/(k/sim_set.Timepoints) - t),'\n']);
+						sec2str(t/(k/sim_set.Timepoints) - t));
+					drawnow();
 				end
 			catch ME
 				d = handles.NAT_Data;
@@ -414,26 +428,31 @@ for i=1:numel(Grid_List)
 				d.Result.(cg).Error_Counter(cd,ct) = d.Result.(cg).Error_Counter(cd,ct) + 1;
 				% Give Informations about the occoured error:
 				
-				fprintf(['\t\t\t', strrep(ME.message, sprintf('\n'),'')]);
-				fprintf(['\t\t\t\tCurrently simulating timepoint ',num2str(ct),'\n']);
+				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
+				mh.add_error('Currently simulating timepoint ',ct);
 				for l=1:3
-					fprintf(['\t\t\t\tfile: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...
+					mh.level_up();
+					mh.add_error('file: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...
 						'; name: ',ME.stack(l).name,...
-						'; line: ',num2str(ME.stack(l).line),'\n']);
+						'; line: ',ME.stack(l).line);
+					mh.level_down();
+					drawnow();
 				end
 			end
 		end
 		
 		% Statusinfo zum Gesamtfortschritt an User:
 		t = toc;
-		fprintf([' finished. Elapsed time: ',...
+		mh.level_down();
+		mh.add_line('finished. Elapsed time: ',...
 			sec2str(t),...
 			'. Remaining time: ',...
-			sec2str(t/(j/num_data_set) - t),'\n']);
+			sec2str(t/(j/num_data_set) - t));
 		err_count = sum(d.Result.(cg).Error_Counter(j,:));
 		if err_count > 0
-			fprintf(['\t\t\tDuring the calculations ',...
-				num2str(err_count),' errors occured!\n']);
+			mh.add_line('During the calculations ',...
+				num2str(err_count),' errors occured!');
+			drawnow();
 		end
 	end
 	
@@ -444,5 +463,10 @@ for i=1:numel(Grid_List)
 	% write back maybe altered data:
 	cur_set.Simulation = sim_set;
 	handles.Current_Settings = cur_set;
+
+end
+mh.level_down();
+mh.addline('Simulations finished!');
+drawnow();
 end
 
