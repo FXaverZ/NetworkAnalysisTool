@@ -2,9 +2,9 @@ classdef MESSAGE_text_handler < handle
 	%MESSAGE_TEXT_HANDLER   Class to provide methods to manage GUI text fields
 	%   Detailed explanation goes here
 
-	% Version:                 1.1
+	% Version:                 1.2
 	% Created by:              Franz Zeilinger - 01.10.2015
-	% Last change by:          Franz Zeilinger - 04.05.2018
+	% Last change by:          Franz Zeilinger - 09.05.2018
 
 	properties
 		Current_Text_to_Display = {}
@@ -127,6 +127,7 @@ classdef MESSAGE_text_handler < handle
 			obj.Line_Count_Display = obj.Line_Count_Display + 1;
 			
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
+			drawnow();
 		end
 		
 		function obj = add_error(obj, varargin)
@@ -153,6 +154,7 @@ classdef MESSAGE_text_handler < handle
 				obj.Line_Count_Display = 0;
 			end
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
+			drawnow();
 		end
 		
 		function obj = rem_first_line(obj)
@@ -168,6 +170,7 @@ classdef MESSAGE_text_handler < handle
 			obj.Current_Text_to_Display = {};
 			obj.Line_Count_Display = 0;
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
+			drawnow();
 		end
 		
 		function obj = level_down(obj)
@@ -238,6 +241,7 @@ classdef MESSAGE_text_handler < handle
 		end
 		
 		function obj = stop_sub_log (obj, outputfilename)
+			obj.write_sub_logs();
 			idx = strcmp(outputfilename, obj.Sub_Log_Marker(4,:));
 			fclose(obj.Sub_Log_Marker{3,idx});
 			obj.Sub_Log_Marker = obj.Sub_Log_Marker(:,~idx);

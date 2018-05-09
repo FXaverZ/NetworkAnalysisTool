@@ -7,7 +7,7 @@ function handles = get_data_szenarios_load_infeed(handles)
 % Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
 
 mh = handles.text_message_main_handler;
-mh.add_line('Loading data for scenarios...');
+mh.add_line('Loading data for multiple scenario simulation...');
 mh.level_up();
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:

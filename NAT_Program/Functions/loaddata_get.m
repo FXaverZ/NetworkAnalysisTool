@@ -7,6 +7,7 @@ function handles = loaddata_get(handles, varargin)
 % Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
 
 mh = handles.text_message_main_handler;
+ch = handles.cancel_button_main_handler;
 
 % prepare the functions arguments:
 if nargin == 2
@@ -26,11 +27,15 @@ num_set = handles.Current_Settings.Simulation.Number_Runs;
 
 if num_set == 1
 	% Ein einzelner Datensatz soll ausgelesen werden...
-	mh.add_line('Auslesen der Lastdaten (für Einzeldurchlauf)...');
+	mh.add_line('Reading load data (for single set simulation) ...');
+	mh.level_up();
+	mh.add_line('Using allocation of loads from the GUI.');
 else
-	mh.add_line('Auslesen der Lastdaten (',num_set,' Sets)...');
+	mh.add_line('Reading load data (',num_set,' sets)...');
+	mh.level_up();
+	mh.add_line('Using random allocation of load- and infeed.');
 end
-mh.level_up();
+
 
 % Diese erstellen:
 tic; %Zeitmessung start
@@ -40,8 +45,10 @@ for i = 1:num_set
 	% Avoid Matlab "hang":
 	drawnow(); pause(0.05);
 	
-	% Zufällige Zuordnung treffen:
-	handles = load_random_allocation(handles);
+	if num_set > 1
+		% Zufällige Zuordnung treffen:
+		handles = load_random_allocation(handles);
+	end
 	
 	% Daten auslesen und dem Input-Datensatz hinzufügen:
 	set_count = set_count + 1;
@@ -55,13 +62,22 @@ for i = 1:num_set
 	end
 	if num_set > 1
 		% Infos to the console:
-		mh.add_line('Satz ',i,' von ',num_set,' erledigt... ');
+		mh.add_line('Set ',i,' of ',num_set,' done... ');
+		if ch.was_cancel_pushed()
+			% Cancel Button pushed!
+			errorstr = 'Data extraction canceled by user!';
+			mh.add_line(errorstr);
+			exception = MException(...
+				'NAT:LoadDataGet:CanceledByUser',...
+				errorstr);
+			throw(exception);
+		end
 		t = toc;
 		progress = i/num_set;
 		time_elapsed = t/progress - t;
 		if i < num_set
 			mh.level_up();
-			mh.add_line(' Laufzeit: ', sec2str(t),'. Geschätzte verbleibende Zeit: ',...
+			mh.add_line(' Runtime: ', sec2str(t),'. Remaining: ',...
 				sec2str(time_elapsed));
 			mh.level_down();
 		else
@@ -113,7 +129,6 @@ if save_part_files
 end
 t = toc;
 mh.level_down();
-mh.add_line('... erledigt (in ',sec2str(t),')!');
-mh.level_down();
+mh.add_line('... done (in ',sec2str(t),')!');
 end
 

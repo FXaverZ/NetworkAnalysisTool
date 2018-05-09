@@ -17,6 +17,13 @@ mh.level_up();
 
 % Name of the current grid:
 cg = settin.Files.Grid.Name;
+if isempty(cg)
+	errorstr = 'No grid is specified!';
+	exception = MException(...
+		'NAT:NetworkLoad:NoGridSpecified',...
+		errorstr);
+	throw(exception);
+end
 mh.add_line(['Loading Grid "',cg,'.sin" from "',settin.Files.Grid.Path,'"...']);
 
 % Catch Warnings:

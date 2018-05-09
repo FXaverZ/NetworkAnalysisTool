@@ -2,14 +2,18 @@ function push_load_data_get_Callback_Add(hObject, handles)
 %PUSH_LOAD_DATA_GET_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+dlg_heading = 'Loading of input data...';
+success_str = 'Data succesfully loaded!';
+
 mh = handles.text_message_main_handler;
+ch = handles.cancel_button_main_handler;
+
 buttontext = get(handles.push_load_data_get, 'String');
 mh.add_line('"',buttontext,'" pushed, loading loaddata into NAT:');
 mh.level_up();
 
-set(handles.push_load_data_get, 'Enable', 'off');
-set(handles.push_cancel, 'Enable', 'on');
-pause(.01);
+ch.set_cancel_button(handles.push_load_data_get);
+
 % Ask User, from which Source the Data should be derived:
 if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 	answer = questdlg({...
@@ -22,11 +26,11 @@ if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 			answer = 'Simulationresults_resume';
 		otherwise
 			handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
-			% Refresh the GUI:
-			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
 			mh.add_line('Canceled by user.');
+			% Refresh the GUI:
+			ch.reset_cancel_button();
+			handles = refresh_display_NAT_main_gui(handles);
+			refresh_message_text_operation_finished (handles);
 			% Update the handles-structure:
 			guidata(hObject, handles);
 			return;
@@ -71,18 +75,23 @@ switch answer
 		if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 			if handles.Current_Settings.Start_Simulation_after_Extraction
 				% Refresh the GUI:
+				ch.reset_cancel_button();
 				handles = refresh_display_NAT_main_gui(handles);
+				refresh_message_text_operation_finished (handles);
 				% Update the handles-structure:
 				guidata(hObject, handles);
 				% start calculation:
 				push_network_calculation_start_Callback_Add (hObject, handles);
 				return;
 			else
-				str = 'Daten erfolgreich geladen!';
-				mh.add_line(str);
-				helpdlg(str, 'Laden der Input-Daten...');
+				mh.add_line(success_str);
+				helpdlg(success_str, dlg_heading);
 			end
 		else
+			% Refresh the GUI:
+			ch.reset_cancel_button();
+			handles = refresh_display_NAT_main_gui(handles);
+			refresh_message_text_operation_finished (handles);
 			return;
 		end
 	case 'Simulationresults'
@@ -96,10 +105,10 @@ switch answer
 			[file.Path,filesep]);
 		% Check, if there is a invalid file specified:
 		if isequal(file.Name,0) || isequal(file.Path,0)
-			% if so, refresh the GUI and abort:
+			% Refresh the GUI:
+			ch.reset_cancel_button();
 			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
+			refresh_message_text_operation_finished (handles);
 			% update the handles-structure:
 			guidata(hObject, handles);
 			% leave the function:
@@ -147,19 +156,26 @@ switch answer
 					end
 				end
 			else
-				errordlg('Single scenario simulation currently not supported!');
+				errorstr = 'Single scenario simulation currently not supported!';
+				mh.add_error(errorstr);
+				errordlg(errorstr);
+				% Refresh the GUI:
+				ch.reset_cancel_button();
+				handles = refresh_display_NAT_main_gui(handles);
+				refresh_message_text_operation_finished (handles);
 				return;
 			end
 			clear('Current_Settings');
 		catch ME
+			mh.add_error(ME.message);
 			errordlg({'Error while loading the results:';'';ME.message});
 			% If there's a valid path, save this for later (programm
 			% will look here first...) :
 			handles.Current_Settings.Files.Load.Result.Path = file.Path;
 			% Refresh the GUI:
+			ch.reset_cancel_button();
 			handles = refresh_display_NAT_main_gui(handles);
-			set(handles.push_cancel, 'Enable', 'off');
-			set(handles.push_load_data_get, 'Enable', 'on');
+			refresh_message_text_operation_finished (handles);
 			% Update the handles-structure:
 			guidata(hObject, handles);
 			return;
@@ -168,20 +184,24 @@ switch answer
 		[handles, error] = get_input_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
-				warndlg(['Gridlist successfully loaded, please specify grid allocation ',...
-					'and resume input data generation via button "Load Sceanriodata"!'],...
-					'Laden der Input-Daten...');
+				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
+					'and resume input data generation via button "Load Sceanriodata"!'];
+				mh.add_warning(warnstr)
+				warndlg(warnstr,dlg_heading);
 			else
 				if handles.Current_Settings.Start_Simulation_after_Extraction
 					% Refresh the GUI:
+					ch.reset_cancel_button();
 					handles = refresh_display_NAT_main_gui(handles);
+					refresh_message_text_operation_finished (handles);
 					% Update the handles-structure:
 					guidata(hObject, handles);
 					% start calculation:
 					push_network_calculation_start_Callback_Add (hObject, handles);
 					return;
 				else
-					helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+					mh.add_line(success_str);
+					helpdlg(success_str, dlg_heading);
 				end
 			end
 		end
@@ -190,9 +210,10 @@ switch answer
 		[handles, error] = get_input_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
-				warndlg(['Gridlist successfully loaded, please specify grid allocation ',...
-					'and resume input data generation via button "Resume loading..."!'],...
-					'Laden der Input-Daten...');
+				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
+					'and resume input data generation via button "Resume loading..."!'];
+				mh.add_warning(warnstr)
+				warndlg(warnstr,dlg_heading);
 			else
 				if handles.Current_Settings.Start_Simulation_after_Extraction
 					% Refresh the GUI:
@@ -203,7 +224,8 @@ switch answer
 					push_network_calculation_start_Callback_Add (hObject, handles);
 					return;
 				else
-					helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
+					mh.add_line(success_str);
+					helpdlg(success_str, dlg_heading);
 				end
 			end
 		end
@@ -211,17 +233,19 @@ switch answer
 		mh.add_line('Source: Orginal Data');
 		errorstr = 'Currently not supported!';
 		errordlg(errorstr);
-		mh.add_line('Error: ',errorstr);
+		mh.add_error(errorstr);
 		%TODO: Extraction of Input-Data out of Simulation Resluts...
 	otherwise
 		% Do nothing...
 		mh.add_line('Canceled by user.');
 end
 
+% set(handles.push_cancel, 'Enable', 'off');
+% set(handles.push_load_data_get, 'Enable', 'on');
+
 % Refresh the GUI:
+ch.reset_cancel_button();
 handles = refresh_display_NAT_main_gui(handles);
-set(handles.push_cancel, 'Enable', 'off');
-set(handles.push_load_data_get, 'Enable', 'on');
 refresh_message_text_operation_finished (handles);
 
 % Update the handles-structure:

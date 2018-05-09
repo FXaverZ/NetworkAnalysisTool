@@ -309,36 +309,6 @@ if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 			set(handles.(['radio_simulate_',buttons{a}]), 'Enable', 'off', 'Value', 0);
 		end
 	end
-% 	if handles.NAT_Data.Data_Extract.get_Mean_Value
-% 		set(handles.radio_simulate_mean_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Mean_Value);
-% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Mean_Value;
-% 	else
-% 		set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
-% 	end
-% 	if handles.NAT_Data.Data_Extract.get_Max_Value
-% 		set(handles.radio_simulate_max_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Max_Value);
-% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Max_Value;
-% 	else
-% 		set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
-% 	end
-% 	if handles.NAT_Data.Data_Extract.get_Min_Value
-% 		set(handles.radio_simulate_min_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Min_Value);
-% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Min_Value;
-% 	else
-% 		set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
-% 	end
-% 	if handles.NAT_Data.Data_Extract.get_05_Quantile_Value
-% 		set(handles.radio_simulate_05q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_05_Quantile_Value);
-% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_05_Quantile_Value;
-% 	else
-% 		set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
-% 	end
-% 	if handles.NAT_Data.Data_Extract.get_95_Quantile_Value
-% 		set(handles.radio_simulate_95q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_95_Quantile_Value);
-% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_95_Quantile_Value;
-% 	else
-% 		set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
-% 	end
 	
 	if num_active_datatyps < 1
 		% no datatype which is actice is selected, select the first one..

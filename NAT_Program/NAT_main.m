@@ -246,13 +246,13 @@ function push_cancel_Callback(hObject, ~, handles) %#ok<DEFNU>
 % eventdata	 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
+if handles.cancel_button_main_handler.was_cancel_pushed()
+	handles.cancel_button_main_handler.reset_cancel_button();
+end
+
+handles.cancel_button_main_handler.cancel_button_pushed();
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
-
-% Button wieder deaktivieren:
-set(handles.push_cancel, 'Enable', 'off');
-% get surem that the other bottuns are active again:
-set(handles.push_load_data_get, 'Enable', 'on');
 
 % handles-Structure aktualisieren:
 guidata(hObject, handles);

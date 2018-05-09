@@ -25,8 +25,9 @@ else
 		mkdir([file.Path]);
 	end
 	
-	mh.mark_sub_log([file.Path,filesep,'Data_Extraction_Log.log']);
-	mh.add_line('Loading data for single case simulation...');
+	log_path = [file.Path,filesep,'Data_Extraction_Log.log'];
+	mh.mark_sub_log(log_path);
+	mh.add_line('Load data for single szenario simulation...');
 	mh.level_up();
 	
 	% Check, if the data has to be partitioned:
@@ -37,10 +38,25 @@ else
 		errordlg(errorstr);
 		% bisherige Daten löschen:
 		handles.NAT_Data.Load_Infeed_Data = [];
+		mh.stop_sub_log(log_path);
+		mh.level_down();
 		return;
 	else
 		% get the data:
-		handles = loaddata_get(handles);
+		try
+			handles = loaddata_get(handles);
+		catch ME
+			if strcmp(ME.identifier,'NAT:LoadDataGet:CanceledByUser')
+				% bisherige Daten löschen:
+				handles.NAT_Data.Load_Infeed_Data = [];
+				mh.stop_sub_log(log_path);
+				mh.level_down();
+				return;
+			else
+				rethrow(ME)
+			end
+		end
+		
 	end
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	% Save the files (one load-infeed file and one settings file):
@@ -53,7 +69,8 @@ else
 	
 	mh.add_line('Saved file: ',file.Path, filesep, file.Name, file.Exte,...
 		' (Settings: ',file.Data_Settings,file.Exte,')');
-	mh.stop_sub_log([file.Path,filesep,'Data_Extraction_Log.log']);
+	mh.stop_sub_log(log_path);
+	mh.level_down();
 end
 end
 
