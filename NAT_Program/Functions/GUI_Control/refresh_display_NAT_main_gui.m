@@ -282,37 +282,74 @@ end
 
 % Wenn Lastdaten vorhanden sind, Netzberechnungen erlauben...
 if ~isempty(handles.NAT_Data.Load_Infeed_Data)
+	datatyps = {...
+		'Sample_Value',...
+		'Mean_Value',...
+		'Max_Value',...
+		'Min_Value',...
+		'05_Quantile_Value',...
+		'95_Quantile_Value',...
+		};
+	buttons = {...
+		'sample_value',...
+		'mean_value',...
+		'max_value',...
+		'min_value',...
+		'05q_value',...
+		'95q_value',...
+		};
+		
+	num_active_datatyps = 0;
 	% adopt possible selection of data typs based on available load- and infeed data:
-	if handles.NAT_Data.Data_Extract.get_Sample_Value
-		set(handles.radio_simulate_sample_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Sample_Value);
-	else
-		set(handles.radio_simulate_sample_value, 'Enable', 'off', 'Value', 0);
+	for a=1:numel(datatyps)
+		if handles.NAT_Data.Data_Extract.(['get_',datatyps{a}])
+			set(handles.(['radio_simulate_',buttons{a}]), 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.(['use_',datatyps{a}]));
+			num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.(['use_',datatyps{a}]);
+		else
+			set(handles.(['radio_simulate_',buttons{a}]), 'Enable', 'off', 'Value', 0);
+		end
 	end
-	if handles.NAT_Data.Data_Extract.get_Mean_Value
-		set(handles.radio_simulate_mean_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Mean_Value);
-	else
-		set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
-	end
-	if handles.NAT_Data.Data_Extract.get_Max_Value
-		set(handles.radio_simulate_max_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Max_Value);
-	else
-		set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
-	end
-	if handles.NAT_Data.Data_Extract.get_Min_Value
-		set(handles.radio_simulate_min_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Min_Value);
-	else
-		set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
-	end
-	if handles.NAT_Data.Data_Extract.get_05_Quantile_Value
-		set(handles.radio_simulate_05q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_05_Quantile_Value);
-	else
-		set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
-	end
-	if handles.NAT_Data.Data_Extract.get_95_Quantile_Value
-		set(handles.radio_simulate_95q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_95_Quantile_Value);
-	else
-		set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
-	end
+% 	if handles.NAT_Data.Data_Extract.get_Mean_Value
+% 		set(handles.radio_simulate_mean_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Mean_Value);
+% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Mean_Value;
+% 	else
+% 		set(handles.radio_simulate_mean_value, 'Enable', 'off', 'Value', 0);
+% 	end
+% 	if handles.NAT_Data.Data_Extract.get_Max_Value
+% 		set(handles.radio_simulate_max_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Max_Value);
+% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Max_Value;
+% 	else
+% 		set(handles.radio_simulate_max_value, 'Enable', 'off', 'Value', 0);
+% 	end
+% 	if handles.NAT_Data.Data_Extract.get_Min_Value
+% 		set(handles.radio_simulate_min_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_Min_Value);
+% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_Min_Value;
+% 	else
+% 		set(handles.radio_simulate_min_value, 'Enable', 'off', 'Value', 0);
+% 	end
+% 	if handles.NAT_Data.Data_Extract.get_05_Quantile_Value
+% 		set(handles.radio_simulate_05q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_05_Quantile_Value);
+% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_05_Quantile_Value;
+% 	else
+% 		set(handles.radio_simulate_05q_value, 'Enable', 'off', 'Value', 0);
+% 	end
+% 	if handles.NAT_Data.Data_Extract.get_95_Quantile_Value
+% 		set(handles.radio_simulate_95q_value, 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.use_95_Quantile_Value);
+% 		num_active_datatyps = num_active_datatyps + handles.Current_Settings.Simulation.use_95_Quantile_Value;
+% 	else
+% 		set(handles.radio_simulate_95q_value, 'Enable', 'off', 'Value', 0);
+% 	end
+	
+	if num_active_datatyps < 1
+		% no datatype which is actice is selected, select the first one..
+		for a=1:numel(datatyps)
+			if handles.NAT_Data.Data_Extract.(['get_',datatyps{a}])
+				handles.Current_Settings.Simulation.(['use_',datatyps{a}]) = 1;
+				set(handles.(['radio_simulate_',buttons{a}]), 'Enable', 'on', 'Value', handles.Current_Settings.Simulation.(['use_',datatyps{a}]));
+				break;
+			end
+		end
+	end 
 	% activate simulation-button when
 	% - in the handles-structure a field named 'sin' is available (that means, that a
 	%   communication to SINCAL is there)
