@@ -41,6 +41,7 @@ end
 tic; %Zeitmessung start
 file_part_count = 0;
 set_count = 0;
+mh.add_line('Data Extraction started.');
 for i = 1:num_set
 	% Avoid Matlab "hang":
 	drawnow(); pause(0.05);

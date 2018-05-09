@@ -1,8 +1,8 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 7.0
+% Version:                 7.1
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 05.12.2014
+% Letzte Änderung durch:   Franz Zeilinger - 09.05.2018
 
 % Last Modified by GUIDE v2.5 25-Apr-2018 15:02:53
 

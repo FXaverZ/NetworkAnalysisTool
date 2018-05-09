@@ -56,7 +56,6 @@ else
 				rethrow(ME)
 			end
 		end
-		
 	end
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	% Save the files (one load-infeed file and one settings file):

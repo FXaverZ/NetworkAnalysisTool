@@ -44,6 +44,7 @@ classdef CANCEL_button_handler < handle
 		end
 		
 		function obj = set_cancel_button(obj, varargin)
+			obj.reset_cancel_button();
 			set(obj.handle_cancelbutton, 'Enable', 'on');
 			obj.handles_deactivated_uielements = varargin;
 			for a=1:numel(obj.handles_deactivated_uielements)

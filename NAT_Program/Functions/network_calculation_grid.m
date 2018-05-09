@@ -23,7 +23,7 @@ handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - Data'];
 % save output of the console:
 logpath = [r_path,filesep,'Res_',simdate,' - log.txt'];
 mh.mark_sub_log(logpath);
-mh.add_line('Performing single input grid simulation...');
+mh.add_line('Performing single scenario simulation...');
 % diary(logpath);
 % diary('on');
 
@@ -33,6 +33,9 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 	if isempty (adapt_input_data_time)
 		[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
 		if error
+			errorstr = 'Settings of inputdata and simulation are not compatible! Abort simulation...';
+			mh.add_error(errorstr);
+			errordlg(errorstr);
 			return;
 		end
 	end
@@ -45,12 +48,17 @@ end
 
 error = false;
 % start the calculation
-mh.add_line('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'"');
+mh.add_line('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	try
 		handles = network_calculation_LV(handles);
-	catch
-		error = true;
+	catch ME
+		if strcmp(ME.identifier,'NAT:NetworkCalculationLV:NoAnalysisSpecified')...
+				|| strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
+			error = true;
+		else
+			rethrow(ME)
+		end
 	end
 elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	handles = network_calculation_MV(handles);
@@ -71,6 +79,8 @@ if ~error
 	% save the settings:
 	Current_Settings = handles.Current_Settings; %#ok<NASGU>
 	save([r_path,filesep,'Res_',simdate,' - Settings.mat'],'Current_Settings');
+	mh.level_down();
+	mh.add_line('... Calculations finished!');
 end
 
 mh.stop_sub_log(logpath);
