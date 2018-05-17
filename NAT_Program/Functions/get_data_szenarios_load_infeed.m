@@ -7,8 +7,6 @@ function handles = get_data_szenarios_load_infeed(handles)
 % Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
 
 mh = handles.text_message_main_handler;
-mh.add_line('Loading data for multiple scenario simulation...');
-mh.level_up();
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if handles.Current_Settings.Simulation.Use_Grid_Variants && ~isempty(handles.Current_Settings.Simulation.Grid_List)
@@ -29,11 +27,14 @@ handles.Current_Settings.Simulation.Scenarios_Path = [...
 	];
 mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
 
-diary([handles.Current_Settings.Simulation.Scenarios_Path,filesep,...
-	datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
-	' - Log.txt']);
 
-fprintf('\nErstelle Szenariendaten...\n');
+log_path = [handles.Current_Settings.Simulation.Scenarios_Path,filesep,...
+	datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
+	' - Log.log'];
+mh.mark_sub_log(log_path);
+
+mh.add_line('Loading data for multiple scenario simulation...');
+mh.level_up();
 
 % Mark the type of the grid for this data:
 handles.Current_Settings.Data_Extract.Grid_type = handles.Current_Settings.Grid.Type;
@@ -60,30 +61,43 @@ for i=1:scen_old.Number
 	end
 	% Select the current active scenario
 	d.Simulation.Active_Scenario = scen_old.(['Sc_',num2str(i)]);
-	fprintf([d.Simulation.Active_Scenario.Filename,'\n']);
+	mh.add_line('Scenario "',d.Simulation.Active_Scenario.Filename,'"');
+	mh.level_up();
 	scen_cou = scen_cou + 1;
 	
-	% Check, if the data has to be partitioned:
-	if handles.Current_Settings.Simulation.Number_Runs > handles.System.number_max_datasets
-		% The data has to be partitioned!
-		handles = loaddata_get(handles, 1);
-	else
-		% If not, go through the scenarios in a normal way and store the gathered data in one
-		% file:
-		handles = loaddata_get(handles);
-		% save the extracted data within a seperate file in the grid variants
-		% folder:
-		name = d.Simulation.Active_Scenario.Filename;
-		Load_Infeed_Data = d.Load_Infeed_Data; %#ok<NASGU>
-		save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
-			'Load_Infeed_Data','Load_Infeed_Data','-v7.3');
-		clear('Load_Infeed_Data');
+	try
+		% Check, if the data has to be partitioned:
+		if handles.Current_Settings.Simulation.Number_Runs > handles.System.number_max_datasets
+			% The data has to be partitioned!
+			handles = loaddata_get(handles, 1);
+		else
+			% If not, go through the scenarios in a normal way and store the gathered data in one
+			% file:
+			handles = loaddata_get(handles);
+			% save the extracted data within a seperate file in the grid variants
+			% folder:
+			name = d.Simulation.Active_Scenario.Filename;
+			Load_Infeed_Data = d.Load_Infeed_Data; %#ok<NASGU>
+			save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
+				'Load_Infeed_Data','Load_Infeed_Data','-v7.3');
+			clear('Load_Infeed_Data');
+		end
+	catch ME
+		if strcmp(ME.identifier,'NAT:LoadDataGet:CanceledByUser')
+			% bisherige Daten löschen:
+			handles.NAT_Data.Load_Infeed_Data = [];
+			mh.stop_sub_log(log_path);
+			mh.level_down();
+			return;
+		else
+			rethrow(ME)
+		end
 	end
 	% get the new (altered in loaddata_get) scenario information:
 	scen_new.(['Sc_',num2str(scen_cou)]) = d.Simulation.Active_Scenario;
 	scen_old.(['Sc_',num2str(i)]) = d.Simulation.Active_Scenario;
 	scen_new.Names{scen_cou} = scen_old.Names{i};
-	fprintf('\t--> erledigt!\n');
+	mh.level_down();
 end
 
 % Update the settings:
@@ -102,7 +116,7 @@ save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Setti
 % Update the Current settings:
 handles.Current_Settings.Simulation.Scenarios = scen_old;
 
-diary('off');
+mh.stop_sub_log(log_path);
 
 
 

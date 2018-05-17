@@ -7,13 +7,15 @@ function handles = network_scenario_calculation(handles)
 % Letzte Änderung durch:   Franz Zeilinger - 07.11.2013
 
 mh = handles.text_message_main_handler;
-mh.addline('Performing Scenario based grid simulations...');
+mh.add_line('Performing Scenario based grid simulations...');
 
 % check, if simulation makes sense:
 if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
 		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...
 		handles.Current_Settings.Simulation.Power_Loss_Analysis)
-	fprintf('\nNo active analysis function! Abort simulation...\n')
+	errorstr = 'No active analysis function! Abort simulation...';
+	mh.add_error(errorstr);
+	errordlg(errorstr);
 	return;
 end
 
@@ -44,8 +46,10 @@ handles.Current_Settings.Files.Save.Result.Simdate = now;
 simdatestr = datestr(now,'yyyy_mm_dd-HH.MM.SS');
 
 % Save the outputs to the console:
-diary([r_path,filesep,'Res_',simdatestr,' - log.txt']);
-diary('on');
+log_path = [r_path,filesep,'Res_',simdatestr,' - Log.log'];
+mh.mark_sub_log(log_path);
+
+mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 
 % adapt the Scenario-Settings according to the selection:
 if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
@@ -67,12 +71,12 @@ Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
-fprintf('\nCalculation of the scenarios...\n');
 adapt_input_data_time = [];
 for i=1:scenar.Number;
 	% get the current scenario:
 	cur_scen = scenar.Names{i};
-	fprintf([cur_scen,', Scenario ',num2str(i),' of ',num2str(scenar.Number)]);
+	mh.add_line('Get data for "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));
+	mh.level_up();
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
 	% set the data-object to initial state:
@@ -84,18 +88,21 @@ for i=1:scenar.Number;
 	if isempty (adapt_input_data_time)
 		[adapt_input_data_time, error, handles] = check_inputdata_vs_simsettings(handles);
 		if error
+			errorstr = 'Settings of inputdata and simulation are not compatible! Abort simulation...';
+			mh.add_error(errorstr);
+			errordlg(errorstr);
 			return;
 		end
 	end
 	
 	% Check, if the data is partitioned
 	if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-		fprintf(['\n\tFilepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+		mh.add_line('Filepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
 	end
 	for j = 1:scenar.(['Sc_',num2str(i)]).Data_number_parts
 		if j > 1
 			% load the next data set
-			fprintf(['\n\tFilepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			fmh.add_line('Filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
 			load([s_path,filesep,cur_scen,'_',num2str(j,'%03.0f'),'.mat']);
 			% set the data-object to initial state:
 			d.Load_Infeed_Data = [];
@@ -103,12 +110,12 @@ for i=1:scenar.Number;
 			clear('Load_Infeed_Data');
 		end
 		% perform the network calculations:
-% 		try
-			% when needed, adapt the input data according to the new simulation settings:
-			if adapt_input_data_time
-				handles = adapt_input_data_new_timesettings(handles);
-			end
-			
+		% when needed, adapt the input data according to the new simulation settings:
+		if adapt_input_data_time
+			handles = adapt_input_data_new_timesettings(handles);
+		end
+
+		try
 			% start the calculation
 			if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 				handles = network_calculation_LV(handles);
@@ -119,7 +126,15 @@ for i=1:scenar.Number;
 					handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
 				handles = network_calculation_MV_controller_active(handles);
 			end
-			
+		catch ME
+			if strcmp(ME.identifier,'NAT:NetworkCalculationLV:NoAnalysisSpecified')...
+					|| strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
+				error = true;
+			else
+				rethrow(ME)
+			end
+		end
+		if ~error
 			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 				handles = post_voltage_violation_report(handles);
 			end
@@ -129,11 +144,8 @@ for i=1:scenar.Number;
 			if handles.Current_Settings.Simulation.Power_Loss_Analysis
 				handles = post_active_power_loss_report(handles);
 			end
-% 		catch ME
-% 			disp('An error occurred:');
-% 			disp(ME.message);
-% 			continue;
-% 		end
+		end
+		
 		% save the results:
 		if j == 1
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen];
@@ -141,12 +153,12 @@ for i=1:scenar.Number;
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen,'_',num2str(j,'%03.0f')];
 		end
 		if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-			fprintf(['\t\tSaving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts)]);
+			mh.add_line('Saving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
 		end
 		handles = save_simulation_data(handles);
 	end
-	fprintf('\n================================== \n');
-	
+	mh.add_line('==================================');
+	mh.level_down();
 end
 % write_scenario_log(handles,'close');
 % update the saved current settings of the tool:
@@ -154,10 +166,10 @@ Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
-fprintf('\n================================== \n');
-fprintf('CALCULATION SUCCESSFULLY FINISHED! \n');
-fprintf('================================== \n');
+mh.add_line('==================================');
+mh.add_line('CALCULATION SUCCESSFULLY FINISHED!');
+mh.add_line('==================================');
 
 
-diary('off');
+mh.stop_sub_log(log_path);
 
