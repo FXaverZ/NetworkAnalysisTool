@@ -48,7 +48,7 @@ end
 
 error = false;
 % start the calculation
-mh.add_line('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
+mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	try
 		handles = network_calculation_LV(handles);

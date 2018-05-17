@@ -69,17 +69,16 @@ end
 % give the user feedback 25 times during the simulation of one profile:
 num_gui_update = floor(dat_ext.Timepoints_per_dataset/25);
 
-mh.add_line('Grid-Calculations are using datatyp "',data_typ(2:end),'" with ',dat_ext.Timepoints_per_dataset,...
-			' timepoints.');
+mh.add_info('Grid-Calculations are using datatyp "',data_typ(2:end),'" with ',dat_ext.Timepoints_per_dataset,...
+	' timepoints.');
 mh.level_up; %1
 num_data_set = dat_ext.Number_Data_Sets;
-
+i_timer = tic();
 for i=1:numel(Grid_List)
-	cur_set.Files.Grid.Name = Grid_List{i}(1:end-4);
+	% Set the current Grid
+	cg = Grid_List{i}(1:end-4);
+	cur_set.Files.Grid.Name = cg;
 	handles.Current_Settings = cur_set;
-	
-	% current grid name
-	cg = handles.sin.Settings.Grid_name;
 	
 	if numel(Grid_List) > 1
 		mh.add_line('Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
@@ -105,7 +104,7 @@ for i=1:numel(Grid_List)
 		d.Simulation.Scenario = 'No_Scenario';
 	end
 	
-	tic; %Zeitmessung start
+	j_timer = tic; %Zeitmessung start
 	reset_counter = 1;
 	for j=1:num_data_set
 		% Reset auf RPC Connection after defnined number of profiles
@@ -124,6 +123,8 @@ for i=1:numel(Grid_List)
 		mh.add_line('Using set No. ',j,' of ', num_data_set,' ...');
 		mh.level_up();%3
 		drawnow();
+		% Counting errors during calculation:
+		err_count = 0;
 		
 		%----------------------------------------------------------------------------
 		% Übernehmen der akutell geladenen Daten:
@@ -369,66 +370,115 @@ for i=1:numel(Grid_List)
 		d.Simulation.Input_Data_act = j;
 		
 		mh.add_line('Grid simulation started.');
-		
+		k_timer = tic;
+		lines_to_remove = 0;
 		for k=1:sim_set.Timepoints
 			try
-% 				% aktuellen Zeipunkt speichern:
-% 				d.Simulation.Current_timepoint = k;
-% 				
-% 				% Last- und Einspeisedaten aktualisieren:
-% 				d.Grid.(cg).Load.Loads.update_power(k);
-% 				d.Grid.(cg).Load.Elmob.update_power(k);
-% 				d.Grid.(cg).Sola.Gen_Units.update_power(k);
-% 				% der Berechnung die neuen Leistungswerte übermitteln:
-% 				d.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, d);
-% 				
-% 				% Lastfluss rechnen:
-% 				handles.sin.start_calculation;
-% 				
-% 				% here the analyzing functions are called. Because the data is stored
-% 				% within the NAT_Data-object, on which this function has access, no
-% 				% return value is neccesary:
-% 				
-% 				% Perform online voltage violation analysis (true/false
-% 				% results)
-% 				if sim_set.Voltage_Violation_Analysis
-% 					online_voltage_violation_analysis(handles);
-% 					% An additional condition for saving voltages is
-% 					% inside the online function
+				% 				% aktuellen Zeipunkt speichern:
+				% 				d.Simulation.Current_timepoint = k;
+				%
+				% 				% Last- und Einspeisedaten aktualisieren:
+				% 				d.Grid.(cg).Load.Loads.update_power(k);
+				% 				d.Grid.(cg).Load.Elmob.update_power(k);
+				% 				d.Grid.(cg).Sola.Gen_Units.update_power(k);
+				% 				% der Berechnung die neuen Leistungswerte übermitteln:
+				% 				d.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, d);
+				%
+				% 				% Lastfluss rechnen:
+				% 				handles.sin.start_calculation;
+				%
+				% 				% here the analyzing functions are called. Because the data is stored
+				% 				% within the NAT_Data-object, on which this function has access, no
+				% 				% return value is neccesary:
+				%
+				% 				% Perform online voltage violation analysis (true/false
+				% 				% results)
+				% 				if sim_set.Voltage_Violation_Analysis
+				% 					online_voltage_violation_analysis(handles);
+				% 					% An additional condition for saving voltages is
+				% 					% inside the online function
+				% 				end
+				%
+				% 				% Perform online branch violation analysis (true/false results)
+				% 				if sim_set.Branch_Violation_Analysis
+				% 					online_branch_violation_analysis(handles);
+				% 					if sim_set.Save_Branch_Results
+				% 						% Save branch results in result structure
+				% 						save_branch_values(handles);
+				% 					end
+				% 				end
+				%
+				% 				% Perform online active power loss analysis (values in W)
+				% 				if sim_set.Power_Loss_Analysis
+				% 					online_power_loss_analysis(handles);
+				% 					% An additional condition for power loss saving is
+				% 					% inside the online function
+				% 				end
+				% For Testing Purposes:
+% 				pause(0.000001);
+% 				if j==2 && k == 227
+% 					d.Simulation.Current_timepoint = 227;
+% 					errorstr = 'Test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
+% 				if j==2 && k == 727
+% 					d.Simulation.Current_timepoint = 227;
+% 					errorstr = 'Another test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
 % 				end
 % 				
-% 				% Perform online branch violation analysis (true/false results)
-% 				if sim_set.Branch_Violation_Analysis
-% 					online_branch_violation_analysis(handles);
-% 					if sim_set.Save_Branch_Results
-% 						% Save branch results in result structure
-% 						save_branch_values(handles);
-% 					end
+% 				if j==4 && k == 2
+% 					d.Simulation.Current_timepoint = 227;
+% 					errorstr = 'Test Error at Beginning thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
 % 				end
-% 				
-% 				% Perform online active power loss analysis (values in W)
-% 				if sim_set.Power_Loss_Analysis
-% 					online_power_loss_analysis(handles);
-% 					% An additional condition for power loss saving is
-% 					% inside the online function
+% 				if j==4 && k == 727
+% 					d.Simulation.Current_timepoint = 227;
+% 					errorstr = 'Another test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
 % 				end
-                pause(0.005);
+% 				if j==4 && k == 1435
+% 					d.Simulation.Current_timepoint = 227;
+% 					errorstr = 'Test Error at the end thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
 				
 				if mod(k,num_gui_update) == 0
 					% Statusinfo zum Gesamtfortschritt an User:
+					% 					if (k > num_gui_update) && (err_last_count == err_count)
+					% 						mh.remove_line(2);
+					% 					end
 					if k > num_gui_update
-						mh.remove_line(2);
+						mh.remove_line(lines_to_remove);
+						lines_to_remove = 0;
 					end
+					% 					err_last_count = err_count;
 					mh.add_line(k,' Timepoints calculated (',100*k/sim_set.Timepoints,'%).');
-					t = toc;
+					lines_to_remove = lines_to_remove + 1;
+					t = toc(k_timer);
 					progress = k/sim_set.Timepoints;
 					time_elapsed = t/progress - t;
 					if k < sim_set.Timepoints
 						mh.level_up();%4
-						mh.add_line(' Runtime: ', sec2str(t),'. Remaining: ',...
+						mh.add_line('Runtime: ', sec2str(t),'. Remaining: ',...
 							sec2str(time_elapsed));
 						mh.level_down();%3
-
+						lines_to_remove = lines_to_remove + 1;
 					end
 					mh.write_sub_logs();
 					if ch.was_cancel_pushed()
@@ -464,41 +514,59 @@ for i=1:numel(Grid_List)
 				end
 				d.Result.(cg).Error_Counter(cd,ct) = d.Result.(cg).Error_Counter(cd,ct) + 1;
 				% Give Informations about the occoured error:
-				
-				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
+				mh.level_up();
 				mh.add_error('Currently simulating timepoint ',ct);
+				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
 				for l=1:3
 					mh.level_up();%4
-					mh.add_error('file: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...
-						'; name: ',ME.stack(l).name,...
-						'; line: ',ME.stack(l).line);
+					mh.add_line('in "',ME.stack(l).name,...
+						'" (line: ',ME.stack(l).line,')');
 					mh.level_down();%3
 				end
+				mh.level_down();
+				err_count = err_count + 1;
+				lines_to_remove = 0;
 			end
 		end
 		
 		% Statusinfo zum Gesamtfortschritt an User:
-		mh.remove_line(5);
 		
-		if j > 1 && err_count > 0
-			mh.remove_line();
+		mh.remove_line(lines_to_remove);
+		if err_count == 0
+			mh.remove_line(3);
+			if j > 1 && sum(d.Result.(cg).Error_Counter(j-1,:)) == 0;
+				mh.remove_line();
+			end
 		end
 		
-		t = toc;
 		mh.level_down();%2
+		t = toc(j_timer);
 		if j < num_data_set
 			mh.add_line('Set No. ',j,' of ', num_data_set,' finished. Runtime: ',...
 				sec2str(t),...
 				'. Remaining: ',...
 				sec2str(t/(j/num_data_set) - t));
 		else
-			mh.add_line('Set No. ',j,' of ', num_data_set,' finished. Runtime: ',...
-				sec2str(t));
+			mh.level_down();
+			if numel(Grid_List) == 1
+				mh.add_line('... ',num_data_set,' sets done (in ',sec2str(t),')!');
+			elseif i < numel(Grid_List)
+				tg = toc(i_timer);
+				mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
+				sec2str(tg),...
+				'. Remaining: ',...
+				sec2str(tg/(i/numel(Grid_List)) - tg));
+			elseif i == numel(Grid_List)
+				tg = toc(i_timer);
+				mh.add_line(numel(Grid_List),' grids done (in ',sec2str(tg),')!');
+			end
 		end
 		err_count = sum(d.Result.(cg).Error_Counter(j,:));
 		if err_count > 0
+			mh.level_up();
 			mh.add_line('During the calculations ',...
-				num2str(err_count),' errors occured!');
+				err_count,' errors occured!');
+			mh.level_down();
 		end
 	end
 	% select again the first grid (because here the load-& infeeeddata is
@@ -508,10 +576,6 @@ for i=1:numel(Grid_List)
 	% write back maybe altered data:
 	cur_set.Simulation = sim_set;
 	handles.Current_Settings = cur_set;
-
 end
-t = toc;
-mh.level_down();%1
-mh.add_line('... done (in ',sec2str(t),')!');
 end
 

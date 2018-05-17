@@ -138,6 +138,10 @@ classdef MESSAGE_text_handler < handle
 			obj.add_line('WARNING: ',varargin{:});
 		end
 		
+		function obj = add_info(obj, varargin)
+			obj.add_line('INFO: ',varargin{:});
+		end
+		
 		function obj = remove_line (obj, varargin)
 			if nargin == 1
 				lines_to_remove = 1;
@@ -203,6 +207,7 @@ classdef MESSAGE_text_handler < handle
 			end
 			for i=obj.Line_Count_Saved+1:numel(obj.Current_Text_to_Save)
 				savestr = strrep(obj.Current_Text_to_Save{i},'\','\\');
+				savestr = strrep(savestr,'%','%%');
 				fprintf(obj.OutputFile_handle,[savestr,'\n']);
 			end
 			
@@ -265,6 +270,7 @@ classdef MESSAGE_text_handler < handle
 				end
 				for b = obj.Sub_Log_Marker{1,a}+1:numel(obj.Current_Text_to_Save)
 					savestr = strrep(obj.Current_Text_to_Save{b},'\','\\');
+					savestr = strrep(savestr,'%','%%');
 					savestr = savestr(obj.Blanks_per_Level*obj.Sub_Log_Marker{2,a}+1:end);
 					fprintf(obj.Sub_Log_Marker{3,a},[savestr,'\n']);
 				end

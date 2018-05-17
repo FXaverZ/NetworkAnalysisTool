@@ -6,7 +6,18 @@ mh = handles.text_message_main_handler;
 
 % Lastdaten einlesen und in Struktur speichern:
 if handles.Current_Settings.Simulation.Use_Scenarios
-	handles = get_data_szenarios_load_infeed(handles);
+	try
+		handles = get_data_szenarios_load_infeed(handles);
+	catch ME
+		if strcmp(ME.identifier,'NAT:LoadDataGet:CanceledByUser')
+			% bisherige Daten löschen:
+			handles.NAT_Data.Load_Infeed_Data = [];
+			mh.level_down();
+			return;
+		else
+			rethrow(ME)
+		end
+	end
 else
 	% clear the NAT_Data simulation field (so the default extraction settings of the
 	% default scenario are used):
@@ -60,7 +71,7 @@ else
 	% Die Daten + zugehörige Einstellungen in aktuelles Netzverzeichnis speichern:
 	% Save the files (one load-infeed file and one settings file):
 	handles.NAT_Data.save_LoadInfeedData_as_mat(...
-			file.Path, file.Name);
+		file.Path, file.Name);
 	Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
 	System = handles.System; %#ok<NASGU>
 	save([file.Path,filesep,file.Data_Settings,file.Exte],'Data_Extract','System');
