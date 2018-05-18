@@ -33,6 +33,8 @@ classdef MESSAGE_text_handler < handle
 			'OutputFileHandle';...
 			'OutputFile';...
 			};
+		
+		Display_Line_Marker = [];
 	end
 	
 	methods
@@ -164,10 +166,12 @@ classdef MESSAGE_text_handler < handle
 		function obj = rem_first_line(obj)
 			obj.Current_Text_to_Display = obj.Current_Text_to_Display(2:end);
 			obj.Line_Count_Display = obj.Line_Count_Display - 1;
+			if ~isempty(obj.Display_Line_Marker)
+				obj.Display_Line_Marker(2,:) = obj.Display_Line_Marker(2,:) - 1;
+			end
 			if obj.Line_Count_Display < 0
 				obj.Line_Count_Display = 0;
 			end
-			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
 		end
 		
 		function obj = reset_text(obj)
@@ -277,6 +281,41 @@ classdef MESSAGE_text_handler < handle
 				obj.Sub_Log_Marker{1,a} = obj.Line_Count_Overall;
 			end
 			obj.clear_saved_text();
+		end
+		
+		function markerhandle = mark_current_displayline (obj)
+			if isempty(obj.Display_Line_Marker)
+				markerhandle = 1;
+			else
+				markerhandle = max(obj.Display_Line_Marker(1,:))+1;
+			end
+			obj.Display_Line_Marker(1,end+1) = markerhandle;
+			obj.Display_Line_Marker(2,end) = obj.Line_Count_Display;
+		end
+		
+		function reset_display_marker (obj, markerhandle)
+			idx = find(markerhandle == obj.Display_Line_Marker(1,:));
+			if isempty(idx)
+				return;
+			end
+			obj.Display_Line_Marker(:,idx) = [];
+		end
+		
+		function reset_all_display_marker (obj)
+			obj.Display_Line_Marker = [];
+		end
+		
+		function set_display_back_to_marker (obj, markerhandle)
+			idx = find(markerhandle == obj.Display_Line_Marker(1,:));
+			if isempty(idx)
+				return;
+			end
+			line_to_go_to = obj.Display_Line_Marker(2,idx);
+			if line_to_go_to < 0
+				return;
+			end
+			lines_to_remove = obj.Line_Count_Display - line_to_go_to;
+			obj.remove_line(lines_to_remove);
 		end
 	end
 	
