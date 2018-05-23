@@ -74,6 +74,7 @@ mh.add_info('Grid-Calculations are using datatyp "',data_typ(2:end),'" with ',da
 mh.level_up; %1
 num_data_set = dat_ext.Number_Data_Sets;
 i_timer = tic();
+linemarker_grid_sim_started = mh.mark_current_displayline();
 for i=1:numel(Grid_List)
 	% Set the current Grid
 	cg = Grid_List{i}(1:end-4);
@@ -86,7 +87,6 @@ for i=1:numel(Grid_List)
 	else
 		mh.add_line('Start with grid-calculation',' (',cg,')...');
 	end
-	linemarker_grid_sim_started = mh.mark_current_displayline();
 	mh.level_up;
 	
 	% load the network data:
@@ -107,6 +107,7 @@ for i=1:numel(Grid_List)
 	
 	j_timer = tic; %Zeitmessung start
 	reset_counter = 1;
+	linemarker_dataset_sim_started = mh.mark_current_displayline();
 	for j=1:num_data_set
 		% Reset auf RPC Connection after defnined number of profiles
 		% simulted (because of problems, if more profiles are simulated in
@@ -120,9 +121,7 @@ for i=1:numel(Grid_List)
 			mh.level_down();%2
 			mh.add_line('...done!');
 		end
-		
 		mh.add_line('Using set No. ',j,' of ', num_data_set,' ...');
-		linemarker_dataset_sim_started = mh.mark_current_displayline();
 		mh.level_up();%3
 		drawnow();
 		
@@ -518,11 +517,15 @@ for i=1:numel(Grid_List)
 			end
 		end
 		
-		% Statusinfo zum Gesamtfortschritt an User:
-		err_count = sum(nd.Result.(cg).Error_Counter(j,:));
-		
 		mh.set_display_back_to_marker(linemarker_dataset_sim_started, false);
-		mh.remove_line(1, false);
+		
+		error_all_count = sum(sum(nd.Result.(cg).Error_Counter));
+		if error_all_count > 0
+			mh.level_down();
+			mh.add_error('During the calculations ',...
+				error_all_count,' errors occured!');
+			mh.level_up();
+		end
 		
 		mh.level_down();%2
 		t = toc(j_timer);
@@ -531,49 +534,41 @@ for i=1:numel(Grid_List)
 				sec2str(t),...
 				'. Remaining: ',...
 				sec2str(t/(j/num_data_set) - t));
-			if err_count > 0
-				mh.level_up();
-				mh.add_line('During the calculations ',...
-					err_count,' errors occured!');
-				mh.level_down();
-			end
 		else
 			mh.level_down();
-			if numel(Grid_List) == 1
+% 			if numel(Grid_List) == 1
 				mh.add_line('... ',num_data_set,' sets done (in ',sec2str(t),')!');
-			elseif i < numel(Grid_List)
-				mh.set_display_back_to_marker(linemarker_grid_sim_started, true);
-				mh.remove_line();
-				if i > 1
-					mh.remove_line();
-				end
-				tg = toc(i_timer);
-				mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
-				sec2str(tg),...
-				'. Remaining: ',...
-				sec2str(tg/(i/numel(Grid_List)) - tg));
-			elseif i == numel(Grid_List)
-				mh.set_display_back_to_marker(linemarker_grid_sim_started, true);
-				mh.remove_line();
-				error_all_last_count = sum(sum(nd.Result.(Grid_List{i-1}(1:end-4)).Error_Counter));
-				if error_all_last_count == 0
-					mh.remove_line();
-				end
-				tg = toc(i_timer);
-				mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
-				sec2str(tg));
-			end
-			error_all_count = sum(sum(nd.Result.(cg).Error_Counter));
-			if error_all_count > 0
-				mh.level_up();
-				mh.add_line('During the calculations ',...
-					error_all_count,' errors occured!');
-				mh.level_down();
-			end
+% 			else
 		end
 		mh.reset_display_marker(linemarker_time_sim_started);
-		mh.reset_display_marker(linemarker_dataset_sim_started);
 	end
+	
+	mh.set_display_back_to_marker(linemarker_grid_sim_started, true);
+	
+	error_all_count = 0;
+	for grid_counter = 1 : i
+		error_all_count = error_all_count + sum(sum(nd.Result.(Grid_List{grid_counter}(1:end-4)).Error_Counter));
+	end
+	if error_all_count > 0
+		mh.level_down();
+		mh.add_error('During the calculations ',...
+			error_all_count,' errors occured!');
+		mh.level_up();
+	end
+	
+	if i < numel(Grid_List)
+		tg = toc(i_timer);
+		mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
+			sec2str(tg),...
+			'. Remaining: ',...
+			sec2str(tg/(i/numel(Grid_List)) - tg));
+	elseif i == numel(Grid_List)
+		tg = toc(i_timer);
+		mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
+			sec2str(tg));
+	end
+	
+	mh.reset_display_marker(linemarker_dataset_sim_started);
 	% select again the first grid (because here the load-& infeeeddata is
 	% stored):
 	cur_set.Files.Grid.Name = Grid_List{1}(1:end-4);
@@ -581,7 +576,7 @@ for i=1:numel(Grid_List)
 	% write back maybe altered data:
 	cur_set.Simulation = sim_set;
 	handles.Current_Settings = cur_set;
-	mh.reset_display_marker(linemarker_grid_sim_started);
 end
+mh.reset_display_marker(linemarker_grid_sim_started);
 end
 
