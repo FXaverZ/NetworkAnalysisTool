@@ -3,6 +3,7 @@ function [adapt_input_data_time, error, handles] = check_inputdata_vs_simsetting
 %   Detailed explanation goes here
 
 error = false;
+adapt_input_data_time = [];
 
 % which data typ has to be simulated?
 if handles.Current_Settings.Data_Extract.get_Sample_Value

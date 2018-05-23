@@ -2,6 +2,15 @@ function push_network_select_scenario_folder_Callback_Add (hObject, handles)
 %PUSH_NETWORK_SELECT_SCENARIO_FOLDER_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+% Version:                 1.0
+% Created by:              Franz Zeilinger - 01.01.2015
+% Last change by:          Franz Zeilinger - 23.05.2018
+
+mh = handles.text_message_main_handler;
+buttontext = get(hObject, 'String');
+mh.add_line('"',buttontext,'" pushed, loading of sceanrio data into NAT.');
+mh.level_up();
+
 % Keep the Current Settings:
 curr_set = handles.Current_Settings;
 
@@ -23,10 +32,12 @@ if ischar(Main_Path)
 		
 		% If not, tell user and abort function:
 		if isempty(idx)
-			errordlg({'No valid scenario input data found at the given location!','',...
+			errorstr='No valid scenario input data found at the given location!';
+			errordlg({errorstr,'',...
 				['Hint: A file ''Scenario_Settings.mat'' should be present in the selcted ',...
 				'folder...']},...
 				'Selcet folder with scenario input data...');
+			mh.add_error(errorstr);
 			return;
 		end
 		
@@ -39,8 +50,8 @@ if ischar(Main_Path)
 			error = 0;
 		catch ME
 			error = 1;
-			handles.text_message_main_handler.add_line('Error during loading of the current loaddata:');
-			handles.text_message_main_handler.add_line(ME.message);
+			mh.add_line('Error during loading of the current loaddata:');
+			mh.add_line(ME.message);
 		end
 	else
 		load([Main_Path,filesep,'act_Load_Feed_Data.mat'])
@@ -54,8 +65,7 @@ if ischar(Main_Path)
 		error = 0;
 	end
 else
-	disp('Error during loading scenario-data:');
-	disp('    No valid path!');
+	mh.add_line('Canceled by user.');
 	error = 1;
 end
 if error
@@ -63,13 +73,16 @@ if error
 	% scenario-data information:
 	handles.Current_Settings = curr_set;
 else
-	helpdlg('Data successfully loaded!')
+	str = 'Data successfully loaded!';
+	helpdlg(str);
+	mh.add_line(str);
 end
 
-% Anzeige aktualisieren:
+% Refresh the GUI:
 handles = refresh_display_NAT_main_gui(handles);
+refresh_message_text_operation_finished (handles);
 
-% handles-Struktur aktualisieren:
+% update handles structure:
 guidata(hObject, handles);
 end
 

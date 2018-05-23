@@ -7,6 +7,7 @@ mh = handles.text_message_main_handler;
 ch = handles.cancel_button_main_handler;
 
 buttontext = get(handles.push_network_calculation_start, 'String');
+mh.reset_display_text();
 mh.add_line('"',buttontext,'" pushed, start with calculations:');
 mh.level_up();
 

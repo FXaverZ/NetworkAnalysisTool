@@ -2,12 +2,13 @@ classdef MESSAGE_text_handler < handle
 	%MESSAGE_TEXT_HANDLER   Class to provide methods to manage GUI text fields
 	%   Detailed explanation goes here
 
-	% Version:                 1.2
+	% Version:                 1.3
 	% Created by:              Franz Zeilinger - 01.10.2015
-	% Last change by:          Franz Zeilinger - 09.05.2018
+	% Last change by:          Franz Zeilinger - 23.05.2018
 
 	properties
 		Current_Text_to_Display = {}
+		Buffer_Text_to_Display = {}
 		Current_Text_to_Save = {}
 		MAX_Lines = 0
 		MAX_Colum = 0
@@ -24,6 +25,7 @@ classdef MESSAGE_text_handler < handle
 		
 		Current_Level = 0
 		Blanks_per_Level = 4;
+		Free_Rows = 5;
 		
 		OutputFile_handle
 		
@@ -147,15 +149,52 @@ classdef MESSAGE_text_handler < handle
 		function obj = remove_line (obj, varargin)
 			if nargin == 1
 				lines_to_remove = 1;
+				restore_lines = true;
 			elseif nargin == 2
 				lines_to_remove = varargin{1};
+				restore_lines = true;
+			elseif nargin == 3
+				lines_to_remove = varargin{1};
+				restore_lines = varargin{2};
+			end
+			if lines_to_remove <= 0
+				return;
 			end
 			if lines_to_remove > obj.Line_Count_Display
-				obj.reset_text();
-				return;
+				if restore_lines
+					% get the old lines out of the buffer
+					buffer_length = length(obj.Buffer_Text_to_Display);
+					line_to_restore = buffer_length - lines_to_remove + obj.Line_Count_Display;
+					start_line_to_restore = line_to_restore - obj.MAX_Lines + obj.Free_Rows + 1;
+					if start_line_to_restore < 1
+						start_line_to_restore = 1;
+					end
+					obj.Display_Line_Marker(2,:) = obj.Display_Line_Marker(2,:) + buffer_length - start_line_to_restore + 1;
+					obj.Current_Text_to_Display = obj.Buffer_Text_to_Display(start_line_to_restore:line_to_restore);
+					obj.Buffer_Text_to_Display(start_line_to_restore:end) = [];
+					obj.handle_textfield.set('String',obj.Current_Text_to_Display);
+					drawnow();
+					obj.Line_Count_Display = line_to_restore - start_line_to_restore + 1;
+					
+					return;
+				else
+					lines_to_remove = obj.Line_Count_Display;
+				end
 			end
 			obj.Current_Text_to_Display = obj.Current_Text_to_Display(1:end-lines_to_remove);
 			obj.Line_Count_Display = obj.Line_Count_Display - lines_to_remove;
+			if ~isempty(obj.Buffer_Text_to_Display) && restore_lines
+				if length(obj.Buffer_Text_to_Display) < lines_to_remove
+					lines_to_remove = length(obj.Buffer_Text_to_Display);
+				end
+				obj.Current_Text_to_Display = [obj.Buffer_Text_to_Display(end+1-lines_to_remove:end),obj.Current_Text_to_Display];
+				obj.Buffer_Text_to_Display = obj.Buffer_Text_to_Display(1:end-lines_to_remove);
+				if ~isempty(obj.Display_Line_Marker)
+					obj.Display_Line_Marker(2,:) = obj.Display_Line_Marker(2,:) + lines_to_remove;
+				end
+				obj.Line_Count_Display = obj.Line_Count_Display + lines_to_remove;
+			end
+			
 			if obj.Line_Count_Display < 0
 				obj.Line_Count_Display = 0;
 			end
@@ -164,6 +203,7 @@ classdef MESSAGE_text_handler < handle
 		end
 		
 		function obj = rem_first_line(obj)
+			obj.Buffer_Text_to_Display{end+1} = obj.Current_Text_to_Display{1};
 			obj.Current_Text_to_Display = obj.Current_Text_to_Display(2:end);
 			obj.Line_Count_Display = obj.Line_Count_Display - 1;
 			if ~isempty(obj.Display_Line_Marker)
@@ -174,9 +214,11 @@ classdef MESSAGE_text_handler < handle
 			end
 		end
 		
-		function obj = reset_text(obj)
+		function obj = reset_display_text(obj)
 			obj.Current_Text_to_Display = {};
+			obj.Buffer_Text_to_Display = {};
 			obj.Line_Count_Display = 0;
+			obj.reset_all_display_marker();
 			obj.handle_textfield.set('String',obj.Current_Text_to_Display);
 			drawnow();
 		end
@@ -305,17 +347,14 @@ classdef MESSAGE_text_handler < handle
 			obj.Display_Line_Marker = [];
 		end
 		
-		function set_display_back_to_marker (obj, markerhandle)
+		function set_display_back_to_marker (obj, markerhandle, restore_lines)
 			idx = find(markerhandle == obj.Display_Line_Marker(1,:));
 			if isempty(idx)
 				return;
 			end
 			line_to_go_to = obj.Display_Line_Marker(2,idx);
-			if line_to_go_to < 0
-				return;
-			end
 			lines_to_remove = obj.Line_Count_Display - line_to_go_to;
-			obj.remove_line(lines_to_remove);
+			obj.remove_line(lines_to_remove, restore_lines);
 		end
 	end
 	

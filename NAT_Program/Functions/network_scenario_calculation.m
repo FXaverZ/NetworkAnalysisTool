@@ -2,9 +2,9 @@ function handles = network_scenario_calculation(handles)
 %NETWORK_SCENARIO_CALCULATION Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.3
+% Version:                 1.4
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 07.11.2013
+% Letzte Änderung durch:   Franz Zeilinger - 23.05.2018
 
 mh = handles.text_message_main_handler;
 mh.add_line('Performing Scenario based grid simulations...');
@@ -36,7 +36,7 @@ else
 	path = handles.Current_Settings.Simulation.Grids_Path;
 	r_path = [path,filesep,'Results'];
 end
-if ~isdir(r_path);
+if ~isdir(r_path)
 	mkdir(r_path);
 end
 
@@ -72,7 +72,7 @@ Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
 adapt_input_data_time = [];
-for i=1:scenar.Number;
+for i=1:scenar.Number
 	% get the current scenario:
 	cur_scen = scenar.Names{i};
 	mh.add_line('Get data for "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));
@@ -129,21 +129,21 @@ for i=1:scenar.Number;
 		catch ME
 			if strcmp(ME.identifier,'NAT:NetworkCalculationLV:NoAnalysisSpecified')...
 					|| strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
-				error = true;
+				mh.stop_sub_log(log_path);
+				return;
 			else
 				rethrow(ME)
 			end
 		end
-		if ~error
-			if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-				handles = post_voltage_violation_report(handles);
-			end
-			if handles.Current_Settings.Simulation.Branch_Violation_Analysis
-				handles = post_branch_violation_report(handles);
-			end
-			if handles.Current_Settings.Simulation.Power_Loss_Analysis
-				handles = post_active_power_loss_report(handles);
-			end
+		
+		if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+			handles = post_voltage_violation_report(handles);
+		end
+		if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+			handles = post_branch_violation_report(handles);
+		end
+		if handles.Current_Settings.Simulation.Power_Loss_Analysis
+			handles = post_active_power_loss_report(handles);
 		end
 		
 		% save the results:
@@ -158,6 +158,7 @@ for i=1:scenar.Number;
 		handles = save_simulation_data(handles);
 	end
 	mh.add_line('==================================');
+	mh.level_down();
 	mh.level_down();
 end
 % write_scenario_log(handles,'close');

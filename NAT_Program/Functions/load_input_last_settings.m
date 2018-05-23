@@ -24,7 +24,7 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 	settin.Simulation.Scenarios = Scenarios_Settings;
 	% Deactivate a maybe given scenario selection (because the old scenarios are not
 	% present any more):
-	handles.Current_Settings.Simulation.Scenarios_Selection = [];
+	settin.Simulation.Scenarios_Selection = [];
 	% load the data of the first scenario (% loading of 'Load_Infeed_Data' and
 	% 'Data_Extract'):
 	load([settin.Simulation.Scenarios_Path,filesep, settin.Simulation.Scenarios.Names{1},'.mat']);
