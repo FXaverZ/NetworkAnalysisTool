@@ -266,7 +266,10 @@ classdef MESSAGE_text_handler < handle
 				str = str(1:obj.MAX_Colum-1);
 			else
 			end
+			cur_level = obj.Current_Level;
+			obj.Current_Level = 0;
 			obj.add_line(str);
+			obj.Current_Level = cur_level;
 		end
 		
 		function obj = mark_sub_log (obj, outputfilename)

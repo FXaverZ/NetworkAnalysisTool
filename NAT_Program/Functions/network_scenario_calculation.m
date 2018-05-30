@@ -72,10 +72,15 @@ Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
 adapt_input_data_time = [];
+i_timer = tic();
+
+error_scen_counter = 0;
+error_scen_all_counter = 0;
+linemarker_scen_sim_started = mh.mark_current_displayline();
 for i=1:scenar.Number
 	% get the current scenario:
 	cur_scen = scenar.Names{i};
-	mh.add_line('Get data for "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));
+	mh.add_line('Using data of "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));
 	mh.level_up();
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
@@ -136,7 +141,7 @@ for i=1:scenar.Number
 			end
 		end
 		
-		if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+		if handles.Current_Settings.Simulation.Voltage_Violation_Analysis
 			handles = post_voltage_violation_report(handles);
 		end
 		if handles.Current_Settings.Simulation.Branch_Violation_Analysis
@@ -147,6 +152,7 @@ for i=1:scenar.Number
 		end
 		
 		% save the results:
+		mh.level_down();
 		if j == 1
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen];
 		else
@@ -157,8 +163,38 @@ for i=1:scenar.Number
 		end
 		handles = save_simulation_data(handles);
 	end
-	mh.add_line('==================================');
 	mh.level_down();
+	
+	mh.set_display_back_to_marker(linemarker_scen_sim_started, true);
+	if error_scen_counter > 0
+		mh.add_error('During the calculations ',error_scen_all_counter,' errors in ',...
+			error_scen_counter, ' scenarios occured.');
+	end
+	
+	mh.add_line('Calculations for "', cur_scen,'" (Scenario ',i,' of ',scenar.Number,') finished.');
+	mh.level_up();
+	
+	error_all_count = 0;
+	for grid_counter = 1:numel(handles.Current_Settings.Simulation.Grid_List)
+		error_all_count = error_all_count + sum(sum(handles.NAT_Data.Result.(handles.Current_Settings.Simulation.Grid_List{grid_counter}(1:end-4)).Error_Counter));
+	end
+	if error_all_count > 0
+		mh.add_error('During the calculations ',...
+			error_all_count,' errors occured!');
+		error_scen_counter = error_scen_counter + 1;
+		error_scen_all_counter = error_scen_all_counter + error_all_count;
+	end
+	t = toc(i_timer);
+	if i < scenar.Number
+		mh.add_line('Runtime: ',...
+			sec2str(t),...
+			'. Remaining: ',...
+			sec2str(t/(i/scenar.Number) - t));
+	else
+		mh.add_line('Runtime: ',...
+			sec2str(t),...
+			'.');
+	end
 	mh.level_down();
 end
 % write_scenario_log(handles,'close');
@@ -166,11 +202,14 @@ end
 Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
-
-mh.add_line('==================================');
-mh.add_line('CALCULATION SUCCESSFULLY FINISHED!');
-mh.add_line('==================================');
-
-
+mh.set_display_back_to_marker(linemarker_scen_sim_started, true);
+mh.add_line('Runtime for all scenarios: ',sec2str(t),'.');
+if error_scen_counter > 0
+	mh.add_error('During the calculations ',error_scen_all_counter,' errors in ',...
+		error_scen_counter, ' scenarios occured.');
+	mh.add_line('... Calculations finished!');
+else
+	mh.add_line('... Calculations succesfully finished!');
+end
 mh.stop_sub_log(log_path);
 

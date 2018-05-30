@@ -87,7 +87,7 @@ for i=1:numel(Grid_List)
 	else
 		mh.add_line('Start with grid-calculation',' (',cg,')...');
 	end
-	mh.level_up;
+	mh.level_up; %2
 	
 	% load the network data:
 	handles = network_load (handles);
@@ -414,7 +414,7 @@ for i=1:numel(Grid_List)
 % 				end
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
               % For Testing Purposes:
-				pause(0.001);
+% 				pause(0.001);
 				if k == 207 % i == 1 && j==2 && k == 207
 					errorstr = 'Test Error thrown';
 					exception = MException(...
@@ -504,16 +504,16 @@ for i=1:numel(Grid_List)
 				end
 				nd.Result.(cg).Error_Counter(cd,ct) = nd.Result.(cg).Error_Counter(cd,ct) + 1;
 				% Give Informations about the occoured error:
-				mh.level_up();
+				mh.level_up();%4
 				mh.add_error('Currently simulating timepoint ',ct);
 				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
 				for l=1:3
-					mh.level_up();%4
+					mh.level_up();%5
 					mh.add_line('in "',ME.stack(l).name,...
 						'" (line: ',ME.stack(l).line,')');
-					mh.level_down();%3
+					mh.level_down();%4
 				end
-				mh.level_down();
+				mh.level_down();%3
 			end
 		end
 		
@@ -521,10 +521,10 @@ for i=1:numel(Grid_List)
 		
 		error_all_count = sum(sum(nd.Result.(cg).Error_Counter));
 		if error_all_count > 0
-			mh.level_down();
+			mh.level_down();%2
 			mh.add_error('During the calculations ',...
 				error_all_count,' errors occured!');
-			mh.level_up();
+			mh.level_up();%3
 		end
 		
 		mh.level_down();%2
@@ -535,7 +535,7 @@ for i=1:numel(Grid_List)
 				'. Remaining: ',...
 				sec2str(t/(j/num_data_set) - t));
 		else
-			mh.level_down();
+			mh.level_down();%1
 % 			if numel(Grid_List) == 1
 				mh.add_line('... ',num_data_set,' sets done (in ',sec2str(t),')!');
 % 			else
@@ -550,10 +550,8 @@ for i=1:numel(Grid_List)
 		error_all_count = error_all_count + sum(sum(nd.Result.(Grid_List{grid_counter}(1:end-4)).Error_Counter));
 	end
 	if error_all_count > 0
-		mh.level_down();
 		mh.add_error('During the calculations ',...
 			error_all_count,' errors occured!');
-		mh.level_up();
 	end
 	
 	if i < numel(Grid_List)
