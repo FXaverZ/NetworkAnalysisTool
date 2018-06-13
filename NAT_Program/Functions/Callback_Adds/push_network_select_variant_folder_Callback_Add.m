@@ -40,7 +40,7 @@ if ischar(Main_Path)
 	handles.Current_Settings.Files.Grid.Path = Main_Path;
 	handles.Current_Settings.Files.Grid.Name = files{1}(1:end-4);
 	handles.Current_Settings.Files.Grid.Exte = files{1}(end-3:end);
-	% mark, that gird variants will be used:
+	% mark, that grid variants will be used:
 	handles.Current_Settings.Simulation.Use_Grid_Variants = 1;
 	% load the network data:
 	handles = network_load (handles);

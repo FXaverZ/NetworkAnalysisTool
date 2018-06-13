@@ -65,15 +65,15 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 end
 
 if ~error
-	if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-		handles = post_voltage_violation_report(handles);
-	end
-	if handles.Current_Settings.Simulation.Branch_Violation_Analysis
-		handles = post_branch_violation_report(handles);
-	end
-	if handles.Current_Settings.Simulation.Power_Loss_Analysis
-		handles = post_active_power_loss_report(handles);
-	end
+% 	if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+% 		handles = post_voltage_violation_report(handles);
+% 	end
+% 	if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+% 		handles = post_branch_violation_report(handles);
+% 	end
+% 	if handles.Current_Settings.Simulation.Power_Loss_Analysis
+% 		handles = post_active_power_loss_report(handles);
+% 	end
 	% save the results:
 	handles = save_simulation_data(handles);
 	% save the settings:

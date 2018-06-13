@@ -16,7 +16,7 @@ for cg = 1 : numel(list_of_grids)  % Number of topologies, i.e. models analysed
    
    % Branch limit violation for lines - <Post_Branch_Violation_Analysis>
    d.Result.(grid).Branch_Violation_Summary = ...
-       Post_Branch_Violation_Analysis(ext_obj,ext_grid,grid);
+	   Post_Branch_Violation_Analysis(ext_obj,ext_grid,grid);
    
    % Display results as text display in command window
    d.Result.(grid).Branch_Violation_Summary.Display_results;

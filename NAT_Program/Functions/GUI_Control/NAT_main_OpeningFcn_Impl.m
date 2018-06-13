@@ -20,6 +20,9 @@ handles.text_message_main_handler = ...
 	'OutputFile'     ,[handles.Current_Settings.Files.Save.Log.Path,filesep,Logname],...
 	'OutputToConsole', true);
 handles.cancel_button_main_handler = CANCEL_button_handler(handles.push_cancel);
+handles.waitbar_handler = WAITBAR_handler(handles.waitbar_white, handles.waitbar_color,...
+	handles.waitbar_text);
+handles.waitbar_handler.reset();
 
 mh = handles.text_message_main_handler;
 mh.divider('=-');

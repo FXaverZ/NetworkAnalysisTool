@@ -14,7 +14,7 @@ ch = handles.cancel_button_main_handler;
 % get the Current Settings:
 cur_set = handles.Current_Settings;
 dat_ext = cur_set.Data_Extract;
-% dat_ext = d.Data_Extract;
+% dat_ext = nd.Data_Extract;
 % Simulation Settings:
 sim_set = cur_set.Simulation;
 
@@ -292,7 +292,7 @@ for i=1:numel(Grid_List)
 					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6)); % Lastgang des Last
 				nd.Grid.(cg).Load.Loads(load_counter) = obj;
 				
-% 				disp([num2str(k),': ',d.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
+% 				disp([num2str(k),': ',nd.Grid.(cg).P_Q_Node.Points(k).P_Q_Name,' --> '...
 % 					,hh_typ,'(',num2str(l),')']);
 				
 				%incread counter for load objects and decrease number of households of
@@ -375,82 +375,82 @@ for i=1:numel(Grid_List)
 				% aktuellen Zeipunkt speichern:
 				nd.Simulation.Current_timepoint = k;
 				
-% 				% Last- und Einspeisedaten aktualisieren:
-% 				d.Grid.(cg).Load.Loads.update_power(k);
-% 				d.Grid.(cg).Load.Elmob.update_power(k);
-% 				d.Grid.(cg).Sola.Gen_Units.update_power(k);
-% 				% der Berechnung die neuen Leistungswerte übermitteln:
-% 				d.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, d);
-% 				
-% 				% Lastfluss rechnen:
-% 				handles.sin.start_calculation;
-% 				
-% 				% here the analyzing functions are called. Because the data is stored
-% 				% within the NAT_Data-object, on which this function has access, no
-% 				% return value is neccesary:
-% 				
-% 				% Perform online voltage violation analysis (true/false
-% 				% results)
-% 				if sim_set.Voltage_Violation_Analysis
-% 					online_voltage_violation_analysis(handles);
-% 					% An additional condition for saving voltages is
-% 					% inside the online function
-% 				end
-% 				
-% 				% Perform online branch violation analysis (true/false results)
-% 				if sim_set.Branch_Violation_Analysis
-% 					online_branch_violation_analysis(handles);
-% 					if sim_set.Save_Branch_Results
-% 						% Save branch results in result structure
-% 						save_branch_values(handles);
-% 					end
-% 				end
-% 				
-% 				% Perform online active power loss analysis (values in W)
-% 				if sim_set.Power_Loss_Analysis
-% 					online_power_loss_analysis(handles);
-% 					% An additional condition for power loss saving is
-% 					% inside the online function
-% 				end
-% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-              % For Testing Purposes:
-% 				pause(0.001);
-				if k == 207 % i == 1 && j==2 && k == 207
-					errorstr = 'Test Error thrown';
-					exception = MException(...
-						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
-						errorstr);
-					throw(exception);
-				end
-				if k == 727 % i == 1 && j==2 && k == 727
-					errorstr = 'Another test Error thrown';
-					exception = MException(...
-						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
-						errorstr);
-					throw(exception);
+				% Last- und Einspeisedaten aktualisieren:
+				nd.Grid.(cg).Load.Loads.update_power(k);
+				nd.Grid.(cg).Load.Elmob.update_power(k);
+				nd.Grid.(cg).Sola.Gen_Units.update_power(k);
+				% der Berechnung die neuen Leistungswerte übermitteln:
+				nd.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, nd);
+				
+				% Lastfluss rechnen:
+				handles.sin.start_calculation;
+				
+				% here the analyzing functions are called. Because the data is stored
+				% within the NAT_Data-object, on which this function has access, no
+				% return value is neccesary:
+				
+				% Perform online voltage violation analysis (true/false
+				% results)
+				if sim_set.Voltage_Violation_Analysis
+					online_voltage_violation_analysis(handles);
+					% An additional condition for saving voltages is
+					% inside the online function
 				end
 				
-				if k == 2 % j==4 && k == 2
-					errorstr = 'Test Error at Beginning thrown';
-					exception = MException(...
-						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
-						errorstr);
-					throw(exception);
+				% Perform online branch violation analysis (true/false results)
+				if sim_set.Branch_Violation_Analysis
+					online_branch_violation_analysis(handles);
+					if sim_set.Save_Branch_Results
+						% Save branch results in result structure
+						save_branch_values(handles);
+					end
 				end
-				if k == 777 % j==4 && k == 777
-					errorstr = 'Another test Error thrown';
-					exception = MException(...
-						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
-						errorstr);
-					throw(exception);
+				
+				% Perform online active power loss analysis (values in W)
+				if sim_set.Power_Loss_Analysis
+					online_power_loss_analysis(handles);
+					% An additional condition for power loss saving is
+					% inside the online function
 				end
-				if k == 1435 % j==4 && k == 1435
-					errorstr = 'Test Error at the end thrown';
-					exception = MException(...
-						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
-						errorstr);
-					throw(exception);
-				end
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%               % For Testing Purposes:
+%   				pause(0.001);
+% 				if k == 207 % i == 1 && j==2 && k == 207
+% 					errorstr = 'Test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
+% 				if k == 727 % i == 1 && j==2 && k == 727
+% 					errorstr = 'Another test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
+% 				
+% 				if k == 2 % j==4 && k == 2
+% 					errorstr = 'Test Error at Beginning thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
+% 				if k == 777 % j==4 && k == 777
+% 					errorstr = 'Another test Error thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
+% 				if k == 1435 % j==4 && k == 1435
+% 					errorstr = 'Test Error at the end thrown';
+% 					exception = MException(...
+% 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
+% 						errorstr);
+% 					throw(exception);
+% 				end
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 				
 				if mod(k,num_gui_update) == 0

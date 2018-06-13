@@ -16,7 +16,7 @@ for cg = 1 : numel(list_of_grids)  % Number of topologies, i.e. models analysed
     % Perform a summary analysis of the online voltage violation function
     d.Result.(grid).Voltage_Violation_Summary = Post_Voltage_Violation_Analysis(ext_obj,ext_grid,grid);
 %     % Display results as text display in command window
-%     d.Result.(grid).Voltage_Violation_Summary.Display_results;
+    d.Result.(grid).Voltage_Violation_Summary.Display_results;
     %---------------------------------------------------------------------
     
 end

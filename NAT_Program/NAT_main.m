@@ -284,18 +284,28 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-% d = handles.NAT_Data;
-if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-	handles = post_voltage_violation_report(handles);
-	handles = grid_voltages_comparison(handles,1:3,'all');
+wb = handles.waitbar_handler;
+wb.start(1000);
+for i = 1:1000
+	pause(0.001);
+	wb.update(i);
 end
-if handles.Current_Settings.Simulation.Branch_Violation_Analysis
-	handles = post_branch_violation_report(handles);
-	handles = grid_branches_comparison(handles,1:3,'all');
-end
-if handles.Current_Settings.Simulation.Power_Loss_Analysis
-    handles = post_active_power_loss_report(handles);
-end
+wb.reset();
+
+
+
+% % d = handles.NAT_Data;
+% if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+% 	handles = post_voltage_violation_report(handles);
+% 	handles = grid_voltages_comparison(handles,1:3,'all');
+% end
+% if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+% 	handles = post_branch_violation_report(handles);
+% 	handles = grid_branches_comparison(handles,1:3,'all');
+% end
+% if handles.Current_Settings.Simulation.Power_Loss_Analysis
+%     handles = post_active_power_loss_report(handles);
+% end
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
@@ -320,7 +330,7 @@ function push_network_open_Callback(hObject, ~, handles) %#ok<INUSL,DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-if isfield(handles, 'sin');
+if isfield(handles, 'sin')
 	try
 	handles.sin.open_application_and_file;
 	catch ME
