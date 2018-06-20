@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 09.05.2018
 
-% Last Modified by GUIDE v2.5 25-Apr-2018 15:02:53
+% Last Modified by GUIDE v2.5 20-Jun-2018 14:18:47
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -285,14 +285,44 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 wb = handles.waitbar_handler;
-wb.start(1000);
-for i = 1:1000
-	pause(0.001);
-	wb.update(i);
-end
+% 1st reset the waitbar:
 wb.reset();
-
-
+% define the working environment in form of the size of the single for loops (has to be
+% done in advance or just once before the coresponding for-loop starts): 
+counidx_i = wb.add_end_position(5);
+counidx_j = wb.add_end_position(10);
+counidx_k = wb.add_end_position(15);
+counidx_l = wb.add_end_position(20);
+% start the waitbar time measurement
+wb.start();
+for i = 1:5
+	% just after the for-loop intro update the corresponding counter:
+	wb.update_counter(counidx_i, i);
+	for j = 1:10
+		wb.update_counter(counidx_j, j);
+		for k=1:15
+			wb.update_counter(counidx_k, k);
+			for l=1:20
+				wb.update_counter(counidx_l, l);
+				% - - - - - - - - - - - - 
+				% Insert your code here, e.g. 
+				result = sum([i,j,k,l]);
+				disp(result);
+				% - - - - - - - - - - - - 
+				% if needed makr a update of the waitbar. Here the graphic is updated. It
+				% is recommended to reduce this operation as less as needed, to avoid
+				% unneccesary operations wihtin the calling functions:
+				if mod(l,10) == 0
+					wb.update();
+				end
+			end
+		end
+	end
+end
+% Stop the time measurement and give the user the information about the overall needed
+% time:
+needed_time = wb.stop();
+disp(needed_time);
 
 % % d = handles.NAT_Data;
 % if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
@@ -772,3 +802,10 @@ function edit_pqnode_hh_number_CreateFcn(hObject, eventdata, handles) %#ok<INUSD
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function waitbar_text_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to waitbar_text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
