@@ -289,21 +289,21 @@ wb = handles.waitbar_handler;
 wb.reset();
 % define the working environment in form of the size of the single for loops (has to be
 % done in advance or just once before the coresponding for-loop starts): 
-counidx_i = wb.add_end_position(5);
-counidx_j = wb.add_end_position(10);
-counidx_k = wb.add_end_position(15);
-counidx_l = wb.add_end_position(20);
 % start the waitbar time measurement
 wb.start();
+wb.add_end_position('i',5);
 for i = 1:5
 	% just after the for-loop intro update the corresponding counter:
-	wb.update_counter(counidx_i, i);
+	wb.update_counter('i', i);
+	wb.add_end_position('j',10);
 	for j = 1:10
-		wb.update_counter(counidx_j, j);
+		wb.update_counter('j', j);
+		wb.add_end_position('k',15);
 		for k=1:15
-			wb.update_counter(counidx_k, k);
+			wb.update_counter('k', k);
+			wb.add_end_position('l',20);
 			for l=1:20
-				wb.update_counter(counidx_l, l);
+				wb.update_counter('l', l);
 				% - - - - - - - - - - - - 
 				% Insert your code here, e.g. 
 				result = sum([i,j,k,l]);

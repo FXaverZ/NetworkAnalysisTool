@@ -7,6 +7,7 @@ function handles = network_scenario_calculation(handles)
 % Letzte Änderung durch:   Franz Zeilinger - 23.05.2018
 
 mh = handles.text_message_main_handler;
+wb = handles.waitbar_handler;
 mh.add_line('Performing Scenario based grid simulations...');
 
 % check, if simulation makes sense:
@@ -77,7 +78,9 @@ i_timer = tic();
 error_scen_counter = 0;
 error_scen_all_counter = 0;
 linemarker_scen_sim_started = mh.mark_current_displayline();
+counidx_i = wb.add_end_position(scenar.Number);
 for i=1:scenar.Number
+	wb.update_counter(counidx_i, i);
 	% get the current scenario:
 	cur_scen = scenar.Names{i};
 	mh.add_line('Using data of "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));

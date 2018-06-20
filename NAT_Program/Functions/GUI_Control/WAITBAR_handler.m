@@ -66,6 +66,7 @@ classdef WAITBAR_handler < handle
 		counter = [];
 		tic_start
 		end_pos = [];
+		end_pos_marker = {};
 		end_pos_total = 1;
 		multiplikators = [];
 		
@@ -83,15 +84,21 @@ classdef WAITBAR_handler < handle
 			obj.tic_start = tic();
 		end
 		
-		function index_marker = add_end_position(obj, end_pos)
-			obj.end_pos(end+1) = end_pos;
-			obj.counter(end+1) = 0;
+		function add_end_position(obj, end_pos_marker, end_pos)
+			idx = find(strcmp(obj.end_pos_marker, end_pos_marker), 1);
+			if isempty(idx)
+				obj.end_pos(end+1) = end_pos;
+				obj.end_pos_marker{end+1} = end_pos_marker;
+				obj.counter(end+1) = 0;
+			else
+				return;
+			end
+			
 			end_pos_tot = 1;
 			for a=1:numel(obj.end_pos)
 				end_pos_tot = end_pos_tot*obj.end_pos(a);
 			end
 			obj.end_pos_total = end_pos_tot;
-			index_marker = numel(obj.end_pos);
 			
 			% prepare a arry to know, how many steps were made in the underlying loop
 			% iterators
@@ -111,7 +118,8 @@ classdef WAITBAR_handler < handle
 		end
 		
 		function obj = update_counter (obj, index_marker, cur_pos)
-			obj.counter(index_marker) = cur_pos;
+			idx = strcmp(obj.end_pos_marker, index_marker);
+			obj.counter(idx) = cur_pos;
 		end
 		
 		function obj = update(obj)
@@ -155,6 +163,7 @@ classdef WAITBAR_handler < handle
 			obj.end_pos = [];
 			obj.end_pos_total = 1;
 			obj.multiplikators = [];
+			obj.end_pos_marker = {};
 			set(obj.handle_waitbar_textf,'String',' ');
 			pos = get(obj.handle_waitbar_color,'Position');
 			pos(3) = 0.05;
