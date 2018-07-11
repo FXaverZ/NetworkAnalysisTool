@@ -287,15 +287,16 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 wb = handles.waitbar_handler;
 % 1st reset the waitbar:
 wb.reset();
-% define the working environment in form of the size of the single for loops (has to be
-% done in advance or just once before the coresponding for-loop starts): 
-% start the waitbar time measurement
-wb.start();
+% define the working environment in form of the size of the single for loops. This has to
+% be done in advance (i, j in the example) or just once before the coresponding for-loop
+% starts (k, l in the example)
 wb.add_end_position('i',5);
+wb.add_end_position('j',10);
+% start the waitbar time measurement.
+wb.start();
 for i = 1:5
 	% just after the for-loop intro update the corresponding counter:
 	wb.update_counter('i', i);
-	wb.add_end_position('j',10);
 	for j = 1:10
 		wb.update_counter('j', j);
 		wb.add_end_position('k',15);
@@ -309,7 +310,7 @@ for i = 1:5
 				result = sum([i,j,k,l]);
 				disp(result);
 				% - - - - - - - - - - - - 
-				% if needed makr a update of the waitbar. Here the graphic is updated. It
+				% if needed mark a update of the waitbar. Here the graphic is updated. It
 				% is recommended to reduce this operation as less as needed, to avoid
 				% unneccesary operations wihtin the calling functions:
 				if mod(l,10) == 0

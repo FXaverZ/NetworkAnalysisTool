@@ -14,49 +14,49 @@ classdef WAITBAR_handler < handle
 	%      handles.waitbar_text);
 	% 
 	%   Sample code for usage of the waitbar handler:
-	%    % 1st reset the waitbar:
-	%    wb.reset();
-	%    % define the working environment in form of the size of the single for loops (has
-	%    % to be done in advance or just once before the coresponding for-loop starts): 
-	%    counidx_i = wb.add_end_position(5);
-	%    counidx_j = wb.add_end_position(10);
-	%    counidx_k = wb.add_end_position(15);
-	%    counidx_l = wb.add_end_position(20);
-	%    % start the waitbar time measurement
-	%    wb.start();
-	%    for i = 1:5
-	%    	% just after the for-loop intro update the corresponding counter:
-	%    	wb.update_counter(counidx_i, i);
-	%    	for j = 1:10
-	%    		wb.update_counter(counidx_j, j);
-	%    		for k=1:15
-	%    			wb.update_counter(counidx_k, k);
-	%    			for l=1:20
-	%    				wb.update_counter(counidx_l, l);
-	%    				% - - - - - - - - - - - - 
-	%    				% Insert your code here, e.g. 
-	%    				result = sum([i,j,k,l]);
-	%    				disp(result);
-	%    				% - - - - - - - - - - - - 
-	%    				% if needed makr a update of the waitbar. Here the graphic is
-	%    				% updated. It is recommended to reduce this operation as less as
-	%    				% needed, to avoid unneccesary operations wihtin the calling
-	%    				% functions: 
-	%    				if mod(l,10) == 0
-	%    					wb.update();
-	%    				end
-	%    			end
-	%    		end
-	%    	end
-	%    end
-	%    % Stop the time measurement and give the user the information about the overall needed
-	%    % time:
-	%    needed_time = wb.stop();
-	%    disp(needed_time);
+	% % 1st reset the waitbar:
+	% wb.reset();
+	% % define the working environment in form of the size of the single for loops. This has to
+	% % be done in advance (i, j in the example) or just once before the coresponding for-loop
+	% % starts (k, l in the example)
+	% wb.add_end_position('i',5);
+	% wb.add_end_position('j',10);
+	% % start the waitbar time measurement.
+	% wb.start();
+	% for i = 1:5
+	% 	% just after the for-loop intro update the corresponding counter:
+	% 	wb.update_counter('i', i);
+	% 	for j = 1:10
+	% 		wb.update_counter('j', j);
+	% 		wb.add_end_position('k',15);
+	% 		for k=1:15
+	% 			wb.update_counter('k', k);
+	% 			wb.add_end_position('l',20);
+	% 			for l=1:20
+	% 				wb.update_counter('l', l);
+	% 				% - - - - - - - - - - - -
+	% 				% Insert your code here, e.g.
+	% 				result = sum([i,j,k,l]);
+	% 				disp(result);
+	% 				% - - - - - - - - - - - -
+	% 				% if needed mark a update of the waitbar. Here the graphic is updated. It
+	% 				% is recommended to reduce this operation as less as needed, to avoid
+	% 				% unneccesary operations wihtin the calling functions:
+	% 				if mod(l,10) == 0
+	% 					wb.update();
+	% 				end
+	% 			end
+	% 		end
+	% 	end
+	% end
+	% % Stop the time measurement and give the user the information about the overall needed
+	% % time:
+	% needed_time = wb.stop();
+	% disp(needed_time);
 	
-	% Version:                 1.1
+	% Version:                 1.2
 	% Created by:              Franz Zeilinger - 09.05.2018
-	% Last change by:          Franz Zeilinger - 20.06.2018
+	% Last change by:          Franz Zeilinger - 11.07.2018
 	
 	properties
 		handle_waitbar_white
@@ -153,6 +153,15 @@ classdef WAITBAR_handler < handle
 			time = toc(obj.tic_start);
 			string = [num2str(100,'%4.1f'),...
 				'% done in ', sec2str(time)];
+			set(obj.handle_waitbar_textf,'String',string);
+			obj.tic_start = [];
+		end
+		
+		function stop_cancel (obj)
+			
+			obj.update();
+			string = get(obj.handle_waitbar_textf,'String');
+			string = ['Aborted! ',string];
 			set(obj.handle_waitbar_textf,'String',string);
 			obj.tic_start = [];
 		end
