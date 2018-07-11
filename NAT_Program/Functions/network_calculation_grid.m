@@ -35,7 +35,11 @@ mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 wb.start();
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	try
-		handles = network_calculation_LV(handles);
+		if handles.Current_Settings.Simulation.No_GUI_output
+			handles = network_calculation_LV_no_GUI_out (handles);
+		else
+			handles = network_calculation_LV(handles);
+		end
 	catch ME
 		if strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
 			mh.stop_sub_log(logpath);

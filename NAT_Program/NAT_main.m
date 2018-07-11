@@ -4,7 +4,7 @@
 % Erstellt von:            Franz Zeilinger - 29.01.2013
 % Letzte Änderung durch:   Franz Zeilinger - 11.17.2018
 
-% Last Modified by GUIDE v2.5 20-Jun-2018 14:18:47
+% Last Modified by GUIDE v2.5 11-Jul-2018 16:35:28
 
 function varargout = NAT_main(varargin)
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm
@@ -104,6 +104,18 @@ check_extract_value_Callback_Add (hObject, handles, 'sample_value')
 
 function check_get_time_series_Callback(hObject, ~, handles) %#ok<DEFNU>
 check_use_scenarios_Callback_Add (hObject, handles);
+
+function check_no_output_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to check_no_output (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles.Current_Settings.Simulation.No_GUI_output = get(hObject,'Value');
+
+% Anzeige aktualisieren:
+handles = refresh_display_NAT_main_gui(handles);
+% Update the handles-structure:
+guidata(hObject, handles);
 
 function check_pqnode_active_Callback(hObject, ~, handles) %#ok<DEFNU>
 check_pqnode_active_Callback_Add (hObject, handles);
@@ -761,10 +773,7 @@ function edit_pqnode_hh_number_CreateFcn(hObject, eventdata, handles) %#ok<INUSD
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes during object creation, after setting all properties.
-function waitbar_text_CreateFcn(hObject, eventdata, handles)
+function waitbar_text_CreateFcn(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
 % hObject    handle to waitbar_text (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called

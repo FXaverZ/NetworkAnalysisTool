@@ -328,6 +328,7 @@ Simulation.Parameters = {...
 	'Language',           'US',...        % Ausgabe der Meldungen in Deutsch
 	'Database_Connector', 'ACCESS12',...  % Verwendeter Datenbankconnector (Hier: MS Access, .mdb
 	};
+Simulation.No_GUI_output = 0;
 % Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche
 % Input-Datensätze sollen aus der Datenbank geladen werden?)
 Simulation.Number_Runs = 10;

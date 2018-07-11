@@ -230,6 +230,7 @@ else
 end
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+set(handles.check_no_output, 'Value', handles.Current_Settings.Simulation.No_GUI_output)
 if ~isempty(handles.Current_Settings.Files.Grid.Name)
 	str = [handles.Current_Settings.Files.Grid.Path,filesep,...
 		handles.Current_Settings.Files.Grid.Name,...
