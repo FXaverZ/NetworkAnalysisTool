@@ -8,17 +8,6 @@ function handles = network_scenario_calculation(handles)
 
 mh = handles.text_message_main_handler;
 wb = handles.waitbar_main_handler;
-mh.add_line('Performing Scenario based grid simulations...');
-
-% check, if simulation makes sense:
-if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
-		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...
-		handles.Current_Settings.Simulation.Power_Loss_Analysis)
-	errorstr = 'No active analysis function! Abort simulation...';
-	mh.add_error(errorstr);
-	errordlg(errorstr);
-	return;
-end
 
 % clear previous results:
 handles.NAT_Data.Result = [];
@@ -49,7 +38,7 @@ simdatestr = datestr(now,'yyyy_mm_dd-HH.MM.SS');
 % Save the outputs to the console:
 log_path = [r_path,filesep,'Res_',simdatestr,' - Log.log'];
 mh.mark_sub_log(log_path);
-
+mh.add_line('Performing Scenario based grid simulations...');
 mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 
 % adapt the Scenario-Settings according to the selection:
@@ -66,7 +55,6 @@ if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 	scenar = scen_new;
 end
 
-% write_scenario_log(handles,'close');
 % Save the current Settings of the tool:
 Current_Settings = handles.Current_Settings;
 Current_Settings.Simulation.Scenarios = scenar;
@@ -137,8 +125,7 @@ for scenario_counter=1:scenar.Number
 				handles = network_calculation_MV_controller_active(handles);
 			end
 		catch ME
-			if strcmp(ME.identifier,'NAT:NetworkCalculationLV:NoAnalysisSpecified')...
-					|| strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
+			if strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')
 				mh.stop_sub_log(log_path);
 				return;
 			else

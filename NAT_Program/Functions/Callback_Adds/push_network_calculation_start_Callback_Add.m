@@ -15,10 +15,19 @@ mh.level_up();
 ch.set_cancel_button(handles.push_network_calculation_start);
 wb.reset();
 
-if handles.Current_Settings.Simulation.Use_Scenarios
-	handles = network_scenario_calculation(handles);
+% check, if simulation makes sense:
+if ~(handles.Current_Settings.Simulation.Voltage_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Branch_Violation_Analysis || ...
+		handles.Current_Settings.Simulation.Power_Loss_Analysis)
+	errorstr = 'No active analysis function! Abort simulation...';
+	mh.add_error(errorstr);
+	errordlg(errorstr);
 else
-	handles = network_calculation_grid(handles);
+	if handles.Current_Settings.Simulation.Use_Scenarios
+		handles = network_scenario_calculation(handles);
+	else
+		handles = network_calculation_grid(handles);
+	end
 end
 
 % Refresh the GUI:

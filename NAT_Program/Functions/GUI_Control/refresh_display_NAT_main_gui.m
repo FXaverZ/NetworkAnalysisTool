@@ -298,7 +298,7 @@ if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 		'05q_value',...
 		'95q_value',...
 		};
-		
+	
 	num_active_datatyps = 0;
 	% adopt possible selection of data typs based on available load- and infeed data:
 	for a=1:numel(datatyps)
@@ -319,7 +319,28 @@ if ~isempty(handles.NAT_Data.Load_Infeed_Data)
 				break;
 			end
 		end
-	end 
+	end
+	
+	% which data typ has to be simulated?
+	if handles.Current_Settings.Simulation.use_Sample_Value
+		handles.Current_Settings.Simulation.Data_typ = '_Sample';
+	end
+	if handles.Current_Settings.Simulation.use_Mean_Value
+		handles.Current_Settings.Simulation.Data_typ = '_Mean';
+	end
+	if handles.Current_Settings.Simulation.use_Max_Value
+		handles.Current_Settings.Simulation.Data_typ = '_Max';
+	end
+	if handles.Current_Settings.Simulation.use_Min_Value
+		handles.Current_Settings.Simulation.Data_typ = '_Min';
+	end
+	if handles.Current_Settings.Simulation.use_05_Quantile_Value
+		handles.Current_Settings.Simulation.Data_typ = '_05P_Quantil';
+	end
+	if handles.Current_Settings.Simulation.use_95_Quantile_Value
+		handles.Current_Settings.Simulation.Data_typ = '_95P_Quantil';
+	end
+	
 	% activate simulation-button when
 	% - in the handles-structure a field named 'sin' is available (that means, that a
 	%   communication to SINCAL is there)

@@ -4,11 +4,11 @@ function handles = result_preallocation(handles,cg)
 % and for result saving. % Value of 1 turns on the preallocation
 % function.
 
-% Version:                 1.3
+% Version:                 1.4
 % Erstellt von:            Matej Rejc      - 17.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 04.12.2014
+% Letzte Änderung durch:   Franz Zeilinger - 11.07.2018
 
-% Access to the data-Object:
+% Access to the data-Object (handle object):
 d = handles.NAT_Data;
 % how many data_sets are in the current input data available:
 num_data_set = handles.Current_Settings.Simulation.Number_Runs;
@@ -184,5 +184,10 @@ if save_ploss_results == 1
 		numel(d.Grid.(cg).Branches.Grouped),1);
 	% <numb. of sets, numb. of timepoints,numb_of_branches,loss value>
 end
+% ---------------------------------------------------------------------------
+% Add an error-counter array
+% ---------------------------------------------------------------------------
+d.Result.(cg).Error_Counter = zeros(num_data_set, handles.Current_Settings.Simulation.Timepoints);
+
 end
 
