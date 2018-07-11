@@ -1,8 +1,8 @@
 % NAT_MAIN    Netzanalyse- und Simulationstool, Hauptprogramm 
 
-% Version:                 7.1
+% Version:                 7.2
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 09.05.2018
+% Letzte Änderung durch:   Franz Zeilinger - 11.17.2018
 
 % Last Modified by GUIDE v2.5 20-Jun-2018 14:18:47
 
@@ -284,59 +284,17 @@ function push_network_analysis_perform_Callback(hObject, ~, handles) %#ok<DEFNU>
 % ~			 nicht benötigt (MATLAB spezifisch)
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
-wb = handles.waitbar_handler;
-% 1st reset the waitbar:
-wb.reset();
-% define the working environment in form of the size of the single for loops. This has to
-% be done in advance (i, j in the example) or just once before the coresponding for-loop
-% starts (k, l in the example)
-wb.add_end_position('i',5);
-wb.add_end_position('j',10);
-% start the waitbar time measurement.
-wb.start();
-for i = 1:5
-	% just after the for-loop intro update the corresponding counter:
-	wb.update_counter('i', i);
-	for j = 1:10
-		wb.update_counter('j', j);
-		wb.add_end_position('k',15);
-		for k=1:15
-			wb.update_counter('k', k);
-			wb.add_end_position('l',20);
-			for l=1:20
-				wb.update_counter('l', l);
-				% - - - - - - - - - - - - 
-				% Insert your code here, e.g. 
-				result = sum([i,j,k,l]);
-				disp(result);
-				% - - - - - - - - - - - - 
-				% if needed mark a update of the waitbar. Here the graphic is updated. It
-				% is recommended to reduce this operation as less as needed, to avoid
-				% unneccesary operations wihtin the calling functions:
-				if mod(l,10) == 0
-					wb.update();
-				end
-			end
-		end
-	end
+if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
+	handles = post_voltage_violation_report(handles);
+	handles = grid_voltages_comparison(handles,1:3,'all');
 end
-% Stop the time measurement and give the user the information about the overall needed
-% time:
-needed_time = wb.stop();
-disp(needed_time);
-
-% % d = handles.NAT_Data;
-% if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis
-% 	handles = post_voltage_violation_report(handles);
-% 	handles = grid_voltages_comparison(handles,1:3,'all');
-% end
-% if handles.Current_Settings.Simulation.Branch_Violation_Analysis
-% 	handles = post_branch_violation_report(handles);
-% 	handles = grid_branches_comparison(handles,1:3,'all');
-% end
-% if handles.Current_Settings.Simulation.Power_Loss_Analysis
-%     handles = post_active_power_loss_report(handles);
-% end
+if handles.Current_Settings.Simulation.Branch_Violation_Analysis
+	handles = post_branch_violation_report(handles);
+	handles = grid_branches_comparison(handles,1:3,'all');
+end
+if handles.Current_Settings.Simulation.Power_Loss_Analysis
+    handles = post_active_power_loss_report(handles);
+end
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);

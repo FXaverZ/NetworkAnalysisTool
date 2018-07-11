@@ -2,12 +2,12 @@ function handles = network_scenario_calculation(handles)
 %NETWORK_SCENARIO_CALCULATION Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.4
+% Version:                 1.5
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 23.05.2018
+% Letzte Änderung durch:   Franz Zeilinger - 11.07.2018
 
 mh = handles.text_message_main_handler;
-wb = handles.waitbar_handler;
+wb = handles.waitbar_main_handler;
 mh.add_line('Performing Scenario based grid simulations...');
 
 % check, if simulation makes sense:
@@ -58,9 +58,9 @@ if ~isempty(handles.Current_Settings.Simulation.Scenarios_Selection)
 	scen_old = scenar;
 	scen_new.Number = numel(Scen_Sel);
 	scen_new.Names = cell(1,scen_new.Number);
-	for i=1:scen_new.Number
-		scen_new.Names{i} = scen_old.Names{Scen_Sel(i)};
-		scen_new.(['Sc_',num2str(i)]) = scen_old.(['Sc_',num2str(Scen_Sel(i))]);
+	for scenario_counter=1:scen_new.Number
+		scen_new.Names{scenario_counter} = scen_old.Names{Scen_Sel(scenario_counter)};
+		scen_new.(['Sc_',num2str(scenario_counter)]) = scen_old.(['Sc_',num2str(Scen_Sel(scenario_counter))]);
 	end
 	scen_new.Data_avaliable = 1;
 	scenar = scen_new;
@@ -73,24 +73,26 @@ Current_Settings.Simulation.Scenarios = scenar;
 save([r_path,filesep,'Res_',simdatestr,' - Settings.mat'],'Current_Settings');
 
 adapt_input_data_time = [];
-i_timer = tic();
-
 error_scen_counter = 0;
 error_scen_all_counter = 0;
+
+wb.start();
 linemarker_scen_sim_started = mh.mark_current_displayline();
-counidx_i = wb.add_end_position(scenar.Number);
-for i=1:scenar.Number
-	wb.update_counter(counidx_i, i);
+scenario_counter_timer = tic();
+wb.add_end_position('scenario_counter', scenar.Number);
+for scenario_counter=1:scenar.Number
+	wb.update_counter('scenario_counter', scenario_counter);
+	
 	% get the current scenario:
-	cur_scen = scenar.Names{i};
-	mh.add_line('Using data of "', cur_scen,'", Scenario ',num2str(i),' of ',num2str(scenar.Number));
+	cur_scen = scenar.Names{scenario_counter};
+	mh.add_line('Using data of "', cur_scen,'", Scenario ',num2str(scenario_counter),' of ',num2str(scenar.Number));
 	mh.level_up();
 	% load the input data into the tool (variable 'Load_Infeed_Data'):
 	load([s_path,filesep,cur_scen,'.mat']);
 	% set the data-object to initial state:
 	d.Load_Infeed_Data = [];
 	d.Load_Infeed_Data = Load_Infeed_Data;
-	d.Simulation.Scenario = scenar.(['Sc_',num2str(i)]);
+	d.Simulation.Scenario = scenar.(['Sc_',num2str(scenario_counter)]);
 	clear('Load_Infeed_Data');
 	% Check the settings if adaption of the input data is neccesary and possible:
 	if isempty (adapt_input_data_time)
@@ -104,13 +106,13 @@ for i=1:scenar.Number
 	end
 	
 	% Check, if the data is partitioned
-	if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-		mh.add_line('Filepart 1 of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
+	if scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts > 1
+		mh.add_line('Filepart 1 of ',num2str(scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts));
 	end
-	for j = 1:scenar.(['Sc_',num2str(i)]).Data_number_parts
+	for j = 1:scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts
 		if j > 1
 			% load the next data set
-			fmh.add_line('Filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
+			mh.add_line('Filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts));
 			load([s_path,filesep,cur_scen,'_',num2str(j,'%03.0f'),'.mat']);
 			% set the data-object to initial state:
 			d.Load_Infeed_Data = [];
@@ -161,8 +163,8 @@ for i=1:scenar.Number
 		else
 			handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdatestr,' - ',cur_scen,'_',num2str(j,'%03.0f')];
 		end
-		if scenar.(['Sc_',num2str(i)]).Data_number_parts > 1
-			mh.add_line('Saving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(i)]).Data_number_parts));
+		if scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts > 1
+			mh.add_line('Saving restults for filepart ',num2str(j),' of ',num2str(scenar.(['Sc_',num2str(scenario_counter)]).Data_number_parts));
 		end
 		handles = save_simulation_data(handles);
 	end
@@ -174,7 +176,7 @@ for i=1:scenar.Number
 			error_scen_counter, ' scenarios occured.');
 	end
 	
-	mh.add_line('Calculations for "', cur_scen,'" (Scenario ',i,' of ',scenar.Number,') finished.');
+	mh.add_line('Calculations for "', cur_scen,'" (Scenario ',scenario_counter,' of ',scenar.Number,') finished.');
 	mh.level_up();
 	
 	error_all_count = 0;
@@ -187,12 +189,12 @@ for i=1:scenar.Number
 		error_scen_counter = error_scen_counter + 1;
 		error_scen_all_counter = error_scen_all_counter + error_all_count;
 	end
-	t = toc(i_timer);
-	if i < scenar.Number
+	t = toc(scenario_counter_timer);
+	if scenario_counter < scenar.Number
 		mh.add_line('Runtime: ',...
 			sec2str(t),...
 			'. Remaining: ',...
-			sec2str(t/(i/scenar.Number) - t));
+			sec2str(t/(scenario_counter/scenar.Number) - t));
 	else
 		mh.add_line('Runtime: ',...
 			sec2str(t),...

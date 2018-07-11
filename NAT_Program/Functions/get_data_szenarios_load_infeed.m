@@ -2,11 +2,12 @@ function handles = get_data_szenarios_load_infeed(handles)
 %GET_DATA_SZENARIOS_LOAD_INFEED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.5.1
+% Version:                 1.5.2
 % Erstellt von:            Franz Zeilinger - 24.04.2013
-% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
+% Letzte Änderung durch:   Franz Zeilinger - 11.07.2018
 
 mh = handles.text_message_main_handler;
+wb = handles.waitbar_main_handler;
 
 % Check, if a Subfolder for input-data within the current grid-folder is avaliable:
 if handles.Current_Settings.Simulation.Use_Grid_Variants && ~isempty(handles.Current_Settings.Simulation.Grid_List)
@@ -53,17 +54,21 @@ end
 scen_new.Number = numel(Scen_Sel);
 scen_new.Names = cell(1,scen_new.Number);
 scen_cou = 0;
-for i=1:scen_old.Number
+
+wb.add_end_position('scenario_counter',scen_new.Number);
+for scenario_counter=1:scen_old.Number
 	% check, if the current scenario is selected:
-	if isempty(find(i==Scen_Sel, 1))
+	if isempty(find(scenario_counter==Scen_Sel, 1))
 		% this scenario will not be treated
 		continue;
 	end
+	scen_cou = scen_cou + 1;
+	wb.update_counter('scenario_counter', scen_cou);
+	
 	% Select the current active scenario
-	d.Simulation.Active_Scenario = scen_old.(['Sc_',num2str(i)]);
+	d.Simulation.Active_Scenario = scen_old.(['Sc_',num2str(scenario_counter)]);
 	mh.add_line('Scenario "',d.Simulation.Active_Scenario.Filename,'"');
 	mh.level_up();
-	scen_cou = scen_cou + 1;
 	
 	try
 		% Check, if the data has to be partitioned:
@@ -95,8 +100,8 @@ for i=1:scen_old.Number
 	end
 	% get the new (altered in loaddata_get) scenario information:
 	scen_new.(['Sc_',num2str(scen_cou)]) = d.Simulation.Active_Scenario;
-	scen_old.(['Sc_',num2str(i)]) = d.Simulation.Active_Scenario;
-	scen_new.Names{scen_cou} = scen_old.Names{i};
+	scen_old.(['Sc_',num2str(scenario_counter)]) = d.Simulation.Active_Scenario;
+	scen_new.Names{scen_cou} = scen_old.Names{scenario_counter};
 	mh.level_down();
 end
 

@@ -2,12 +2,13 @@ function handles = loaddata_get(handles, varargin)
 %LOADDATA_GET Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.3
+% Version:                 1.4
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 04.05.2018
+% Letzte Änderung durch:   Franz Zeilinger - 11.07.2018
 
 mh = handles.text_message_main_handler;
 ch = handles.cancel_button_main_handler;
+wb = handles.waitbar_main_handler;
 
 % prepare the functions arguments:
 if nargin == 2
@@ -41,10 +42,14 @@ end
 tic; %Zeitmessung start
 file_part_count = 0;
 set_count = 0;
+
 mh.add_line('Data Extraction started.');
-for i = 1:num_set
+wb.add_end_position('set_counter',num_set);
+for set_counter = 1:num_set
+	wb.update_counter('set_counter', set_counter);
+	
 	% Avoid Matlab "hang":
-	drawnow(); pause(0.05);
+	drawnow(); pause(0.01);
 	
 	if num_set > 1
 		% Zufällige Zuordnung treffen:
@@ -58,12 +63,13 @@ for i = 1:num_set
 	get_data_elmob(handles, set_count);
 	% create dummy values of not needed input data
 	get_empty_data_lvgrids(handles, set_count);
-	if i > 1
+	if set_counter > 1
 		mh.remove_line(2);
 	end
 	if num_set > 1
+		wb.update();
 		% Infos to the console:
-		mh.add_line('Set ',i,' of ',num_set,' done... ');
+		mh.add_line('Set ',set_counter,' of ',num_set,' done... ');
 		if ch.was_cancel_pushed()
 			% Cancel Button pushed!
 			errorstr = 'Data extraction canceled by user!';
@@ -74,9 +80,9 @@ for i = 1:num_set
 			throw(exception);
 		end
 		t = toc;
-		progress = i/num_set;
+		progress = set_counter/num_set;
 		time_elapsed = t/progress - t;
-		if i < num_set
+		if set_counter < num_set
 			mh.level_up();
 			mh.add_line(' Runtime: ', sec2str(t),'. Remaining: ',...
 				sec2str(time_elapsed));
@@ -86,7 +92,7 @@ for i = 1:num_set
 		end
 		mh.write_sub_logs();
 	end
-	if save_part_files && i >= ((file_part_count+1) * handles.System.number_max_datasets)
+	if save_part_files && set_counter >= ((file_part_count+1) * handles.System.number_max_datasets)
 		% save a part-file:
 		file_part_count = file_part_count + 1;
 		% Save the number of datasets in this file part:
@@ -108,11 +114,11 @@ for i = 1:num_set
 	end
 end
 % save last file-part:
-if save_part_files && i > (file_part_count * handles.System.number_max_datasets)
+if save_part_files && set_counter > (file_part_count * handles.System.number_max_datasets)
 	file_part_count = file_part_count + 1;
 	% Save the number of datasets in this file part:
 	handles.NAT_Data.Simulation.Active_Scenario.Data_content(file_part_count) = ...
-		i - (file_part_count-1) * handles.System.number_max_datasets;
+		set_counter - (file_part_count-1) * handles.System.number_max_datasets;
 	
 	mh.add_line('Save file part no. ',file_part_count);
 	name = [handles.NAT_Data.Simulation.Active_Scenario.Filename,'_',num2str(file_part_count,'%03.0f')];

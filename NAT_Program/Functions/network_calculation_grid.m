@@ -49,6 +49,7 @@ end
 error = false;
 % start the calculation
 mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
+handles.waitbar_main_handler.start();
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	try
 		handles = network_calculation_LV(handles);

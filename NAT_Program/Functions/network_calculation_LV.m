@@ -2,14 +2,15 @@ function handles = network_calculation_LV(handles)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 3.2
+% Version:                 3.3
 % Erstellt von:            Franz Zeilinger - 05.02.2013
-% Letzte Änderung durch:   Franz Zeilinger - 23.05.2018
+% Letzte Änderung durch:   Franz Zeilinger - 11.07.2018
 
 % Zugriff auf Datenobjekt und sontige handler:
 nd = handles.NAT_Data;
 mh = handles.text_message_main_handler;
 ch = handles.cancel_button_main_handler;
+wb = handles.waitbar_main_handler;
 
 % get the Current Settings:
 cur_set = handles.Current_Settings;
@@ -73,16 +74,21 @@ mh.add_info('Grid-Calculations are using datatyp "',data_typ(2:end),'" with ',da
 	' timepoints.');
 mh.level_up; %1
 num_data_set = dat_ext.Number_Data_Sets;
-i_timer = tic();
+
+% Iterate over all grids
 linemarker_grid_sim_started = mh.mark_current_displayline();
-for i=1:numel(Grid_List)
+grid_counter_timer = tic();
+wb.add_end_position('grid_counter',numel(Grid_List));
+for grid_counter=1:numel(Grid_List)
+	wb.update_counter('grid_counter', grid_counter);
+	
 	% Set the current Grid
-	cg = Grid_List{i}(1:end-4);
+	cg = Grid_List{grid_counter}(1:end-4);
 	cur_set.Files.Grid.Name = cg;
 	handles.Current_Settings = cur_set;
 	
 	if numel(Grid_List) > 1
-		mh.add_line('Start with grid-calculation ',num2str(i)',' of ',num2str(numel(Grid_List)),...
+		mh.add_line('Start with grid-calculation ',num2str(grid_counter)',' of ',num2str(numel(Grid_List)),...
 			' (',cg,')...');
 	else
 		mh.add_line('Start with grid-calculation',' (',cg,')...');
@@ -105,14 +111,18 @@ for i=1:numel(Grid_List)
 		nd.Simulation.Scenario = 'No_Scenario';
 	end
 	
-	j_timer = tic; %Zeitmessung start
 	reset_counter = 1;
+	
 	linemarker_dataset_sim_started = mh.mark_current_displayline();
-	for j=1:num_data_set
+	dataset_counter_timer = tic; %Zeitmessung start
+	wb.add_end_position('dataset_counter',num_data_set);
+	for dataset_counter=1:num_data_set
+		wb.update_counter('dataset_counter', dataset_counter);
+		
 		% Reset auf RPC Connection after defnined number of profiles
 		% simulted (because of problems, if more profiles are simulated in
 		% one row! SINCAL chrushes then!)
-		if j > (reset_counter * handles.System.number_max_profiles_simulated)
+		if dataset_counter > (reset_counter * handles.System.number_max_profiles_simulated)
 			mh.add_line('Reset of RPC-Connection...');
 			mh.level_up;%3
 			reset_counter = reset_counter + 1;
@@ -121,23 +131,23 @@ for i=1:numel(Grid_List)
 			mh.level_down();%2
 			mh.add_line('...done!');
 		end
-		mh.add_line('Using set No. ',j,' of ', num_data_set,' ...');
+		mh.add_line('Using set No. ',dataset_counter,' of ', num_data_set,' ...');
 		mh.level_up();%3
 		drawnow();
 		
 		%----------------------------------------------------------------------------
 		% Übernehmen der akutell geladenen Daten:
 		%----------------------------------------------------------------------------
-		Load_Data = nd.Load_Infeed_Data.(['Set_',num2str(j)]).Households.(['Data',data_typ]);
-		Sola_Data = nd.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.(['Data',data_typ]);
-		Elmo_Data = nd.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]);
-		cur_set.Table_Network = nd.Load_Infeed_Data.(['Set_',num2str(j)]).Table_Network;
+		Load_Data = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Households.(['Data',data_typ]);
+		Sola_Data = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Solar.(['Data',data_typ]);
+		Elmo_Data = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).El_Mobility.(['Data',data_typ]);
+		cur_set.Table_Network = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Table_Network;
 		
 % % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % 		% Debug: generate debug input data:
-% 		if j==1
+% 		if dataset_counter==1
 % 			factor = 1;
-% 		elseif j==2;
+% 		elseif dataset_counter==2;
 % 			factor = 1.25;
 % 		else
 % 			factor = 3;
@@ -194,9 +204,9 @@ for i=1:numel(Grid_List)
 % % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		
 		% Save the maybe altered Data for the OAT-Programm:
-		nd.Load_Infeed_Data.(['Set_',num2str(j)]).Households.(['Data',data_typ]) = Load_Data;
-		nd.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.(['Data',data_typ]) = Sola_Data;
-		nd.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.(['Data',data_typ]) = Elmo_Data;
+		nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Households.(['Data',data_typ]) = Load_Data;
+		nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Solar.(['Data',data_typ]) = Sola_Data;
+		nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).El_Mobility.(['Data',data_typ]) = Elmo_Data;
 		
 		if isempty(Load_Data) && isempty(Elmo_Data) && isempty(Sola_Data)
 			errorstr = 'Not enough input-Data for simulation!';
@@ -228,7 +238,7 @@ for i=1:numel(Grid_List)
 		%--------------------------------------------------------------------------------
 		% Options for result preallocation are currently defined within
 		% result_preallocation function
-		if j == 1
+		if dataset_counter == 1
 			% We predefine the results for all datasets for specific (cg)
 			% grid at first dataset iteration
 			handles = result_preallocation(handles,cg);
@@ -245,11 +255,11 @@ for i=1:numel(Grid_List)
 		% Haushalts-Lasten ins Netz einfügen:
 		%------------------------------------------------------------------------
 		% get important information, first content of the loaded profiles
-		hh_conten = nd.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Content;
+		hh_conten = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Households.Content;
 		% total number of present households:
 		hh_num_to = numel(hh_conten);
 		% number of households per typ:
-		hh_number = nd.Load_Infeed_Data.(['Set_',num2str(j)]).Households.Number;
+		hh_number = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Households.Number;
 		% where are the PQ-Node names in the network table?
 		idx_pq_na = strcmp(cur_set.Table_Network.ColumnName, 'Names');
 		% where are the number of households of the node?
@@ -264,9 +274,9 @@ for i=1:numel(Grid_List)
 		% go through all P_Q_Nodes and connect the household loads to them according to
 		% their number and typ selection:
 		load_counter = 1; % counter for load-objects
-		for k=1:numel(nd.Grid.(cg).P_Q_Node.ids)
+		for timepoint_counter=1:numel(nd.Grid.(cg).P_Q_Node.ids)
 			% where ist the entry of the current point in the network table?
-			pq_name = nd.Grid.(cg).P_Q_Node.Points(k).P_Q_Name;
+			pq_name = nd.Grid.(cg).P_Q_Node.Points(timepoint_counter).P_Q_Name;
 			idx_pq_nt = strcmp(cur_set.Table_Network.Data(:,idx_pq_na),pq_name);
 			% How many Households have to be connected at that point?
 			hh_pq_num = cur_set.Table_Network.Data{idx_pq_nt,idx_hh_nu};
@@ -287,7 +297,7 @@ for i=1:numel(Grid_List)
 				idx = idx(hh_typ_number);
 				% Last-Instanz erzeugen und dem Objektarray hinzufügen:
 				obj = Unit_Time_Dependent(...
-					nd.Grid.(cg).P_Q_Node.Points(k),...         % Anschlusspunkt-Objekt
+					nd.Grid.(cg).P_Q_Node.Points(timepoint_counter),...         % Anschlusspunkt-Objekt
 					true, ...                                  % Objekt aktiv
 					Load_Data(:,((idx-1)*6)+1:((idx-1)*6)+6)); % Lastgang des Last
 				nd.Grid.(cg).Load.Loads(load_counter) = obj;
@@ -308,19 +318,19 @@ for i=1:numel(Grid_List)
 		% Elektrofahrzeuge einfügen:
 		%------------------------------------------------------------------------
 		if ~isempty(Elmo_Data)
-			elm_num = nd.Load_Infeed_Data.(['Set_',num2str(j)]).El_Mobility.Number;
+			elm_num = nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).El_Mobility.Number;
 			elm_count = 0;
 			nd.Grid.(cg).Load.Elmob = Unit_Time_Dependent.empty(0,elm_num);
 			idx_em = strcmp(...
 				cur_set.Table_Network.ColumnName,...
 				'El. Mob.');
-			for k=1:numel(nd.Grid.(cg).P_Q_Node.ids)
+			for timepoint_counter=1:numel(nd.Grid.(cg).P_Q_Node.ids)
 				% Wieviele Fahrzeuge sollen hier angeschlossen werden?
-				elmoby = cur_set.Table_Network.Data{k,idx_em};
+				elmoby = cur_set.Table_Network.Data{timepoint_counter,idx_em};
 				% Elektromobilitätsinstanz erzeugen:
 				for l=1:elmoby
 					obj = Unit_Time_Dependent(...
-						nd.Grid.(cg).P_Q_Node.Points(k),...             % Anschlusspunkt-Objekt
+						nd.Grid.(cg).P_Q_Node.Points(timepoint_counter),...             % Anschlusspunkt-Objekt
 						true,...                                       % Objekt inaktiv
 						Elmo_Data(:,(elm_count*6)+1:(elm_count*6)+6)); % Lastgang des Last
 					elm_count = elm_count + 1;
@@ -338,19 +348,19 @@ for i=1:numel(Grid_List)
 				'PV_Plant_Name');
 			num_unit = size(Sola_Data,2)/6;
 			nd.Grid.(cg).Sola.Gen_Units = Unit_Time_Dependent.empty(0,num_unit);
-			plants =  nd.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Plants;
+			plants =  nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Solar.Plants;
 			gen_count = 1;
-			for k=1:numel(nd.Grid.(cg).P_Q_Node.ids)
-				gen_unit_name = add_data{k,idx_pv_add};
+			for timepoint_counter=1:numel(nd.Grid.(cg).P_Q_Node.ids)
+				gen_unit_name = add_data{timepoint_counter,idx_pv_add};
 				if isempty(gen_unit_name)
 					continue;
 				end
-				idx = find(strcmp(gen_unit_name,nd.Load_Infeed_Data.(['Set_',num2str(j)]).Solar.Content));
+				idx = find(strcmp(gen_unit_name,nd.Load_Infeed_Data.(['Set_',num2str(dataset_counter)]).Solar.Content));
 				idx = idx(plants.(gen_unit_name).Number) - 1;
 				plants.(gen_unit_name).Number = plants.(gen_unit_name).Number - 1;
 				% Last-Instanz erzeugen:
 				obj = Unit_Time_Dependent(...
-					nd.Grid.(cg).P_Q_Node.Points(k),...       % Anschlusspunkt-Objekt
+					nd.Grid.(cg).P_Q_Node.Points(timepoint_counter),...       % Anschlusspunkt-Objekt
 					true,...                                 % Objekt aktiv
 					Sola_Data(:,(idx*6)+1:(idx*6)+6));       % Lastgang des Last
 				nd.Grid.(cg).Sola.Gen_Units(gen_count) = obj;
@@ -365,20 +375,24 @@ for i=1:numel(Grid_List)
 		
 		% noch die aktuellen Einstellungen speichern:
 		nd.Simulation.Grid_act = cg;
-		nd.Simulation.Input_Data_act = j;
+		nd.Simulation.Input_Data_act = dataset_counter;
 		
 		mh.add_line('Load profile simulation started.');
 		linemarker_time_sim_started = mh.mark_current_displayline();
-		k_timer = tic;
-		for k=1:sim_set.Timepoints
+		
+		timepoint_counter_timer = tic;
+		wb.add_end_position('timepoint_counter',sim_set.Timepoints);
+		for timepoint_counter=1:sim_set.Timepoints
+			wb.update_counter('timepoint_counter', timepoint_counter);
+			
 			try
 				% aktuellen Zeipunkt speichern:
-				nd.Simulation.Current_timepoint = k;
+				nd.Simulation.Current_timepoint = timepoint_counter;
 				
 				% Last- und Einspeisedaten aktualisieren:
-				nd.Grid.(cg).Load.Loads.update_power(k);
-				nd.Grid.(cg).Load.Elmob.update_power(k);
-				nd.Grid.(cg).Sola.Gen_Units.update_power(k);
+				nd.Grid.(cg).Load.Loads.update_power(timepoint_counter);
+				nd.Grid.(cg).Load.Elmob.update_power(timepoint_counter);
+				nd.Grid.(cg).Sola.Gen_Units.update_power(timepoint_counter);
 				% der Berechnung die neuen Leistungswerte übermitteln:
 				nd.Grid.(cg).P_Q_Node.Points.update_power;%(cg, j, k, nd);
 				
@@ -415,14 +429,14 @@ for i=1:numel(Grid_List)
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %               % For Testing Purposes:
 %   				pause(0.001);
-% 				if k == 207 % i == 1 && j==2 && k == 207
+% 				if timepoint_counter == 207 % i == 1 && j==2 && timepoint_counter == 207
 % 					errorstr = 'Test Error thrown';
 % 					exception = MException(...
 % 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
 % 						errorstr);
 % 					throw(exception);
 % 				end
-% 				if k == 727 % i == 1 && j==2 && k == 727
+% 				if timepoint_counter == 727 % i == 1 && j==2 && timepoint_counter == 727
 % 					errorstr = 'Another test Error thrown';
 % 					exception = MException(...
 % 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
@@ -430,21 +444,21 @@ for i=1:numel(Grid_List)
 % 					throw(exception);
 % 				end
 % 				
-% 				if k == 2 % j==4 && k == 2
+% 				if timepoint_counter == 2 % j==4 && timepoint_counter == 2
 % 					errorstr = 'Test Error at Beginning thrown';
 % 					exception = MException(...
 % 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
 % 						errorstr);
 % 					throw(exception);
 % 				end
-% 				if k == 777 % j==4 && k == 777
+% 				if timepoint_counter == 777 % j==4 && timepoint_counter == 777
 % 					errorstr = 'Another test Error thrown';
 % 					exception = MException(...
 % 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
 % 						errorstr);
 % 					throw(exception);
 % 				end
-% 				if k == 1435 % j==4 && k == 1435
+% 				if timepoint_counter == 1435 % j==4 && timepoint_counter == 1435
 % 					errorstr = 'Test Error at the end thrown';
 % 					exception = MException(...
 % 						'NAT:NetworkCalculationLV:ErrorDuringCalculation',...
@@ -453,18 +467,19 @@ for i=1:numel(Grid_List)
 % 				end
 % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 				
-				if mod(k,num_gui_update) == 0
+				if mod(timepoint_counter,num_gui_update) == 0
 					% Statusinfo zum Gesamtfortschritt an User:
-					err_count = sum(nd.Result.(cg).Error_Counter(j,:));
+					wb.update();
+					err_count = sum(nd.Result.(cg).Error_Counter(dataset_counter,:));
 					mh.set_display_back_to_marker(linemarker_time_sim_started, false);
 					if err_count > 0
 						mh.add_error(err_count,' error(s) occured during calculations!');
 					end
-					mh.add_line(k,' Timepoints calculated (',100*k/sim_set.Timepoints,'%).');
-					t = toc(k_timer);
-					progress = k/sim_set.Timepoints;
+					mh.add_line(timepoint_counter,' Timepoints calculated (',100*timepoint_counter/sim_set.Timepoints,'%).');
+					t = toc(timepoint_counter_timer);
+					progress = timepoint_counter/sim_set.Timepoints;
 					time_elapsed = t/progress - t;
-					if k < sim_set.Timepoints
+					if timepoint_counter < sim_set.Timepoints
 						mh.level_up();%4
 						mh.add_line('Runtime: ', sec2str(t),'. Remaining: ',...
 							sec2str(time_elapsed));
@@ -528,12 +543,12 @@ for i=1:numel(Grid_List)
 		end
 		
 		mh.level_down();%2
-		t = toc(j_timer);
-		if j < num_data_set
-			mh.add_line('Set No. ',j,' of ', num_data_set,' finished. Runtime: ',...
+		t = toc(dataset_counter_timer);
+		if dataset_counter < num_data_set
+			mh.add_line('Set No. ',dataset_counter,' of ', num_data_set,' finished. Runtime: ',...
 				sec2str(t),...
 				'. Remaining: ',...
-				sec2str(t/(j/num_data_set) - t));
+				sec2str(t/(dataset_counter/num_data_set) - t));
 		else
 			mh.level_down();%1
 % 			if numel(Grid_List) == 1
@@ -546,23 +561,23 @@ for i=1:numel(Grid_List)
 	mh.set_display_back_to_marker(linemarker_grid_sim_started, true);
 	
 	error_all_count = 0;
-	for grid_counter = 1 : i
-		error_all_count = error_all_count + sum(sum(nd.Result.(Grid_List{grid_counter}(1:end-4)).Error_Counter));
+	for done_grid_counter = 1 : grid_counter
+		error_all_count = error_all_count + sum(sum(nd.Result.(Grid_List{done_grid_counter}(1:end-4)).Error_Counter));
 	end
 	if error_all_count > 0
 		mh.add_error('During the calculations ',...
 			error_all_count,' errors occured!');
 	end
 	
-	if i < numel(Grid_List)
-		tg = toc(i_timer);
-		mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
+	if grid_counter < numel(Grid_List)
+		tg = toc(grid_counter_timer);
+		mh.add_line('Grid No. ',grid_counter,' of ', numel(Grid_List),' finished. Runtime: ',...
 			sec2str(tg),...
 			'. Remaining: ',...
-			sec2str(tg/(i/numel(Grid_List)) - tg));
-	elseif i == numel(Grid_List)
-		tg = toc(i_timer);
-		mh.add_line('Grid No. ',i,' of ', numel(Grid_List),' finished. Runtime: ',...
+			sec2str(tg/(grid_counter/numel(Grid_List)) - tg));
+	elseif grid_counter == numel(Grid_List)
+		tg = toc(grid_counter_timer);
+		mh.add_line('Grid No. ',grid_counter,' of ', numel(Grid_List),' finished. Runtime: ',...
 			sec2str(tg));
 	end
 	

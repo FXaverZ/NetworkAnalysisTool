@@ -3,15 +3,20 @@ function handles = get_input_from_database(handles)
 %   Detailed explanation goes here
 
 mh = handles.text_message_main_handler;
+wb = handles.waitbar_main_handler;
+wb.reset();
 
 % Lastdaten einlesen und in Struktur speichern:
 if handles.Current_Settings.Simulation.Use_Scenarios
 	try
+		wb.start();
 		handles = get_data_szenarios_load_infeed(handles);
+		wb.stop();
 	catch ME
 		if strcmp(ME.identifier,'NAT:LoadDataGet:CanceledByUser')
 			% bisherige Daten löschen:
 			handles.NAT_Data.Load_Infeed_Data = [];
+			wb.stop_cancel();
 			mh.level_down();
 			return;
 		else
@@ -49,17 +54,21 @@ else
 		errordlg(errorstr);
 		% bisherige Daten löschen:
 		handles.NAT_Data.Load_Infeed_Data = [];
+		wb.stop_cancel();
 		mh.stop_sub_log(log_path);
 		mh.level_down();
 		return;
 	else
 		% get the data:
+		wb.start();
 		try
 			handles = loaddata_get(handles);
+			wb.stop();
 		catch ME
 			if strcmp(ME.identifier,'NAT:LoadDataGet:CanceledByUser')
 				% bisherige Daten löschen:
 				handles.NAT_Data.Load_Infeed_Data = [];
+				wb.stop_cancel();
 				mh.stop_sub_log(log_path);
 				mh.level_down();
 				return;

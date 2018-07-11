@@ -81,7 +81,10 @@ classdef WAITBAR_handler < handle
 		end
 		
 		function obj = start(obj)
+			string = 'Operation started, waiting for 1st update...';
+			set(obj.handle_waitbar_textf,'String',string);
 			obj.tic_start = tic();
+			drawnow();
 		end
 		
 		function add_end_position(obj, end_pos_marker, end_pos)
@@ -155,15 +158,17 @@ classdef WAITBAR_handler < handle
 				'% done in ', sec2str(time)];
 			set(obj.handle_waitbar_textf,'String',string);
 			obj.tic_start = [];
+			drawnow();
 		end
 		
 		function stop_cancel (obj)
 			
 			obj.update();
-			string = get(obj.handle_waitbar_textf,'String');
-			string = ['Aborted! ',string];
+% 			string = get(obj.handle_waitbar_textf,'String');
+			string = 'OPERATION ABORTED!';
 			set(obj.handle_waitbar_textf,'String',string);
 			obj.tic_start = [];
+			drawnow();
 		end
 		
 		function obj = reset(obj)
