@@ -38,7 +38,7 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 		if handles.Current_Settings.Simulation.No_GUI_output
 			handles = network_calculation_LV_no_GUI_out (handles);
 		else
-			handles = network_calculation_LV(handles);
+			handles = network_calculation_LV (handles);
 		end
 	catch ME
 		if strcmp(ME.identifier,'NAT:NetworkCalculationLV:CanceledByUser')

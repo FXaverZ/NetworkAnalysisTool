@@ -78,7 +78,6 @@ for grid_counter=1:numel(Grid_List)
 	end
 	
 	reset_counter = 1;
-	
 	linemarker_dataset_sim_started = mh.mark_current_displayline();
 	dataset_counter_timer = tic; %Zeitmessung start
 	wb.add_end_position('dataset_counter',num_data_set);
@@ -306,9 +305,7 @@ for grid_counter=1:numel(Grid_List)
 				sec2str(t/(dataset_counter/num_data_set) - t));
 		else
 			mh.level_down();%1
-% 			if numel(Grid_List) == 1
-				mh.add_line('... ',num_data_set,' sets done (in ',sec2str(t),')!');
-% 			else
+			mh.add_line('... ',num_data_set,' sets done (in ',sec2str(t),')!');
 		end
 		mh.reset_display_marker(linemarker_time_sim_started);
 	end
