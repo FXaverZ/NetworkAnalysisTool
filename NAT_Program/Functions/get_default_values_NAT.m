@@ -148,8 +148,9 @@ System.wind.Default_Plant = Default_Plant;
 Scenario.Description = ...
 	'Default settings for random allocation';
 Scenario.Filename = '01_Default_Settings';
-Scenario.Data_is_divided = 0;   % indicates, if file-parts are presten (=1) or not (=0)
-Scenario.Data_number_parts = 1; % number of file-parts for the scenariodata (only valid, when ...Scenario.Data_is_divided = 1)
+Scenario.Data_is_divided = 0;   % indicates, if file-parts are present (=1) or not (=0)
+Scenario.Data_number_parts = 1; % number of file-parts for the scenariodata (only valid, 
+                                %    when Scenario.Data_is_divided = 1)
 Scenario.Data_content = [];     % Array with number of datasets within the specified file part
 
 Time.Season = [];               % current sesason of the sceanrio (possible ones: see handles.System.seasons{1,:})

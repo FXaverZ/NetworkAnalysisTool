@@ -20,7 +20,6 @@ classdef NAT_Data < handle
 		Simulation
 	% Structure for saving debug information:
 		Debug
-	%        different simulation settings
 	end
 	
 	methods
