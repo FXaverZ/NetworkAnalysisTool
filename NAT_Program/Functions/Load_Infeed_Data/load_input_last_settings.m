@@ -59,6 +59,7 @@ else
 	% data-set:
 	d_set_names = fields(d.Load_Infeed_Data);
 	settin.Table_Network = d.Load_Infeed_Data.(d_set_names{1}).Table_Network;
+	settin.Data_Extract.Solar = d.Load_Infeed_Data.(d_set_names{1}).Solar_Plants;
 end
 % Anzahl der jeweiligen Haushalte ermitteln:
 % !!!HAS TO BE REFACTORED!!!

@@ -327,7 +327,7 @@ Simulation.Parameters = {...
 	'Batch_mode',          4,...          % Laden aus reeller in virt. Datenbank, Speichern in virtuelle Datenbank
 	'Database_typ',       'DB_EL',...     % Datenbanktyp "elektrisches Netz"
 	'Language',           'US',...        % Ausgabe der Meldungen in Deutsch
-	'Database_Connector', 'ACCESS12',...  % Verwendeter Datenbankconnector (Hier: MS Access, .mdb
+	'Database_Connector', 'ACCESS12',...  % Verwendeter Datenbankconnector (Hier: MS Access, .mdb)
 	};
 Simulation.No_GUI_output = 0;
 % Anzahl der durchzuführenden Einzelsimulationen (wieviele unterschiedliche

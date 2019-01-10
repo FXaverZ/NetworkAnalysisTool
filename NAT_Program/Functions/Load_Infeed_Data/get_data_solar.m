@@ -287,11 +287,13 @@ if isempty(idx_act)
 	% Es wird nur ein Datensatz generiert, diese Direkt in die
 	% Load-Infeed-Struktur einfügen:
 	d.Load_Infeed_Data.Set_1.Solar = Solar;
+	d.Load_Infeed_Data.Set_1.Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 	if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
 		d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
 	end
 else
 	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+	d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 	if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 	end

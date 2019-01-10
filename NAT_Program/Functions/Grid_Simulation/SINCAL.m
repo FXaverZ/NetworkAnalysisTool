@@ -221,6 +221,7 @@ classdef SINCAL < handle
 					'Loading of the virtual database failed!');
 				throw(exception);
 			end
+			
 			% Try to get also a direct connection to the database of the grid model
 			% (for direct manipulation):
 			% First create the needed connection string:
@@ -744,7 +745,7 @@ classdef SINCAL < handle
 			end
 			
 			% Testen, ob der angegebene Ordner vorhanden ist:
-			if isdir([path,filesep,name,'_files'])
+			if isfolder([path,filesep,name,'_files'])
 				% Aus den Angaben zur Datenbank vollständige Namen erzeugen:
 				% Datenbankfile:
 				obj.Database.DBfilename = [path,filesep,name,'_files\database.mdb'];
@@ -942,7 +943,7 @@ classdef SINCAL < handle
 			%                                ausgegeben.
 			
 			% Argumentenliste überprüfen:
-			if nargin < 3;
+			if nargin < 3
 				% Normaler Modus der Stautsmeldungen:
 				details = false;
 			elseif nargin == 3
