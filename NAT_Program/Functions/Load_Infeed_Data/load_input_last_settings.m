@@ -6,8 +6,6 @@ function handles = load_input_last_settings(handles)
 % Erstellt von:            Franz Zeilinger - 04.11.2013
 % Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
 
-
-
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
 system = handles.System;

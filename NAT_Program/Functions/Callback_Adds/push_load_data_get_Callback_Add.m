@@ -181,7 +181,7 @@ switch answer
 			return;
 		end
 		handles.Current_Settings.Files.Load.Result = file;
-		[handles, error] = get_input_from_results(handles);
+		[handles, error] = get_input_MV_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
@@ -207,7 +207,7 @@ switch answer
 		end
 	case 'Simulationresults_resume'
 		mh.add_line('Source: Simulationresults (resumed)');
-		[handles, error] = get_input_from_results(handles);
+		[handles, error] = get_input_MV_from_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
@@ -231,10 +231,13 @@ switch answer
 		end
 	case 'Orginal Data'
 		mh.add_line('Source: Orginal Data');
-		errorstr = 'Currently not supported!';
-		errordlg(errorstr);
-		mh.add_error(errorstr);
-		%TODO: Extraction of Input-Data out of Simulation Resluts...
+		if strcmp(handles.Current_Settings.Grid.Type, 'MV')
+			errorstr = 'Currently not supported!';
+			errordlg(errorstr);
+			mh.add_error(errorstr);
+		else
+			handles = get_input_LV_from_results(handles);
+		end
 	otherwise
 		% Do nothing...
 		mh.add_line('Canceled by user.');

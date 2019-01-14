@@ -1,4 +1,4 @@
-function [handles, error] = get_input_from_results(handles)
+function [handles, error] = get_input_MV_from_results(handles)
 %GET_INPUT_FROM_RESULTS    creates input for MV-Grid out of LV-Grid-Simulation Results
 %   Detailed explanation goes here
 

@@ -58,6 +58,8 @@ else
 		mh.stop_sub_log(log_path);
 		mh.level_down();
 		return;
+		% TODO: Implementation of data partioning of non
+		% scenario-simulations
 	else
 		% get the data:
 		wb.start();
