@@ -1,9 +1,10 @@
-function push_input_data_loadsimulation_load_direct_Callback_Add(hObject, ~, handles)
+function handles = get_input_from_loadsimulation_direct(handles)
 %PUSH_INPUT_DATA_LOADSIMULATION_LOAD_DIRECT_CALLBACK_ADD Summary of this function goes here
 % hObject    handle to push_input_data_loadsimulation_load_direct (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% Userabfrage nach neuen Datenbankpfad:
+
+% BETA
 
 d = handles.NAT_Data;
 
@@ -558,7 +559,7 @@ file.Path = [handles.Current_Settings.Files.Grid.Path,filesep,...
 	handles.Current_Settings.Files.Grid.Name,'_nat',filesep,...
 	'Load_Infeed_Data',filesep,...
 	datestr(settin.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS')];
-if ~isdir([file.Path])
+if ~isfolder([file.Path])
 	mkdir([file.Path]);
 end
 % Save the files (on load-infeed file and one settings file:
@@ -575,17 +576,10 @@ handles.Current_Settings.Simulation.Number_Runs = 1;
 handles.Current_Settings.Simulation.Use_Grid_Variants = 0;
 handles.Current_Settings.Simulation.Use_Scenarios = 0;
 
-Data_Extract = settin; %#ok<NASGU>
+Data_Extract = settin;
 System = handles.System; %#ok<NASGU>
 save([file.Path,filesep,'Data_Settings.mat'],'Data_Extract','System');
 handles.Current_Settings.Files.Auto_Load_Feed_Data = file;
-
-helpdlg('Daten erfolgreich geladen!', 'Laden der Input-Daten...');
-
-% Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
-
-% handles-Structure aktualisieren:
-guidata(hObject, handles);
+handles.Current_Settings.Data_Extract = Data_Extract;
 end
 
