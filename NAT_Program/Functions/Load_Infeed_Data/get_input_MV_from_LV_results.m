@@ -1,4 +1,4 @@
-function [handles, error] = get_input_MV_from_results(handles)
+function [handles, error] = get_input_MV_from_LV_results(handles)
 %GET_INPUT_FROM_RESULTS    creates input for MV-Grid out of LV-Grid-Simulation Results
 %   Detailed explanation goes here
 
@@ -230,7 +230,7 @@ if isempty(handles.Current_Settings.Simulation.Grid_List)
 else
 	path = handles.Current_Settings.Simulation.Grids_Path;
 end
-if ~isdir([path,filesep,'Load_Infeed_Data_f_Scenarios'])
+if ~isfolder([path,filesep,'Load_Infeed_Data_f_Scenarios'])
 	mkdir([path,filesep,'Load_Infeed_Data_f_Scenarios']);
 end
 

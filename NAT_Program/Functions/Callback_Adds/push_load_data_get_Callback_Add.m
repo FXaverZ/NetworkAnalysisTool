@@ -23,7 +23,7 @@ if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 		'Yes', 'Abort', 'Yes');
 	switch answer
 		case 'Yes'
-			answer = 'Simulationresults_resume';
+			answer = 'LV-Simulationresults_resume';
 		otherwise
 			handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
 			mh.add_line('Canceled by user.');
@@ -44,7 +44,7 @@ if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 % 		'';...
 % 		'Please specify desired data source:'},...
 % 		'Specifying data source',...
-% 		'Load- and Infeed-Database', 'Simulationresults', 'Orginal Data', 'Simulationresults');
+% 		'Load- and Infeed-Database', 'LV-Simulationresults', 'Previous Simulation', 'LV-Simulationresults');
 elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 	answer = questdlg({[...
 		'Should the data be newly created out of simulation results (MV input out of LV ',...
@@ -53,7 +53,7 @@ elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
 		'';...
 		'Please specify desired data source:'},...
 		'Specifying data source',...
-		'Simulationresults', 'Orginal Data', 'Simulationresults');
+		'LV-Simulationresults', 'Previous Simulation', 'LV-Simulationresults');
 elseif handles.Current_Settings.Load_Database.valid
 	answer = questdlg({...
 		'Should the data be loaded from ';...
@@ -63,9 +63,9 @@ elseif handles.Current_Settings.Load_Database.valid
 		'';...
 		'Please specify desired data source:'},...
 		'Specifying data source',...
-		'Load- and Infeed-Database', 'Orginal Data', 'Direct from Loadsim (BETA)' ,'Load- and Infeed-Database');
+		'Load- and Infeed-Database', 'Previous Simulation', 'Direct from Loadsim (BETA)' ,'Load- and Infeed-Database');
 else
-	answer = 'Orginal Data';
+	answer = 'Previous Simulation';
 end
 % According to this, use different function for input-data creation:
 switch answer
@@ -120,8 +120,8 @@ switch answer
 			refresh_message_text_operation_finished (handles);
 			return;
 		end
-	case 'Simulationresults'
-		mh.add_line('Source: Simulationresults');
+	case 'LV-Simulationresults'
+		mh.add_line('Source: LV-Simulationresults');
 		% User has to specify, which results he want's to use...
 		file = handles.Current_Settings.Files.Load.Result;
 		[file.Name,file.Path] = uigetfile([...
@@ -207,7 +207,7 @@ switch answer
 			return;
 		end
 		handles.Current_Settings.Files.Load.Result = file;
-		[handles, error] = get_input_MV_from_results(handles);
+		[handles, error] = get_input_MV_from_LV_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
@@ -231,9 +231,9 @@ switch answer
 				end
 			end
 		end
-	case 'Simulationresults_resume'
-		mh.add_line('Source: Simulationresults (resumed)');
-		[handles, error] = get_input_MV_from_results(handles);
+	case 'LV-Simulationresults_resume'
+		mh.add_line('Source: LV-Simulationresults (resumed)');
+		[handles, error] = get_input_MV_from_LV_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
 				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
@@ -255,15 +255,9 @@ switch answer
 				end
 			end
 		end
-	case 'Orginal Data'
-		mh.add_line('Source: Orginal Data');
-		if strcmp(handles.Current_Settings.Grid.Type, 'MV')
-			errorstr = 'Currently not supported!';
-			errordlg(errorstr);
-			mh.add_error(errorstr);
-		else
-			handles = get_input_LV_from_results(handles);
-		end
+	case 'Previous Simulation'
+		mh.add_line('Source: Previous Simulation');
+		handles = load_input_previous_simulation(handles);
 	otherwise
 		% Do nothing...
 		mh.add_line('Canceled by user.');
