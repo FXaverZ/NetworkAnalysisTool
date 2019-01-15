@@ -152,7 +152,7 @@ switch answer
 		file.Path = file.Path(1:end-1);
 		try
 			% Load the settings of the simulation ('Current_Settings'):
-			load([file.Path,filesep,file.Name,file.Exte]);
+			load([file.Path,filesep,file.Name,file.Exte],'Current_Settings');
 			% Save the needed settings for Results-Processing:
 			handles.Result_Settings = [];
 			handles.Result_Settings.Data_Extract = Current_Settings.Data_Extract;

@@ -8,24 +8,7 @@ function handles = get_input_from_loadsimulation_direct(handles)
 
 d = handles.NAT_Data;
 
-if handles.Current_Settings.Data_Extract.get_Sample_Value
-	data_typ = '_Sample';
-end
-if handles.Current_Settings.Data_Extract.get_Mean_Value
-	data_typ = '_Mean';
-end
-if handles.Current_Settings.Data_Extract.get_Max_Value
-	data_typ = '_Max';
-end
-if handles.Current_Settings.Data_Extract.get_Min_Value
-	data_typ = '_Max';
-end
-if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
-	data_typ = '_05P_Quantil';
-end
-if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
-	data_typ = '_95P_Quantil';
-end
+data_typ = '_Mean';
 
 Main_Path_HH_Data = uigetdir([handles.Current_Settings.Files.Grid.Path,filesep,...
 	handles.Current_Settings.Files.Grid.Name,'_nat'],...
@@ -130,8 +113,8 @@ El_Mobility = HH;
 HH.Content = {};
 
 % load the model data for further information:
-% loading structures "Model", "Configuration", "Time", "Households"
-load([Main_Path_HH_Data,filesep,model_files{1}]);
+% loading structures 'Model', 'Configuration', 'Time', 'Households'
+load([Main_Path_HH_Data,filesep,model_files{1}], 'Model', 'Configuration', 'Time', 'Households');
 
 % get the most important information:
 data_sets_number = Model.Number_Runs;
@@ -276,44 +259,43 @@ for i=1:data_sets_number
 				filename = [data_initial_string,data_sep,num2str(i),data_sep,...
 					date,data_sep,season,data_sep,weekday,data_sep,...
 					Model.Sim_Resolution,'.mat'];
-				% "Result"
-				load([Main_Path_HH_Data,filesep,filename]);
+				% 'Result'
+				load([Main_Path_HH_Data,filesep,filename],'Result');
 			end
 			data_raw = Result.(households_av_typs{k});
 			% 			Result = rmfield(Result, households_av_typs{k});
 			data_raw = data_raw(:,idx_part,:);
 			% adjust the data to the needed time resolution:
-			switch data_typ
-				case '_Mean'
-					% get the number of timepoints to be treated:
-					num_points = round(settin.Time_Resolution/data_time_base);
-					num_time_points = 24*60*60/settin.Time_Resolution;
-					if num_points <= 0
-						errordlg('Time resolutions not campatible!!!');
-						return;
-					end
-					for l=1:numel(idx_part)
-						hh_data = squeeze(data_raw(:,l,:))';
-						% 						data_raw(:,end,:) = [];
-						hh_data = hh_data(1:end-1,[1 4 2 5 3 6]);
-						if num_points > 1
-							hh_data = reshape(hh_data,num_points,[],6);
-							hh_data = squeeze(mean(hh_data));
-						end
-						if j == 1
-							% Beginn der Zeitreihe
-							Data_Mean = [Data_Mean, hh_data]; %#ok<AGROW>
-							HH.Content{end+1} = households_av_typs{k};
-						else
-							% Zeitreihe wird fortgeführt:
-							Data_Mean((j-1)*num_time_points+1:j*num_time_points,(hh_counter*6)+((l-1)*6+1:l*6)) = ...
-								hh_data; %#ok<AGROW>
-						end
-					end
-				otherwise
-					disp('Unknown data typ!');
-					errordlg('Data typ not implemented yet!!!');
+			if settin.get_Mean_Value
+				% get the number of timepoints to be treated:
+				num_points = round(settin.Time_Resolution/data_time_base);
+				num_time_points = 24*60*60/settin.Time_Resolution;
+				if num_points <= 0
+					errordlg('Time resolutions not campatible!!!');
 					return;
+				end
+				for l=1:numel(idx_part)
+					hh_data = squeeze(data_raw(:,l,:))';
+					% 						data_raw(:,end,:) = [];
+					hh_data = hh_data(1:end-1,[1 4 2 5 3 6]);
+					if num_points > 1
+						hh_data = reshape(hh_data,num_points,[],6);
+						hh_data = squeeze(mean(hh_data));
+					end
+					if j == 1
+						% Beginn der Zeitreihe
+						Data_Mean = [Data_Mean, hh_data]; %#ok<AGROW>
+						HH.Content{end+1} = households_av_typs{k};
+					else
+						% Zeitreihe wird fortgeführt:
+						Data_Mean((j-1)*num_time_points+1:j*num_time_points,(hh_counter*6)+((l-1)*6+1:l*6)) = ...
+							hh_data; %#ok<AGROW>
+					end
+				end
+			else
+				disp('Unknown data typ!');
+				errordlg('Data typ not implemented yet!!!');
+				return;
 			end
 			hh_counter = hh_counter + numel(idx_part);
 		end
@@ -383,7 +365,7 @@ if ~error_solar
 	% Einstrahlungswerte interpolieren, dazu erst die entsprechenden Daten laden:
 	name = ['Gene',sep,'Solar',sep,'Radiation'];
 	% Daten laden (Variable 'radiation_data_fix' und 'Content'):
-	load([Main_Path_Solar_Data,filesep,name,'.mat']);
+	load([Main_Path_Solar_Data,filesep,name,'.mat'],'radiation_data_fix','Content');
 	
 	% Aufbau des Arrays für geneigte Flächen (fix montiert, 'radiation_data_fix'):
 	% 1. Dimension: Tag innerhalb eines Jahres (von 1.1 bis 31.12. 365 Tage)
@@ -428,8 +410,8 @@ if ~error_solar
 		[season, ~, ~] = day2sim_parameter(Model, data_sets_days(i));
 		if ~isfield(num_data_sets, season)
 			name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,'Info'];
-			% Daten laden (Variable "data_info")
-			load([Main_Path_Solar_Data,filesep,name,'.mat']);
+			% Daten laden (Variable 'data_info')
+			load([Main_Path_Solar_Data,filesep,name,'.mat'],'data_info');
 			% wieviele Datensätze gibt es insgesamt?
 			num_data_sets.(season) = size(data_info,2);
 			data_info_sol.(season) = data_info;
@@ -476,8 +458,8 @@ if ~error_solar
 		% Name der aktuellen Teil-Datei:
 		name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,...
 			num2str(j,'%03.0f')];
-		% Daten laden (Variable "data_cloud_factor")
-		load([Main_Path_Solar_Data,filesep,name,'.mat']);
+		% Daten laden (Variable 'data_cloud_factor')
+		load([Main_Path_Solar_Data,filesep,name,'.mat'],'data_cloud_factor');
 		% die relevanten Daten auslesen:
 		data_cloud_factor = data_cloud_factor(:,idx_part);
 		

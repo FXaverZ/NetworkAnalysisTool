@@ -62,8 +62,8 @@ for i=1:size(system.housholds,1)-1
 	% Info Datei laden:
 	path = [db_fil.Path,filesep,db_fil.Name,filesep,season,filesep,weekda];
 	name = ['Load',sep,season,sep,weekda,sep,system.housholds{i,1},sep,'Info'];
-	% Daten laden (Variable "data_info")
-	load([path,filesep,name,'.mat']);
+	% Daten laden (Variable 'data_info')
+	load([path,filesep,name,'.mat'],'data_info');
 	% wieviele Datensätze gibt es insgesamt?
 	num_data_sets = size(data_info,2)/6;
 	
@@ -232,8 +232,8 @@ for i=1:size(system.housholds,1)-1
 		% Name der aktuellen Teil-Datei:
 		name = ['Load',sep,season,sep,weekda,sep,system.housholds{i,1},sep,...
 			num2str(j,'%03.0f')];
-		% Daten laden (Variable "data_phase")
-		load([path,filesep,name,'.mat']);
+		% Daten laden (Variable 'data_phase')
+		load([path,filesep,name,'.mat'],'data_phase');
 		
 		% je nach Einstellungen, die relevanten Daten auslesen:
 		if settin.get_Sample_Value
