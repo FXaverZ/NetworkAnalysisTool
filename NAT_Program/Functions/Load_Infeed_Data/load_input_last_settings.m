@@ -2,9 +2,9 @@ function handles = load_input_last_settings(handles)
 %LOAD_INPUT_LAST_SETTINGS Summary of this function goes here
 %   Detailed explanation goes here
 
-% Version:                 1.0
+% Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 04.11.2013
-% Letzte Änderung durch:   Franz Zeilinger - 09.04.2014
+% Letzte Änderung durch:   Franz Zeilinger - 16.01.2019
 
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
@@ -18,14 +18,13 @@ mh.level_up();
 if handles.Current_Settings.Simulation.Use_Scenarios
 	mh.add_line('Load loaddata for scenarios.');
 	% try to load the last scenario-data-sets:
-	load([settin.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat']);
+	load([settin.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],'Scenarios_Settings','Data_Extract');
 	settin.Simulation.Scenarios = Scenarios_Settings;
 	% Deactivate a maybe given scenario selection (because the old scenarios are not
 	% present any more):
 	settin.Simulation.Scenarios_Selection = [];
-	% load the data of the first scenario (% loading of 'Load_Infeed_Data' and
-	% 'Data_Extract'):
-	load([settin.Simulation.Scenarios_Path,filesep, settin.Simulation.Scenarios.Names{1},'.mat']);
+	% load the data of the first scenario (% loading of 'Load_Infeed_Data'):
+	load([settin.Simulation.Scenarios_Path,filesep, settin.Simulation.Scenarios.Names{1},'.mat'],'Load_Infeed_Data');
 	% indicate, that data is available:
 	settin.Simulation.Scenarios.Data_avaliable = 1;
 else
@@ -33,9 +32,9 @@ else
 	% automatisch gespeicherte Last- und Einspeisedaten laden:
 	file = settin.Files.Auto_Load_Feed_Data;
 	% Laden von 'Load_Infeed_Data':
-	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
+	load('-mat', [file.Path,filesep,file.Name,file.Exte],'Load_Infeed_Data');
 	% Laden von 'Data_Extract' und 'System'
-	load('-mat', [file.Path,filesep,file.Data_Settings,file.Exte]);
+	load('-mat', [file.Path,filesep,file.Data_Settings,file.Exte],'Data_Extract','System');
 end
 
 % save the loaded data in the gui-structure:
@@ -57,7 +56,11 @@ else
 	% data-set:
 	d_set_names = fields(d.Load_Infeed_Data);
 	settin.Table_Network = d.Load_Infeed_Data.(d_set_names{1}).Table_Network;
-	settin.Data_Extract.Solar = d.Load_Infeed_Data.(d_set_names{1}).Solar_Plants;
+	% check, if a solar structure is available in the loaded data an load
+	% this data for displaying in the GUI:
+	if isfield(d.Load_Infeed_Data.(d_set_names{1}),'Solar_Plants')
+		settin.Data_Extract.Solar = d.Load_Infeed_Data.(d_set_names{1}).Solar_Plants;
+	end
 end
 % Anzahl der jeweiligen Haushalte ermitteln:
 % !!!HAS TO BE REFACTORED!!!

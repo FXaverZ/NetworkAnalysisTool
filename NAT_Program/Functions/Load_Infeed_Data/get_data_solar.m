@@ -1,9 +1,9 @@
 function get_data_solar (handles, varargin)
 %GET_DATA_SOLAR    extrahiert und simuliert die Einspeise-Daten der Solaranlagen
 
-% Version:                 2.1 - Für Verwendung im NAT
+% Version:                 2.2 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 04.07.2012
-% Letzte Änderung durch:   Franz Zeilinger - 19.04.2013
+% Letzte Änderung durch:   Franz Zeilinger - 16.01.2019
 
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
@@ -50,11 +50,13 @@ if isempty(settin.Solar.Plants)
 		% Es wird nur ein Datensatz generiert, diese Direkt in die
 		% Load-Infeed-Struktur einfügen:
 		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		d.Load_Infeed_Data.Set_1.Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
 			d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
 		end
 	else
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
 			d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 		end
@@ -75,14 +77,16 @@ end
 if number_plants == 0
 	% (leeres) Ergebnis zurückschreiben:
 	if isempty(idx_act)
-		% Es wird nur ein Datensatz generiert, diese Direkt in die
-		% Load-Infeed-Struktur einfügen:
+		% Es wird nur ein Datensatz generiert, diese direkt in die
+		% Load-Infeed-Struktur einfügen: 
 		d.Load_Infeed_Data.Set_1.Solar = Solar;
+		d.Load_Infeed_Data.Set_1.Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 		if ~isfield(d.Load_Infeed_Data.Set_1, 'Table_Network')
 			d.Load_Infeed_Data.Set_1.Table_Network = handles.Current_Settings.Table_Network;
 		end
 	else
 		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar = Solar;
+		d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Solar_Plants = handles.Current_Settings.Data_Extract.Solar;
 		if ~isfield(d.Load_Infeed_Data.(['Set_',num2str(idx_act)]), 'Table_Network')
 			d.Load_Infeed_Data.(['Set_',num2str(idx_act)]).Table_Network = handles.Current_Settings.Table_Network;
 		end
@@ -95,7 +99,7 @@ end
 path = [db_fil.Path,filesep,db_fil.Name,filesep,season,filesep,'Genera'];
 name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,'Info'];
 % Daten laden (Variable "data_info")
-load([path,filesep,name,'.mat']);
+load([path,filesep,name,'.mat'],'data_info');
 % wieviele Datensätze gibt es insgesamt?
 num_data_sets = size(data_info,2);
 
@@ -103,7 +107,7 @@ num_data_sets = size(data_info,2);
 % Einstrahlungswerte interpolieren, dazu erst die entsprechenden Daten laden:
 name = ['Gene',sep,season,sep,'Solar',sep,'Radiation'];
 % Daten laden (Variable 'radiation_data_fix','radiation_data_tra' und 'Content'):
-load([path,filesep,name,'.mat']);
+load([path,filesep,name,'.mat'],'radiation_data_fix','radiation_data_tra','Content');
 
 % Aufbau des Arrays für geneigte Flächen (fix montiert, 'radiation_data_fix'):
 % 1. Dimension: Monat innerhalb einer Jahreszeit (je 4 Monate)
@@ -141,11 +145,11 @@ switch settin.Worstcase_Generation
 		% Neigung
 		% Anzahl der Datenpunkte jedes Monats ermitteln (d.h. Zeitwert > 0)
 		num_datapoi = sum(squeeze(...
-			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2); %#ok<NODEF>
+			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2);  %#ok<IDISVAR,NODEF>
 		% Durchschnittliche Einstrahlung ermitteln:
 		e_avg_fix = sum(squeeze(...
 			radiation_data_fix(:,idx_orient, idx_inclin,3,:)),2)./num_datapoi;
-		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; %#ok<NODEF>
+		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; %#ok<IDISVAR,NODEF>
 		% Monat auswählen, in dem die durchschnittliche Einstrahlung Maximal wird:
 		month_fix = find(e_avg_fix == max(e_avg_fix),1); % Monat für fixe Anlagen
 		month_tra = find(e_avg_tra == max(e_avg_tra),1); % Monat für Tracker
@@ -192,13 +196,14 @@ for j=1:ceil(num_data_sets/max_num_data_set)
 	% Name der aktuellen Teil-Datei:
 	name = ['Gene',sep,season,sep,'Solar',sep,'Cloud_Factor',sep,...
 		num2str(j,'%03.0f')];
-	% Daten laden (Variable "data_cloud_factor")
-	load([path,filesep,name,'.mat']);
+	% Daten laden (Variable 'data_cloud_factor')
+	load([path,filesep,name,'.mat'],'data_cloud_factor');
 	% die relevanten Daten auslesen:
 	data_cloud_factor = data_cloud_factor(:,idx_part);
 end
 Solar.Content = cell(1,number_plants);
 Content_count = 1;
+
 % nun stehen für die Anlagen jeweils Einstrahlungsdaten sowie Wolkeneinflussdaten zur
 % Verfügung. Mit diesen Daten sowie den definierten Anlagenparametern werden nun die
 % Anlagen simuliert:
