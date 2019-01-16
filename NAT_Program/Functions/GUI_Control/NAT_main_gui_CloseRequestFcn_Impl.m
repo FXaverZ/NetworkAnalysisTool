@@ -28,7 +28,7 @@ switch user_response
 		System = handles.System; %#ok<NASGU>
 		file = Current_Settings.Files.Last_Conf;
 		% Falls Pfad der Konfigurationsdatei nicht vorhanden ist, Ordner erstellen:
-		if ~isdir(file.Path)
+		if ~isfolder(file.Path)
 			mkdir(file.Path);
 		end
 		save([file.Path,filesep,file.Name,file.Exte],'Current_Settings','System');

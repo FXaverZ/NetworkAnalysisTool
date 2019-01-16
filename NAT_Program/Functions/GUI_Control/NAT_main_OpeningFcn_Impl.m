@@ -52,10 +52,16 @@ mh.level_up();
 try
 	mh.add_line('Try to load last configuration...');
 	file = handles.Current_Settings.Files.Last_Conf;
-	load('-mat', [file.Path,filesep,file.Name,file.Exte]);
+	load('-mat', [file.Path,filesep,file.Name,file.Exte],'Current_Settings','System');
+	% Save the current place of the last configuration (in case it was
+	% copied from another machine):
+	Current_Settings.Files.Last_Conf = handles.Current_Settings.Files.Last_Conf;
+	% Load the configuration into the program data structure:
 	handles.Current_Settings = Current_Settings;
 	handles.System = System;
 	mh.add_line('... Configuration loaded!');
+	
+	% now try to set up the old configuration as far as possible:
 	if handles.Current_Settings.Load_Database.valid
 		mh.add_line('Try to connect to DLE database...');
 		mh.level_up();
