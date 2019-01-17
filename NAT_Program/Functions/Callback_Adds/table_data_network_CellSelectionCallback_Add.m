@@ -15,7 +15,7 @@ else
 end
 
 % Anzeige aktualisieren:
-handles = refresh_display_NAT_main_gui(handles);
+handles = refresh_display_PQNodefield(handles);
 
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
