@@ -4,7 +4,7 @@ function handles = load_input_last_settings(handles)
 
 % Version:                 1.1
 % Erstellt von:            Franz Zeilinger - 04.11.2013
-% Letzte Änderung durch:   Franz Zeilinger - 16.01.2019
+% Letzte Änderung durch:   Franz Zeilinger - 17.01.2019
 
 % Einstellungen und Systemvariablen auslesen:
 settin = handles.Current_Settings;
@@ -19,6 +19,14 @@ if handles.Current_Settings.Simulation.Use_Scenarios
 	mh.add_line('Load loaddata for scenarios.');
 	% try to load the last scenario-data-sets:
 	load([settin.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],'Scenarios_Settings','Data_Extract');
+	% check, if the data is sutiable for the active grid type:
+	if ~strcmp(settin.Grid.Type, Data_Extract.Grid_type)
+		errorstr = 'Grid types of active grid an data to be loaded are not equal!';
+		exception = MException(...
+			'NAT:LoadInputLastSettings:GridtypeNotCompatible',...
+			errorstr);
+		throw(exception);
+	end
 	settin.Simulation.Scenarios = Scenarios_Settings;
 	% Deactivate a maybe given scenario selection (because the old scenarios are not
 	% present any more):

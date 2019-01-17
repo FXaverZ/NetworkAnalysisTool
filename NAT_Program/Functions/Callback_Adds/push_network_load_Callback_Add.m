@@ -36,6 +36,8 @@ switch user_response
 		handles.Current_Settings.Grid.Type = 'MV';
 	otherwise
 		% leave function ('Cancel' or 'abort')
+		mh.add_line('Canceled by user.');
+		refresh_message_text_operation_finished (handles);
 		return;
 end
 mh.add_line(['Grid interpreted as type "',...
@@ -55,6 +57,9 @@ handles.Current_Settings.Simulation.Grids_Path = handles.Current_Settings.Files.
 
 % Netzdaten laden:
 try
+	% Reset the stored NAT_Data:
+	handles.NAT_Data.reset();
+	% Load the grid:
 	handles = network_load (handles);
 	% Tabelle mit Default-Werten befüllen:
 	[handles.Current_Settings.Table_Network, handles.Current_Settings.Data_Extract] = ...

@@ -4,7 +4,7 @@ classdef NAT_Data < handle
 	
 	% Version:                 1.2
 	% Erstellt von:            Franz Zeilinger - 10.04.2013
-	% Letzte Änderung durch:   Matej Rejc      - 24.04.2013
+	% Letzte Änderung durch:   Franz Zeilinger - 17.01.2016
 	
 	properties
 	% Grid Properties and grid related Objects
@@ -23,7 +23,16 @@ classdef NAT_Data < handle
 	end
 	
 	methods
-        function remove_COM_objects (obj)
+		function reset (obj)
+			obj.Grid = [];
+			obj.Load_Infeed_Data = [];
+			obj.Result = [];
+			obj.Data_Extract = [];
+			obj.Simulation = [];
+			obj.Debug = [];
+		end
+		
+		function remove_COM_objects (obj)
             % removing all COM-Object out of this class. This has to be
             % done just before instances of this class are saved. Because
             % the COM-Connection will be mostly lost, when this data is

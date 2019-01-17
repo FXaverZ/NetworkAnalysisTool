@@ -71,7 +71,7 @@ try
 			mh.add_line('Connecting "',...
 				handles.Current_Settings.Load_Database.Name,'" from "',...
 				handles.Current_Settings.Load_Database.Path,'"');
-			load([pathstr,filesep,name,filesep,name,'.mat']);
+			load([pathstr,filesep,name,filesep,name,'.mat'],'setti','files');
 			handles.Current_Settings.Load_Database.setti = setti;
 			handles.Current_Settings.Load_Database.files = files;
 			handles.Current_Settings.Load_Database.valid = 1;
