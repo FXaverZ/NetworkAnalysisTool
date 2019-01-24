@@ -84,7 +84,7 @@ for i=1:numel(Grid_List)
 	
 	tic; %Zeitmessung start
 	reset_counter = 1;
-	for j=1:num_data_set;
+	for j=1:num_data_set
 		% Reset auf RPC Connection after defnined number of profiles
 		% simulted (because of problems, if more profiles are simulated in
 		% one row! SINCAL chrushes then!)
@@ -316,7 +316,7 @@ for i=1:numel(Grid_List)
 				d.Result.(cg).Error_Counter(cd,ct) = d.Result.(cg).Error_Counter(cd,ct) + 1;
 				% Give Informations about the occoured error:
 				
-				fprintf(['\t\t\t', strrep(ME.message, sprintf('\n'),'')]);
+				fprintf(['\t\t\t', strrep(ME.message, newline,'')]);
 				fprintf(['\t\t\t\tCurrently simulating timepoint ',num2str(ct),'\n']);
 				for l=1:3
 					fprintf(['\t\t\t\tfile: ',regexprep(ME.stack(l).file, '\\', '\\\\'),...

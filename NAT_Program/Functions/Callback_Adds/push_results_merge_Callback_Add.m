@@ -102,15 +102,7 @@ if ~File_ok
 end
 
 % Output of selected result files:
-mh.level_up();
-for i=1:numel(valid_results)
-	if sum(i==File_Sel)>0
-		mh.add_line('[X] ',valid_results{i});
-	else
-		mh.add_line('[ ] ',valid_results{i});
-	end
-end
-mh.level_down();
+mh.add_listselection(valid_results, File_Sel);
 
 % investegate the settings and decide what to do
 mh.add_line('Going through the found results...');
@@ -258,7 +250,7 @@ scen_new.Data_avaliable = 1;
 Simulation.Scenarios = scen_new;
 
 if Simulation.Scenarios.Number > 1
-	mh.add_line('Selection of the scenarios by user...');
+	mh.add_line('Selection of the scenarios to be used by user...');
 	% Ask user, which scenarios should be merged:
 	% User dialogs to select the desired files to be merged:
 	[Scen_Sel,Scen_ok] = listdlg(...
@@ -291,15 +283,7 @@ if Simulation.Scenarios.Number > 1
 end
 
 % Output of selected scenarios:
-mh.level_up();
-for i=1:scen_old.Number
-	if sum(i==Scen_Sel)>0
-		mh.add_line('[X] ',scen_old.(['Sc_',num2str(i)]).Filename);
-	else
-		mh.add_line('[ ] ',scen_old.(['Sc_',num2str(i)]).Filename);
-	end
-end
-mh.level_down();
+mh.add_listselection(scen_old.Names, Scen_Sel);
 
 % Check, if in all scenarios are now the same grids present (the ones whiche are not
 % present in every scenario file are later removed):
@@ -339,7 +323,7 @@ end
 
 if numel(grds) > 1
 	% Ask user, which grid simulation he want's to merge:
-	mh.add_line('Selection of the grids by user...');
+	mh.add_line('Selection of the grids to be used by user...');
 	[Grid_Sel,Grid_ok] = listdlg(...
 		'ListString',Grid_List,...
 		'Name','Selection of the grids to be merged',...
@@ -379,15 +363,7 @@ Grid_Allocation(cellfun('isempty',Grid_Allocation)) = [];
 Grid_Allocation = reshape(Grid_Allocation,[],Simulation.Scenarios.Number,2);
 
 % Output of selected grids:
-mh.level_up();
-for i=1:numel(grds)
-	if sum(i==Grid_Sel)>0
-		mh.add_line('[X] ',grds{i});
-	else
-		mh.add_line('[ ] ',grds{i});
-	end
-end
-mh.level_down();
+mh.add_listselection(grds, Grid_Sel);
 
 % now merge the Data:
 mh.add_line('Start with merging...');

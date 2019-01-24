@@ -210,10 +210,10 @@ switch answer
 		[handles, error] = get_input_MV_from_LV_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
-				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
+				infostr = ['Gridlist successfully loaded, please specify grid allocation ',...
 					'and resume input data generation via button "Load Sceanriodata"!'];
-				mh.add_warning(warnstr)
-				warndlg(warnstr,dlg_heading);
+				mh.add_info(infostr);
+				helpdlg(infostr,dlg_heading);
 			else
 				if handles.Current_Settings.Start_Simulation_after_Extraction
 					% Refresh the GUI:
@@ -236,10 +236,11 @@ switch answer
 		[handles, error] = get_input_MV_from_LV_results(handles);
 		if ~error
 			if handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
-				warnstr = ['Gridlist successfully loaded, please specify grid allocation ',...
-					'and resume input data generation via button "Resume loading..."!'];
-				mh.add_warning(warnstr)
-				warndlg(warnstr,dlg_heading);
+				infostr = ['Gridlist successfully loaded, please specify grid allocation ',...
+					'and resume input data generation via button "Load Sceanriodata"!'];
+				mh.add_info(infostr);
+				mh.level_down();
+				helpdlg(infostr,dlg_heading);
 			else
 				if handles.Current_Settings.Start_Simulation_after_Extraction
 					% Refresh the GUI:
@@ -267,9 +268,11 @@ end
 % set(handles.push_load_data_get, 'Enable', 'on');
 
 % Refresh the GUI:
-ch.reset_cancel_button();
-handles = refresh_display_NAT_main_gui(handles);
-refresh_message_text_operation_finished (handles);
+if ~handles.Current_Settings.Data_Extract.MV_input_generation_in_progress
+	ch.reset_cancel_button();
+	handles = refresh_display_NAT_main_gui(handles);
+	refresh_message_text_operation_finished (handles);
+end
 
 % Update the handles-structure:
 guidata(hObject, handles);

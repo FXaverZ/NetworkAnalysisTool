@@ -238,6 +238,26 @@ classdef MESSAGE_text_handler < handle
 			obj.Current_Level = 0;
 		end
 		
+		function obj = add_listselection(obj, full_list, selection_idxs)
+		% ADD_LISTSELECTION prints the made selection from a LIST-dialog
+		% Examlple usage:
+		%    mh = MESSAGE_text_handler(handle_textfield)
+		%    list = {'Red','Yellow','Blue',...                   
+		%            'Green','Orange','Purple'};
+		%    indx = listdlg('ListString',list);
+		%    mh.add_listselection(list, indx;
+		
+			obj.level_up();
+			for i=1:numel(full_list)
+				if sum(i==selection_idxs)>0
+					obj.add_line('[X] ',full_list{i});
+				else
+					obj.add_line('[ ] ',full_list{i});
+				end
+			end
+			obj.level_down();
+		end
+		
 		function obj = set_OutputFile (obj, outputfilename)
 			obj.OutputFile = outputfilename;
 		end

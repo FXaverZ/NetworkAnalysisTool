@@ -2,24 +2,44 @@ function [handles, error] = get_input_MV_from_LV_results(handles)
 %GET_INPUT_FROM_RESULTS    creates input for MV-Grid out of LV-Grid-Simulation Results
 %   Detailed explanation goes here
 
-
 mh = handles.text_message_main_handler;
 
 Result_Settings = handles.Result_Settings;
-
 warning_user = 0;
 error = 0;
 
 % get important settings:
 LV_Grids_List = handles.Current_Settings.Data_Extract.LV_Grids_List;
-Number_Data_Sets = handles.Current_Settings.Simulation.Number_Runs;
 MV_input_generation_in_progress = handles.Current_Settings.Data_Extract.MV_input_generation_in_progress;
 
 % Reload the data extraktion settings:
 handles.Current_Settings.Data_Extract = Result_Settings.Data_Extract;
 
-% Update this settings with the current settings in the GUI:
-handles.Current_Settings.Data_Extract.Number_Data_Sets = Number_Data_Sets;
+% Check, if a Subfolder for input-data within the current grid-folder is avaliable:
+if ~MV_input_generation_in_progress
+	if isempty(handles.Current_Settings.Simulation.Grid_List)
+		path = [handles.Current_Settings.Files.Grid.Path,filesep,...
+			handles.Current_Settings.Files.Grid.Name,'_nat'];
+	else
+		path = handles.Current_Settings.Simulation.Grids_Path;
+	end
+	if ~isfolder([path,filesep,'Load_Infeed_Data_f_Scenarios'])
+		mkdir([path,filesep,'Load_Infeed_Data_f_Scenarios']);
+	end
+	% Create a Subfolder for the extracted data, containing the extraction-moment:
+	handles.Current_Settings.Data_Extract.Date_Extraktion = now();
+	handles.Current_Settings.Simulation.Scenarios_Path = [...
+		path,filesep,'Load_Infeed_Data_f_Scenarios',filesep,...
+		datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
+		];
+	mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
+	mh.mark_sub_log([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Log.log']);
+end
+
+mh.add_line('Using data specified in "',...
+	handles.Current_Settings.Files.Load.Result.Name,...
+	'" from "',...
+	handles.Current_Settings.Files.Load.Result.Path,'".');
 
 % Use the datatyp an number of sets out of the simulation, also set this in
 % the data extraction part of the current settings:
@@ -42,7 +62,6 @@ for a=1:size(datatyps,1)
 	end
 end
 mh.add_line('Datatyp in results is "',datatyps{sel_datatyp,1},'"');
-handles.Current_Settings.Data_Extract.Number_Data_Sets = Result_Settings.Data_Extract.Number_Data_Sets;
 mh.add_line(handles.Current_Settings.Data_Extract.Number_Data_Sets,' Datasets are present');
 
 % % Reset the network table:
@@ -51,8 +70,12 @@ mh.add_line(handles.Current_Settings.Data_Extract.Number_Data_Sets,' Datasets ar
 
 % just quick check, if the correct kind of grid is present:
 if strcmp(handles.Current_Settings.Grid.Type, 'LV')
-	fprintf('Wrong destination grid!');
-	return;
+	errorstr = 'Wrong destination grid!';
+	mh.add_error(errorstr);
+	exception = MException(...
+		'NAT:GetInputMVfromLVResults:WrongDestinationGrid',...
+		errorstr);
+	throw(exception);
 end
 
 % update the grid-numbers:
@@ -68,6 +91,8 @@ clear data idx_lv
 if 	~MV_input_generation_in_progress && ...
 		(isempty(LV_Grids_List) || sum(LV_Grids_Number) == 0)
 	% no grid allocation is present
+	mh.add_line('Ask user about LV-grid allocation...');
+	mh.level_up();
 	answer = questdlg({'Another question:';...
 		'';...
 		[...
@@ -79,14 +104,24 @@ if 	~MV_input_generation_in_progress && ...
 		'Please specify desired procedure:'},...
 		'Specifying data generation procedure',...
 		'Random allo.', 'Make allo.', 'Make allo.');
+	if isempty(answer)
+		mh.add_line('Canceled by user.');
+		error = 1;
+		return;
+	end
+	mh.add_line('"',answer,'" was selected');
+	mh.level_down();
 elseif MV_input_generation_in_progress &&...
 		(isempty(LV_Grids_List) || sum(LV_Grids_Number) == 0)
-	errordlg({'No valid lv-grid-allocation found!';...
-		'Please specify the lv-grid allocation in the main-GUI!'},...
-		'Specifying data generation procedure');
+	errorstr1 = 'No valid lv-grid-allocation found! ';
+	errorstr2 = 'Please specify the lv-grid allocation in the main-GUI!';
+	mh.add_error(errorstr1,errorstr2)
+	errordlg({errorstr1;errorstr2},'Specifying data generation procedure');
 	error = 1;
 	return;
 elseif 	~MV_input_generation_in_progress
+	mh.add_line('Ask user about LV-grid allocation...');
+	mh.level_up();
 	answer = questdlg({'Another question:';...
 		'';...
 		[...
@@ -99,6 +134,13 @@ elseif 	~MV_input_generation_in_progress
 		'Please specify desired procedure:'},...
 		'Specifying data generation procedure',...
 		'Random allo.', 'Use GUI allo.', 'Make allo.', 'Use GUI allo.');
+	if isempty(answer)
+		mh.add_line('Canceled by user.');
+		error = 1;
+		return;
+	end
+	mh.add_line('"',answer,'" was selected');
+	mh.level_down();
 end
 
 if 	~MV_input_generation_in_progress
@@ -106,6 +148,7 @@ if 	~MV_input_generation_in_progress
 	load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{1}],'Grid');
 	
 	% Get the simulated grid names:
+	mh.add_line('Selection of the grids to be used by user...');
 	LV_Grids_List = fields(Grid);
 	if numel(LV_Grids_List) > 1
 		[Grid_Sel,Scen_ok] = listdlg(...
@@ -119,12 +162,15 @@ if 	~MV_input_generation_in_progress
 			'CancelString','Vorgang abbr.',...
 			'ListSize', [320, 300]);
 		if ~Scen_ok
+			mh.add_line('Canceled by user.');
 			error = 1;
 			return;
 		end
 	else
 		Grid_Sel = 1;
 	end
+	% Output of selected grids:
+	mh.add_listselection(LV_Grids_List, Grid_Sel);
 	
 	% Save the Grid-List for later allocation of the single grids to MV-Connection points:
 	LV_Grids_List = LV_Grids_List(Grid_Sel);
@@ -138,11 +184,13 @@ if 	~MV_input_generation_in_progress
 	if strcmp(answer, 'Make allo.')
 		% the user wants to go back to the main GUI to make the allocation of the lv-grids
 		% manually, so leave this function:
+		mh.add_line('LV-grid allocation has to be made in NAT GUI...');
 		handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 1;
 		return;
 	end
 	
 	if strcmp(answer, 'Random allo.')
+		mh.add_line('LV-grid allocation is made randomly.');
 		idx_lv = strcmp(handles.Current_Settings.Table_Network.ColumnName, 'LV-Grid');
 		num_dif_grds = numel(LV_Grids_List);
 		for i=1:numel(handles.Current_Settings.Table_Network.Data(:,idx_lv))
@@ -163,6 +211,7 @@ end
 clear data idx_lv
 
 % User dialogs to select the desired settings of Data
+mh.add_line('Selection of the scenarios to be used by user...');
 [Scen_Sel,Scen_ok] = listdlg (...
 	'ListString',Result_Settings.Simulation.Scenarios.Names,...
 	'Name','Auswahl der zu extrahierenden Szenarios',...
@@ -187,6 +236,8 @@ scen_new.Data_avaliable = 1;
 handles.Current_Settings.Simulation.Scenarios = scen_new;
 % mark all scenarios as active for simulation:
 handles.Current_Settings.Simulation.Scenarios_Selection = [];
+% Output of selected scenarios:
+mh.add_listselection(scen_old.Names, Scen_Sel);
 clear i scen_old Scen_ok
 
 % load data from first scenario (for grid properties), without 'Debug':
@@ -195,6 +246,8 @@ load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Re
 
 % let the user select the point of each grid, from where the Power Data
 % should be used (Transformers):
+mh.add_line('Prepare simulation data...');
+mh.level_up();
 for i=1:numel(LV_Grids_List)
 	Transf.(LV_Grids_List{i}) = ...
 		{Grid.(LV_Grids_List{i}).Branches.Transf.Branch_Name};
@@ -204,6 +257,7 @@ for i=1:numel(LV_Grids_List)
 		Transf.(LV_Grids_List{i}) = ...
 			Grid.(LV_Grids_List{i}).Branches.Transf(1).Branch_ID;
 	else
+		mh.add_line('Selection of Transformer within grid "',LV_Grids_List{i},'"...');
 		[Tran_Sel,Tran_ok] = listdlg(...
 			'ListString',Transf.(LV_Grids_List{i}),...
 			'Name','Selection of the Transformer' ,...
@@ -215,9 +269,11 @@ for i=1:numel(LV_Grids_List)
 			'CancelString','Cancel',...
 			'ListSize', [320, 300]);
 		if ~Tran_ok
+			mh.add_error('No transformer selected!')
 			error = 1;
 			return;
 		end
+		mh.add_listselection(Transf.(LV_Grids_List{i}), Tran_Sel);
 		Transf.(LV_Grids_List{i}) = ...
 			Grid.(LV_Grids_List{i}).Branches.Transf(Tran_Sel).Branch_ID;
 	end
@@ -226,25 +282,7 @@ for i=1:numel(LV_Grids_List)
 		vertcat(Grid.(LV_Grids_List{i}).Branches.Grouped.Branch_ID) == ...
 		Transf.(LV_Grids_List{i});
 end
-
-% Check, if a Subfolder for input-data within the current grid-folder is avaliable:
-if isempty(handles.Current_Settings.Simulation.Grid_List)
-	path = [handles.Current_Settings.Files.Grid.Path,filesep,...
-		handles.Current_Settings.Files.Grid.Name,'_nat'];
-else
-	path = handles.Current_Settings.Simulation.Grids_Path;
-end
-if ~isfolder([path,filesep,'Load_Infeed_Data_f_Scenarios'])
-	mkdir([path,filesep,'Load_Infeed_Data_f_Scenarios']);
-end
-
-% Create a Subfolder for the extracted data, containing the extraction-moment:
-handles.Current_Settings.Data_Extract.Date_Extraktion = now();
-handles.Current_Settings.Simulation.Scenarios_Path = [...
-	path,filesep,'Load_Infeed_Data_f_Scenarios',filesep,...
-	datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS'),...
-	];
-mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
+mh.level_down();
 
 % Flag, if user once seleced, when to few LV grid simulation
 % data is available that the allready used profiles should be used
@@ -252,15 +290,26 @@ mkdir(handles.Current_Settings.Simulation.Scenarios_Path);
 repeat = 0;
 
 % Now process the scenario data:
+mh.add_line('Start with data extraction...');
+mh.level_up();
 for i=1:scen_new.Number
 	% The data of the first sceanrio is already loaded, so load the scenario data for
 	% the other ones:
 	if i>1
+		mh.add_line('Loading "',Result_Settings.Result_Files{Scen_Sel(i)},'" from "',...
+			handles.Current_Settings.Files.Load.Result.Path,filesep,'"');
+		mh.add_line('(Scenario ',i,' from ',scen_new.Number,')...');
+		mh.level_up();
 		load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(i)}],...
 		'Grid','Load_Infeed_Data','Result');
+	else
+		mh.add_line('Using allready loaded result data (Scenario 1 from ',scen_new.Number,')...');
+		mh.level_up();
 	end
 	if scen_new.(['Sc_',num2str(i)]).Data_is_divided
-		errordlg('Partitioned input-files are currently not supported!');
+		errorstr = 'Partitioned input-files are currently not supported!';
+		mh.add_error(errorstr);
+		errordlg(errorstr);
 		error = 1;
 		return;
 	end
@@ -285,21 +334,23 @@ for i=1:scen_new.Number
 			rea_power(idx,:,:) = [];
 			% inform user:
 			if ~warning_user
-				helpdlg({...
-					'Warnung!';...
-					['Simulationsdaten mit teilweise fehlerhaften Einträgen (NANs) sind '...
-					'vorhanden, die betreffenden Profile werden nicht berücksichtigt!'];});
+				warnstr1 = 'Warnung! ';
+				warnstr2 = ['Simulationsdaten mit teilweise fehlerhaften Einträgen (NANs) sind ',...
+					'vorhanden, die betreffenden Profile werden nicht berücksichtigt!'];
+				mh.add_warning(warnstr2);
+				helpdlg({warnstr1;warnstr2;});
 				warning_user = 1;
 			end
 		end
 		% When all data is currupted --> Error!
 		if isempty(act_power)
-			errordlg({...
-				'Fehler!';...
-				['Keine Daten ohne fehlerhafte Einträge (NANs) für Szenario "',...
+			errorstr1 = 'Fehler!';
+			errorstr2 = ['Keine Daten ohne fehlerhafte Einträge (NANs) für Szenario "',...
 				scen_new.(['Sc_',num2str(i)]).Filename,' und Netz "',...
 				LV_Grids_List{j},...
-				'" vorhanden! Datenzusammenstellung wird abgebrochen!"']});
+				'" vorhanden! Datenzusammenstellung wird abgebrochen!"'];
+			mh.add_error(errorstr2);
+			errordlg({errorstr1; errorstr2;});
 			error = 1;
 			return;
 		end
@@ -558,6 +609,8 @@ for i=1:scen_new.Number
 			
 			for l=1:num_grd
 				if isempty(pool) && ~ repeat
+					mh.add_warning('To few LV grid simulation data available, ask user how to proceed...')
+					mh.level_up();
 					answer = questdlg({...
 						'To few LV grid simulation data available than needed!';...
 						'';...
@@ -565,11 +618,14 @@ for i=1:scen_new.Number
 						'Running out of LV grid simulation data...',...
 						'Yes','Abort','Abort');
 					if strcmp(answer, 'Yes')
+						mh.add_info('Allready used data will be used again.')
 						repeat = 1;
 					else
+						mh.add_error('Canceld by user.');
 						error = 1;
 						return;
 					end
+					mh.level_down();
 				end
 				
 				if isempty(pool) && repeat
@@ -669,9 +725,13 @@ for i=1:scen_new.Number
 	
 	% Save the Scenario Data:
 	name = scen_new.(['Sc_',num2str(i)]).Filename;
+	mh.add_line('Saving load and infeed data to "',name,' in "',handles.Current_Settings.Simulation.Scenarios_Path,filesep,'"');
 	save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
 		'Load_Infeed_Data');
+	mh.level_down();
 end
+mh.level_down();
+
 
 % Update the settings:
 handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
@@ -681,6 +741,7 @@ handles.Current_Settings.Data_Extract.LV_Grids_Number = LV_Grids_Number;
 handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
 
 % Save the settings:
+mh.add_line('Saving settings "Scenario_Settings.mat" in "',handles.Current_Settings.Simulation.Scenarios_Path,filesep,'"');
 Scenarios_Settings = handles.Current_Settings.Simulation.Scenarios; %#ok<NASGU>
 Data_Extract = handles.Current_Settings.Data_Extract;
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
