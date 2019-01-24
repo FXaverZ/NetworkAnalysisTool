@@ -3,7 +3,7 @@ function get_data_solar (handles, varargin)
 
 % Version:                 2.2 - Für Verwendung im NAT
 % Erstellt von:            Franz Zeilinger - 04.07.2012
-% Letzte Änderung durch:   Franz Zeilinger - 16.01.2019
+% Letzte Änderung durch:   Franz Zeilinger - 23.01.2019
 
 system = handles.System;   % Systemvariablen
 settin = handles.Current_Settings.Data_Extract; % aktuelle Einstellungen
@@ -107,12 +107,12 @@ num_data_sets = size(data_info,2);
 % Einstrahlungswerte interpolieren, dazu erst die entsprechenden Daten laden:
 name = ['Gene',sep,season,sep,'Solar',sep,'Radiation'];
 % Daten laden (Variable 'radiation_data_fix','radiation_data_tra' und 'Content'):
-load([path,filesep,name,'.mat'],'radiation_data_fix','radiation_data_tra','Content');
+load([path,filesep,name,'.mat'],'radiation_data_fix','radiation_data_tra');
 
 % Aufbau des Arrays für geneigte Flächen (fix montiert, 'radiation_data_fix'):
 % 1. Dimension: Monat innerhalb einer Jahreszeit (je 4 Monate)
 % 2. Dimension: Orientierung z.B. [-15°, 0°, 15°] (0° = Süd; -90° = Ost)
-% 3. Dimension: Neigung [15°, 30°, 45°, 60°, 90°] (0°  = waagrecht,
+% 3. Dimension: Neigung z.B. [15°, 30°, 45°, 60°, 90°] (0°  = waagrecht,
 %                                                        90° = senkrecht,
 %                                                        trac = Tracker)
 % 4. Dimension: Datenart [Zeit, Temperatur, Direkt, Diffus]
@@ -121,7 +121,7 @@ load([path,filesep,name,'.mat'],'radiation_data_fix','radiation_data_tra','Conte
 % Beim Array für die nachgeführten Anlagen (Tracker, 'radiation_data_tra') entfallen
 % die Dimensionen für "Orientierung" und "Neigung"!
 %
-% Die Struktur "Content" enthält die korrekten Bezeichnungen/Werte der einzelnen
+% Die Struktur "db_fil.setti.content_sola_data" enthält die korrekten Bezeichnungen/Werte der einzelnen
 % Dimensionen für die spätere Weiterverarbeitung (für Indexsuche bzw.
 % Interpolationen). Aufbau siehe: 'create_radiation_array.m'
 
