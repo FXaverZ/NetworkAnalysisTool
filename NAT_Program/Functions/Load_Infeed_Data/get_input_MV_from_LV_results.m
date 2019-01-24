@@ -61,6 +61,7 @@ for a=1:size(datatyps,1)
 		handles.Current_Settings.Data_Extract.(['get_',datatyps{a,1}])=0;
 	end
 end
+handles.Current_Settings.Data_Extract.Grid_type = handles.Current_Settings.Grid.Type;
 mh.add_line('Datatyp in results is "',datatyps{sel_datatyp,1},'"');
 mh.add_line(handles.Current_Settings.Data_Extract.Number_Data_Sets,' Datasets are present');
 
