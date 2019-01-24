@@ -4,7 +4,7 @@ function handles = get_default_values_NAT(handles)
 
 % Version:                 7.0
 % Erstellt von:            Franz Zeilinger - 29.01.2013
-% Letzte Änderung durch:   Franz Zeilinger - 11.12.2014
+% Letzte Änderung durch:   Franz Zeilinger - 23.01.2019
 
 %------------------------------------------------------------------------------------
 % System-Werte - sollten sich während der Systemlaufzeit nicht ändern!
@@ -243,7 +243,7 @@ Files.Grid.Name = [];
 Files.Grid.Exte = '.sin';
 
 % Speicherpfad für Daten
-if ~isdir([Files.Main_Path,filesep,'Results'])
+if ~isfolder([Files.Main_Path,filesep,'Results'])
 	mkdir([Files.Main_Path,filesep,'Results']);
 end
 Files.Save.Result.Path = [Files.Main_Path,filesep,'Results'];
@@ -268,14 +268,16 @@ Files.Auto_Load_Feed_Data.Path = Files.Main_Path;
 Current_Settings.Files = Files;
 
 % Defaultwerte der Datenbehandlungseinstellungen (Auslesen & Speichern):
-data_settings.Time_Resolution = 150;    % zeitliche Auflösung
-data_settings.Timepoints_per_dataset = 144; % Number of Timepoints per dataset (is 
-% depending on handles.Current_Settings.Data_Extract.Time_Resolution and time series 
-% settings) 
+data_settings.Time_Resolution = 150;        % zeitliche Auflösung 2.5min
+ % Number of Timepoints per dataset (is depending on
+ % handles.Current_Settings.Data_Extract.Time_Resolution and time series
+ % settings):
+data_settings.Timepoints_per_dataset = round(24*60*60/data_settings.Time_Resolution);
+
 data_settings.get_Sample_Value = 0;   % Sample-Werte ermitteln bzw. speichern.
 data_settings.get_Mean_Value = 1;     % Mittelwerte ermitteln bzw. speichern.
-data_settings.get_Min_Value = 0;      % Minimalwerte ermitteln bzw. speichern.
-data_settings.get_Max_Value = 0;      % Maximalwerte ermitteln bzw. speichern.
+data_settings.get_Min_Value = 1;      % Minimalwerte ermitteln bzw. speichern.
+data_settings.get_Max_Value = 1;      % Maximalwerte ermitteln bzw. speichern.
 data_settings.get_95_Quantile_Value = 0; % Ermitteln des 95%-Quantils
 data_settings.get_05_Quantile_Value = 0; % Ermitteln des 5%-Quantils
 % Einstellungen für Datenauslesen:
@@ -347,8 +349,8 @@ Simulation.Use_Scenarios = 1;
 Simulation.Scenarios_Path = Files.Main_Path;
 Simulation.Scenarios_Selection = [];
 % Datatyps to be used:
-Simulation.use_Sample_Value = 1;
-Simulation.use_Mean_Value = 0;
+Simulation.use_Sample_Value = 0;
+Simulation.use_Mean_Value = 1;
 Simulation.use_Max_Value = 0;
 Simulation.use_Min_Value = 0;
 Simulation.use_05_Quantile_Value = 0;

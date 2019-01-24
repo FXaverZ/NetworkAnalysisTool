@@ -2,12 +2,15 @@ function [handles, error] = get_input_MV_from_LV_results(handles)
 %GET_INPUT_FROM_RESULTS    creates input for MV-Grid out of LV-Grid-Simulation Results
 %   Detailed explanation goes here
 
+
+mh = handles.text_message_main_handler;
+
 Result_Settings = handles.Result_Settings;
 
 warning_user = 0;
 error = 0;
 
-% get impoortant setting:
+% get important settings:
 LV_Grids_List = handles.Current_Settings.Data_Extract.LV_Grids_List;
 Number_Data_Sets = handles.Current_Settings.Simulation.Number_Runs;
 MV_input_generation_in_progress = handles.Current_Settings.Data_Extract.MV_input_generation_in_progress;
@@ -18,25 +21,29 @@ handles.Current_Settings.Data_Extract = Result_Settings.Data_Extract;
 % Update this settings with the current settings in the GUI:
 handles.Current_Settings.Data_Extract.Number_Data_Sets = Number_Data_Sets;
 
-if handles.Current_Settings.Data_Extract.get_Sample_Value
-	data_typ = '_Sample';
+% Use the datatyp an number of sets out of the simulation, also set this in
+% the data extraction part of the current settings:
+datatyps = {...
+	'Sample_Value'     ,'_Sample';...
+	'Mean_Value'       ,'_Mean';...
+	'Max_Value'        ,'_Max';...
+	'Min_Value'        ,'_Min';...
+	'05_Quantile_Value','_05P_Quantil';...
+	'95_Quantile_Value','_95P_Quantil';...
+	};
+sel_datatyp = 0;
+for a=1:size(datatyps,1)
+	if Result_Settings.Simulation.(['use_',datatyps{a,1}])
+		data_typ = datatyps{a,2};
+		handles.Current_Settings.Data_Extract.(['get_',datatyps{a,1}])=1;
+		sel_datatyp = a;
+	else
+		handles.Current_Settings.Data_Extract.(['get_',datatyps{a,1}])=0;
+	end
 end
-if handles.Current_Settings.Data_Extract.get_Mean_Value
-	data_typ = '_Mean';
-end
-if handles.Current_Settings.Data_Extract.get_Max_Value
-	data_typ = '_Max';
-end
-if handles.Current_Settings.Data_Extract.get_Min_Value
-	data_typ = '_Max';
-end
-if handles.Current_Settings.Data_Extract.get_05_Quantile_Value
-	data_typ = '_05P_Quantil';
-end
-if handles.Current_Settings.Data_Extract.get_95_Quantile_Value
-	data_typ = '_95P_Quantil';
-end
-
+mh.add_line('Datatyp in results is "',datatyps{sel_datatyp,1},'"');
+handles.Current_Settings.Data_Extract.Number_Data_Sets = Result_Settings.Data_Extract.Number_Data_Sets;
+mh.add_line(handles.Current_Settings.Data_Extract.Number_Data_Sets,' Datasets are present');
 
 % % Reset the network table:
 % [handles.Current_Settings.Table_Network, ...
@@ -95,10 +102,8 @@ elseif 	~MV_input_generation_in_progress
 end
 
 if 	~MV_input_generation_in_progress
-	% load first scenario (for grid properties):
-	load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{1}]);
-	% delete the not needed data:
-	clear Debug Load_Infeed_Data Result 
+	% load 'Grid' from first scenario (for grid properties):
+	load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{1}],'Grid');
 	
 	% Get the simulated grid names:
 	LV_Grids_List = fields(Grid);
@@ -184,10 +189,9 @@ handles.Current_Settings.Simulation.Scenarios = scen_new;
 handles.Current_Settings.Simulation.Scenarios_Selection = [];
 clear i scen_old Scen_ok
 
-% load first selected scenario (for grid properties):
-load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(1)}]);
-% delete the not needed data:
-clear Debug 
+% load data from first scenario (for grid properties), without 'Debug':
+load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(1)}],...
+	'Grid','Load_Infeed_Data','Result');
 
 % let the user select the point of each grid, from where the Power Data
 % should be used (Transformers):
@@ -252,11 +256,9 @@ for i=1:scen_new.Number
 	% The data of the first sceanrio is already loaded, so load the scenario data for
 	% the other ones:
 	if i>1
-		load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(i)}]);
-		% delete the not needed data:
-		clear('Debug');
+		load([handles.Current_Settings.Files.Load.Result.Path,filesep,Result_Settings.Result_Files{Scen_Sel(i)}],...
+		'Grid','Load_Infeed_Data','Result');
 	end
-	
 	if scen_new.(['Sc_',num2str(i)]).Data_is_divided
 		errordlg('Partitioned input-files are currently not supported!');
 		error = 1;
@@ -270,9 +272,9 @@ for i=1:scen_new.Number
 	for j=1:numel(LV_Grids_List)
 		act_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[1,5,9]));
 		rea_power = squeeze(Result.(LV_Grids_List{j}).Branch_Values(:,:,Sel_idx.(LV_Grids_List{j}),[2,6,10]));
-		% 		% invert the powers, to get the correct power behavior:
-		% 		act_power = act_power *-1;
-		% 		rea_power = rea_power *-1;
+% 		% invert the powers, to get the correct power behavior:
+% 		act_power = act_power *-1;
+% 		rea_power = rea_power *-1;
 		
 		% Ceck if NANs are present in the data - remove the respective profiles:
 		idx = find(isnan(act_power));
@@ -311,15 +313,18 @@ for i=1:scen_new.Number
 				set = Load_Infeed_Data_old.(['Set_',sprintf('%d',k)]);
 				
 				Hous_Data = set.Households.(['Data',data_typ]);
-				hhs = set.Households.Number;
+% 				hhs = set.Households.Number;
+				hhs = cell2struct(set.Households.Number(:,2),set.Households.Number(:,1));
 				idx_hh = strcmp(set.Table_Network.ColumnName, 'Housh.type');
 				data_hou = zeros(size(Hous_Data,1),6);
 				
 				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
 					hh_typ = set.Table_Network.Data{l,idx_hh};
 					idx = find(strcmp(hh_typ,set.Households.Content));
-					idx = idx(hhs.(hh_typ).Number)-1;
-					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+% 					idx = idx(hhs.(hh_typ).Number)-1;
+					idx = idx(hhs.(hh_typ))-1;
+% 					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+					hhs.(hh_typ) = hhs.(hh_typ) - 1;
 					data_hou = data_hou + Hous_Data(:,(idx*6)+1:(idx*6)+6);
 				end
 				act_power_hou(k,:,:) = data_hou(:,[1 3 5]);
@@ -336,15 +341,18 @@ for i=1:scen_new.Number
 				set = Load_Infeed_Data_old.(LV_Grids_List{j}).(['Set_',sprintf('%d',k)]);
 				
 				Hous_Data = set.Households.(['Data',data_typ]);
-				hhs = set.Households.Number;
+% 				hhs = set.Households.Number;
+				hhs = cell2struct(set.Households.Number(:,2),set.Households.Number(:,1));
 				idx_hh = strcmp(set.Table_Network.ColumnName, 'Housh.type');
 				data_hou = zeros(size(Hous_Data,1),6);
 				
 				for l=1:numel(Grid.(LV_Grids_List{j}).P_Q_Node.ids)
 					hh_typ = set.Table_Network.Data{l,idx_hh};
 					idx = find(strcmp(hh_typ,set.Households.Content));
-					idx = idx(hhs.(hh_typ).Number)-1;
-					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+% 					idx = idx(hhs.(hh_typ).Number)-1;
+					idx = idx(hhs.(hh_typ))-1;
+% 					hhs.(hh_typ).Number = hhs.(hh_typ).Number - 1;
+					hhs.(hh_typ) = hhs.(hh_typ) - 1;
 					data_hou = data_hou + Hous_Data(:,(idx*6)+1:(idx*6)+6);
 				end
 				act_power_hou(k,:,:) = data_hou(:,[1 3 5]);
@@ -667,18 +675,20 @@ end
 
 % Update the settings:
 handles.Current_Settings.Simulation.Scenarios.Data_avaliable = 1;
+handles.Current_Settings.Simulation.Number_Runs = Result_Settings.Simulation.Number_Runs;
 handles.Current_Settings.Data_Extract.LV_Grids_List = LV_Grids_List;
 handles.Current_Settings.Data_Extract.LV_Grids_Number = LV_Grids_Number;
 handles.Current_Settings.Data_Extract.MV_input_generation_in_progress = 0;
 
 % Save the settings:
 Scenarios_Settings = handles.Current_Settings.Simulation.Scenarios; %#ok<NASGU>
-Data_Extract = handles.Current_Settings.Data_Extract; %#ok<NASGU>
+Data_Extract = handles.Current_Settings.Data_Extract;
 save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Settings.mat'],...
 	'Scenarios_Settings', 'Data_Extract');
 
 % save the latest input data set to the NAT-data structure, to show, that now valid data
 % is available:
 handles.NAT_Data.Load_Infeed_Data = Load_Infeed_Data;
+handles.NAT_Data.Data_Extract = Data_Extract;
 
 
