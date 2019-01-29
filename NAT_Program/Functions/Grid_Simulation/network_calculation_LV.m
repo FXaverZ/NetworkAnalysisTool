@@ -275,7 +275,7 @@ for grid_counter=1:numel(Grid_List)
 				% Give Informations about the occoured error:
 				mh.level_up();%4
 				mh.add_error('Currently simulating timepoint ',ct);
-				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
+				mh.add_error(strrep(ME.message, newline, ''));
 				for l=1:3
 					mh.level_up();%5
 					mh.add_line('in "',ME.stack(l).name,...
@@ -286,6 +286,7 @@ for grid_counter=1:numel(Grid_List)
 			end
 		end
 		
+		% Statusinfo zum Gesamtfortschritt an User:
 		mh.set_display_back_to_marker(linemarker_dataset_sim_started, false);
 		
 		error_all_count = sum(sum(nd.Result.(cg).Error_Counter));
@@ -334,6 +335,7 @@ for grid_counter=1:numel(Grid_List)
 	end
 	
 	mh.reset_display_marker(linemarker_dataset_sim_started);
+	
 	% select again the first grid (because here the load-& infeeeddata is
 	% stored):
 	cur_set.Files.Grid.Name = Grid_List{1}(1:end-4);

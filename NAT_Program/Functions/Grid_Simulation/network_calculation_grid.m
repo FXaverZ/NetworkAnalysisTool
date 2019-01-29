@@ -49,7 +49,11 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 		end
 	end
 elseif strcmp(handles.Current_Settings.Grid.Type, 'MV')
-	handles = network_calculation_MV(handles);
+	if handles.Current_Settings.Simulation.No_GUI_output
+		handles = network_calculation_MV_silent(handles);
+	else
+		handles = network_calculation_MV(handles);
+	end
 end
 
 if  handles.Current_Settings.Simulation.Voltage_Violation_Analysis

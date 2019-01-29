@@ -116,10 +116,18 @@ for scenario_counter=1:scenar.Number
 		try
 			% start the calculation
 			if strcmp(handles.Current_Settings.Grid.Type, 'LV')
-				handles = network_calculation_LV(handles);
+				if handles.Current_Settings.Simulation.No_GUI_output
+					handles = network_calculation_LV_silent (handles);
+				else
+					handles = network_calculation_LV (handles);
+				end
 			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
 					~handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
-				handles = network_calculation_MV(handles);
+				if handles.Current_Settings.Simulation.No_GUI_output
+					handles = network_calculation_MV_silent(handles);
+				else
+					handles = network_calculation_MV(handles);
+				end
 			elseif strcmp(handles.Current_Settings.Grid.Type, 'MV') && ...
 					handles.Current_Settings.Simulation.Controller.El_Mobility.Charge_Controller.Active
 				handles = network_calculation_MV_controller_active(handles);

@@ -128,6 +128,7 @@ for grid_counter=1:numel(Grid_List)
 		mh.add_line('Load profile simulation started.');
 		linemarker_time_sim_started = mh.mark_current_displayline();
 		
+% 		timepoint_counter_timer = tic;
 % 		wb.add_end_position('timepoint_counter',sim_set.Timepoints);
 		for timepoint_counter=1:sim_set.Timepoints
 % 			wb.update_counter('timepoint_counter', timepoint_counter);
@@ -238,7 +239,7 @@ for grid_counter=1:numel(Grid_List)
 				% Give Informations about the occoured error:
 				mh.level_up();%4
 				mh.add_error('Currently simulating timepoint ',ct);
-				mh.add_error(strrep(ME.message, sprintf('\n'), ''));
+				mh.add_error(strrep(ME.message, newline, ''));
 				for l=1:3
 					mh.level_up();%5
 					mh.add_line('in "',ME.stack(l).name,...
