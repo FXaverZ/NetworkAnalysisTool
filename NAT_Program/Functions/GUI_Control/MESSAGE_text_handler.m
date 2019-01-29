@@ -245,7 +245,7 @@ classdef MESSAGE_text_handler < handle
 		%    list = {'Red','Yellow','Blue',...                   
 		%            'Green','Orange','Purple'};
 		%    indx = listdlg('ListString',list);
-		%    mh.add_listselection(list, indx;
+		%    mh.add_listselection(list, indx);
 		
 			obj.level_up();
 			for i=1:numel(full_list)

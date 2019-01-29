@@ -28,6 +28,7 @@ if ~Scen_ok
 	% no Selection (a.k.a. select all)
 	handles.Current_Settings.Simulation.Scenarios_Selection = [];
 else
+	mh.add_listselection(handles.Current_Settings.Simulation.Scenarios.Names, Scenarios_Selection);
 	if sum(Scenarios_Selection>=1) == handles.Current_Settings.Simulation.Scenarios.Number
 		% all scenarios were selected (a.k.a. select all)
 		handles.Current_Settings.Simulation.Scenarios_Selection = [];
@@ -35,7 +36,6 @@ else
 	handles.Current_Settings.Simulation.Scenarios_Selection = Scenarios_Selection;
 	end
 end
-
 % Refresh the GUI:
 handles = refresh_display_NAT_main_gui(handles);
 refresh_message_text_operation_finished (handles);

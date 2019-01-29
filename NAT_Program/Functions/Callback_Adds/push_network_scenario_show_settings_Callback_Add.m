@@ -2,76 +2,96 @@ function push_network_scenario_show_settings_Callback_Add(hObject, handles)
 %PUSH_NETWORK_SCENARIO_SHOW_SETTINGS_CALLBACK_ADD Summary of this function goes here
 %   Detailed explanation goes here
 
+mh = handles.text_message_main_handler;
+buttontext = get(hObject, 'String');
+mh.add_line('"',buttontext,'" pushed, printing scenario settings:');
 cur_scen_set = handles.Current_Settings.Simulation.Scenarios;
-
-fprintf('\n+-------------------+\n');
-fprintf('| Scenario Settings |\n');
-fprintf('+-------------------+\n\n');
-
+mh.add_line('+-------------------+');
+mh.add_line('| Scenario Settings |');
+mh.add_line('+-------------------+');
+mh.level_up();
 for i=1:cur_scen_set.Number
-	if i > 1
-		fprintf('\n');
-	end
-	fprintf(['-- Scenario No. ',num2str(i),'\n']);
+	mh.add_line('-- Scenario No. ',i);
 	cur_scen = cur_scen_set.(['Sc_',num2str(i)]);
-	fprintf('\tO General scenario description:\n');
-	fprintf(['\t\tFilename:    ',cur_scen.Filename,'\n']);	
-	fprintf(['\t\tDescription: ',stradapt(cur_scen.Description),'\n']);
-	fprintf('\tO Time Settings:\n');
-	fprintf(['\t\tSeason: ',cur_scen.Time.Season,'\n']);
-	fprintf(['\t\tWeekday: ',cur_scen.Time.Weekday,'\n']);
-	fprintf('\tO Residential Load Settings:\n');
+	mh.level_up();
+	mh.add_line('O General scenario description:');
+	mh.level_up();
+	mh.add_line('Filename:    ',cur_scen.Filename);	
+	mh.add_line('Description: ',cur_scen.Description);
+	mh.level_down();
+	mh.add_line('O Time Settings:');
+	mh.level_up();
+	mh.add_line('Season: ',cur_scen.Time.Season);
+	mh.add_line('Weekday: ',cur_scen.Time.Weekday);
+	mh.level_down();
+	mh.add_line('O Residential Load Settings:');
 	wc = cur_scen.Households.WC_Selection;
+	mh.level_up();
 	idx = strcmp(handles.System.wc_households(:,2),wc);
-	fprintf(['\t\tWorst Case: ',handles.System.wc_households{idx,1},'\n']);
-	fprintf('\tO E-Mobility Load Settings:\n');
+	mh.add_line('Worst Case: ',handles.System.wc_households{idx,1});
+	mh.level_down();
+	mh.add_line('O E-Mobility Load Settings:');
+	mh.level_up();
 	if cur_scen.El_Mobility.Number > 0
-		fprintf(['\t\tE-Mobility Share: ',num2str(cur_scen.El_Mobility.Number),' %%\n']);
+		mh.add_line('E-Mobility Share: ',num2str(cur_scen.El_Mobility.Number),' %');
 	else
-		fprintf('\t\tNo E-Mobility present in Scenario\n');
+		mh.add_line('No E-Mobility present in Scenario\n');
 	end
-	fprintf('\tO PV-Infeed Settings:\n');
+	mh.level_down();
+	mh.add_line('O PV-Infeed Settings:');
+	mh.level_up();
 	if sum(cur_scen.Solar.Number) > 0
-		fprintf('\t\tPV-plants per Node (share in %%):\n');
-		fprintf(['\t\t\tFix installed plants: ',num2str(cur_scen.Solar.Number(1)),' %%\n']);
-		fprintf(['\t\t\tTracker plants:       ',num2str(cur_scen.Solar.Number(2)),' %%\n']);
-		fprintf(['\t\tMean installed power: ',...
-			num2str(cur_scen.Solar.Power_sgl/1000),' kWp\n']);
-		fprintf(['\t\t\tStd. Deviation: ',...
-			num2str(cur_scen.Solar.Power_sgl_dev),' %%\n']);
-		fprintf(['\t\tMean Orientation (0° = South, -90° = East): ',...
-			num2str(cur_scen.Solar.mean_Orientation),' °\n']);
-		fprintf(['\t\t\tStd. Deviation: ',...
-			num2str(cur_scen.Solar.dev_Orientation),' °\n']);
-		fprintf(['\t\tMean Inclination (0° = horizontal, -90° = vertikal): ',...
-			num2str(cur_scen.Solar.mean_Inclination),' °\n']);
-		fprintf(['\t\t\tStd. Deviation: ',...
-			num2str(cur_scen.Solar.dev_Inclination),' °\n']);
-		fprintf(['\t\tPerformance Ratio: ',...
-			num2str(cur_scen.Solar.Performance_Ratio),' [-]\n']);
-		fprintf(['\t\t\tStd. Deviation: ',...
-			num2str(cur_scen.Solar.dev_Performance_Ratio),' %%\n']);
-		fprintf(['\t\tEfficiency: ',...
-			num2str(cur_scen.Solar.Efficiency*100),' %%\n']);
-		fprintf(['\t\t\tStd. Deviation: ',...
-			num2str(cur_scen.Solar.dev_Efficiency),' %%\n']);
+		mh.add_line('PV-plants per Node (share in %):');
+		mh.level_up();
+		mh.add_line('Fix installed plants: ',num2str(cur_scen.Solar.Number(1)),' %');
+		mh.add_line('Tracker plants:       ',num2str(cur_scen.Solar.Number(2)),' %');
+		mh.level_down();
+		mh.add_line('Mean installed power: ',...
+			num2str(cur_scen.Solar.Power_sgl/1000),' kWp');
+		mh.level_up();
+		mh.add_line('Std. Deviation: ',...
+			num2str(cur_scen.Solar.Power_sgl_dev),' %');
+		mh.level_down();
+		mh.add_line('Mean Orientation (0° = South, -90° = East): ',...
+			num2str(cur_scen.Solar.mean_Orientation),' °');
+		mh.level_up();
+		mh.add_line('Std. Deviation: ',...
+			num2str(cur_scen.Solar.dev_Orientation),' °');
+		mh.level_down();
+		mh.add_line('Mean Inclination (0° = horizontal, -90° = vertikal): ',...
+			num2str(cur_scen.Solar.mean_Inclination),' °');
+		mh.level_up();
+		mh.add_line('Std. Deviation: ',...
+			num2str(cur_scen.Solar.dev_Inclination),' °');
+		mh.level_down();
+		mh.add_line('Performance Ratio: ',...
+			num2str(cur_scen.Solar.Performance_Ratio),' [-]');
+		mh.level_up();
+		mh.add_line('Std. Deviation: ',...
+			num2str(cur_scen.Solar.dev_Performance_Ratio),' %');
+		mh.level_down();
+		mh.add_line('Efficiency: ',...
+			num2str(cur_scen.Solar.Efficiency*100),' %');
+		mh.level_up();
+		mh.add_line('Std. Deviation: ',...
+			num2str(cur_scen.Solar.dev_Efficiency),' %');
+		mh.level_down();
 		wc = cur_scen.Solar.WC_Selection;
 		idx = strcmp(handles.System.wc_generation(:,2),wc);
-		fprintf(['\t\tWorst Case: ',handles.System.wc_generation{idx,1},'\n']);
+		mh.add_line('Worst Case: ',handles.System.wc_generation{idx,1});
 	else
-		fprintf('\t\tNo PV-Infeed present in Scenario\n');
+		mh.add_line('No PV-Infeed present in Scenario');
 	end
+	mh.level_down();
+	mh.level_down();
 end
-fprintf('\n+-------------------+\n\n');
+mh.level_down();
 
 % Anzeige aktualisieren:
 handles = refresh_display_NAT_main_gui(handles);
+refresh_message_text_operation_finished (handles);
 
 % handles-Struktur aktualisieren:
 guidata(hObject, handles);
-end
-
-function str = stradapt(str)
-str = strrep(str, '%', '%%');
 end
 
