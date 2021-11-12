@@ -1,41 +1,41 @@
 function out = vary_parameter(mean, sigma, varargin)
-%VARY_PARAMETER    führt verschiedene Parametervariationen & Auswahlen durch
-%    OUT = VARY_PARAMETER(MEAN, SIGMA) sorgt für eine Normalverteilung um den
+%VARY_PARAMETER    fï¿½hrt verschiedene Parametervariationen & Auswahlen durch
+%    OUT = VARY_PARAMETER(MEAN, SIGMA) sorgt fï¿½r eine Normalverteilung um den
 %    Mittelwert MEAN mit der Standardabweichung SIGMA.
-%    MEAN kann ein [N,M]-Array sein, mit N Einträgen von M verschiedenen
-%    Parametern. SIGMA muss in diesem Fall ein [1,M]-Vektor sein, der für jeden
+%    MEAN kann ein [N,M]-Array sein, mit N Eintrï¿½gen von M verschiedenen
+%    Parametern. SIGMA muss in diesem Fall ein [1,M]-Vektor sein, der fï¿½r jeden
 %    der M Parameter die Standardabweichung definiert.
 %    Im Fall eines MEAN-Arrays der Form [N,1] kann Sigma ein Einzelwert sein
-%    (der die Standardverteilung für alle N Einträge darstellt) oder ebenfalls
+%    (der die Standardverteilung fï¿½r alle N Eintrï¿½ge darstellt) oder ebenfalls
 %    ein [N,1]-Array, welches verschiedene Standardabweichungen zu den korrespon-
 %    dierenden Werten von MEAN angibt.
 %    SIGMA muss in % angegeben werden!
 %
-%    OUT = VARY_PARAMETER(VALUE, 'Uniform_Distr') sorgt für eine Variierung des
-%    Wertes VALUE gemäß einer Gleichverteilung im Bereich 0 bis VALUE
+%    OUT = VARY_PARAMETER(VALUE, 'Uniform_Distr') sorgt fï¿½r eine Variierung des
+%    Wertes VALUE gemï¿½ï¿½ einer Gleichverteilung im Bereich 0 bis VALUE
 %
-%    OUT = VARY_PARAMETER(MEAN, SIGMA, 'Uniform_Distr') sorgt für eine
-%    Variierung des Wertes MEAN gemäß einer Gleichverteilung im Bereich
+%    OUT = VARY_PARAMETER(MEAN, SIGMA, 'Uniform_Distr') sorgt fï¿½r eine
+%    Variierung des Wertes MEAN gemï¿½ï¿½ einer Gleichverteilung im Bereich
 %    MEAN*(1-SIGMA) bis MEAN*(1+SIGMA). SIGMA wird in Prozent des
-%    Mittelwerts MEAN übergeben.
+%    Mittelwerts MEAN ï¿½bergeben.
 %
-%    OUT = VARY_PARAMETER(TIME, SIGMA, 'Time') sorgt für eine Variierung des
+%    OUT = VARY_PARAMETER(TIME, SIGMA, 'Time') sorgt fï¿½r eine Variierung des
 %    Zeitpunktes TIME (angegeben in Minuten) um SIGMA Minuten.
 %
-%    OUT = VARY_PARAMETER(LIST, PROBABILITY, 'List') sorgt für eine zufällige
+%    OUT = VARY_PARAMETER(LIST, PROBABILITY, 'List') sorgt fï¿½r eine zufï¿½llige
 %    Auswahl eines Eintrages aus einer [N,1]-Liste LIST. Die [N,1]-Liste
 %    PROBABILITY gibt die jeweilige Wahrscheinlichkeitsdichte der einzelnen
-%    Listenwerte an (die Gesamtsumme aller Einträge von PROBABILITY muss somit
+%    Listenwerte an (die Gesamtsumme aller Eintrï¿½ge von PROBABILITY muss somit
 %    100% ergeben)
 
 %    Franz Zeilinger - 29.10.2010
 
 if nargin == 3 && strcmpi(varargin{1},'list')
-	% Eintrag muss aus einer Liste ausgewählt werden
+	% Eintrag muss aus einer Liste ausgewï¿½hlt werden
 	list = mean;
 	proba = sigma/100; % Umrechnen von %
 	sum_proba = sum(proba,1);
-	% Überprüfen, ob die Eingangsvariablen stimmen:
+	% ï¿½berprï¿½fen, ob die Eingangsvariablen stimmen:
 	if (numel(list) == numel(proba)) && (abs(sum_proba-1) <= 1e-3)
 		% Umrechnen der angegebenen Wahrscheinlichkeitsdichte in eine
 		% kummulative Verteilungsfunktion:
@@ -46,13 +46,13 @@ if nargin == 3 && strcmpi(varargin{1},'list')
 		proba1 = [0; proba(1:end-1)];
 		proba = [proba1, proba];
 		fort = rand();
-		% Ermitteln, in welchen Bereich Zufallszahl (zw. 0 und 1) fällt:
+		% Ermitteln, in welchen Bereich Zufallszahl (zw. 0 und 1) fï¿½llt:
 		idx = proba(:,1) < fort & fort <= proba(:,2);
 		if fort == 0
-			% falls Zufallszahl 0, 1. Bereich wählen:
+			% falls Zufallszahl 0, 1. Bereich wï¿½hlen:
 			idx = 1;
 		end
-		% Je nach Listentyp Eintrag zurückgeben:
+		% Je nach Listentyp Eintrag zurï¿½ckgeben:
 		if iscell(list)
 			out = list{idx};
 		else
@@ -73,7 +73,7 @@ if nargin == 3 && strcmpi(varargin{1},'uniform_distr')
 end
 
 % Falls in SIGMA der String 'Uniform_Distr' steht, eine Gleichverteilung
-% durchführen:
+% durchfï¿½hren:
 if ischar(sigma) && strcmpi(sigma, 'uniform_distr')
 	% Wert zwischen 0 und 1 erzeugen gem. einer Gleichverteilung:
 	fort = rand();
@@ -91,10 +91,14 @@ if size(sig,2) ~= size(mean,2)
 	sig = repmat(sig, [1,floor(size(mean,2)/size(sig,2))]);
 end
 
-% Jeweilige Varriierung durchführen:
+% Jeweilige Varriierung durchfï¿½hren:
 if nargin == 2
-	out = normrnd(mean, abs(mean.*sig/100));
+	out = nrmrnd(mean, abs(mean.*sig/100));
 elseif nargin == 3 && strcmpi(varargin{1},'time')
-	out = mean + normrnd(0,sig);
+	out = mean + nrmrnd(0,sig);
 end
 end
+
+function nrmmatrix = nrmrnd(mu, sigma)
+nrmmatrix = mu+sigma*randn;
+end 
