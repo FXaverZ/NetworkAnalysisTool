@@ -76,9 +76,9 @@ handles.NVIEW_Control.Simulation_Options = Simulation_Options;
 % get the result filenames, first search for all files in the current location along with
 % the scenario description
 files = dir(file.Path);
-
 files = struct2cell(files);
-files = files(1,cell2mat(files(3,:)) ~= 0);
+files = files(1,3:end);
+
 % reset the files-list:
 handles.NVIEW_Control.Result_Files = {};
 handles.NVIEW_Control.Result_Files_Paths = {};
