@@ -82,7 +82,7 @@ for scenario_counter=1:scen_old.Number
 			% save the extracted data within a seperate file in the grid variants
 			% folder:
 			name = d.Simulation.Active_Scenario.Filename;
-			Load_Infeed_Data = d.Load_Infeed_Data; %#ok<NASGU>
+			Load_Infeed_Data = d.Load_Infeed_Data; 
 			save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,name,'.mat'],...
 				'Load_Infeed_Data','Load_Infeed_Data','-v7.3');
 			clear('Load_Infeed_Data');
