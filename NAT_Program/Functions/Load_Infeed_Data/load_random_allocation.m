@@ -257,7 +257,7 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 	end
 	
 	% ermitteln, wieviele Elektrofahrzeuge gesamt im Netz enthalten sind:
-	handles.Current_Settings.Data_Extract.El_Mobility.Number = ...
+	Data_Extract.El_Mobility.Number = ...
 		sum(cell2mat(Table_Network.Data(:,idx_em)));
 	
 	% Add information, which got lost during the recreation of the network table:

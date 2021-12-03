@@ -35,7 +35,7 @@ for i=1:cur_scen_set.Number
 	if cur_scen.El_Mobility.Number > 0
 		mh.add_line('E-Mobility Share: ',num2str(cur_scen.El_Mobility.Number),' %');
 	else
-		mh.add_line('No E-Mobility present in Scenario\n');
+		mh.add_line('No E-Mobility present in Scenario');
 	end
 	mh.level_down();
 	mh.add_line('O PV-Infeed Settings:');
