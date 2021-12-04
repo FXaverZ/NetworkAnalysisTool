@@ -3,7 +3,7 @@ function [Result, Debug] = merge_results_grid (Result,...
 %MERGE_RESULTS_GRID Summary of this function goes here
 %   Detailed explanation goes here
 
-tmp_result         = Raw_Results.Result.(cur_grd);
+tmp_result         = Result.(cur_grd);
 tmp_add_result     = Raw_Results.Result.(cur_grd);
 
 number_datasets_current   = size(tmp_result.Branch_Values,1);
