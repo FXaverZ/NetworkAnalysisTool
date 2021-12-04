@@ -1,8 +1,25 @@
 # Network Analysis Tool
-Nähere Beschreibungen im [Wiki](https://github.com/FXaverZ/NetworkAnalysisTool/wiki)
+Detailed description under [Wiki](https://github.com/FXaverZ/NetworkAnalysisTool/wiki)
 
-Link zum [Datenstrukturdokument](https://docs.google.com/spreadsheets/d/1t5LASSJUTRudgFsh8Z0A3TpSzqCkcQceqHsrnVQB8Hk/edit?usp=sharing) (Google Tabellen).
-# Changelog NAT
+Link to [Datenstructuredocument](https://docs.google.com/spreadsheets/d/1t5LASSJUTRudgFsh8Z0A3TpSzqCkcQceqHsrnVQB8Hk/edit?usp=sharing) (Google Tabellen).
+
+## System Requirements
+
+Needed Software:
+
+* MATLAB Version: 9.7.0.1190202 (R2019b) with following toolboxes
+	* Curve Fitting Toolbox, Version 3.5.10
+	* Data Acquisition Toolbox, Version 4.0.1  
+	* Database Toolbox, Version 9.2
+	* Optimization Toolbox, Version 8.4
+	* Parallel Computing Toolbox, Version 7.1
+	* Spreadsheet Link, Version 3.4.2
+	* Statistics and Machine Learning Toolbox
+* PSS(R)SINCAL 14.0 
+
+## Changelogs
+
+### Changelog NAT
 
 **Changelog documentation in NAT,** v1.1b, date of changes: **11/04/2013**
 
