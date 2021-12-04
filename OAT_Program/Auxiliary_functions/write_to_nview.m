@@ -9,7 +9,7 @@ Analysis_Selection_Id = define_analysis_selection_id(handles.NVIEW_Analysis_Sele
 % Store information
 % ----------------------------------------------------------------------------------------------------------------------------------------------
 info =...
-['>> bus                                                                                                                                 ';
+['>> bus                                                                                                                                  ';
 'columns... 1 bus no, 2 Upp (kV), 3 Upe (kV), 4 Umax (%), 5 Umin (%)                                                                     ';
 'rows... nodes                                                                                                                           ';
 '                                                                                                                                        ';
