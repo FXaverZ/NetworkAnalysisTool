@@ -26,7 +26,7 @@ for i = 1 : numel(Data_List)
     xlabel(PlotXLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
     xlim([1,Table.(Data_List{i}).XLim]);
     legend1=legend(PlotLegend,'Location','SouthEast');
-    set(legend1,'EdgeColor',[1 1 1],'YColor',[1 1 1],'XColor',[1 1 1],...
+    set(legend1,'EdgeColor',[1 1 1],...
         'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
     hold off;
     % Append temporary data to gcf - append ID for colorscheme control!

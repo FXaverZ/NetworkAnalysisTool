@@ -29,7 +29,7 @@ end
 set(gca,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize,'XTick',PlotXtick,'XTickLabel',PlotXtickLabel);
 ylabel(PlotYLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
 legend1=legend(PlotLegend,'Location','SouthEast');
-set(legend1,'EdgeColor',[1 1 1],'YColor',[1 1 1],'XColor',[1 1 1],...
+set(legend1,'EdgeColor',[1 1 1],...
     'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
 hold off;
 

@@ -67,13 +67,11 @@ if ~isempty(check_active_figures)
             cp = flipud(cp);
             count = 0;
             for j = 1 : size(cp,1)
-                
+                count = count + 1;
                 if ~strcmp(get(cp(j),'DisplayName'),'')
-                    count = count + 1 ;
                     if mod(j,2) ~= 0
                         set(cp(j),'LineStyle',get(cp(j),'LineStyle'),'LineWidth',get(cp(j),'LineWidth'),'Color',handles.System.Graphics.Colormap(count,:));
                     else
-                         count = count + 1;
                         set(cp(j),'LineStyle',get(cp(j),'LineStyle'),'LineWidth',get(cp(j),'LineWidth'),'Color',handles.System.Graphics.Colormap(count,:));
                     end
                 end

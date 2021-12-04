@@ -377,7 +377,7 @@ function [handles,levels,parentIdx,listing] = findjobj(container,varargin)
             jRootPane = jFigPanel.getRootPane;
         catch
             try
-                warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  % R2008b compatibility
+                warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');  % R2008b compatibility
                 jFrame = get(hFig,'JavaFrame');
                 jFigPanel = get(jFrame,'FigurePanelContainer');
                 jRootPane = jFigPanel;
@@ -388,7 +388,7 @@ function [handles,levels,parentIdx,listing] = findjobj(container,varargin)
         end
         try
             % If invalid RootPane - try another method...
-            warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  % R2008b compatibility
+            warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');  % R2009b compatibility
             jFrame = get(hFig,'JavaFrame');
             jAxisComponent = get(jFrame,'AxisComponent');
             jRootPane = jAxisComponent.getParent.getParent.getRootPane;

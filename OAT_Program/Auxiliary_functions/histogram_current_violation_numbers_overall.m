@@ -33,7 +33,7 @@ for i = 1 : numel(cg)
     % calculate the number of elements in bins
     nj = calc_bin_numbers(binIdx,nBins,binEdges);
     % Draw histogram
-    b=bar(cj,100*nj/sum(nj),'style','hist');
+    b=bar(cj,100*nj/sum(nj),'hist');
     if numel(cg) == 1
         set(b,'EdgeColor','none','FaceColor',handles.System.Graphics.Colormap(i,:),'LineWidth',1.5,'FaceAlpha',min([0.2+ i/10,0.7]));
     else
@@ -67,7 +67,7 @@ set(gca,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize
 xlabel(HistXLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
 ylabel(HistYLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
 legend1 = legend(HistLegend,'Location','SouthEast');
-set(legend1,'EdgeColor',[1 1 1],'YColor',[1 1 1],'XColor',[1 1 1],...
+set(legend1,'EdgeColor',[1 1 1],...
     'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
 hold off;
 

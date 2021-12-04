@@ -16,14 +16,13 @@ for i = 1 : numel(Data_List)
     % Define figure with computer resolution size
     figure('name',PlotFigureName,'Renderer',handles.System.Graphics.Renderer); hold on; grid on; box on
     set(gcf,'Position',handles.System.Graphics.Screensize);  % Adjust figure to user screensize
-    count = 0;
+    count = 1;
     for j = 1 : numel(PlotLegend)
-        count = count + 1;
         if mod(j,2) ~= 0
             plot(PlotInput(:,j),'LineStyle','-','LineWidth',1.0,'Color',handles.System.Graphics.Colormap(count,:));
         else
-            count = count + 1;
             plot(PlotInput(:,j),'LineStyle',':','LineWidth',2,'Color',handles.System.Graphics.Colormap(count,:));
+            count = count + 1;
         end
     end
     
@@ -33,7 +32,7 @@ for i = 1 : numel(Data_List)
     xlabel(PlotXLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
     xlim([0,Table.(Data_List{i}).XLim]);
     legend1=legend(PlotLegend,'Location','SouthEast');
-    set(legend1,'EdgeColor',[1 1 1],'YColor',[1 1 1],'XColor',[1 1 1],...
+    set(legend1,'EdgeColor',[1 1 1],...
         'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
     hold off;
     % Append temporary data to gcf - append ID for colorscheme control!
