@@ -312,7 +312,7 @@ end
 if isempty(merge.present_grids(Grid_Sel))
     str1='No matching grid simulation found in all scenario data! ';
     str2='Data can''t be merged.';
-    str3='At least one grid should be simulated in every scenario!';
+    str3='At least one grid should be simulated in every scenario to be merged!';
     mh.add_error(str1,str2);
     mh.level_up();
     mh.add_error(str3);
