@@ -363,14 +363,6 @@ handles = write_to_nview(handles);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_merge_nat_results_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_merge_nat_results (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles = merge_simulation_runs(handles);
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
 function pushtool_CloseFig_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to pushtool_CloseFig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
