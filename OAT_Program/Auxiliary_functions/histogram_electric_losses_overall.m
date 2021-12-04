@@ -36,7 +36,7 @@ for i = 1 : numel(cg)
     % calculate the number of elements in bins
     nj = calc_bin_numbers(binIdx,nBins,binEdges);
     % Draw histogram
-    b=bar(cj,100*nj/sum(nj),'style','hist');
+    b=bar(cj,100*nj/sum(nj),'hist');
     if numel(cg) == 1
         set(b,'EdgeColor','none','FaceColor',handles.System.Graphics.Colormap(i,:),'LineWidth',1.5,'FaceAlpha',min([0.2+ i/10,0.7]));
     else
