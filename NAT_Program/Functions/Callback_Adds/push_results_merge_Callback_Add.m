@@ -195,6 +195,11 @@ for i=1:numel(File_Sel)
             merge.present_datasets(end+1,1:numel(merge.present_grids)) = 0;
             merge.file_allocation{end+1,numel(merge.present_grids)} = {};
             idx_scn = numel(merge.present_scenarios);
+        else
+            if size(merge.present_datasets,2) < numel(merge.present_grids)
+                merge.present_datasets(:,end+1) = 0;
+                merge.file_allocation(:,end+1) = deal(cell(numel(merge.present_scenarios),1));
+            end
         end
         % Update the also the scenario description structure if needed, so
         % here all presen scenarios can be found:
@@ -288,7 +293,7 @@ if Simulation.Scenarios.Number > 1
         scen_new.(['Sc_',num2str(i)]) = scen_old.(['Sc_',num2str(Scen_Sel(i))]);
         merge.present_scenarios{i} = scen_old.Names{Scen_Sel(i)};
         merge.present_datasets(i,:) = merge_old.present_datasets(Scen_Sel(i),:);
-        merge.file_allocation(i,:) = merge_old.file_allocation(i,:);
+        merge.file_allocation(i,:) = merge_old.file_allocation(Scen_Sel(i),:);
     end
     scen_new.Data_avaliable = 1;
     Simulation.Scenarios = scen_new;
@@ -298,7 +303,12 @@ mh.add_listselection(scen_old.Names, Scen_Sel);
 clear scen_new scen_old merge_old
 
 % After this selection check, which grids can be merged:
-Grid_Sel = logical(1 - (sum(merge.present_datasets > 0) < Simulation.Scenarios.Number));
+if Simulation.Scenarios.Number > 1
+    Grid_Sel = logical(1 - (sum(merge.present_datasets > 0) < Simulation.Scenarios.Number));
+else
+    Grid_Sel = merge.present_datasets > 0;
+end
+
 if isempty(merge.present_grids(Grid_Sel))
     str1='No matching grid simulation found in all scenario data! ';
     str2='Data can''t be merged.';
@@ -359,6 +369,7 @@ Files_Grid.Name = merge.present_grids{1};
 merge.number_datasets = min(merge.present_datasets,[],'all');
 Data_Extract.Number_Data_Sets = merge.number_datasets;
 Simulation.Number_Runs = merge.number_datasets;
+mh.add_info('A total of ',merge.number_datasets,' datasets can be merged!');
 
 % now merge the Data:
 mh.add_line('Start with merging...');
