@@ -13,6 +13,14 @@ function handles = get_default_values_NAT(handles)
 % Current version of the NAT
 System.version = '4.3';
 
+% possible logos
+System.logos = {
+    'TU Wien', 'institutslogo.jpg';
+    'Siemens', 'siemenslogo.jpg';
+    };
+
+System.logo_selector = 'TU Wien';
+
 % maximum number of a whole dataset, if this number is exceeded, partial
 % files are created: 
 System.number_max_datasets = 500;

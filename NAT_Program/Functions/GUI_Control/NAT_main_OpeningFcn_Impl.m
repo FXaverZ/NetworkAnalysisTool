@@ -108,11 +108,9 @@ end
 mh.level_down();
 
 % Logo anzeigen:
-% if strcmpi(getComputerName, 'eeapc14')
-logo=imread('Figures\institutslogo.jpg','jpg');   % Einlesen der Grafik
-% else
-% 	logo=imread('Figures\siemenslogo.jpg','jpg');     % Einlesen der Grafik
-% end
+logofilename = ...
+    handles.System.logos{strcmp(handles.System.logo_selector,handles.System.logos(:,1)),2};
+logo=imread(['Figures\',logofilename]);      % Einlesen der Grafik
 image(logo,'Parent',handles.axes_logo);           % Darstellen des Logos
 axis image;                                       % Grafik entzerren
 axis off;                                         % Achsenbezeichnung ausschalten
