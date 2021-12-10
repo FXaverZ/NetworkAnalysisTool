@@ -215,11 +215,7 @@ if strcmp(handles.Current_Settings.Grid.Type, 'LV')
 		sola_settin.Selectable{end+1,1} = sola_settin.Selectable{end,1};
 		sola_settin.Selectable{end-1,2} = name;
 		
-		typ = handles.System.sola.Typs{sola_settin.Plants.(name).Typ,1};
-		long_na = [typ(1:4),' - ',...
-			num2str(sola_settin.Plants.(name).Power_Installed/1000,'%.2f'),' kWp - ',...
-			num2str(sola_settin.Plants.(name).Orientation,'%.2f'),'° - ',...
-			num2str(sola_settin.Plants.(name).Inclination,'%.2f'),'°'];
+        long_na = pvplant2str(handles,sola_settin.Plants.(name));
 		sola_settin.Selectable{end-1,1} = long_na;
 		
 		Table_Network.Data{row_act,idx_pv} = long_na;
