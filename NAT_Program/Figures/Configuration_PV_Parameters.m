@@ -148,6 +148,8 @@ function edit_power_installed_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 handles.plant.Power_Installed = str2double(get(hObject,'String'));
+% Umrechnen von kWp auf Oberfläche auf Wp:
+handles.plant.Power_Installed = handles.plant.Power_Installed * 1000;
 handles.plant.Size_Collector = ...
 	handles.plant.Rel_Size_Collector * handles.plant.Power_Installed;
 
@@ -163,6 +165,8 @@ function edit_rel_size_collector_Callback(hObject, ~, handles) %#ok<DEFNU>
 % handles    Struktur mit Grafiklinks und User-Daten (siehe GUIDATA)
 
 handles.plant.Rel_Size_Collector = str2double(get(hObject,'String'));
+% Umrechnen von m²/kWp auf Oberfläche auf m²/Wp:
+handles.plant.Rel_Size_Collector = handles.plant.Rel_Size_Collector / 1000;
 handles.plant.Size_Collector = ...
 	handles.plant.Rel_Size_Collector * handles.plant.Power_Installed;
 
@@ -277,13 +281,13 @@ end
 
 % die angezeigten Werte aktualisieren:
 set(handles.edit_number, 'String', num2str(plant.Number));
-set(handles.edit_power_installed, 'String', num2str(plant.Power_Installed));
-set(handles.edit_orientation, 'String', num2str(plant.Orientation));
-set(handles.edit_inclination, 'String', num2str(plant.Inclination));
-set(handles.edit_efficiency, 'String', num2str(plant.Efficiency*100));
-set(handles.edit_rel_size_collector, 'String', num2str(plant.Rel_Size_Collector));
-set(handles.edit_sigma_delay_time, 'String', num2str(plant.Sigma_delay_time));
-set(handles.edit_size_collector,'String', num2str(plant.Size_Collector));
+set(handles.edit_power_installed, 'String', num2str(plant.Power_Installed/1000,'%.2f'));
+set(handles.edit_orientation, 'String', num2str(plant.Orientation,'%.2f'));
+set(handles.edit_inclination, 'String', num2str(plant.Inclination,'%.2f'));
+set(handles.edit_efficiency, 'String', num2str(plant.Efficiency*100,'%.2f'));
+set(handles.edit_rel_size_collector, 'String', num2str(plant.Rel_Size_Collector*1000,'%.2f'));
+set(handles.edit_sigma_delay_time, 'String', num2str(plant.Sigma_delay_time,'%.2f'));
+set(handles.edit_size_collector,'String', num2str(plant.Size_Collector,'%.2f'));
 
 % "Einstellungen übernehmen" Button aktivieren:
 if handles.new_data

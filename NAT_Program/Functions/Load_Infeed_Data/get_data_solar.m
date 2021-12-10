@@ -145,11 +145,11 @@ switch settin.Worstcase_Generation
 		% Neigung
 		% Anzahl der Datenpunkte jedes Monats ermitteln (d.h. Zeitwert > 0)
 		num_datapoi = sum(squeeze(...
-			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2);  %#ok<IDISVAR,NODEF>
+			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2);  
 		% Durchschnittliche Einstrahlung ermitteln:
 		e_avg_fix = sum(squeeze(...
 			radiation_data_fix(:,idx_orient, idx_inclin,3,:)),2)./num_datapoi;
-		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; %#ok<IDISVAR,NODEF>
+		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; 
 		% Monat auswählen, in dem die durchschnittliche Einstrahlung Maximal wird:
 		month_fix = find(e_avg_fix == max(e_avg_fix),1); % Monat für fixe Anlagen
 		month_tra = find(e_avg_tra == max(e_avg_tra),1); % Monat für Tracker
@@ -166,11 +166,11 @@ switch settin.Worstcase_Generation
 		% Neigung
 		% Anzahl der Datenpunkte jedes Monats ermitteln (d.h. Zeitwert > 0)
 		num_datapoi = sum(squeeze(...
-			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2); %#ok<NODEF>
+			radiation_data_fix(:,idx_orient, idx_inclin,1,:)) > 0,2); 
 		% Durchschnittliche Einstrahlung ermitteln:
 		e_avg_fix = sum(squeeze(...
 			radiation_data_fix(:,idx_orient, idx_inclin,3,:)),2)./num_datapoi;
-		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; %#ok<NODEF>
+		e_avg_tra = sum(squeeze(radiation_data_tra(:,3,:)),2)./num_datapoi; 
 		% Monat auswählen, in dem die durchschnittliche Einstrahlung Maximal wird:
 		month_fix = find(e_avg_fix == min(e_avg_fix),1); % Monat für fixe Anlagen
 		month_tra = find(e_avg_tra == min(e_avg_tra),1); % Monat für Tracker

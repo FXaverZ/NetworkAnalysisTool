@@ -108,7 +108,7 @@ Default_Plant.Orientation = 0;          % Ausrichtung              [°]
 Default_Plant.Inclination = 30;         % Neigung                  [°]
 Default_Plant.Efficiency = 0.12;        % Wirkungsgrad Zelle + WR  [-]
 Default_Plant.Performance_Ratio = 0.62; % Betriebsbedingungen der Photovoltaikanlage [-]
-Default_Plant.Rel_Size_Collector = 0.01;% Rel. Kollektorfläche     [m²/Wp]
+Default_Plant.Rel_Size_Collector = 6.5*10e-3; % Rel. Kollektorfläche     [m²/Wp]
 Default_Plant.Size_Collector = ...      % Kollektorfläche          [m²]
 	Default_Plant.Power_Installed * Default_Plant.Rel_Size_Collector;
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung[s] 
@@ -141,7 +141,7 @@ Default_Plant.c_p =            [];      % Tabelle mit Leistungsbeiwerten bei
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung        [s] 
 Default_Plant.Phase_Allocation_Mode = 'auto';  % Modus zur Phasenzuordnung der Anlage [-]
                                                % siehe handles.System.Phase_Modes_Generation
-Default_Plant.Max_Power_4_Single_Phase = 4601; % Max. Leistung für einphasigen Anschluss [kW]
+Default_Plant.Max_Power_4_Single_Phase = 4601; % Max. Leistung für einphasigen Anschluss [W]
 System.wind.Default_Plant = Default_Plant;
 
 % Define a default scenario:
@@ -158,12 +158,12 @@ Time.Weekday = [];              % current weekday of the sceanrio (possible ones
 Scenario.Time = Time;           % settings in the time domain of the scenario
 
 Solar.Number = [50, 0];         % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 5000;         % mittlere Leistung der Anlagen [Wp]
-Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
+Solar.Power_sgl = 10000;         % mittlere Leistung der Anlagen [Wp]
+Solar.Power_sgl_dev = 30;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
 Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
+Solar.dev_Orientation = 10;      % Standardabweichung der Ausrichtung [°]
 Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
+Solar.dev_Inclination = 10;      % Standardabweichung der Neigung [°]
 Solar.Performance_Ratio = 0.62; % mittlere Betriebsbedingungen der Photovoltaikanlage [-]
 Solar.dev_Performance_Ratio = 5;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
 Solar.Efficiency = 0.12;        % mittlerer Wirkungsgrad Zelle + WR [-]
