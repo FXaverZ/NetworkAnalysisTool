@@ -12,7 +12,7 @@ wb = handles.waitbar_main_handler;
 % Because scenarios are not used create path to results (Grid_folder_nat\Results)
 r_path = [handles.Current_Settings.Files.Grid.Path,filesep,...
 	handles.Current_Settings.Files.Grid.Name,'_nat',filesep,'Results'];
-if ~isdir(r_path)
+if ~isfolder(r_path)
 	mkdir(r_path);
 end
 handles.Current_Settings.Files.Save.Result.Path = r_path;
@@ -29,6 +29,7 @@ handles.Current_Settings.Files.Save.Result.Name = ['Res_',simdate,' - Data'];
 logpath = [r_path,filesep,'Res_',simdate,' - log.txt'];
 mh.mark_sub_log(logpath);
 mh.add_line('Performing single scenario simulation...');
+mh.add_info('Using Input data from "',handles.Current_Settings.Simulation.Scenarios_Path,'".');
 mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 
 % start the calculation

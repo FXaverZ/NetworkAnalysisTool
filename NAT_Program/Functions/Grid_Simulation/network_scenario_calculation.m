@@ -26,7 +26,7 @@ else
 	path = handles.Current_Settings.Simulation.Grids_Path;
 	r_path = [path,filesep,'Results'];
 end
-if ~isdir(r_path)
+if ~isfolder(r_path)
 	mkdir(r_path);
 end
 
@@ -39,6 +39,7 @@ simdatestr = datestr(now,'yyyy_mm_dd-HH.MM.SS');
 log_path = [r_path,filesep,'Res_',simdatestr,' - Log.log'];
 mh.mark_sub_log(log_path);
 mh.add_line('Performing Scenario based grid simulations...');
+mh.add_info('Using Input data from "',s_path,'".');
 mh.add_info('Grid(s) are from Type "',handles.Current_Settings.Grid.Type,'".');
 
 % adapt the Scenario-Settings according to the selection:
