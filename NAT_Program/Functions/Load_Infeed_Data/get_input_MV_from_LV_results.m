@@ -384,7 +384,8 @@ for i=1:scen_new.Number
 			end
 			clear Hous_Data hhs idx_hh data_hou hh_typ idx data_hou k l
 			
-		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Households.(['Data',data_typ]))
+		elseif isfield(Load_Infeed_Data_old, LV_Grids_List{j}) && ...
+            ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Households.(['Data',data_typ]))
 			
 			act_power_hou = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_hou = act_power_hou;
@@ -444,7 +445,8 @@ for i=1:scen_new.Number
 				rea_power_sol(k,:,:) = data_sol(:,[2 4 6]);
 			end
 			clear set Sola_Data add_data idx_pv_add plants data_sol l k gen_unit_name idx
-		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Solar.(['Data',data_typ]))
+		elseif isfield(Load_Infeed_Data_old, LV_Grids_List{j}) && ...
+                ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.Solar.(['Data',data_typ]))
 			act_power_sol = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_sol = act_power_sol;
 			
@@ -500,7 +502,8 @@ for i=1:scen_new.Number
 				rea_power_elm(k,:,:) = data_elm(:,[2 4 6]);
 			end
 			clear set Elmo_Data elm_count idx_em data_elm elmoby k l m elm_num
-		elseif ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.El_Mobility.(['Data',data_typ]))
+		elseif isfield(Load_Infeed_Data_old, LV_Grids_List{j}) && ...
+                ~isempty(Load_Infeed_Data_old.(LV_Grids_List{j}).Set_1.El_Mobility.(['Data',data_typ]))
 			act_power_elm = zeros(Result_Settings.Simulation.Number_Runs,Result_Settings.Data_Extract.Timepoints_per_dataset,3);
 			rea_power_elm = act_power_elm;
 			
