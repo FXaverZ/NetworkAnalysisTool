@@ -50,7 +50,7 @@ classdef NAT_Data < handle
 		
 		function save_LoadInfeedData_as_mat (obj, path, name)
 			% save the Load_Infeed_Data to the specified path
-			Load_Infeed_Data = obj.Load_Infeed_Data; %#ok<NASGU,PROPLC>
+			Load_Infeed_Data = obj.Load_Infeed_Data; %#ok<PROPLC>
 			save([path,filesep,name,'.mat'],'Load_Infeed_Data','-v7.3');
 			clear('Load_Infeed_Data');
 		end
