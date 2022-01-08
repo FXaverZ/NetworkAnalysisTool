@@ -84,9 +84,9 @@ for i=1:numel(d.Grid.(cg).P_Q_Node.ids)
 	d.Grid.(cg).P_Q_Node.Points(i) = Connection_Point(sin, d.Grid.(cg).P_Q_Node.ids(i));
 end
 % Allgemeine Knoten-Objekte erstellen:
-d.Grid.(cg).All_Node.Points = Connection_All_Point.empty(numel(d.Grid.(cg).All_Node.ids),0);
+d.Grid.(cg).All_Node.Points = Node.empty(numel(d.Grid.(cg).All_Node.ids),0);
 for i=1:numel(d.Grid.(cg).All_Node.ids)
-	d.Grid.(cg).All_Node.Points(i) = Connection_All_Point(sin, d.Grid.(cg).All_Node.ids(i));
+	d.Grid.(cg).All_Node.Points(i) = Node(sin, d.Grid.(cg).All_Node.ids(i));
 end
 % Define Node-Voltage limits:
 d.Grid.(cg).All_Node.Points.define_voltage_limits;
