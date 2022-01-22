@@ -1,5 +1,5 @@
 classdef Node < handle
-	%NODE 
+	%NODE
 	%
     %    E I G E N S C H A F T E N :
 	%
@@ -43,7 +43,7 @@ classdef Node < handle
         Rated_Voltage_phase_earth = [];
     %        Rated voltages phase - phase in V
         Voltage_Limits = [];        
-    %        Voltage limits in %    
+    %        Voltage limits in %      
         Voltage = zeros(1,3);
 	%        aktuelle Spannungswerte. Werden durch OBJ.GET_VOLTAGES_NODE
 	%        aktualisiert mit den Spannungswerten des Knotens OBJ.NODE_ID. 
@@ -62,6 +62,18 @@ classdef Node < handle
 		function obj = Node(sin_ext, node_id_ext)
 			%NODE    Konstruktor der Klasse NODE
 			
+            if  ischar(sin_ext) && strcmpi(sin_ext, 'recreation')
+                obj.Node_ID                   = node_id_ext.Node_ID;
+                obj.Node_Obj                  = node_id_ext.Node_Obj;
+                obj.Node_Name                 = node_id_ext.Node_Name;
+                obj.VoltLevel_ID              = node_id_ext.VoltLevel_ID;
+                obj.Rated_Voltage_phase_phase = node_id_ext.Rated_Voltage_phase_phase;
+                obj.Rated_Voltage_phase_earth = node_id_ext.Rated_Voltage_phase_earth;
+                obj.Voltage_Limits            = node_id_ext.Voltage_Limits;
+                obj.Voltage                   = node_id_ext.Voltage;
+                return;
+            end
+            
 			% ID nodes:
             obj.Node_ID = node_id_ext;
 			% SINCAL Node object
@@ -103,9 +115,10 @@ classdef Node < handle
 			%    genaue Beschreibung fehlt!
 			voltage_limits(1) = 110;   % Default settings 1.1 p.u.
 			voltage_limits(2) = 90;    % Default settings 0.9 p.u.
-            
-			% voltage_limits defined as 2 element matrix
-			% [upper_U_limit  lower_U_limit]
+			voltage_limits(3) = 110;   % Default settings 1.1 p.u.
+			voltage_limits(4) = 90;    % Default settings 0.9 p.u.
+			% voltage_limits defined as 4 element matrix
+			% [upper_U_limit  lower_U_limit  upper_U_limit2   lower_U_limit2]
 			
 			for i = 1:numel(obj)
 				% Check if voltage limits are defined in SINCAL model
@@ -118,10 +131,30 @@ classdef Node < handle
 				if obj(i).Node_Obj.get('Item','ull') ~= 0
 					voltage_limits(2) = obj(i).Node_Obj.get('Item','ull');
 				end
-								
+				
+				if obj(i).Node_Obj.get('Item','uul1') ~= 0
+					voltage_limits(3) = obj(i).Node_Obj.get('Item','uul1');
+				end
+				
+				if obj(i).Node_Obj.get('Item','ull1') ~= 0
+					voltage_limits(4) = obj(i).Node_Obj.get('Item','ull1');
+				end
+				
 				obj(i).Voltage_Limits = voltage_limits;
 				% Voltage limits assigned to object
-                   
+                
+                % Determine if only one voltage limit is set across all nodes (more common than two)
+                % If all uul = uul2 and ull = ull2 are the same, comparison truth values
+                % equal the number of all nodes!
+                if size(voltage_limits,1) == sum(voltage_limits(:,1) == voltage_limits(:,3)) && ...
+                   size(voltage_limits,1) == sum(voltage_limits(:,2) == voltage_limits(:,4))    
+               
+                     obj(i).Number_of_Voltage_Violation_limits = 0;
+                     % Only one limit is defined ... Number_of_Voltage_Violation_limits = 1;
+                else
+                     obj(i).Number_of_Voltage_Violation_limits = 1;
+                     % Two limits are defined ... Number_of_Voltage_Violation_limits = 1;
+                end                     
 			end
 		end
 		

@@ -65,6 +65,18 @@ classdef Node < handle
 		function obj = Node(sin_ext, node_id_ext)
 			%NODE    Konstruktor der Klasse NODE
 			
+            if  ischar(sin_ext) && strcmpi(sin_ext, 'recreation')
+                obj.Node_ID                   = node_id_ext.Node_ID;
+                obj.Node_Obj                  = node_id_ext.Node_Obj;
+                obj.Node_Name                 = node_id_ext.Node_Name;
+                obj.VoltLevel_ID              = node_id_ext.VoltLevel_ID;
+                obj.Rated_Voltage_phase_phase = node_id_ext.Rated_Voltage_phase_phase;
+                obj.Rated_Voltage_phase_earth = node_id_ext.Rated_Voltage_phase_earth;
+                obj.Voltage_Limits            = node_id_ext.Voltage_Limits;
+                obj.Voltage                   = node_id_ext.Voltage;
+                return;
+            end
+            
 			% ID nodes:
             obj.Node_ID = node_id_ext;
 			% SINCAL Node object
