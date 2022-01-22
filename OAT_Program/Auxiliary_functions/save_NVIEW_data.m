@@ -22,6 +22,8 @@ end
 
 handles.NVIEW_Control.OAT_Data_File = file;
 
+handles = process_nat_results_as(handles); % Process results
+
 variables = {};
 if isfield(handles, 'NVIEW_Analysis_Selection')
     variables{end+1} = 'NVIEW_Analysis_Selection';
