@@ -1,4 +1,4 @@
-function handles = online_voltage_analysis(handles)
+function handles = online_voltage_violation_analysis(handles)
 %ON_LINE_VOLTAGE_ANALAYSIS - voltage_analysis
 %    This function represents the body of an anlayzing function for
 %    "on-line" analyzing simulation results within the NAT.
