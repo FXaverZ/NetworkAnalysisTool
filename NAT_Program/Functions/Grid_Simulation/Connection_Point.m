@@ -1,6 +1,10 @@
 classdef Connection_Point < handle
 	%CONNECTION_POINT    Klasse von Netzanschlusspunkten für anschlussfähige Objekte
-	%    Detaillierte Beschreibung fehlt!
+	%    Diese Klasse repräsentiert die Netz-Knoten, an denen aktive
+	%    Elemente (Unit)  angeschlossen werden und bietet die
+	%    entsprechenden Mehtoden, um für jeden Simulationsschritt die für
+	%    die Netzberechnung notwendigen Daten zur Verfügung zu stellen,
+	%    z.B. die akutelle Wirk- und Blindleistung.
 	%    
 	%    K O N S T R U K T O R :
 	%
@@ -48,20 +52,10 @@ classdef Connection_Point < handle
 	%        angeschlossenen SG-Regler mit ihrer Regelaufgabe fertig sind 
 	%            TRUE = alle Regler fertig --> Simulationspunkt fertig berechnet; 
 	%            FALSE = Regler sind noch aktiv und haben noch keinen "stationären"
-	%            Endwert erreicht!
-	%	 'dV_dPdQ'
-	%        [V/W bzw. V/VAr]
-	%        Wert der Abhängigkeit der Spannungsänderung pro Laständerung an diesem
-	%        Knoten. Dabei handelt es sich um eine [6,3] Matrix, da für jede Phase
-	%        sowohl für Wirk- als auch Blindleistung die Spannungsänderung auf allen
-	%        drei Phasen angegeben wird:
-	%                            U_L1         U_L2         U_L3
-	%                P_L1    dU_L1_dP_L1  dU_L2_dP_L1  dU_L3_dP_L1
-	%                Q_L1    dU_L1_dQ_L1  dU_L2_dQ_L1  dU_L3_dQ_L1
-	%                P_L2    dU_L1_dP_L2  dU_L2_dP_L2  dU_L3_dP_L2
-	%                Q_L2    ...
-	%                P_L3 
-	%                Q_L3 	
+	%            Endwert erreicht!	
+    %
+	%    M E T H O D E N :
+    %    
 	
 	% Version:                 1.4.1
 	% Erstellt von:            Franz Zeilinger - 14.01.2013
@@ -114,19 +108,7 @@ classdef Connection_Point < handle
 	%            TRUE = alle Regler fertig --> Simulationspunkt fertig berechnet; 
 	%            FALSE = Regler sind noch aktiv und haben noch keinen "stationären"
 	%            Endwert erreicht!
-		dV_dPdQ = [];
-	%        [V/W bzw. V/VAr]
-	%        Wert der Abhängigkeit der Spannungsänderung pro Laständerung an diesem
-	%        Knoten. Dabei handelt es sich um eine [6,3] Matrix, da für jede Phase
-	%        sowohl für Wirk- als auch Blindleistung die Spannungsänderung auf allen
-	%        drei Phasen angegeben wird:
-	%                            U_L1         U_L2         U_L3
-	%                P_L1    dU_L1_dP_L1  dU_L2_dP_L1  dU_L3_dP_L1
-	%                Q_L1    dU_L1_dQ_L1  dU_L2_dQ_L1  dU_L3_dQ_L1
-	%                P_L2    dU_L1_dP_L2  dU_L2_dP_L2  dU_L3_dP_L2
-	%                Q_L2    ...
-	%                P_L3 
-	%                Q_L3 
+
 	end
 	
 	methods
