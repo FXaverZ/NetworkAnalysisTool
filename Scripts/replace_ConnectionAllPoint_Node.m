@@ -2,10 +2,12 @@ clear;
 
 addpath([pwd, filesep, 'Additional_Resources']);
 addpath([fileparts(pwd),filesep,'NAT_Program',filesep,'Functions',filesep,'Grid_Simulation']);
+addpath([fileparts(pwd),filesep,'NAT_Program',filesep,'Functions',filesep,'Analyzing']);
+
 warning('off','MATLAB:load:variableNotFound');
 %Path of the files with old instances of "Connection_Point_All" to be
 %replaced with "Node"
-replacement_files_path = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Results_mean\03_Merged';
+replacement_files_path = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Results';
 
 fprintf('Starting with conversion...\n')
 
@@ -46,8 +48,9 @@ for i=1:numel(replacement_files)
         'Load_Infeed_Data','-v7.3'),
     fprintf(' done!\n');
     
-    clear 'Grid' 'Load_Infeed_Data' 'Result'
-    
+    clear Grid Load_Infeed_Data Result
+    clear Points NewPoints gridlist j k
 end
+clear replacement_files replacement_files_path i
 warning('on','MATLAB:load:variableNotFound');
 fprintf('finished! \n')
