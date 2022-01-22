@@ -79,8 +79,8 @@ close(check_active_figures);
 delete(hObject);
 % --------------------------------------------------------------------
 
-function menu_exit_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_exit (see GCBO)
+function menu_home_exit_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_home_exit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
  user_response = questdlg('Close NAT result viewer?',...
@@ -92,25 +92,30 @@ function menu_exit_Callback(hObject, eventdata, handles)
          check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
          close(check_active_figures);
          delete(handles.NVIEW_main_gui);
- end       
+ end 
+ 
+ function menu_home_export_oat_results_Callback(hObject, ~, handles)
+% hObject    handle to menu_home_export_oat_results (see GCBO)
+% ~          reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+save_NVIEW_data(hObject,handles)
 
-% --------------------------------------------------------------------
 function menu_help_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_help (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% --------------------------------------------------------------------
 function menu_about_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_about (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
- msgbox(sprintf(['Netzanalyse und Simulationstool result viewer\n',...
-                 'Matej Rejc, UL FE/SIEMENS, 2014']),...
-                 'NVIEW result processing toolbox','help');
+ msgbox(sprintf(['Result viewer for Netzanalysetool NAT\n',...
+                 'Franz Zeilinger, TU Wien/SIEMENS, 2014 - 2022\n',...
+                 'Matej Rejc, UL FE/SIEMENS, 2014\n']),...
+                 'NAT result processing toolbox','help');
  
-function menu_import_nat_results_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_import_nat_results (see GCBO)
+function menu_home_import_nat_results_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_home_import_nat_results (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -198,7 +203,14 @@ switch user_response
            handles = rmfield(handles,'NVIEW_Analysis_Selection');
        end
 end
- guidata(hObject, handles);
+guidata(hObject, handles);
+ 
+ function menu_home_import_oat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_home_import_oat_results (see GCBO)
+% ~          reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+load_NVIEW_data(hObject,handles)
 
  % --------------------------------------------------------------------
 function menu_debug_mode_Callback(hObject, eventdata, handles)
@@ -259,8 +271,8 @@ handles = update_NVIEW_control_panel_simulation_options(handles);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_scen_information_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_scen_information (see GCBO)
+function menu_view_scen_information_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_view_scen_information (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -269,8 +281,8 @@ handles = update_NVIEW_control_panel_simulation_description(handles,'scenario');
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_grid_information_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_grid_information (see GCBO)
+function menu_view_grid_information_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_view_grid_information (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -279,8 +291,8 @@ handles = update_NVIEW_control_panel_simulation_description(handles,'grid');
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_analysis_settings_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_analysis_settings (see GCBO)
+function menu_view_analysis_settings_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_view_analysis_settings (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 

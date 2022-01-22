@@ -12,6 +12,8 @@ handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
 handles.NVIEW_Control.Result_Information_File.Name = [];
 handles.NVIEW_Control.Result_Information_File.Exte = '.mat';
 
+handles.NVIEW_Control.OAT_Data_File = handles.NVIEW_Control.Result_Information_File;
+
 % Add table ID
 handles.System.Graphics.Table = 'Empty';
 
