@@ -14,21 +14,21 @@ for H = 1 : numel(Data_List)
     Table.(Data_List{H}).Values = d.Input_Data.(Data_List{H})/1000;
     switch Data_List{H}
         case 'Households'
-            Table.(Data_List{H}).Description = 'Household active power consumption histogram';
+            Table.(Data_List{H}).Description = 'Active power histogram household consumption';
             Table.(Data_List{H}).RowName =  'Household active power consumption (kW)';
 		% CHANGELOG 1.2, FZ Start
 		case 'LV_Grid_Input'
-			Table.(Data_List{H}).Description = 'Low voltage grid active power consumption histogram';
+			Table.(Data_List{H}).Description = 'Active power histogram low voltage grid consumption';
             Table.(Data_List{H}).RowName =  'Low voltage grid power consumption (kW)';
 		% CHANGELOG 1.2, FZ End
         case 'Solar'
-            Table.(Data_List{H}).Description = 'Solar power plants active power injection histogram';
-            Table.(Data_List{H}).RowName =  'Solar power plants active power injection (kW)';
+            Table.(Data_List{H}).Description = 'Active power histogram solar power injection';
+            Table.(Data_List{H}).RowName =  'Solar power active power injection (kW)';
         case 'El_mobility'
-            Table.(Data_List{H}).Description = 'E-mobility active power consumption histogram';
+            Table.(Data_List{H}).Description = 'Active power histogram E-mobility consumption';
             Table.(Data_List{H}).RowName =  'E-mobility active power consumption (kW)';
         case 'Balance'
-            Table.(Data_List{H}).Description = 'System balance active power histogram';
+            Table.(Data_List{H}).Description = 'Active power histogram System balance';
             Table.(Data_List{H}).RowName =  'System balance active power (kW)';
     end
     Table.(Data_List{H}).ColumnName = d.Control.Simulation_Description.Scenario(:,1);

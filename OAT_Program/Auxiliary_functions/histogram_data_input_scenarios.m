@@ -1,43 +1,55 @@
 function histogram_data_input_scenarios(handles,d,ext_inp)
 
+LineStyle_Shapes{1} = ':'; 
+LineStyle_Shapes{2} = '-'; 
+LineStyle_Shapes{3} = '--';
+
+nBins = 50; % 50 bin histogram!
+
 cs = d.Control.Simulation_Options.Number_of_Scenarios;
-cd = d.Control.Simulation_Options.Number_of_datasets;
-ct = d.Control.Simulation_Options.Timepoints_per_dataset;
-cg = d.Control.Simulation_Description.Variants;
+% cd = d.Control.Simulation_Options.Number_of_datasets;
+% ct = d.Control.Simulation_Options.Timepoints_per_dataset;
+% cg = d.Control.Simulation_Description.Variants;
 
 css = d.Control.Simulation_Description.Scenario(:,1);
 
+Table = ext_inp;
 Data_List = fields(ext_inp);
+Data_List = setdiff(Data_List,'ColumnName');
 for H = 1 : numel(Data_List)
-    clear  nBins binEdges aj bj cj count LineStyle_* b nj binIdx i Hist*
+    clear  binEdges count nj binIdx i
+    Table.(Data_List{H}).Values = zeros(nBins,cs+1);
+    if H == 1 
+        Table.ColumnName{1} = 'Center_Value';
+        for i = 1 : numel(Table.(Data_List{H}).ColumnName)
+             Table.ColumnName{end+1} = Table.(Data_List{H}).ColumnName{i};
+        end
+    end
+    Table.(Data_List{H}) = rmfield(Table.(Data_List{H}),'ColumnName');
     
     % Create histogram
-    nBins = 50; % 50 bin histogram!
-    % Bin edges from 0 to max_edge
-    if strcmp(Data_List{H},'Balance')
-        binEdges = linspace(min(ext_inp.(Data_List{H}).Values(:)),max(ext_inp.(Data_List{H}).Values(:)),nBins+1);
-    else
-        binEdges = linspace(0,max(ext_inp.(Data_List{H}).Values(:)),nBins+1); 
+    [binEdges, cj] = get_binEdges(Data_List{H}, ext_inp.(Data_List{H}).Values(:), nBins);
+    Table.(Data_List{H}).Values(:,1) = cj;
+    Table.(Data_List{H}).Details = ['Bin Size: ',num2str(cj(2)-cj(1)),' kW'];
+    for i = 1 : cs
+        [~,binIdx] = histc(ext_inp.(Data_List{H}).Values(:,i),[binEdges(1:end-1),Inf]); % histc
+        % calculate the number of elements in bins
+        nj = calc_bin_numbers(binIdx,nBins,binEdges);
+        Table.(Data_List{H}).Values(:,i+1) = nj;
     end
-    % Lower edge
-    aj = binEdges(1:end-1);
-    % Higher edge
-    bj = binEdges(2:end);
-    % Center
-    cj = (aj+bj) ./2; % center
+end
 
+for H = 1 : numel(Data_List)
+    clear  binEdges cj count b nj i Hist*
+    
+    % Draw the histograms
+    [~, cj] = get_binEdges(Data_List{H}, ext_inp.(Data_List{H}).Values(:), nBins);
     % Define figure with computer resolution size
     figure('name',ext_inp.(Data_List{H}).Description,'Renderer',handles.System.Graphics.Renderer); hold on; grid on; box on
     set(gcf,'Position',handles.System.Graphics.Screensize);  % Adjust figure to user screensize
     count = 0;
-    LineStyle_Shapes{1} = ':'; LineStyle_Shapes{2} = '-'; LineStyle_Shapes{3} = '--';
     for i = 1 : cs
-        binIdx = [];
-        nj = [];
-        b = [];
-        [~,binIdx] = histc(ext_inp.(Data_List{H}).Values(:,i),[binEdges(1:end-1),Inf]); % histc
-        % calculate the number of elements in bins
-        nj = calc_bin_numbers(binIdx,nBins,binEdges);
+        nj = Table.(Data_List{H}).Values(:,i);
         % Draw histogram
         b=bar(cj,100*nj/sum(nj),'hist');
         if i <= cs/2
@@ -71,9 +83,10 @@ for H = 1 : numel(Data_List)
     set(legend1,'EdgeColor',[1 1 1],...
         'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
     hold off;
+    
     % Append temporary data to gcf - append ID for colorscheme control!
     setappdata(findobj(gcf,'type','figure'),'FigureID','hist');
-  
+    setappdata(findobj(gcf,'type','figure'),'table',Table);
 end
 
 end
@@ -88,4 +101,19 @@ function nj = calc_bin_numbers(binIdx,nBins,binEdges)
             nj(i,1) = sum(binIdx==i);
         end
     end
-end  
+end 
+
+function [binEdges, cj] = get_binEdges(Data_list_entry,values,nBins)
+% Bin edges from 0 to max_edge
+if strcmp(Data_list_entry,'Balance')
+    binEdges = linspace(min(values),max(values),nBins+1);
+else
+    binEdges = linspace(0,max(values),nBins+1);
+end
+% Lower edge
+aj = binEdges(1:end-1);
+% Higher edge
+bj = binEdges(2:end);
+% Center
+cj = (aj+bj) ./2; % center
+end

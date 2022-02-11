@@ -39,6 +39,8 @@ figure_data_id{28,1} = 'Total_Voltage_Max_Timeline_Scen';
 figure_data_id{29,1} = 'Voltage_Max_Timeline_Grid';
 figure_data_id{30,1} = 'Voltage_Max_Timeline_Scen';
 
+figure_data_id{31,1} = 'Active_Power_Histogramm';
+
 
 % function menu_load_analysis_all_Callback
 figure_name = get(active_figure,'Name');
@@ -105,6 +107,8 @@ elseif strncmp(figure_name,'Voltage maximum values timelines for grid ',42)
 	output = 29;
 elseif strncmp(figure_name,'Voltage maximum values timelines for scenario ', 46)
 	output = 30;
+elseif strncmp(figure_name,'Active power histogram ', 23)
+	output = 31;
 end
 
 if ~isempty(output)

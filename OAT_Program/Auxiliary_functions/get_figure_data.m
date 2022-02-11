@@ -59,9 +59,12 @@ for i = 1 :  numel(check_active_figures)
                     Table_rf.Description = [Table_rf.Description(1:28),'...'];
                 end
                 
-                Table_rf.Values = cell(3,size(Table.(Data_List{j}).Values,2)); % Descriptionm, Row
+                Table_rf.Values = cell(3,size(Table.(Data_List{j}).Values,2)); % Description, Row, Details
                 Table_rf.Values{1,1} = Table.(Data_List{j}).Description;
                 Table_rf.Values{2,1} = Table.(Data_List{j}).RowName;
+                if isfield(Table.(Data_List{j}), 'Details')
+                    Table_rf.Values{3,1} = Table.(Data_List{j}).Details; 
+                end
                 Table_rf.Values = [Table_rf.Values; RowID; num2cell(Table.(Data_List{j}).Values)];
                 
                 write_figure_to_excel(handles,Table_rf,file);
