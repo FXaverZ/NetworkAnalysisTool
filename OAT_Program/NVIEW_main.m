@@ -1294,3 +1294,11 @@ handles = call_current_violation_time_graph(handles,6);
 handles = call_current_violation_time_graph(handles,8);
 % Update handles structure
 guidata(hObject, handles);
+
+
+% --------------------------------------------------------------------
+function menu_home_merge_nat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_home_merge_nat_results (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+merge_nat_results(hObject, handles)
