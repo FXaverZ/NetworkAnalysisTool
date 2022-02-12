@@ -24,3 +24,9 @@ if exist(handles.System.Export_Path,'dir') == 0
     mkdir(handles.System.Export_Path);
 end
 
+% Log-Path
+Files.Save.Log.Path = [handles.System.Main_Path,filesep,'Log'];
+Files.Save.Log.Name = 'NVIEW_Main_Log';
+Files.Save.Log.Exte = '.log';
+
+handles.System.Files = Files;
