@@ -2,6 +2,14 @@ function save_NVIEW_data(hObject,handles)
 %SAVE_NVIEW_DATA Summary of this function goes here
 %   Detailed explanation goes here
 
+handles = update_NVIEW_control_panel(handles, 'Saving OAT Data, please wait...\n', 'clear');
+
+if ~isfield(handles, 'NVIEW_Results')
+    handles = refresh_display_NVIEW_main_gui(handles);
+    guidata(hObject, handles);
+    return
+end
+
 sep = ' - ';
 titlestr = 'Saving OAT Data File...';
 % Set default location for UI get file to open at (handles >> System)
@@ -21,17 +29,13 @@ if isequal(file.Path,0)
     % If file is invalid, exit this function and update display of main window    
     % Update detail result panel with error information, not yet implemented
     % Update handles structure
+    handles = refresh_display_NVIEW_main_gui(handles);
 	guidata(hObject, handles);
 	return;
 end
-
 handles.NVIEW_Control.OAT_Data_File = file;
 
-% load the OAT data of the file...
-handles = update_NVIEW_control_panel(handles, 'Saving OAT Data, please wait...\n', 'clear');
-
 filename_add = [sep,'000'];
-
 % make a subfolder
 if ~isfolder([file.Path,filesep,result_Name,filename_add])
     mkdir([file.Path,filesep,result_Name,filename_add])
@@ -58,12 +62,17 @@ else
                 end
                 new_filename_add_number = new_filename_add_number + 1;
             end
+        case 'Cancel'
+            handles = refresh_display_NVIEW_main_gui(handles);
+            guidata(hObject, handles);
+            return
     end
 end
 % copy the settings file and the corresponding log-file in the new
 % directory for later reference:
 copyfile([sourcefile.Path,filesep,sourcefile.Name,sourcefile.Exte],[file.Path,filesep,result_Name,filename_add]);
 copyfile([sourcefile.Path,filesep,result_Name,sep,'Log.log'],[file.Path,filesep,result_Name,filename_add]);
+
 
 [~, infostr] = update_NVIEW_control_panel_simulation_options(handles);
 infostr = sprintf([...

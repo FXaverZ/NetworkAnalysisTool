@@ -41,7 +41,10 @@ button = questdlg({...
 
 if strcmp(button,'No')
     mh.add_line('Canceled by user.');
-    refresh_message_text_operation_finished (handles);
+    mh.reset_level();
+    mh.divider('- ');
+    mh.reset_sub_logs();
+    mh.reset_all_display_marker();
     return;
 end
 
