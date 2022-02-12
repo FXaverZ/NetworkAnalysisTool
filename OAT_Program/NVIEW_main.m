@@ -456,53 +456,68 @@ for i = 1 :  numel(check_active_figures)
 end
 guidata(hObject, handles);
 
+function pushtool_Resize_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to pushtool_Resize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Screensize = change_screensize(handles);
+handles.System.Graphics.Screensize = Screensize;
+check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
 
-% --------------------------------------------------------------------
-function pushtool_SaveFig_ClickedCallback(hObject, eventdata, handles)
+for i = 1 : numel(check_active_figures)
+    set(check_active_figures(i),'Position',Screensize);
+end
+guidata(hObject, handles);
+
+function pushtool_SaveFig_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to pushtool_SaveFig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
-file_format_1 = 'emf'; % Enhanced meta file
+handles = update_NVIEW_control_panel(handles, 'Saving figures, please wait...\n', 'clear');
 
-%Changelog 1.5 FZ Start
+check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
+
+file_format_1 = 'emf'; % Enhanced meta file
 file_format_2 = 'png'; % "Thumbnail" for quick checking of contents of figures...
-%Changelog 1.5 FZ End
+
 
 for i = 1 : numel(check_active_figures)
-    Figure_Name = [];
     Figure_Name = [strrep(handles.NVIEW_Control.Result_Information_File.Name,' - Settings','_'),...
                    get(check_active_figures(i),'name')];
-    
     % Shorten names
     Figure_Name = strrep(Figure_Name, 'percentage', 'perc');
     Figure_Name = strrep(Figure_Name, 'affected','aff');
     Figure_Name = strrep(Figure_Name, 'voltage','volt');
     Figure_Name = strrep(Figure_Name, 'violations','viol');
-	
-	%Changelog 1.5 FZ Start
 	Figure_Name = strrep(Figure_Name, 'violation','viol');
 	Figure_Name = strrep(Figure_Name, 'currents','curr');
 	Figure_Name = strrep(Figure_Name, 'current','curr');
 	Figure_Name = strrep(Figure_Name, 'Current','Curr');
 	Figure_Name = strrep(Figure_Name, 'histogram','hist');
-% 	if ~isempty(strfind(Figure_Name,'hist'))
-% 		Figure_Name = [Figure_Name,'_',num2str(i)];
-% 	end
-	%Changelog 1.5 FZ End
-    
 	Figure_Name = strrep(Figure_Name, ' ', '_');
-	%Changelog 1.5 FZ Start
+	
     Figure_Name_1 = [Figure_Name,'.',file_format_1];
 	Figure_Name_2 = [Figure_Name,'.',file_format_2];
+    
     % Add filepath to file name
     Figure_Name = [handles.System.Export_Path,filesep,Figure_Name_1];    
     saveas(check_active_figures(i),Figure_Name,file_format_1)
 	Figure_Name = [handles.System.Export_Path,filesep,Figure_Name_2]; 
 	saveas(check_active_figures(i),Figure_Name,file_format_2)
-	%Changelog 1.5 FZ End
 end
+handles = refresh_display_NVIEW_main_gui(handles);
+guidata(hObject, handles);
+
+function pushtool_SaveFigData_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to pushtool_SaveFigData (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = get_figure_data(handles);
+handles = refresh_display_NVIEW_main_gui(handles);
+helpdlg('The plot(s) were succesfully saved!','Save plots...');
+guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function pushtool_OpenExcel_ClickedCallback(hObject, eventdata, handles)
@@ -728,20 +743,6 @@ handles = process_nat_results_as(handles); % Process results
 guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,4);
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
-function pushtool_Resize_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to pushtool_Resize (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-Screensize = change_screensize(handles);
-handles.System.Graphics.Screensize = Screensize;
-check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
-
-for i = 1 : numel(check_active_figures)
-    set(check_active_figures(i),'Position',Screensize);
-end
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -1094,16 +1095,6 @@ guidata(hObject, handles);
 handles = call_electric_losses_time_graph(handles,4);
 guidata(hObject, handles);
 
-% --------------------------------------------------------------------
-function pushtool_SaveFigData_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to pushtool_SaveFigData (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-handles = get_figure_data(handles);
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
 function show_list_nodes_violated_Callback(hObject, eventdata, handles)
 % hObject    handle to show_list_nodes_violated (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
