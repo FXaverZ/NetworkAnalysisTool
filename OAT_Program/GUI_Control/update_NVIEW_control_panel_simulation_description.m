@@ -5,7 +5,7 @@ if isfield(handles.NVIEW_Control,'Simulation_Description')
     switch option
         case 'scenario'            
             % Update static text result details - NVIEW Content panel
-            set(handles.static_text_result_details, 'String','');            
+            set(handles.static_text_result_details, 'String','','FontName','MS Sans Serif');            
             static_text_result_details = [];
             
             static_text_result_details = ...
@@ -15,11 +15,11 @@ if isfield(handles.NVIEW_Control,'Simulation_Description')
                 static_text_result_details{i,1}= [int2str(i-1),': ', static_text_result_details{i,1}];
             end
             
-            set(handles.static_text_result_details, 'String', static_text_result_details)
+            set(handles.static_text_result_details, 'String', static_text_result_details,'FontName','MS Sans Serif')
             
         case 'grid'
              % Update static text result details - NVIEW Content panel
-            set(handles.static_text_result_details, 'String','');            
+            set(handles.static_text_result_details, 'String','','FontName','MS Sans Serif');            
             static_text_result_details = [];
             % Currently, no grid information exists, only use names of grid
             % (first column)
@@ -29,7 +29,7 @@ if isfield(handles.NVIEW_Control,'Simulation_Description')
             for i = 2 : size(static_text_result_details,1)
                 static_text_result_details{i,1}= [int2str(i-1),': ', static_text_result_details{i,1}];
             end
-            set(handles.static_text_result_details, 'String', static_text_result_details)
+            set(handles.static_text_result_details, 'String', static_text_result_details,'FontName','MS Sans Serif')
             
     end
 end

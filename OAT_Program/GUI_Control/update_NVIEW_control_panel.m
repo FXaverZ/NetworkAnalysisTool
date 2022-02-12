@@ -11,7 +11,7 @@ if strcmpi(append_strategy, 'append')
     new_text = [old_text_oneline,text];
     text = new_text;
 elseif strcmpi(append_strategy, 'clear')
-    set(handles.static_text_result_details, 'String','');
+    set(handles.static_text_result_details, 'String','','FontName','MS Sans Serif');
 else
     error('Unknown append strategy.')
 end

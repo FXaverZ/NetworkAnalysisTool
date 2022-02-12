@@ -10,7 +10,7 @@ if isempty(handles.NVIEW_Control.Result_Information_File.Name)
     set(handles.static_text_import_results, 'String', 'No result information file loaded!');
     % NVIEW Content panel default display and empty text
     set(handles.panel_result_details,'Title','OAT Content Panel');
-    set(handles.static_text_result_details, 'String','');
+    set(handles.static_text_result_details, 'String','','FontName','MS Sans Serif');
     
 else
     % Static text import results display
