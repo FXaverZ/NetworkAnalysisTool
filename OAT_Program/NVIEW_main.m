@@ -3,7 +3,7 @@
 
 % Version:                 1.1
 % Erstellt von:            Matej Rejc       - 29.01.2013
-% Letzte Änderung durch:   Matej Rejc       - 29.04.2013
+% Letzte Änderung durch:   Franz Zeilinger  - 12.02.2022
 
 function varargout = NVIEW_main(varargin)
 % Begin initialization code - DO NOT EDIT

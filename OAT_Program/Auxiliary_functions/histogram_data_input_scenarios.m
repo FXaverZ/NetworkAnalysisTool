@@ -49,7 +49,7 @@ for H = 1 : numel(Data_List)
     set(gcf,'Position',handles.System.Graphics.Screensize);  % Adjust figure to user screensize
     count = 0;
     for i = 1 : cs
-        nj = Table.(Data_List{H}).Values(:,i);
+        nj = Table.(Data_List{H}).Values(:,i+1);
         % Draw histogram
         b=bar(cj,100*nj/sum(nj),'hist');
         if i <= cs/2
