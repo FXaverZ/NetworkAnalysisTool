@@ -1,8 +1,8 @@
 clear;
 
 addpath([pwd, filesep, 'Additional_Resources']);
-addpath([fileparts(pwd),filesep,'NAT_Program',filesep,'Functions',filesep,'Grid_Simulation']);
-addpath([fileparts(pwd),filesep,'NAT_Program',filesep,'Functions',filesep,'Analyzing']);
+addpath([fileparts(pwd),filesep,'NAT_Common',filesep,'Grid_Representation']);
+addpath([fileparts(pwd),filesep,'NAT_Common',filesep,'Analyzing']);
 
 warning('off','MATLAB:load:variableNotFound');
 %Path of the files with old instances of "Connection_Point_All" to be
