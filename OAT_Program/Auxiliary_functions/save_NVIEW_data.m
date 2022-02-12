@@ -52,8 +52,6 @@ save([file.Path,filesep,'Res_',simdate,' - OAT-Data'],variables{:},'-v7.3')
 % Inform the user:
 str = 'Data successfully saved!';
 helpdlg(str, 'Saving OAT Data File...');
-mh.add_line(str);
-
 
 handles = refresh_display_NVIEW_main_gui(handles);
 

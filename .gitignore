@@ -3,6 +3,7 @@
 *.mat
 *.cfg
 *.emf
+*.png
 *.xls
 *.tmp
 *.lnk
