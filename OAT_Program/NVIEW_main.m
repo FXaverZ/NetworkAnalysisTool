@@ -103,118 +103,14 @@ function menu_home_exit_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 save_NVIEW_data(hObject,handles)
 
-function menu_help_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_help (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
 function menu_about_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_about (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
  msgbox(sprintf(['Result viewer for Netzanalysetool NAT\n',...
-                 'Franz Zeilinger, TU Wien/SIEMENS, 2014 - 2022\n',...
-                 'Matej Rejc, UL FE/SIEMENS, 2014\n']),...
+                 'Franz Zeilinger, TU Wien / SIEMENS, 2014 - 2022\n',...
+                 'Matej Rejc, UL FE / SIEMENS, 2014\n']),...
                  'NAT result processing toolbox','help');
- 
-function menu_home_import_nat_results_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_home_import_nat_results (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Clear NVIEW Control and Result fields
-handles = get_default_values_NVIEW(handles);
-handles = refresh_display_NVIEW_main_gui (handles);
-
-% Clear NVIEW_Results if existing
-if isfield(handles,'NVIEW_Results')
-    handles = rmfield(handles,'NVIEW_Results');
-end
-if isfield(handles,'NVIEW_Processed')
-    handles = rmfield(handles,'NVIEW_Processed');
-end
-if isfield(handles,'NVIEW_Analysis_Selection')
-    handles = rmfield(handles,'NVIEW_Analysis_Selection');
-end
-
-% Clear table if existing
-if isfield(handles,'table_results')
-    set(handles.table_results,'Visible','off');
-    set(handles.table_results,'Data',[])
-    set(handles.table_results,'ColumnName',[],'RowName',[])
-end
-
-% Set default location for UI get file to open at (handles >> System)
-handles.NVIEW_Control.Result_Information_File.Path = handles.System.Main_Path;
-
-% Select NAT result file
-file = handles.NVIEW_Control.Result_Information_File;
-% Open UI window and select result information file
-[file.Name,file.Path] = uigetfile([...
-	{'*.mat','*.mat result information MAT-file'};...
-	{'*.*','All files'}],...
-	'Load result information data...',...
-	[file.Path,filesep]);
-% Check whether an invalid location has been specified:
-if isequal(file.Name,0) || isequal(file.Path,0)  
-    % If file is invalid, exit this function and update display of main window    
-    % Update detail result panel with error information, not yet implemented
-    % Update handles structure
-	guidata(hObject, handles);
-	return;
-end
-
-% Selected file and location are valid.
-[~, file.Name, file.Exte] = fileparts(file.Name);
-% Remove backslash from folder name
-file.Path = file.Path(1:end-1);
-% Update NVIEW settings result information
-handles.NVIEW_Control.Result_Information_File = file;
-
-% Load result information database
-handles = load_result_information(handles);
-% Convert unprocessed NAT results to NVIEW results
-% Update GUI display with new values
-handles = refresh_display_NVIEW_main_gui(handles);
-% Update handles structure
-
-% select user response and act accordingly
-user_response = questdlg(sprintf([...
-    'The program must convert NAT results to NVIEW for result analysis.\n\n',...
-    'Do you want to open the NAT result file?']),...
-    'NVIEW Result Processing', 'Ok','Cancel','Ok');
-switch user_response
-   case 'Ok'
-       handles = update_NVIEW_control_panel_busy(handles);
-       [handles,NVIEW_Results,~] = convert_nat_results_to_nview(handles);
-       handles.NVIEW_Results = NVIEW_Results;
-       handles = set_default_analysis_selection(handles);
-       
-       % Refresh display
-       handles = refresh_display_NVIEW_main_gui (handles);
-
-   case 'Cancel'
-       handles = get_default_values_NVIEW(handles);
-       handles = refresh_display_NVIEW_main_gui (handles);
-       % Clear NVIEW_Results if existing
-       if isfield(handles,'NVIEW_Results')
-           handles = rmfield(handles,'NVIEW_Results');
-       end
-       if isfield(handles,'NVIEW_Processed')
-           handles = rmfield(handles,'NVIEW_Processed');
-       end       
-       if isfield(handles,'NVIEW_Analysis_Selection')
-           handles = rmfield(handles,'NVIEW_Analysis_Selection');
-       end
-end
-guidata(hObject, handles);
- 
- function menu_home_import_oat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
-% hObject    handle to menu_home_import_oat_results (see GCBO)
-% ~          reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-load_NVIEW_data(hObject,handles)
 
  % --------------------------------------------------------------------
 function menu_debug_mode_Callback(hObject, eventdata, handles)
@@ -365,6 +261,30 @@ guidata(hObject, handles);
 % Write to Excel
 handles = write_to_excel(handles);
 guidata(hObject, handles);
+
+function menu_help_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    handle to menu_help (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+function menu_home_import_nat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_home_import_nat_results (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = get_default_values_NVIEW(handles);
+handles = refresh_display_NVIEW_main_gui (handles);
+
+handles = import_nat_results(handles,'UserInput',true);
+
+guidata(hObject, handles);
+ 
+ function menu_home_import_oat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_home_import_oat_results (see GCBO)
+% ~          reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+load_NVIEW_data(hObject,handles)
 
 % --------------------------------------------------------------------
 function pushtool_CloseFig_ClickedCallback(hObject, eventdata, handles)

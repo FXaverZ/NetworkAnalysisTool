@@ -48,6 +48,22 @@ if strcmp(button,'No')
     return;
 end
 
+button = questdlg('Should the merged results be directly loaded into the OAT?',...
+    title_str,'Yes','No','Yes');
+switch button
+    case 'Yes'
+        load_after_merge = true;
+    case 'No'
+        load_after_merge = false;
+    otherwise
+        mh.add_line('Canceled by user.');
+        mh.reset_level();
+        mh.divider('- ');
+        mh.reset_sub_logs();
+        mh.reset_all_display_marker();
+        return;
+end
+
 % Ask user for path of the folder containing the resultfolder to be merged:
 Main_Path = uigetdir(handles.System.Main_Path,...
     'Selcet folder containing the results to be merged...');
@@ -467,13 +483,14 @@ Current_Settings.Files.Grid = Files_Grid;
 Current_Settings.Files.Save.Result.Simdate = simdate;
 
 % Save the Current_Settings
-filename = ['Res_',simdatestr,' - Settings.mat'];
-mh.add_line('Saving settings in "',filename,'"');
-save([Merge_Save_Path,filesep,filename],'Current_Settings','-v7.3');
+filename = ['Res_',simdatestr,' - Settings'];
+mh.add_line('Saving settings in "',filename,'.mat"');
+save([Merge_Save_Path,filesep,filename,'.mat'],'Current_Settings','-v7.3');
 
 % Inform the user:
 str = 'NAT results data successfully merged!';
-helpdlg(str, title_str);
+
+
 mh.add_line(str);
 mh.reset_level();
 mh.divider('- ');
@@ -483,6 +500,16 @@ mh.reset_all_display_marker();
 
 % load the OAT data of the file...
 handles = update_NVIEW_control_panel(handles, str, 'clear');
+
+if load_after_merge
+    handles.NVIEW_Control.Result_Information_File.Name = filename;
+    handles.NVIEW_Control.Result_Information_File.Path = Merge_Save_Path;
+    handles = import_nat_results(handles, 'UserInput', false);
+    handles = process_nat_results_as(handles); % Process results
+    helpdlg('NAT results data successfully merged and loaded into OAT!', title_str);
+else
+    helpdlg(str, title_str);
+end
 
 % update GUI:
 handles = refresh_display_NVIEW_main_gui(handles);
