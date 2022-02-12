@@ -507,6 +507,7 @@ for i = 1 : numel(check_active_figures)
 	saveas(check_active_figures(i),Figure_Name,file_format_2)
 end
 handles = refresh_display_NVIEW_main_gui(handles);
+helpdlg('The plot(s) were succesfully saved!','Save plots...');
 guidata(hObject, handles);
 
 function pushtool_SaveFigData_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
@@ -516,7 +517,6 @@ function pushtool_SaveFigData_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
 
 handles = get_figure_data(handles);
 handles = refresh_display_NVIEW_main_gui(handles);
-helpdlg('The plot(s) were succesfully saved!','Save plots...');
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
