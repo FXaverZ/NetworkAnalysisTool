@@ -51,6 +51,8 @@ Path = fileparts(Source_File.Name);
 % können)
 addpath(genpath(Path));
 handles.Current_Settings.Files.Main_Path = Path;
+% Add path to common functions
+addpath(genpath([fileparts(Path),filesep,'NAT_Common']));
 
 % Restliche OpeningFcn
 NAT_main_OpeningFcn_Impl(hObject, handles, varargin);

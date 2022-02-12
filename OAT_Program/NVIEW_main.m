@@ -38,10 +38,13 @@ if ischar(Source_File)
 	return;
 end
 
-% Add path to program
 Path = fileparts(Source_File.Name);
-addpath(genpath(Path));
 handles.System.Main_Path = Path;
+% Add path to program
+addpath(genpath(Path));
+% Add path to common functions
+addpath(genpath([fileparts(Path),filesep,'NAT_Common']));
+
 
 % Set default settings >> default settings are defined in "get_default_values_NVIEW"
 handles.NVIEW_Control = [];

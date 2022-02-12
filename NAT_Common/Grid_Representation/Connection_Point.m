@@ -135,11 +135,10 @@ classdef Connection_Point < handle
 			% aktualisieren sowie dies in OBJ.POWERS_CHANGED festhalten:
 			for i=1:numel(obj_s)
 				p_q = obj_s(i).P_Q_Act(obj_s(i).P_Q_Act_active,:);
-				p_q = sum(p_q,1);
-%                 d.Debug.(cg).P_Q_Input_tot(cd,ct,i,:) = p_q;             
+                p_q = sum(p_q,1);
                 obj_s(i).P_Q_Obj.set('Item','P1',p_q(1));
-				obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
-				obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
+                obj_s(i).P_Q_Obj.set('Item','Q1',p_q(2));
+                obj_s(i).P_Q_Obj.set('Item','P2',p_q(3));
 				obj_s(i).P_Q_Obj.set('Item','Q2',p_q(4));
 				obj_s(i).P_Q_Obj.set('Item','P3',p_q(5));
 				obj_s(i).P_Q_Obj.set('Item','Q3',p_q(6));

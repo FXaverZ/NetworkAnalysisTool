@@ -1,4 +1,3 @@
-% -- changelog v1.1b ##### (start) // 20130423
 classdef Node < handle
 	%NODE
 	%
@@ -43,10 +42,10 @@ classdef Node < handle
     %        Rated voltages phase - earth in V, used for unsym. LF
         Rated_Voltage_phase_earth = [];
     %        Rated voltages phase - phase in V
-        Voltage_Limits = [];        
-    %        Voltage limits in %    
+        Voltage_Limits = [];
+    %        Voltage limits in %
         Number_of_Voltage_Violation_limits
-    %        Number of voltage limits (1 or 2)    
+    %        Number of voltage limits (1 or 2)
         Voltage = zeros(1,3);
 	%        aktuelle Spannungswerte. Werden durch OBJ.GET_VOLTAGES_NODE
 	%        aktualisiert mit den Spannungswerten des Knotens OBJ.NODE_ID. 
