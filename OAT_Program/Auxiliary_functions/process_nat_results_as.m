@@ -20,7 +20,7 @@ end
   end
 
 % Busy display
-handles = update_NVIEW_control_panel_busy(handles);
+handles = update_NVIEW_control_panel(handles, 'Processing analysis, please wait...\n', 'clear');
 
 % Transfer from handles
 NVIEW_Control = handles.NVIEW_Control;

@@ -4,7 +4,6 @@ check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
 active_figures_log = 0;
 noexportpossible_graphs = {};
 title_str = 'Save plot data...';
-% load the OAT data of the file...
 handles = update_NVIEW_control_panel(handles, 'Saving figure data, please wait...\n', 'clear');
 
 for i = 1 :  numel(check_active_figures)
