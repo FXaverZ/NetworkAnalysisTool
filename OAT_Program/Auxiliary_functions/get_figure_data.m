@@ -3,6 +3,10 @@ function handles = get_figure_data(handles)
 check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
 active_figures_log = 0;
 noexportpossible_graphs = {};
+title_str = 'Save plot data...';
+% load the OAT data of the file...
+handles = update_NVIEW_control_panel(handles, 'Saving figure data, please wait...\n', 'clear');
+
 for i = 1 :  numel(check_active_figures)
     % Get figure table
     Table = getappdata(findobj(check_active_figures(i),'type','figure'),'table');
@@ -81,9 +85,13 @@ if (numel(noexportpossible_graphs) > 0)
     for i=1:numel(noexportpossible_graphs)
         helptext{end+1} = ['   - "',noexportpossible_graphs{i},'"']; %#ok<AGROW>
     end
+    helptext{end+1} = '';
     helptext{end+1} = 'cannot be saved to Excel!';
     helptext{end+1} = '';
     helptext{end+1} = 'If the plot(s) is a (are) histogram(s), the data is available in the summary Excel-file!';
-    
-    helpdlg(helptext,'Save plot data...');
+    helptext{end+1} = 'All other plots were saved succesfully!';
+else
+    helptext = {'The data of the plot(s) was succesfully saved!'};
+end
+helpdlg(helptext,title_str);
 end

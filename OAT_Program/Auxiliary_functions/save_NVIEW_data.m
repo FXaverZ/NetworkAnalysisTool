@@ -49,6 +49,12 @@ handles = update_NVIEW_control_panel(handles, 'Saving OAT Data, please wait...\n
 simdate = datestr(now,'yyyy-mm-dd_HH-MM-SS');
 save([file.Path,filesep,'Res_',simdate,' - OAT-Data'],variables{:},'-v7.3')
 
+% Inform the user:
+str = 'Data successfully saved!';
+helpdlg(str, 'Saving OAT Data File...');
+mh.add_line(str);
+
+
 handles = refresh_display_NVIEW_main_gui(handles);
 
 guidata(hObject, handles);
