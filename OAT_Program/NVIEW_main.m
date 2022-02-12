@@ -363,18 +363,6 @@ handles = write_to_excel(handles);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_export_analysis_to_nview_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_export_analysis_to_nview (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles = process_nat_results_as(handles); % Process results
-% Update handles structure
-guidata(hObject, handles);
-% Write to matlab
-handles = write_to_nview(handles);
-guidata(hObject, handles);
-
-% --------------------------------------------------------------------
 function pushtool_CloseFig_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to pushtool_CloseFig (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
