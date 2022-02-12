@@ -51,7 +51,7 @@ handles = get_default_values_NVIEW(handles);
 handles = refresh_display_NVIEW_main_gui(handles);
 
 % Update content panel title
-set(handles.panel_result_details,'Title','NVIEW Content Panel');
+set(handles.panel_result_details,'Title','OAT Content Panel');
 % SIEMENS-Logo set to nview_axes_logo:
 logo=imread('Figures\Siemens_Logo.jpg','jpg');   % Einlesen der Grafik
 % logo=imread('Figures\institutslogo.jpg','jpg');

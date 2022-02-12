@@ -1,4 +1,4 @@
-function handles = reset_display_nview_main_gui(handles)
+function handles = refresh_display_NVIEW_main_gui(handles)
 %reset_display_nview_main_gui    
 
 Limit_static_text_display_charsize = 60; % Default: 40
@@ -9,7 +9,7 @@ if isempty(handles.NVIEW_Control.Result_Information_File.Name)
     % static_text_import_results default display
     set(handles.static_text_import_results, 'String', 'No result information file loaded!');
     % NVIEW Content panel default display and empty text
-    set(handles.panel_result_details,'Title','NVIEW Content Panel');
+    set(handles.panel_result_details,'Title','OAT Content Panel');
     set(handles.static_text_result_details, 'String','');
     
 else
