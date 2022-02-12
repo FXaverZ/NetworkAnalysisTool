@@ -70,7 +70,7 @@ set(gca,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize
 xlabel(HistXLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
 ylabel(HistYLabel,'FontName','Times New Roman','FontSize',handles.System.Graphics.FontSize);
 legend1 = legend(HistLegend,'Location','SouthEast');
-set(legend1,'EdgeColor',[1 1 1],'YColor',[1 1 1],'XColor',[1 1 1],...
+set(legend1,'EdgeColor',[1 1 1],...
     'FontName','Times New Roman','Fontsize',handles.System.Graphics.FontSize,'box','off');
 hold off;
 xlim([min(min(Table.Values)),max(max(Table.Values))])
