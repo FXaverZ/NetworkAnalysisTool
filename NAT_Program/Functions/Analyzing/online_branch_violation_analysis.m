@@ -60,10 +60,11 @@ transf_apparent_power = vertcat(d.Grid.(cg).Branches.Transf.Apparent_Power);
 
 
 if ~isempty(line_currents)     
-     % branch_violation_check for lines
+     % branch_violation_check for lines with 1st thermal limit defined
+     % "line_current_limits(:,1)"
      branch_violation_check_lines  = ...
          1*( max(line_currents(:,1:3),[],2) >...
-         d.Simulation.Branch_Violation_analysis.line_current_limits);      
+         d.Simulation.Branch_Violation_analysis.line_current_limits(:,1));      
      % Checks the maximum current in the three phases, if any phase is
      % overloaded, branch violation occurs! 
 else
@@ -74,10 +75,12 @@ if ~isempty(transf_apparent_power)
     % Branch violation check for transformers
     % Reminder: Current limits are single phase values, while apparent
      % power limits are threephase equiv. values! Important for transf.
-     % checking, since that uses apparent power!
+     % checking, since that uses apparent power! Use first rated thermal
+     % "transf_app_power_limits(:,1)"
+     % power (
      branch_violation_check_transf  = ...
         1*( sum(transf_apparent_power(:,1:3),2) >...
-        d.Simulation.Branch_Violation_analysis.transf_app_power_limits);     
+        d.Simulation.Branch_Violation_analysis.transf_app_power_limits(:,1));     
 else
     branch_violation_check_transf = [];
 end
