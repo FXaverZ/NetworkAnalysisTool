@@ -10,15 +10,15 @@ Simulation = handles.Current_Settings.Simulation;
 scen_count = 0;
 
 % Similar Values for all Scenarios:
-Solar.Power_sgl_dev = 10;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
+Solar.Power_sgl_dev = 20;       % Standardabweichung der Anlagenleistung [% vom Mittelwert]
 Solar.mean_Orientation = 0;     % mittlere Ausrichtung der Anlagen [°] (0° = Süd; -90° = Ost)
-Solar.dev_Orientation = 5;      % Standardabweichung der Ausrichtung [°]
+Solar.dev_Orientation = 15;      % Standardabweichung der Ausrichtung [°]
 Solar.mean_Inclination = 30;    % mittlere Neigung der Anlagen [°] (0° = Waagrecht; 90° = Senkrecht)
-Solar.dev_Inclination = 5;      % Standardabweichung der Neigung [°]
+Solar.dev_Inclination = 15;      % Standardabweichung der Neigung [°]
 Solar.Performance_Ratio = 0.62; % mittlere Betriebsbedingungen der Photovoltaikanlage [-]
-Solar.dev_Performance_Ratio = 5;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
+Solar.dev_Performance_Ratio = 15;% Standardabweichung der Betriebsbedingungen [% vom Mittelwert]
 Solar.Efficiency = 0.12;        % mittlerer Wirkungsgrad Zelle + WR [-]
-Solar.dev_Efficiency = 5;       % Standardabweichung des Wirkungsgrad [% vom Mittelwert]
+Solar.dev_Efficiency = 15;       % Standardabweichung des Wirkungsgrad [% vom Mittelwert]
 
 %====================================================================================
 %                       S z e n a r i e n d e f i n i t i o n :
