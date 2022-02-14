@@ -2,12 +2,16 @@
 % profiles were allocated correctly...
 
 Saved_OAT_Data = [];
+% laodInfeedDataPath = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+laodInfeedDataPath = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 %% show the first three sets of each input dataset
-folders = dir('C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios\');
+folders = dir(laodInfeedDataPath);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
 figure; tiledlayout(5,3);
+
+show_power_sum = true;
 
 scen_sel = {
 	4, '04_S1_LowLoadHighInfeed_Summer_Workda';...
@@ -25,13 +29,15 @@ loadtype = 'Solar';
 for i = 1: numel(folders)
 	nexttile;
 	for j = 1 : size(scen_sel,1)
-		load(['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios\',folders{i},'\',scen_sel{j,2},'.mat']);
+		load([laodInfeedDataPath,filesep,folders{i},'\',scen_sel{j,2},'.mat']);
 		Data = [];
 		for k = 1 : num_profiles
 			Data = [Data;...
 				Load_Infeed_Data.(['Set_',num2str(k)]).(loadtype).Data_Mean]; %#ok<AGROW>
 		end
-		Data = sum(Data,2);
+		if show_power_sum
+			Data = sum(Data,2);
+		end
 		plot(Data);
 		drawnow;
 		if j <=1
