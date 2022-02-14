@@ -45,7 +45,9 @@ classdef Branch < handle
         Number_of_Branch_Violation_limits
     %        Number of branch limits (0 or 1)   
         Current = zeros(1,4); 
-    %        Currents (from node to element) [L1 L2 L3 LE?]        
+    %        Currents (from node to element) [L1 L2 L3 LE?]  
+	    Current_to = zeros(1,8);
+    %        Currents (from node to element) [I1 I2 I3 Ie phiI1 phiI2 phiI3 cos_phie] 
         Active_Power = zeros(1,4); 
     %        Active Power (from node to element) [L1 L2 L3 LE?]    
         Reactive_Power = zeros(1,4); 
