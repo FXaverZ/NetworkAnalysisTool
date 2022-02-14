@@ -59,8 +59,10 @@ for i = 1 : numel(Grid_List)
         branch_Vt_pe(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).Rated_Voltage1_phase_phase(1);
         branch_Vt_pp(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).Rated_Voltage2_phase_phase(1);
         
-        branch_Ilim(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).Current_Limits;
-        branch_Slim(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).App_Power_Limits;
+		% Using 1st thermal limit defined
+        branch_Ilim(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).Current_Limits(:,1);
+		% Using 1st rated thermal power
+        branch_Slim(j,1) = data.Grid.(Grid_List{i}).Branches.Grouped(j).App_Power_Limits(:,1);
     end
     
     % Create internal reference structure
