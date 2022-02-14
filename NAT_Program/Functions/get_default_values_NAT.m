@@ -116,7 +116,7 @@ Default_Plant.Orientation = 0;          % Ausrichtung              [°]
 Default_Plant.Inclination = 30;         % Neigung                  [°]
 Default_Plant.Efficiency = 0.12;        % Wirkungsgrad Zelle + WR  [-]
 Default_Plant.Performance_Ratio = 0.62; % Betriebsbedingungen der Photovoltaikanlage [-]
-Default_Plant.Rel_Size_Collector = 6.5*10e-3; % Rel. Kollektorfläche     [m²/Wp]
+Default_Plant.Rel_Size_Collector = 6.5*1e-3; % Rel. Kollektorfläche     [m²/Wp]
 Default_Plant.Size_Collector = ...      % Kollektorfläche          [m²]
 	Default_Plant.Power_Installed * Default_Plant.Rel_Size_Collector;
 Default_Plant.Sigma_delay_time = 15;    % zeitl. Standardabweichung[s] 
