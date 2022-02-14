@@ -1,7 +1,8 @@
-% This is a simple testfile to look deeper into the data to see, if the
+% This is a simple testscript to look deeper into the data to see, if the
 % profiles were allocated correctly...
 
 Saved_OAT_Data = [];
+Saved_InputData = [];
 % laodInfeedDataPath = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 laodInfeedDataPath = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
@@ -12,15 +13,25 @@ folders = folders(1,3:end);
 figure; tiledlayout(5,3);
 
 show_power_sum = true;
+% show_power_sum = false;
 
 scen_sel = {
+	1, '01_SB_Base_Winter_Workda';...
+	2, '02_SB_Base_Summer_Workda';...
+	3, '03_S1_LowLoadHighInfeed_Winter_Workda';...
 	4, '04_S1_LowLoadHighInfeed_Summer_Workda';...
+	5, '05_S2_HighLoadHighInfeed_Winter_Workda';...
 	6, '06_S2_HighLoadHighInfeed_Summer_Workda';...
+	7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda';...
 	8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda';...
-% 	10,'10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda';...
+	9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda';...
+	10,'10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda';...
 	};
 
 num_profiles = 10;
+
+max_value_plot = -1;
+% max_value_plot = 60000;
 
 % loadtype = 'Households';
 loadtype = 'Solar';
@@ -28,20 +39,53 @@ loadtype = 'Solar';
 
 for i = 1: numel(folders)
 	nexttile;
+	if ~isfield(Saved_InputData,['Saved_',num2str(i)])
+		Saved_InputData.(['Saved_',num2str(i)]) = [];
+	end
+	Labels = {};
 	for j = 1 : size(scen_sel,1)
-		load([laodInfeedDataPath,filesep,folders{i},'\',scen_sel{j,2},'.mat']);
+		if ~isfield(Saved_InputData.(['Saved_',num2str(i)]),['Saved_',num2str(scen_sel{j,1})])
+			load([laodInfeedDataPath,filesep,folders{i},'\',scen_sel{j,2},'.mat']);
+			Saved_InputData.(['Saved_',num2str(i)]).(['Saved_',num2str(scen_sel{j,1})]).Load_Infeed_Data = Load_Infeed_Data;
+		else
+			Load_Infeed_Data = Saved_InputData.(['Saved_',num2str(i)]).(['Saved_',num2str(scen_sel{j,1})]).Load_Infeed_Data;
+		end
+		
 		Data = [];
 		for k = 1 : num_profiles
 			Data = [Data;...
 				Load_Infeed_Data.(['Set_',num2str(k)]).(loadtype).Data_Mean]; %#ok<AGROW>
+			
 		end
 		if show_power_sum
 			Data = sum(Data,2);
+			num_active = 9999;
+			switch loadtype
+				case 'Households'
+					num_active = sum(cell2mat(Load_Infeed_Data.Set_1.Households.Number(:,2)));
+					Labels{end+1} = [num2str(num_active),' Act.'];
+				case 'Solar'
+					num_active = size(Load_Infeed_Data.(['Set_',num2str(k)]).Solar_Plants.Selectable,1)-2;
+					if num_active > 0
+						Labels{end+1} = [num2str(num_active),' Act.'];
+					end
+				case 'El_Mobility'
+					num_active = Load_Infeed_Data.(['Set_',num2str(k)]).(loadtype).Number;
+					if num_active > 0
+						Labels{end+1} = [num2str(num_active),' Act.'];
+					end
+				otherwise
+					num_active = 0;
+			end
+			
 		end
 		plot(Data);
 		drawnow;
 		if j <=1
 			hold on;
+			if max_value_plot > 0 
+				ylim([0 max_value_plot]);
+			end
 			title(['Dataset ',num2str(i),' - Source - "',loadtype,'"']);
 		end
 %     load('C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios\2021_12_03-14.05.14\04_S1_LowLoadHighInfeed_Summer_Workda.mat');
@@ -53,6 +97,7 @@ for i = 1: numel(folders)
 %     title('Datenset 2 - LoadInfeed Raw');
 	end
 	hold off;
+	legend(Labels{:})
 end
 %%
 folders = dir('C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Results_mean\01_Merged_OAT-Data\');
