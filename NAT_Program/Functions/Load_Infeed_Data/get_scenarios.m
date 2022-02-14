@@ -96,7 +96,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Winter';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S1 - Normal Load, High Infeed, No Elektromobility - 0-25% E-HH, 24% PV-Infeed w. 20 kWp, No Elektromobility, ',...
+	['S1 - Normal Load, High Infeed, No Elektromobility - 0-25% E-HH, 25% PV-Infeed w. 20 kWp, No Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 
@@ -105,7 +105,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename =[...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [24, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Number = [25, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 Solar.Power_sgl = 20000;         % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
@@ -126,7 +126,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Summer';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S1 - Normal Load, High Infeed, No Elektromobility - 0-25% E-HH, 24% PV-Infeed w. 20 kWp, No Elektromobility, ',...
+	['S1 - Normal Load, High Infeed, No Elektromobility - 0-25% E-HH, 25% PV-Infeed w. 20 kWp, No Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 
@@ -135,7 +135,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename =[...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [24, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Number = [25, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 Solar.Power_sgl = 20000;         % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
@@ -159,7 +159,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Winter';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S2 - High Load, Medium Infeed, High Elektromobility - 50-75% E-HH, 34% PV-Infeed w. 4.5 kWp, 75% Elektromobility, ',...
+	['S2 - High Load, Medium Infeed, High Elektromobility - 50-75% E-HH, 34% PV-Infeed w. 9.0 kWp, 75% Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
@@ -167,8 +167,8 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [34, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 4500;          % mittlere Leistung der Anlagen [Wp]
+Solar.Number = [33.3, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Power_sgl = 9000;          % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
@@ -188,7 +188,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Summer';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S2 - High Load, Medium Infeed, High Elektromobility - 50-75% E-HH, 34% PV-Infeed w. 4.5 kWp, 75% Elektromobility, ',...
+	['S2 - High Load, Medium Infeed, High Elektromobility - 50-75% E-HH, 34% PV-Infeed w. 9.0 kWp, 75% Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
@@ -196,8 +196,8 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [34, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 4500;          % mittlere Leistung der Anlagen [Wp]
+Solar.Number = [33.3, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Power_sgl = 9000;          % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
@@ -229,7 +229,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename =[...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [67, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Number = [66.7, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 Solar.Power_sgl = 4500;         % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
@@ -238,7 +238,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar;
 Households.WC_Selection = 'E_075';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
 
-El_Mobility.Number = 0;         % Prozent-Anteil an Elektroautos in den Haushalten
+El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
 %------------------------------------------------------------------------------------
 
@@ -259,7 +259,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename =[...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [67, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Number = [66.7, 0];          % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
 Solar.Power_sgl = 4500;         % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
@@ -268,7 +268,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar;
 Households.WC_Selection = 'E_075';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Households = Households;
 
-El_Mobility.Number = 0;         % Prozent-Anteil an Elektroautos in den Haushalten
+El_Mobility.Number = 75;         % Prozent-Anteil an Elektroautos in den Haushalten
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).El_Mobility = El_Mobility;
 %------------------------------------------------------------------------------------
 
@@ -283,7 +283,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Winter';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S4 - Normal Load, Medium Infeed, Medium E-Mobility - 67% PV-Infeed w. 4.5 kWp, 30% Elektromobility, ',...
+	['S4 - Normal Load, Medium Infeed, Medium E-Mobility - 33% PV-Infeed w. 9.0 kWp, 30% Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
@@ -291,8 +291,8 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [67, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 4500;          % mittlere Leistung der Anlagen [Wp]
+Solar.Number = [33.3, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Power_sgl = 9000;          % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
@@ -312,7 +312,7 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season = 'Summer';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday = 'Workda';
 % Bezeichnung des Szenarios:
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Description = ...
-	['S4 - Normal Load, Medium Infeed, Medium E-Mobility - 67% PV-Infeed w. 4.5 kWp, 30% Elektromobility, ',...
+	['S4 - Normal Load, Medium Infeed, Medium E-Mobility - 33% PV-Infeed w. 9.0 kWp, 30% Elektromobility, ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,', ',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
@@ -320,8 +320,8 @@ Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Filename = [...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Season,'_',...
 	Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Time.Weekday];
 % Erzeugungsanlagen verteilen (gem‰ﬂ Parametern):
-Solar.Number = [67, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
-Solar.Power_sgl = 4500;          % mittlere Leistung der Anlagen [Wp]
+Solar.Number = [33.3, 0];        % Anteil der Anlagen an Gesamtanzahl an Anschlussknoten [% Fix, % Tracker]
+Solar.Power_sgl = 9000;          % mittlere Leistung der Anlagen [Wp]
 
 Solar.WC_Selection = 'none_';
 Simulation.Scenarios.(['Sc_',num2str(scen_count)]).Solar = Solar; 
