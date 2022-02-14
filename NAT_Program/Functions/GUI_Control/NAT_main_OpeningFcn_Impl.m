@@ -48,6 +48,16 @@ set(handles.popup_gen_worstcase, 'String', handles.System.wc_generation(:,1));
 mh.add_line('Starting up NAT...');
 mh.level_up();
 
+mh.add_line('Setting up random number generator...');
+mh.level_up();
+seed_opt = 'shuffle';
+% seed_opt = 'default'; % Use this to become always the same random number sequence!
+% Set random number generator:
+rng(seed_opt); randomGenerator = rng(seed_opt); % twice, just to get shure...
+mh.add_line('Using Seed "',randomGenerator.Seed,'"');
+mh.level_down();
+mh.add_line('... done!');
+
 % Versuch, die Einstellungen des letzen Durchlaufs zu laden:
 try
 	mh.add_line('Try to load last configuration...');
