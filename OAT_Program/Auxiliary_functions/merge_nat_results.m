@@ -316,7 +316,11 @@ if Simulation.Scenarios.Number > 1
         mh.add_error(str);
         errordlg(str, title_str);
         mh.stop_sub_log(log_path);
-        refresh_message_text_operation_finished (handles);
+		mh.reset_level();
+		mh.divider('- ');
+		mh.save_message_text();
+		mh.reset_sub_logs();
+		mh.reset_all_display_marker();
         return;
     end
     % adapt the Scenario-Settings according to the selection:
@@ -358,8 +362,12 @@ if isempty(merge.present_grids(Grid_Sel))
     mh.level_down();
     errordlg({str1;str2;str3}, title_str);
     mh.stop_sub_log(log_path);
-    refresh_message_text_operation_finished (handles);
-    return;
+	mh.reset_level();
+	mh.divider('- ');
+	mh.save_message_text();
+	mh.reset_sub_logs();
+	mh.reset_all_display_marker();
+	return;
 end
 merge.present_grids = merge.present_grids(Grid_Sel);
 merge.present_datasets = merge.present_datasets(:,Grid_Sel);
@@ -381,7 +389,11 @@ if numel(merge.present_grids) > 1
         mh.add_error(str);
         errordlg(str, title_str);
         mh.stop_sub_log(log_path);
-        refresh_message_text_operation_finished (handles);
+		mh.reset_level();
+		mh.divider('- ');
+		mh.save_message_text();
+		mh.reset_sub_logs();
+		mh.reset_all_display_marker();
         return;
     end
     
