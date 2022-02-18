@@ -107,6 +107,6 @@ text_output = sprintf([text_input,'User result selection:\n',...
     '- ', Branch_selection_details]);
 
 set(handles.static_text_result_details, 'String', ...
-    sprintf(text_output),'FontName','MS Sans Serif');
+    sprintf(strrep(text_output,'%','%%')),'FontName','MS Sans Serif');
 
 return;

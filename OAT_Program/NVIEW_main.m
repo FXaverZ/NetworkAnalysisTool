@@ -191,12 +191,6 @@ handles = update_NVIEW_control_panel_simulation_description(handles,'grid');
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
-function menu_view_analysis_settings_Callback(hObject, eventdata, handles)
-% hObject    handle to menu_view_analysis_settings (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% --------------------------------------------------------------------
 function menu_home_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_home (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -601,8 +595,7 @@ guidata(hObject, handles);
 handles = call_voltage_analysis(handles,0);
 guidata(hObject, handles);
 
-% --------------------------------------------------------------------
-function menu_show_voltage_analysis_table_Callback(hObject, eventdata, handles)
+function menu_show_voltage_analysis_table_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to menu_show_voltage_analysis_table (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -612,6 +605,14 @@ handles = process_nat_results_as(handles); % Process results
 guidata(hObject, handles);
 % Analysis subfunction call
 handles = call_voltage_analysis(handles,-1);
+guidata(hObject, handles);
+
+function menu_view_analysis_settings_Callback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to menu_view_analysis_settings (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+handles = update_NVIEW_control_panel_analysis_selection(handles,[]);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
