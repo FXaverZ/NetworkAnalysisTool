@@ -101,9 +101,6 @@ for grid_counter=1:numel(Grid_List)
 		mh.level_up();%3
 		drawnow();
 		
-		% Wieviele Zeitpunkte werden berechnet?
-		sim_set.Timepoints = dat_ext.Timepoints_per_dataset;
-		
 		% write back maybe altered data:
 		cur_set.Simulation = sim_set;
 		handles.Current_Settings = cur_set;

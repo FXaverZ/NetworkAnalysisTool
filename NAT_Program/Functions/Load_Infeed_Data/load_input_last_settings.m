@@ -51,6 +51,8 @@ d.Data_Extract = Data_Extract;
 % settin.Data_Extract = Data_Extract;
 % adapt number of simulation runs (according to available data):
 settin.Simulation.Number_Runs = d.Data_Extract.Number_Data_Sets;
+% Wieviele Zeitpunkte werden berechnet?
+settin.Simulation.Timepoints = d.Data_Extract.Timepoints_per_dataset;
 
 % clear the loaded data:
 clear('Load_Infeed_Data', 'Data_Extract', 'Scenario_Settings', 'System');

@@ -120,6 +120,8 @@ save([handles.Current_Settings.Simulation.Scenarios_Path,filesep,'Scenario_Setti
 
 % Update the Current settings:
 handles.Current_Settings.Simulation.Scenarios = scen_old;
+% Wieviele Zeitpunkte werden berechnet?
+handles.Current_Settings.Simulation.Timepoints = Data_Extract.Timepoints_per_dataset;
 
 mh.stop_sub_log(log_path);
 

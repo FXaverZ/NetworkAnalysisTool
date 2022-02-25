@@ -37,7 +37,7 @@ else
 		handles.Current_Settings.Files.Grid.Name,'_nat',filesep,...
 		'Load_Infeed_Data',filesep,...
 		datestr(handles.Current_Settings.Data_Extract.Date_Extraktion,'yyyy_mm_dd-HH.MM.SS')];
-	if ~isdir([file.Path])
+	if ~isfolder([file.Path])
 		mkdir([file.Path]);
 	end
 	
