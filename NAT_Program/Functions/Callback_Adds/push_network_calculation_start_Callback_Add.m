@@ -65,8 +65,9 @@ for i = 1:numel(todo_scenarios)
 		if reload_Inputdata
 			if i > 1
 				mh.reset_display_text();
-				mh.add_line('Automatically procced with next inputdataset, start with calculations:');
+				mh.add_line('Automatically procced with next inputdataset.');
 				mh.level_up();
+				mh.add_line('Processing set ',i,' of ',numel(todo_scenarios),'...');
 			end
 			mh.add_line('Loading of sceanrio data "',todo_scenarios{i},'" into NAT...');
 			mh.level_up();
