@@ -51,36 +51,28 @@ dt = handles.NVIEW_Control.Simulation_Options.Input_values_used;
 Scenario_Output.Input_Data.Households = [];
 Scenario_Output.Input_Data.Solar = [];
 Scenario_Output.Input_Data.El_mobility = [];
-% CHANGELOG 1.2, FZ Start
 Scenario_Output.Input_Data.LV_Grid_Input = [];
-% CHANGELOG 1.2, FZ End
 for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_datasets
     households = []; 
     solar = []; 
     el_mobility = [];
-	% CHANGELOG 1.2, FZ Start
 	lv_grid_da = [];
-    % CHANGELOG 1.2, FZ End
 	
     households = data.Load_Infeed_Data.(['Set_', int2str(i)]).Households.(dt);
-	% CHANGELOG 1.1, FZ Start
 	% If there is no households-data, check if lv-grid data is present. If
 	% so, use this data for further investigations:
 	if isempty(households) && isfield(data.Load_Infeed_Data.(['Set_', int2str(i)]),'LV_Grid_Input') 
 		 households = data.Load_Infeed_Data.(['Set_', int2str(i)]).LV_Grid_Input.(dt);
 	end
-	% CHANGELOG 1.1, FZ End
     solar = data.Load_Infeed_Data.(['Set_', int2str(i)]).Solar.(dt);
     el_mobility = data.Load_Infeed_Data.(['Set_', int2str(i)]).El_Mobility.(dt);
     
-	% CHANGELOG 1.2, FZ Start
 	lv_grid_da = data.Load_Infeed_Data.(['Set_', int2str(i)]).LV_Grid_Input.(dt);
 	if isempty(lv_grid_da)
 		lv_grid_da = zeros(size(households));
 	end
 	Scenario_Output.Input_Data.LV_Grid_Input = [Scenario_Output.Input_Data.LV_Grid_Input;
-		sum( lv_grid_da(:,1:6:end) + lv_grid_da(:,2:6:end) + lv_grid_da(:,3:6:end),2)];
-	% CHANGELOG 1.2, FZ End
+		sum( lv_grid_da(:,1:6:end) + lv_grid_da(:,3:6:end) + lv_grid_da(:,5:6:end),2)];
     
 	if isempty(solar)
 		solar = zeros(size(households));
@@ -90,11 +82,11 @@ for i = 1 : handles.NVIEW_Control.Simulation_Options.Number_of_datasets
     end
     
     Scenario_Output.Input_Data.Households = [Scenario_Output.Input_Data.Households;
-        sum( households(:,1:6:end) + households(:,2:6:end) + households(:,3:6:end),2)];
+        sum( households(:,1:6:end) + households(:,3:6:end) + households(:,5:6:end),2)];
     Scenario_Output.Input_Data.Solar = [Scenario_Output.Input_Data.Solar;
-        sum(solar(:,1:6:end) + solar(:,2:6:end) + solar(:,3:6:end),2)];
+        sum(solar(:,1:6:end) + solar(:,3:6:end) + solar(:,5:6:end),2)];
     Scenario_Output.Input_Data.El_mobility = [Scenario_Output.Input_Data.El_mobility;
-        sum(el_mobility(:,1:6:end) + el_mobility(:,2:6:end) + el_mobility(:,3:6:end),2)];
+        sum(el_mobility(:,1:6:end) + el_mobility(:,3:6:end) + el_mobility(:,5:6:end),2)];
 end
 
 end
