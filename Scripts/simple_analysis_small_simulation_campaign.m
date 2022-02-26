@@ -12,10 +12,10 @@ Saved_Data_OAT   = [];
 Saved_Data_Input = [];
 
 % Paths to source files:
-Data_Path_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
-% Data_Path_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
-Data_Path_OAT = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Results_mean\01_Merged_OAT-Data\';
-% Data_Path_OAT = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+% Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+Path_Data_OAT = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Results_mean\01_Merged_OAT-Data\';
+% Path_Data_OAT = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 % Add folder with help functions to path:
 addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
@@ -48,7 +48,7 @@ Settings_Fontsize_Axes   = 8;
 Settings_Fontsize_Legend = 6;
 
 % Load data (Load Infeed Data)
-folders = dir(Data_Path_LoadInfeed);
+folders = dir(Path_Data_LoadInfeed);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
 
@@ -58,7 +58,7 @@ for i = 1: numel(folders)
 	end
 	for j = 1 : size(Settings_Scenario,1)
 		if ~isfield(Saved_Data_Input.(['Saved_',num2str(i)]),['Saved_',num2str(Settings_Scenario{j,1})])
-			load([Data_Path_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat']);
+			load([Path_Data_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat']);
 			Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data = Load_Infeed_Data;
 		end
 	end
@@ -478,9 +478,8 @@ clear Active_* Option_* ax b Data* Hist_* i j k m Labels_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (sum over appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 2:2:10; % Sommer
-% Option_Active_Scenarios = [6,8];
+% Option_Active_Scenarios = 2:2:10; % Sommer
+Option_Active_Scenarios = [6,8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
@@ -494,7 +493,7 @@ Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  5; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
-	Settings_Datasets{Option_Type_Load,3},'"'];
+	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
 Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Subplot_Title_Startstr = 'Anzahl Profile: '; % e.g. final format: "Anzahl Profile: 30"
@@ -589,80 +588,126 @@ end
 clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Histogramm aufbauend
+%% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-histogrammdevelopment = figure; tiledlayout(5,3);
-histogrammdevelopmentSingle = figure; tiledlayout(5,3);
-Data_Dev_Hist = [];
-Data_Dev_Hist_Single = [];
-for i = 1: numel(folders)
-	figure(histogrammdevelopment); nexttile;
-	figure(histogrammdevelopmentSingle); nexttile;
-	for j = 1 : size(Settings_Scenario,1)
-		if (~isfield(Data_Dev_Hist, ['Saved_',num2str(Settings_Scenario{j,1})]))
-			Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
+% Option_Active_Scenarios = 2:2:10; % Sommer
+Option_Active_Scenarios = [6,8];
+% Option_Active_Scenarios = 1:2:10; % Winter
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Number_Bins            = 70;
+Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
+Option_Histogramm_x_min_Value =  0; %kW
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Histogramm_y_min_Value  =  0; % '%'
+Option_Histogramm_y_step_Value =  5; % '%'
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
+Labels_X_Direction = 'Leistung [kW]';
+Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Subplot_Title_Startstr = 'Anzahl Profile: '; % e.g. final format: "Anzahl Profile: 30"
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+% Plot the figure:
+for i = 1 : Saved_Data_Input.Number_Datasets
+	if i <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		
+		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		
+		fig_histogrammdevsingle = figure;
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		
+		Data_Dev_Hist_Single = [];
+	end
+	
+	figure(fig_histogrammdevsingle); nexttile;
+	Labels_Scenarios = {};
+	for j = 1 : size(Active_Scenarios,1)
+		% prepare a structure to keep the scenario data
+		if (~isfield(Data_Dev_Hist_Single, ['Saved_',num2str(Active_Scenarios{j,1})]))
+			Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]) = [];
 		end
-		if (~isfield(Data_Dev_Hist_Single, ['Saved_',num2str(Settings_Scenario{j,1})]))
-			Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
-		end
-		Load_Infeed_Data = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data;
+		% load the raw data
+		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
 		Data = [];
 		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Load_Infeed_Data.(['Set_',num2str(k)]).(Option_Type_Load).Data_Mean]; %#ok<AGROW>
+			Data = [Data; Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
 		end
-		Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]) = [Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data,2)];
-		
-		Hist_binEdges = linspace(min_hist_value,Option_Histogramm_x_max_Value,Settings_Number_Bins+1);
-		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-		[~,Hist_binIdx] = histc(Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
-		% calculate the number of elements in bins
-		Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
-		figure(histogrammdevelopment);
-		switch Option_Type_Load
-			case 'Solar'
-				b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj),'hist');
-			otherwise
-				b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+		% from W to kW
+		Data = Data ./ 1000;
+		if (~isempty(Data))
+			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			% combine the profiles
+			Data_Singlephase = [];
+			for k = 1 : size(Data, 2)/ 6
+				Data_Sing = Data(:,1+(k-1)*6:6+(k-1)*6);
+				Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
+			end
+			Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
+				[Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data_Singlephase,2)];
+			% histogramms of development of profile numbers:
+			if Option_Histogramm_x_max_Value > 0
+				Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			else
+				Hist_x_max_Value = max(Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]));
+				Hist_x_min_Value = min(Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]));
+				Hist_binEdges = linspace(Hist_x_min_Value,Hist_x_max_Value,Option_Number_Bins+1);
+			end
+			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
+			[~,Hist_binIdx] = histc(Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})])...
+				,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
+			% calculate the number of elements in bins
+			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+			figure(fig_histogrammdevsingle);
+			switch Active_Type
+				case 'Solar'
+					% In case of solar, don't plot the "0" bin, becaus this
+					% is almost 50% of the data (nigthtime!)
+					b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
+				otherwise
+					b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+			end
+			set(b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
+			alpha(b,.5)
 		end
-		set(b,'EdgeColor','none','FaceColor',Settings_Scenario{j,3});
-		alpha(b,.5)
 		hold on;
-		
-		figure(histogrammdevelopmentSingle);
-		Data_Singlephase = [];
-		for k = 1 : size(Data, 2)/ 6
-			Data_Sing = Data(:,1+(k-1)*6:6+(k-1)*6);
-			Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
-		end
-		Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]) = [Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data_Singlephase,2)];
-		
-		Hist_binEdges = linspace(Option_Histogramm_Single_min_Value,Option_Histogramm_Single_max_Value,Settings_Number_Bins+1);
-		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-		[~,Hist_binIdx] = histc(Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
-		% calculate the number of elements in bins
-		Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
-		figure(histogrammdevelopmentSingle);
-		switch Option_Type_Load
-			case 'Solar'
-				b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj),'hist');
-			otherwise
-				b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
-		end
-		set(b,'EdgeColor','none','FaceColor',Settings_Scenario{j,3});
-		alpha(b,.5)
-		hold on;
-		
-		if j <=1
-			figure(histogrammdevelopment); title([num2str(i*10),' Datasets ',' - Source - "',Option_Type_Load,'"']);
-		end
 	end
-	figure(histogrammdevelopment); hold off;
-	figure(histogrammdevelopmentSingle); hold off;
+	% Format Diagrams:
+	figure(fig_histogrammdevsingle); 
+	ax = gca;
+	% General:
+	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i*Settings_Number_Profiles)];
+	ax.FontName     = 'Palatino Linotype';
+	ax.FontSize     = Settings_Fontsize_Axes;
+	% X Axis
+	ax.XGrid        = 'on';
+	% Y Axis
+	if Option_Histogramm_y_max_Value > 0
+		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+		ax.YAxis.TickValues   = tick_y_Positions;
+		ax.YAxis.TickLabels   = tick_y_Labels;
+	end
+	ax.YGrid        = 'on';
+	% Legend
+	if i == 1
+		legend(Labels_Scenarios);
+		ax.Legend.FontSize    = Settings_Fontsize_Legend;
+	end
+	figure(fig_histogrammdevsingle); hold off;
 end
 
+clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
+
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% OAT Data
-folders = dir(Data_Path_OAT);
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+folders = dir(Path_Data_OAT);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
 
@@ -682,7 +727,7 @@ folders = unique(folders);
 oatsummary = figure; tiledlayout(5,3);
 for i = 1: numel(folders)
 	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i)])
-		load([Data_Path_OAT,...
+		load([Path_Data_OAT,...
 			folders{i},' - 000 - OAT-Data.mat']);
 		Saved_Data_OAT.(['Saved_',num2str(i)]).NVIEW_Results = NVIEW_Results;
 	else
@@ -703,5 +748,4 @@ end
 
 %% Close all figures
 close(fig_infeedsummary);
-close(histogrammsummary);
 close(oatsummary);
