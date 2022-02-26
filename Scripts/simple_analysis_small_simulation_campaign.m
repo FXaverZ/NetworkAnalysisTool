@@ -476,133 +476,134 @@ end
 clear Active_* Option_* ax b Data* Hist_* i j k m Labels_* tick_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Histogramms with adding up sum over appliance profiles
+%% Histogramms with adding up profile number (sum over appliance profiles)
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Option_Active_Scenarios = 2:2:10; % Sommer
+% Option_Active_Scenarios = [6,8];
+% Option_Active_Scenarios = 1:2:10; % Winter
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Number_Bins            = 70;
+Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
+Option_Histogramm_x_min_Value =  0; %kW
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Histogramm_y_min_Value  =  0; % '%'
+Option_Histogramm_y_step_Value =  5; % '%'
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+	Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_X_Direction = 'Leistung [kW]';
+Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Subplot_Title_Startstr = 'Anzahl Profile: '; % e.g. final format: "Anzahl Profile: 30"
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-%%
-for i = 1: numel(folders)
-	figure(fig_infeedsummary); nexttile;
-	figure(histogrammsummary); nexttile;
-	figure(histogrammSingle); nexttile;
-	if ~isfield(Saved_Data_Input,['Saved_',num2str(i)])
-		Saved_Data_Input.(['Saved_',num2str(i)]) = [];
-	end
-	Labels_Activity = {};
-	for j = 1 : size(Settings_Scenario,1)
-		if ~isfield(Saved_Data_Input.(['Saved_',num2str(i)]),['Saved_',num2str(Settings_Scenario{j,1})])
-			load([Data_Path_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat']);
-			Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data = Load_Infeed_Data;
-		else
-			Load_Infeed_Data = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data;
-		end
+% Plot the figure:
+for i = 1 : Saved_Data_Input.Number_Datasets
+	if i <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
+		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		
+		fig_histogrammdevsummary = figure;
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		
+		Data_Dev_Hist = [];
+	end
+	
+	figure(fig_histogrammdevsummary); nexttile;
+	Labels_Scenarios = {};
+	for j = 1 : size(Active_Scenarios,1)
+		% prepare a structure to keep the scenario data
+		if (~isfield(Data_Dev_Hist, ['Saved_',num2str(Active_Scenarios{j,1})]))
+			Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]) = [];
+		end
+		% load the raw data
+		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
 		Data = [];
 		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Load_Infeed_Data.(['Set_',num2str(k)]).(Option_Type_Load).Data_Mean]; %#ok<AGROW>
-			
+			Data = [Data; Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
 		end
-		
-		if Option_Show_Power_Sum
-			Data_Singlephase = [];
-			for m = 1 : size(Data, 2)/ 6
-				Data_Sing = Data(:,1+(m-1)*6:6+(m-1)*6);
-				Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
+		% from W to kW
+		Data = Data ./ 1000;
+		if (~isempty(Data))
+			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			% combine the profiles
+			Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
+				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data,2)];
+			% histogramms of development of profile numbers:
+			if Option_Histogramm_x_max_Value > 0
+				Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			else
+				Hist_x_max_Value = max(Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]));
+				Hist_x_min_Value = min(Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]));
+				Hist_binEdges = linspace(Hist_x_min_Value,Hist_x_max_Value,Option_Number_Bins+1);
 			end
-			Data_Singlephase = sum(Data_Singlephase,2);
-			Data = sum(Data,2);
-			Data_num_active = 9999;
-			switch Option_Type_Load
-				case 'Households'
-					Data_num_active = sum(cell2mat(Load_Infeed_Data.Set_1.Households.Number(:,2)));
-					Labels_Activity{end+1} = [num2str(Data_num_active),' Act.'];
-				case 'Solar'
-					Data_num_active = size(Load_Infeed_Data.(['Set_',num2str(k)]).Solar_Plants.Selectable,1)-2;
-					if Data_num_active > 0
-						Labels_Activity{end+1} = [num2str(Data_num_active),' Act.'];
-					end
-				case 'El_Mobility'
-					Data_num_active = Load_Infeed_Data.(['Set_',num2str(k)]).(Option_Type_Load).Number;
-					if Data_num_active > 0
-						Labels_Activity{end+1} = [num2str(Data_num_active),' Act.'];
-					end
-				otherwise
-					Data_num_active = 0;
-			end
-			% histogramms of sum
-			Hist_binEdges = linspace(min_hist_value,Option_Histogramm_x_max_Value,Settings_Number_Bins+1);
 			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-			[~,Hist_binIdx] = histc(Data,[Hist_binEdges(1:end-1),Inf]); % histc
+			[~,Hist_binIdx] = histc(Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})])...
+				,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
 			% calculate the number of elements in bins
-			Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
-			figure(histogrammsummary); 
-			switch Option_Type_Load
+			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+			figure(fig_histogrammdevsummary);
+			switch Active_Type
 				case 'Solar'
+					% In case of solar, don't plot the "0" bin, becaus this
+					% is almost 50% of the data (nigthtime!)
 					b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
 				otherwise
 					b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
-			set(b,'EdgeColor','none','FaceColor',Settings_Scenario{j,3});
+			set(b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
 			alpha(b,.5)
-			hold on;
-			
-			% histogramms of single appliances
-			Hist_binEdges = linspace(Option_Histogramm_Single_min_Value,Option_Histogramm_Single_max_Value,Settings_Number_Bins+1);
-			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-			[~,Hist_binIdx] = histc(Data_Singlephase,[Hist_binEdges(1:end-1),Inf]); % histc
-			% calculate the number of elements in bins
-			Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
-			figure(histogrammSingle); 
-			switch Option_Type_Load
-				case 'Solar'
-					b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
-				otherwise
-					b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
-			end
-			set(b,'EdgeColor','none','FaceColor',Settings_Scenario{j,3});
-			alpha(b,.5)
-			hold on;
-			
 		end
-		figure(fig_infeedsummary); l = plot(Data);
-		set(l, 'Color', Settings_Scenario{j,3});
-		drawnow;
-		if j <=1
-			figure(fig_infeedsummary); hold on;
-			if Option_Plot_max_Value > 0 
-				ylim([0 Option_Plot_max_Value]);
-			end
-			figure(fig_infeedsummary); title(['Dataset ',num2str(i),' - Source - "',Option_Type_Load,'"']);
-			figure(histogrammsummary); title(['Histogramm ',num2str(i),' - Source - "',Option_Type_Load,'"']);
-			figure(histogrammSingle); title(['Histogramm Einzel',num2str(i),' - Source - "',Option_Type_Load,'"']);
-		end
+		hold on;
 	end
-	if Option_Show_Power_Sum && i <= 1
-		figure(fig_infeedsummary); legend(Labels_Activity{:})
-		figure(histogrammsummary); legend(Settings_Scenario{:,4});
-		figure(histogrammSingle); legend(Settings_Scenario{:,4});
+	% Format Diagrams:
+	figure(fig_histogrammdevsummary); 
+	ax = gca;
+	% General:
+	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i*Settings_Number_Profiles)];
+	ax.FontName     = 'Palatino Linotype';
+	ax.FontSize     = Settings_Fontsize_Axes;
+	% X Axis
+	ax.XGrid        = 'on';
+	% Y Axis
+	if Option_Histogramm_y_max_Value > 0
+		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+		ax.YAxis.TickValues   = tick_y_Positions;
+		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	if Option_Show_Power_Sum && i == 2
-		figure(fig_infeedsummary); hold on;
-		figure(fig_infeedsummary); legend(Settings_Scenario{:,4});
+	ax.YGrid        = 'on';
+	% Legend
+	if i == 1
+		legend(Labels_Scenarios);
+		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
-	figure(fig_infeedsummary); hold off;
-	figure(histogrammsummary); hold off;
+	figure(fig_histogrammdevsummary); hold off;
 end
+
+clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
+
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramm aufbauend
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 histogrammdevelopment = figure; tiledlayout(5,3);
 histogrammdevelopmentSingle = figure; tiledlayout(5,3);
-histData = [];
-histDataSingle = [];
+Data_Dev_Hist = [];
+Data_Dev_Hist_Single = [];
 for i = 1: numel(folders)
 	figure(histogrammdevelopment); nexttile;
 	figure(histogrammdevelopmentSingle); nexttile;
 	for j = 1 : size(Settings_Scenario,1)
-		if (~isfield(histData, ['Saved_',num2str(Settings_Scenario{j,1})]))
-			histData.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
+		if (~isfield(Data_Dev_Hist, ['Saved_',num2str(Settings_Scenario{j,1})]))
+			Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
 		end
-		if (~isfield(histDataSingle, ['Saved_',num2str(Settings_Scenario{j,1})]))
-			histDataSingle.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
+		if (~isfield(Data_Dev_Hist_Single, ['Saved_',num2str(Settings_Scenario{j,1})]))
+			Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]) = [];
 		end
 		Load_Infeed_Data = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data;
 		Data = [];
@@ -610,11 +611,11 @@ for i = 1: numel(folders)
 			Data = [Data;...
 				Load_Infeed_Data.(['Set_',num2str(k)]).(Option_Type_Load).Data_Mean]; %#ok<AGROW>
 		end
-		histData.(['Saved_',num2str(Settings_Scenario{j,1})]) = [histData.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data,2)];
+		Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]) = [Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data,2)];
 		
 		Hist_binEdges = linspace(min_hist_value,Option_Histogramm_x_max_Value,Settings_Number_Bins+1);
 		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-		[~,Hist_binIdx] = histc(histData.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
+		[~,Hist_binIdx] = histc(Data_Dev_Hist.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
 		% calculate the number of elements in bins
 		Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
 		figure(histogrammdevelopment);
@@ -634,11 +635,11 @@ for i = 1: numel(folders)
 			Data_Sing = Data(:,1+(k-1)*6:6+(k-1)*6);
 			Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
 		end
-		histDataSingle.(['Saved_',num2str(Settings_Scenario{j,1})]) = [histDataSingle.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data_Singlephase,2)];
+		Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]) = [Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]); sum(Data_Singlephase,2)];
 		
 		Hist_binEdges = linspace(Option_Histogramm_Single_min_Value,Option_Histogramm_Single_max_Value,Settings_Number_Bins+1);
 		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
-		[~,Hist_binIdx] = histc(histDataSingle.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
+		[~,Hist_binIdx] = histc(Data_Dev_Hist_Single.(['Saved_',num2str(Settings_Scenario{j,1})]),[Hist_binEdges(1:end-1),Inf]); % histc
 		% calculate the number of elements in bins
 		Hist_nj = accumarray(Hist_binIdx,1,[Settings_Number_Bins,1], @sum);
 		figure(histogrammdevelopmentSingle);
