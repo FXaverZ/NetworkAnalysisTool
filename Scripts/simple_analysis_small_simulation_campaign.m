@@ -91,7 +91,7 @@ end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
-Lables_Y_Direction = 'Leistung [kW]';
+Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -101,7 +101,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_infeedsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Lables_Y_Direction);
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		% Set up the needed ticks:
 		[tick_x_Positions, tick_x_Labels] = get_tick_x_profiles(Settings_Number_Profiles);
@@ -213,7 +213,7 @@ end
 Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
-Lables_Y_Direction = 'Leistung [kW]';
+Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -226,7 +226,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_infeedsingle = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Lables_Y_Direction);
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		% Set up the needed ticks:
 		[tick_x_Positions, tick_x_Labels] = get_tick_x_profiles(Settings_Number_Profiles);
@@ -298,7 +298,7 @@ Option_Histogramm_y_step_Value =  4; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Lables_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -312,7 +312,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_histogrammsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Lables_Y_Direction);
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 	end
 	figure(fig_histogrammsummary); nexttile;
 	Labels_Scenarios = {};
@@ -384,19 +384,32 @@ Option_Active_Scenarios = [6,8];
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Number_Bins          = 50;
+Option_Number_Bins            = 50;
 Option_Histogramm_x_max_Value = 10; %kW
 Option_Histogramm_x_min_Value =  0; %kW
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option_Histogramm_y_max_Value  = 20; % '%' (-1 ... autoscale)
+Option_Histogramm_y_min_Value  =  0; % '%'
+Option_Histogramm_y_step_Value =  5; % '%'
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_X_Direction = 'Leistung [kW]';
+Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Subplot_Title_Startstr = 'Profilsatz'; % e.g. final format: "Profilsatz 3"
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-Active_Type = Settings_Datasets{Option_Type_Load,2};
-
-fig_histogrammsingle = figure;
-set_up_tiledlayout(['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'],...
-	'Leistung [kW]','% rel. Häufigkeit');
-
+% Plot the figure:
 for i = 1 : Saved_Data_Input.Number_Datasets
+	if i <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		
+		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
+		
+		fig_histogrammsingle = figure;
+		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+	end
 	figure(fig_histogrammsingle); nexttile;
 	Labels_Scenarios = {};
 	for j = 1 : size(Active_Scenarios,1)
@@ -440,9 +453,18 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_histogrammsingle); 
 	ax = gca;
 	% General:
-	ax.Title.String = ['Profilsatz ',num2str(i)];
+	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i)];
 	ax.FontName     = 'Palatino Linotype';
 	ax.FontSize     = Settings_Fontsize_Axes;
+	% X Axis
+	ax.XGrid        = 'on';
+	% Y Axis
+	if Option_Histogramm_y_max_Value > 0
+		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+		ax.YAxis.TickValues   = tick_y_Positions;
+		ax.YAxis.TickLabels   = tick_y_Labels;
+	end
+	ax.YGrid        = 'on';
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
@@ -451,7 +473,11 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_histogrammsingle); hold off;
 end
 
-clear Option_*
+clear Active_* Option_* ax b Data* Hist_* i j k m Labels_* tick_*
+
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Histogramms with adding up sum over appliance profiles
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 %%
 for i = 1: numel(folders)
