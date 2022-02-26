@@ -44,8 +44,6 @@ Settings_Datasets = {
 	};
 
 Settings_Number_Profiles = 10;
-Settings_Fontsize_Axes   = 8;
-Settings_Fontsize_Legend = 6;
 
 % Load data (Load Infeed Data)
 folders = dir(Path_Data_LoadInfeed);
@@ -152,30 +150,24 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	% Format Diagrams:
 	figure(fig_infeedsummary); 
 	ax = gca;
-	% General:
 	ax.Title.String = ['Profilsatz ',num2str(i)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	elseif i == 2
 		legend(Labels_Activity{:});
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
 	% X Axis
 	ax.XAxis.Limits       = [0 144*Settings_Number_Profiles];
 	ax.XAxis.TickValues   = tick_x_Positions;
 	ax.XAxis.TickLabels   = tick_x_Labels;
-	ax.XGrid              = 'on';
 	% Y Axis
 	if Option_Plot_max_Value > 0
 		ax.YAxis.Limits  = [0 Option_Plot_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid              = 'on';
+	set_default_plot_properties(ax);
 	figure(fig_infeedsummary); hold off;
 end
 
@@ -184,7 +176,7 @@ clear Active_* Option_* Labels_* Data* tick_* i j k l ax
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 3; % Select only one scenario!
+Option_Active_Scenarios = 8; % Select only one scenario!
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -249,32 +241,26 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Data = Data(:,1:3:end)+Data(:,2:3:end)+Data(:,3:3:end);
 		figure(fig_infeedsingle); plot(Data);
 		drawnow;
-		if j <=1
-			figure(fig_infeedsingle); hold on;
-			legend([num2str(size(Data,2)),' aktive Profile']);
-		end
+% 		if j <=1
+% 			figure(fig_infeedsingle); hold on;
+% 			legend([num2str(size(Data,2)),' aktive Profile']);
+% 		end
 	end
 	% Format Diagrams:
 	figure(fig_infeedsingle); 
 	ax = gca;
-	% General:
 	ax.Title.String = ['Profilsatz ',num2str(i)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
-	% Legend
-	ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	% X Axis
 	ax.XAxis.Limits       = [0 144*Settings_Number_Profiles];
 	ax.XAxis.TickValues   = tick_x_Positions;
 	ax.XAxis.TickLabels   = tick_x_Labels;
-	ax.XGrid              = 'on';
 	% Y Axis
 	if Option_Plot_max_Value > 0
 		ax.YAxis.Limits  = [0 Option_Plot_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid              = 'on';
+	set_default_plot_properties(ax);
 	figure(fig_infeedsingle); hold off;
 end
 
@@ -355,22 +341,18 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	ax = gca;
 	% General:
 	ax.Title.String = ['Profilsatz ',num2str(i)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
 	% X Axis
-	ax.XGrid        = 'on';
 	% Y Axis
 	if Option_Histogramm_y_max_Value > 0
-		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+		ax.YAxis.Limits       = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid        = 'on';
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
+	set_default_plot_properties(ax);
 	figure(fig_histogrammsummary); hold off;
 end
 
@@ -454,22 +436,18 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	ax = gca;
 	% General:
 	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
 	% X Axis
-	ax.XGrid        = 'on';
 	% Y Axis
 	if Option_Histogramm_y_max_Value > 0
 		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid        = 'on';
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
+	set_default_plot_properties(ax);
 	figure(fig_histogrammsingle); hold off;
 end
 
@@ -488,15 +466,14 @@ Option_Number_Bins            = 70;
 Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
 Option_Histogramm_x_min_Value =  0; %kW
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Histogramm_y_max_Value  =  6; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  5; % '%'
+Option_Histogramm_y_step_Value =  2; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
 Labels_Y_Direction = '% rel. Häufigkeit';
-Labels_Subplot_Title_Startstr = 'Anzahl Profile: '; % e.g. final format: "Anzahl Profile: 30"
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -565,23 +542,19 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_histogrammdevsummary); 
 	ax = gca;
 	% General:
-	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i*Settings_Number_Profiles)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
+	ax.Title.String = [num2str(i*Settings_Number_Profiles),' Profile'];
 	% X Axis
-	ax.XGrid        = 'on';
 	% Y Axis
 	if Option_Histogramm_y_max_Value > 0
 		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid        = 'on';
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
+	set_default_plot_properties(ax);
 	figure(fig_histogrammdevsummary); hold off;
 end
 
@@ -591,8 +564,8 @@ clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 %% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = [6,8];
-% Option_Active_Scenarios = 1:2:10; % Winter
+% Option_Active_Scenarios = [6,8];
+Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -600,15 +573,14 @@ Option_Number_Bins            = 70;
 Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
 Option_Histogramm_x_min_Value =  0; %kW
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Histogramm_y_max_Value  = 10; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  5; % '%'
+Option_Histogramm_y_step_Value =  2; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
 Labels_Y_Direction = '% rel. Häufigkeit';
-Labels_Subplot_Title_Startstr = 'Anzahl Profile: '; % e.g. final format: "Anzahl Profile: 30"
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -682,30 +654,26 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_histogrammdevsingle); 
 	ax = gca;
 	% General:
-	ax.Title.String = [Labels_Subplot_Title_Startstr,' ',num2str(i*Settings_Number_Profiles)];
-	ax.FontName     = 'Palatino Linotype';
-	ax.FontSize     = Settings_Fontsize_Axes;
+	ax.Title.String = [num2str(i*Settings_Number_Profiles),' Profile'];
 	% X Axis
-	ax.XGrid        = 'on';
 	% Y Axis
 	if Option_Histogramm_y_max_Value > 0
 		ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
 		ax.YAxis.TickValues   = tick_y_Positions;
 		ax.YAxis.TickLabels   = tick_y_Labels;
 	end
-	ax.YGrid        = 'on';
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-		ax.Legend.FontSize    = Settings_Fontsize_Legend;
 	end
+	set_default_plot_properties(ax);
 	figure(fig_histogrammdevsingle); hold off;
 end
 
 clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% OAT Data
+%% Load OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 folders = dir(Path_Data_OAT);
 folders = struct2cell(folders);
