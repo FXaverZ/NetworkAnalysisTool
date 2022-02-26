@@ -10,7 +10,8 @@ clear();
 Saved_Data_Input = [];
 
 % Paths to source files:
-Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+% Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
 % Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 % Add folder with help functions to path:
@@ -39,7 +40,7 @@ Settings_Datasets = {
 	3, 'El_Mobility' , 'Elektromobilität';...
 	};
 
-Settings_Number_Profiles = 10;
+Settings_Number_Profiles = 30;
 
 % Load data (Load Infeed Data)
 folders = dir(Path_Data_LoadInfeed);
@@ -69,7 +70,7 @@ Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 % Option_Active_Scenarios = 1:10;   % All scenarios (not recomended!)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Type_Load = 1; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
+Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % y-axis Settings (Option_Plot_max_Value = -1 ... autoscale)
 switch Option_Type_Load
@@ -562,8 +563,8 @@ clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 %% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-% Option_Active_Scenarios = [6,8];
-Option_Active_Scenarios = 1:2:10; % Winter
+Option_Active_Scenarios = [6,8];
+% Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
