@@ -1,3 +1,4 @@
+clear();
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Initial Set Up
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -6,8 +7,6 @@
 % one.
 % Only this cell (set up of of datastorage) and the next one (Set up and
 % loading of data) have to be executed before every other cell!
-
-clear();
 Saved_Data_Input = [];
 
 % Paths to source files:
@@ -53,8 +52,8 @@ for i = 1: numel(folders)
 	end
 	for j = 1 : size(Settings_Scenario,1)
 		if ~isfield(Saved_Data_Input.(['Saved_',num2str(i)]),['Saved_',num2str(Settings_Scenario{j,1})])
-			load([Path_Data_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat']);
-			Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]).Load_Infeed_Data = Load_Infeed_Data;
+			Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]) = ...
+				load([Path_Data_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat'],'Load_Infeed_Data');
 		end
 	end
 end
@@ -65,11 +64,12 @@ clear folders i j Load_Infeed_Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot sum over single appliance profiles over scenarios
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 2:2:10;   % Sommer
+% Option_Active_Scenarios = 2:2:10;   % Sommer
+Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 % Option_Active_Scenarios = 1:10;   % All scenarios (not recomended!)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Type_Load = 3; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
+Option_Type_Load = 1; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % y-axis Settings (Option_Plot_max_Value = -1 ... autoscale)
 switch Option_Type_Load
@@ -84,7 +84,7 @@ switch Option_Type_Load
 		Option_Plot_step_Value =   5; % kW
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = [];%['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -114,6 +114,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
 		end
 		Data = sum(Data,2);
+		% from W to kW
 		Data = Data ./ 1000;
 		if (~isempty(Data))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
