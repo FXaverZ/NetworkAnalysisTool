@@ -269,7 +269,8 @@ function menu_home_import_nat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
 handles = get_default_values_NVIEW(handles);
 handles = refresh_display_NVIEW_main_gui (handles);
 
-handles = import_nat_results(handles,'UserInput',true);
+handles = import_nat_results(handles,'UserInput',true); % Import results
+handles = process_nat_results_as(handles); % Process results
 
 guidata(hObject, handles);
  
