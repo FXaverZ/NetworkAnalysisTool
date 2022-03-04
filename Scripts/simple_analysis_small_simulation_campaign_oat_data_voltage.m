@@ -83,27 +83,31 @@ clear sep folders i NVIEW_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the distribution of voltage band violations per grid variant
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% Option_Active_Scenarios = 2:2:10;   % Sommer
+Option_Active_Scenarios = 2:2:10;   % Sommer
 % Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = 8;
-Option_Active_Scenarios = 1:2:10; % Winter
+% Option_Active_Scenarios = 1:2:10; % Winter
 % Option_Active_Scenarios = 1:10;   % All scenarios (not recomended!)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-% Option_Active_GridVariants = [1,2,3,4];     % 
-Option_Active_GridVariants = 2;
+Option_Active_GridVariants = [2,3,4];     % 
+% Option_Active_GridVariants = 2;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+% y-axis Settings (Option_y_max_Value = -1 ... autoscale)
+Option_y_max_Value  = 1.05; % -1 ... autoscale
+Option_y_min_Value  = 0.95;
+Option_y_step_Value = 0.01; % -1 ... autostep
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-if size(Option_Active_GridVariants,1) < 2
-	Labels_Title = ['Mittlere Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+if numel(Option_Active_GridVariants) < 2
+	Labels_Title = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
 else
-	if size(Option_Active_Scenarios,1) > 1
-		Labels_Title = 'Mittlere Verlauf Spannung';
+	if numel(Option_Active_Scenarios) > 1
+		Labels_Title = 'Mittlerer Verlauf Spannung';
 	else
-		Labels_Title = ['Mittlere Verlauf Spannung für Scenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+		Labels_Title = ['Mittlerer Verlauf Spannung für Scenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
 	end
 end
-Labels_X_Direction = 'Datensets';
-Labels_Y_Direction = 'Spannung [V]';
+Labels_X_Direction = 'Tageszeit [h]';
+Labels_Y_Direction = 'Spannung [p.u.]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i = 1 : Saved_Data_OAT.Number_Datasets
@@ -117,6 +121,8 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 	
 	figure(fig_oat_voltage_sum); nexttile;
 	Labels_Scenarios = {};
+	Labels_Grid      = {};
+	Labels_Gridstyle = [];
 	d = Saved_Data_OAT.(['Saved_',num2str(i)]).NVIEW_Processed;
 	
 	for j = 1:size(Active_GridVars,1)
@@ -134,38 +140,46 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 				set(l, 'LineStyle', Active_GridVars{j,3});
 			end
 			drawnow;
-			if size(Active_GridVars,1) < 2
+			if j == 1
 				Labels_Scenarios{end+1} = Active_Scenarios{k,5}; %#ok<SAGROW>
-			else
-				if size(Active_Scenarios,1) > 1
-					Labels_Scenarios{end+1} = [Active_GridVars{j,2},': ',Active_Scenarios{k,5}]; %#ok<SAGROW>
-				else
-					Labels_Scenarios{end+1} = [Active_GridVars{j,2}]; %#ok<SAGROW>
-				end
 			end
 			if k <=1
 				figure(fig_oat_voltage_sum); hold on;
 			end
 		end
+		l = plot(nan, nan);
+		set(l, 'Color', 'k');
+		set(l, 'LineStyle', Active_GridVars{j,3});
+		Labels_Gridstyle(end+1) = l; %#ok<SAGROW>
+		Labels_Grid{end+1} = Active_GridVars{j,2}; %#ok<SAGROW>
 	end
 	% Format Diagrams:
 	figure(fig_oat_voltage_sum); 
 	ax = gca;
 	ax.Title.String = ['Profilsatz ',num2str(i)];
 	% Legend
-	if i == 1
+	if i == 1 && numel(Option_Active_Scenarios) > 1
 		legend(Labels_Scenarios);
 	end
-% 	% X Axis
-% 	ax.XAxis.Limits       = [0 144*Settings_Number_Profiles];
-% 	ax.XAxis.TickValues   = tick_x_Positions;
-% 	ax.XAxis.TickLabels   = tick_x_Labels;
-% 	% Y Axis
-% 	if Option_Plot_max_Value > 0
-% 		ax.YAxis.Limits       = [0 Option_Plot_max_Value];
-% 		ax.YAxis.TickValues   = tick_y_Positions;
-% 		ax.YAxis.TickLabels   = tick_y_Labels;
-% 	end
+	if i == 2 && numel(Option_Active_GridVariants) > 1
+		l = legend(Labels_Gridstyle, Labels_Grid);
+	end
+	% X Axis
+	[tick_x_Positions, tick_x_Labels] = get_tick_x_single_day_profile();
+	ax.XAxis.Limits       = [0 144];
+	ax.XAxis.TickValues   = tick_x_Positions;
+	ax.XAxis.TickLabels   = tick_x_Labels;
+	% Y Axis
+	if Option_y_max_Value > 0
+		ax.YAxis.Limits       = [Option_y_min_Value Option_y_max_Value];
+		if Option_y_step_Value > 0
+			tick_y_Positions = Option_y_min_Value:Option_y_step_Value:Option_y_max_Value;
+			tick_y_Labels    = tick_y_Positions;
+			ax.YAxis.TickValues   = tick_y_Positions;
+			ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+
+	end
 	set_default_plot_properties(ax);
 	figure(fig_oat_voltage_sum); hold off;
 end
