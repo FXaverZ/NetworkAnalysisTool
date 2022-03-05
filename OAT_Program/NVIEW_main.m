@@ -269,7 +269,8 @@ function menu_home_import_nat_results_Callback(hObject, ~, handles) %#ok<DEFNU>
 handles = get_default_values_NVIEW(handles);
 handles = refresh_display_NVIEW_main_gui (handles);
 
-handles = import_nat_results(handles,'UserInput',true);
+handles = import_nat_results(handles,'UserInput',true); % Import results
+handles = process_nat_results_as(handles); % Process results
 
 guidata(hObject, handles);
  
@@ -331,8 +332,25 @@ function pushtool_Color16_ClickedCallback(hObject, eventdata, handles)
 handles = recolor_nview_figures(handles);
 guidata(hObject, handles);
 
-% --------------------------------------------------------------------
-function pushtool_FontSizeUp_ClickedCallback(hObject, eventdata, handles)
+function pushtool_FontSizeDown_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to pushtool_FontSizeDown (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.System.Graphics.FontSize = set_fontsize_values(handles.System.Graphics.FontSize-2);
+% Limit text to 4 fontsize
+if handles.System.Graphics.FontSize < 6
+    handles.System.Graphics.FontSize = 6;
+end
+
+check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
+for i = 1 :  numel(check_active_figures)
+    % Set text and axes text size
+    set(findall(check_active_figures(i),'Type','text'),'FontSize',handles.System.Graphics.FontSize);
+    set(findall(check_active_figures(i),'Type','axes'),'FontSize',handles.System.Graphics.FontSize);
+end
+guidata(hObject, handles);
+
+function pushtool_FontSizeUp_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to pushtool_FontSizeUp (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -351,24 +369,12 @@ for i = 1 :  numel(check_active_figures)
 end
 guidata(hObject, handles);
 
-
-% --------------------------------------------------------------------
-function pushtool_FontSizeDown_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to pushtool_FontSizeDown (see GCBO)
+function pushtool_Format_4_Word_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
+% hObject    handle to pushtool_fromat4word (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.System.Graphics.FontSize = set_fontsize_values(handles.System.Graphics.FontSize-2);
-% Limit text to 4 fontsize
-if handles.System.Graphics.FontSize < 6
-    handles.System.Graphics.FontSize = 6;
-end
-
 check_active_figures = setdiff(findobj('Type','figure'),handles.NVIEW_main_gui);
-for i = 1 :  numel(check_active_figures)
-    % Set text and axes text size
-    set(findall(check_active_figures(i),'Type','text'),'FontSize',handles.System.Graphics.FontSize);
-    set(findall(check_active_figures(i),'Type','axes'),'FontSize',handles.System.Graphics.FontSize);
-end
+
 guidata(hObject, handles);
 
 function pushtool_Resize_ClickedCallback(hObject, ~, handles) %#ok<DEFNU>
