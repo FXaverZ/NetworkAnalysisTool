@@ -50,90 +50,23 @@ for i = 1 : numel(Grid_List)
     
     % VOLTAGE ANALYSIS
     if handles.NVIEW_Control.Simulation_Options.Voltage_Analysis == 1
-        clear bus_info voltage_violations bus_violated bus_voltages voltage_violation_numbers violated_nodes_number counter
-        clear voltage_violation_statistics bus_deviations bus_deviation_summary bus_violations_number  nodes_afflicted voltage_statistics
+        clear bus_info voltage_violations voltage_violation_numbers violated_nodes_number
+        clear voltage_violation_statistics bus_deviation_summary bus_violations_number  voltage_statistics
         
         bus_voltages = NVIEW_Results.(Grid_List{i}).bus_voltages;
         bus_info = NVIEW_Results.(Grid_List{i}).bus;
         Umin = NVIEW_Analysis_Selection.Umin/100; % pu
         Umax = NVIEW_Analysis_Selection.Umax/100; % pu
         
-        nodes_afflicted = cell(size(bus_voltages,2),size(bus_voltages,1));
-        voltage_violations = zeros(size(bus_voltages,1),size(bus_voltages,2),size(bus_voltages,3),size(bus_voltages,4));
-		voltage_values = zeros([size(voltage_violations) 3]);
-        violated_nodes_number = zeros(size(bus_voltages,2),size(bus_voltages,1));
-        
-
-        for s = 1 : size(bus_voltages,1) % scenario
-            for d = 1 : size(bus_voltages,2) % dataset
-                for t = 1 : size(bus_voltages,3) % timepoint
-                    for n = 1 : size(bus_voltages,4) % node
-                        
-						if sum(bus_voltages(s,d,t,n,:)==0) > 0
-							bus_voltages(s,d,t,n,:) = NaN;
-						end
-						
-						voltage_values (s,d,t,n,:) = bus_voltages(s,d,t,n,:) / bus_info(n,3);
-						
-                        voltage_violations(s,d,t,n) = ((bus_voltages(s,d,t,n,1) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,1) / bus_info(n,3)) > Umax) ||...
-                            ((bus_voltages(s,d,t,n,2) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,2) / bus_info(n,3)) > Umax) ||...
-                            ((bus_voltages(s,d,t,n,3) / bus_info(n,3)) < Umin) ||((bus_voltages(s,d,t,n,3) / bus_info(n,3)) > Umax);
-                        
-                    end % node
-                    nodes_afflicted{d,s} = unique([nodes_afflicted{d,s}; find(squeeze(voltage_violations(s,d,t,:)) == 1)]);
-                end % timepoint
-            end % dataset
-        end % scenario
-        
-        voltage_violation_numbers = nansum(nansum(voltage_violations,4)>0,3);
-        for s = 1 : size(bus_voltages,1) % scenario
-            for d = 1 : size(bus_voltages,2) % dataset
-                violated_nodes_number(d,s) = numel(nodes_afflicted{d,s});
-            end
-        end
-        
-        for s = 1 : size(bus_voltages,1) % scenario
-            voltage_violation_statistics(:,s) =[sum(voltage_violation_numbers(s,:));
-                100*sum(voltage_violation_numbers(s,:))/(Timepoints*Datasets);
-                sum(violated_nodes_number(:,s));
-                100*sum(violated_nodes_number(:,s))/(size(bus_info,1)*Datasets);];
-        end
-        
-        voltage_violation_numbers = voltage_violation_numbers';
-        
-        bus_violations_number = zeros(size(bus_voltages,4),size(bus_voltages,1));
-        for s = 1 : size(bus_voltages,1) % scenario
-            for d = 1 : size(bus_voltages,2) % dataset
-                if ~isempty(nodes_afflicted{d,s})
-                    for n = 1 : numel(nodes_afflicted{d,s})
-                        
-                        bus_violations_number(nodes_afflicted{d,s}(n),s) = bus_violations_number(nodes_afflicted{d,s}(n),s) + 1;
-                    end
-                end
-            end
-        end
-        
-        bus_deviations =  nan(size(bus_voltages,1),size(bus_voltages,2)*size(bus_voltages,3)*size(bus_voltages,4),size(bus_voltages,5));
-        
-        for s = 1 : size(bus_voltages,1) % scenario
-            counter = 0;
-            for d = 1 : size(bus_voltages,2) % dataset
-                for t = 1 : size(bus_voltages,3) % timepoint
-                    voltage_statistics = [];
-                    if size(bus_voltages,4) ~= 1
-                        voltage_statistics = squeeze(bus_voltages(s,d,t,:,:))./ repmat(bus_info(:,3),1,3);
-                    else
-                        voltage_statistics = squeeze(bus_voltages(s,d,t,:,:))'./ repmat(bus_info(:,3),1,3);
-                    end
-                    
-                    bus_deviations(s,counter + (1:size(voltage_statistics,1)),:) = voltage_statistics;
-                    counter = max(counter + (1:size(voltage_statistics,1)));
-                end
-            end
-            bus_deviation_summary(s,:,:) = [nanmax(squeeze(bus_deviations(s,:,:)),[],1);
-                                            nanmean(squeeze(bus_deviations(s,:,:)),1);
-                                            nanmin(squeeze(bus_deviations(s,:,:)),[],1)];
-        end
+		[...
+			voltage_violations,...
+			bus_violations_number,...
+			voltage_violation_statistics,...
+			voltage_violation_numbers, ...
+			violated_nodes_number, ...
+			bus_deviation_summary, ...
+			voltage_values...
+			] = analysis_voltage (bus_voltages, bus_info, Timepoints, Datasets, Umin, Umax);
         
         res.(Grid_List{i}).voltage_violations = voltage_violations;
         res.(Grid_List{i}).bus_violations = bus_violations_number;
@@ -143,8 +76,8 @@ for i = 1 : numel(Grid_List)
         res.(Grid_List{i}).bus_deviations = bus_deviation_summary;
 		res.(Grid_List{i}).bus_voltages = voltage_values;
         
-        clear bus_info voltage_violations bus_violated bus_voltages voltage_violation_numbers violated_nodes_number counter
-        clear voltage_violation_statistics bus_deviations bus_deviation_summary bus_violations_number  nodes_afflicted voltage_statistics voltage_values
+        clear bus_info voltage_violations bus_voltages voltage_violation_numbers violated_nodes_number counter
+        clear voltage_violation_statistics bus_deviations bus_deviation_summary bus_violations_number  nodes_afflicted voltage_values
     end % VOLTAGE ANALYSIS
     
     if handles.NVIEW_Control.Simulation_Options.Overcurrent_Analysis == 1
