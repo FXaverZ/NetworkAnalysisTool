@@ -1,18 +1,19 @@
 clear();
+Saved_Data_OAT   = [];
+
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Initial Set Up
+%% Initial Set Up / Loading of OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % This is a simple script for the analysis of the small simulation
 % campaign. It is structured into individuall cells to be executed one by
 % one.
-% Only this cell (set up of of datastorage) and the next one (Set up and
-% loading of data) have to be executed before every other cell!
-Saved_Data_OAT   = [];
+% Only this cell (loading the data) and the next one (set up of
+% information) have to be executed before every other cell! 
+
 
 % Paths to source files:
 Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
 	'Results_mean\01_Merged_OAT-Data\'];
-% Path_Data_OAT = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 % Add folder with help functions / needed classes to path:
 scriptpath = fileparts(matlab.desktop.editor.getActiveFilename);
@@ -21,9 +22,31 @@ addpath([scriptpath, filesep, 'Additional_Resources']);
 addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Analyzing']);
 addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Grid_Representation']);
 
-clear scriptpath 
+% Load OAT Data
+folders = dir(Path_Data_OAT);
+folders = struct2cell(folders);
+folders = folders(1,3:end);
+
+sep = cell(1,numel(folders));
+sep(:) = {' - '};
+folders = cellfun(@strsplit,folders,sep,'UniformOutput',false);
+folders = cellfun(@(x) x{1},folders,'UniformOutput',false);
+folders = unique(folders);
+disp('Loading OAT Data...');
+for i = 1: numel(folders)
+	disp(['    Reading File ',num2str(i),' of ',num2str(numel(folders))]);
+	NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
+	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i)])
+		Saved_Data_OAT.(['Saved_',num2str(i)]) = load([Path_Data_OAT,...
+			folders{i},' - 000 - OAT-Data.mat'],NVIEW_Data_Names{:});
+	end
+end
+disp('... done!');
+Saved_Data_OAT.Number_Datasets = numel(folders);
+clear scriptpath sep folders i NVIEW_*
+
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Additional Set Up / Configuration / Loading of OAT Data
+%% Additional Set Up / Configuration
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Settings_Scenario = {...
 % 1     2                                                3             4          5
@@ -54,33 +77,6 @@ Settings_Datasets = {
 	};
 
 Settings_Number_Profiles = 10;
-
-% Load OAT Data
-folders = dir(Path_Data_OAT);
-folders = struct2cell(folders);
-folders = folders(1,3:end);
-
-sep = cell(1,numel(folders));
-sep(:) = {' - '};
-folders = cellfun(@strsplit,folders,sep,'UniformOutput',false);
-folders = cellfun(@(x) x{1},folders,'UniformOutput',false);
-sep(:) = {'_Solar'}; % if solar pictures are also present...
-folders = cellfun(@strsplit,folders,sep,'UniformOutput',false);
-folders = cellfun(@(x) x{1},folders,'UniformOutput',false);
-folders = unique(folders);
-disp('Loading OAT Data...');
-for i = 1: numel(folders)
-	disp(['    Reading File ',num2str(i),' of ',num2str(numel(folders))]);
-	NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
-	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i)])
-		Saved_Data_OAT.(['Saved_',num2str(i)]) = load([Path_Data_OAT,...
-			folders{i},' - 000 - OAT-Data.mat'],NVIEW_Data_Names{:});
-	end
-end
-disp('... done!');
-Saved_Data_OAT.Number_Datasets = numel(folders);
-clear sep folders i NVIEW_*
-
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the distribution of voltage band violations per grid variant
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -96,7 +92,7 @@ Option_Active_GridVariants = [2,3,4];     %
 % y-axis Settings (Option_y_max_Value = -1 ... autoscale)
 Option_y_max_Value  = 1.05; % -1 ... autoscale
 Option_y_min_Value  = 0.95;
-Option_y_step_Value = 0.01; % -1 ... autostep
+Option_y_step_Value = 0.02; % -1 ... autostep
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 if numel(Option_Active_GridVariants) < 2
 	Labels_Title = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
@@ -116,8 +112,8 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_GridVars  = Settings_GridVariants(Option_Active_GridVariants,:);
 		
-		fig_oat_voltage_sum = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_oat_voltage_sum = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		
 	end
 	
 	figure(fig_oat_voltage_sum); nexttile;

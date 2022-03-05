@@ -110,8 +110,7 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
-		fig_oat_infeedsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_oat_infeedsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		% Set up the needed ticks:
 		[tick_x_Positions, tick_x_Labels] = get_tick_x_profiles(Settings_Number_Profiles);

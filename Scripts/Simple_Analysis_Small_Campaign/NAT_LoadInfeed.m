@@ -96,8 +96,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
-		fig_infeedsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_infeedsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		% Set up the needed ticks:
 		[tick_x_Positions, tick_x_Labels] = get_tick_x_profiles(Settings_Number_Profiles);
@@ -216,8 +215,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
-		fig_infeedsingle = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_infeedsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		% Set up the needed ticks:
 		[tick_x_Positions, tick_x_Labels] = get_tick_x_profiles(Settings_Number_Profiles);
@@ -296,8 +294,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
-		fig_histogrammsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_histogrammsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		
 	end
 	figure(fig_histogrammsummary); nexttile;
 	Labels_Scenarios = {};
@@ -388,8 +386,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		
-		fig_histogrammsingle = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_histogrammsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 	end
 	figure(fig_histogrammsingle); nexttile;
 	Labels_Scenarios = {};
@@ -484,8 +481,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		
-		fig_histogrammdevsummary = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_histogrammdevsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		Data_Dev_Hist = [];
 	end
@@ -591,8 +587,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		tick_y_Positions = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		tick_y_Labels    = Option_Histogramm_y_min_Value : Option_Histogramm_y_step_Value : Option_Histogramm_y_max_Value;
 		
-		fig_histogrammdevsingle = figure;
-		set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
+		fig_histogrammdevsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
 		
 		Data_Dev_Hist_Single = [];
 	end
