@@ -1,3 +1,8 @@
+% This script is neccesary, if simulation data has the old class
+% "Conncection_All_Point" present. This class was renamed to "Node". This
+% script replaces every instance of "Conncection_All_Point" with a instance
+% of "Node" with the same properties
+
 clear;
 
 addpath([pwd, filesep, 'Additional_Resources']);
