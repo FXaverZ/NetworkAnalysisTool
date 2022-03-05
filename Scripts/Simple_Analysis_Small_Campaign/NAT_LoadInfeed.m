@@ -10,8 +10,8 @@ clear();
 Saved_Data_Input = [];
 
 % Paths to source files:
-% Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
-Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
+Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+% Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
 % Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 % Add folder with help functions to path:
@@ -37,10 +37,10 @@ Settings_Scenario = {
 Settings_Datasets = {
 	1, 'Households'  , 'Haushaltslast'   ;...
 	2, 'Solar'       , 'PV Einspeisung'  ;...
-	3, 'El_Mobility' , 'Elektromobilität';...
+	3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
-Settings_Number_Profiles = 30;
+Settings_Number_Profiles = 10;
 
 % Load data (Load Infeed Data)
 folders = dir(Path_Data_LoadInfeed);
@@ -85,7 +85,7 @@ switch Option_Type_Load
 		Option_Plot_step_Value =   5; % kW
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = [];%['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = [];%['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -200,8 +200,8 @@ switch Option_Type_Load
 			};
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -279,9 +279,9 @@ Option_Histogramm_y_max_Value  = 12; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  4; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -371,9 +371,9 @@ Option_Histogramm_y_max_Value  = 20; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  5; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Subplot_Title_Startstr = 'Profilsatz'; % e.g. final format: "Profilsatz 3"
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -466,10 +466,10 @@ Option_Histogramm_y_max_Value  =  6; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  2; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -572,10 +572,10 @@ Option_Histogramm_y_max_Value  = 10; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  2; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
