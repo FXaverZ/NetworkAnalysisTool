@@ -13,6 +13,14 @@ voltage_violations = zeros(size(bus_voltages,1),size(bus_voltages,2),size(bus_vo
 voltage_values = zeros([size(voltage_violations) 3]);
 violated_nodes_number = zeros(size(bus_voltages,2),size(bus_voltages,1));
 
+if isempty(bus_voltages)
+	bus_violations_number = [];
+	voltage_violation_statistics = [];
+	voltage_violation_numbers = [];
+	bus_deviation_summary = [];
+	return
+end
+
 for s = 1 : size(bus_voltages,1) % scenario
 	for d = 1 : size(bus_voltages,2) % dataset
 		for t = 1 : size(bus_voltages,3) % timepoint
