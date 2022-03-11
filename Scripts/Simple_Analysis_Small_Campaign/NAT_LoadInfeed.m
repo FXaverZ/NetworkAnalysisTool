@@ -46,18 +46,18 @@ clear folders i_*
 %% Additional Set Up / Configuration / Loading of Input Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Settings_Scenario = {
-% 1      2                                                3             4          5
-% ID  ,  Filename                                       , Color       , LineStyle, String for legend 
-	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187], '-'      , 'Base Winter';...
-	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187], '-'      , 'Base Summer';...
-	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Winter';...
-	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Summer';...
-	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Winter';...
-	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Summer';...
-	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Winter';...
-	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Summer';...
-	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Winter';...
-	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Summer';...
+% 1      2                                                3             4          5                      6 
+% ID  ,  Filename                                       , Color       , LineStyle, Legendstr w.o. Season, Season 
+	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187], '-'      , 'SB'                 , 'Winter';...
+	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187], '-'      , 'SB'                 , 'Sommer';...
+	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72], '-'      , 'S1'                 , 'Winter';...
+	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72], '-'      , 'S1'                 , 'Sommer';...
+	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84], '-'      , 'S2'                 , 'Winter';...
+	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84], '-'      , 'S2'                 , 'Sommer';...
+	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162], '-'      , 'S3'                 , 'Winter';...
+	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162], '-'      , 'S3'                 , 'Sommer';...
+	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36], '-'      , 'S4'                 , 'Winter';...
+	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36], '-'      , 'S4'                 , 'Sommer';...
 	};
 
 Settings_Datasets = {
@@ -68,30 +68,22 @@ Settings_Datasets = {
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot sum over single appliance profiles over scenarios
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 2:2:10;   % Sommer
-% Option_Active_Scenarios = [6, 8];
-% Option_Active_Scenarios = 1:2:10; % Winter
-% Option_Active_Scenarios = 1:10;   % All scenarios (not recomended!)
+% Option_Active_Scenarios = 2:2:10; Option_Show_Season = 0; % Sommer
+Option_Active_Scenarios = [6, 8]; Option_Show_Season = 0;
+% Option_Active_Scenarios = 1:2:10; Option_Show_Season = 0; % Winter
+% Option_Active_Scenarios = 1:10; Option_Show_Season = 1; % All scenarios (not recomended!)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % y-axis Settings (Option_Plot_max_Value = -1 ... autoscale)
-switch Option_Type_Load
-	case 1 % 'Households'
-		Option_Plot_max_Value  =  40; % kW
-		Option_Plot_step_Value =  10; % kW
-	case 2 % 'Solar'
-		Option_Plot_max_Value  = 120; % kW
-		Option_Plot_step_Value =  20; % kW
-	case 3 % 'El_Mobility'
-		Option_Plot_max_Value  =  30; % kW
-		Option_Plot_step_Value =   5; % kW
-end
+Option_Plot_max_Value  = 110; % kW
+Option_Plot_step_Value =  20; % kW
+Option_Show_Activity   =   1;
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
-% Labels_Title = []; % No title for Word output
+Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -122,24 +114,27 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Data = Data ./ 1000;
 		if (~isempty(Data))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			if Option_Show_Season
+				Labels_Scenarios{end} = [Labels_Scenarios{end},' ',Active_Scenarios{j,6}]; %#ok<UNRCH>
+			end
 		end
 		switch Active_Type
 			case 'Households'
 				Data_num_active = sum(cell2mat(Data_Input.Set_1.Households.Number(:,2)));
-				Labels_Activity{end+1} = [num2str(Data_num_active),' Act.']; %#ok<SAGROW>
+				Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 			case 'Solar'
 				Data_num_active = size(Data_Input.(['Set_',num2str(k)]).Solar_Plants.Selectable,1)-2;
 				if Data_num_active > 0
-					Labels_Activity{end+1} = [num2str(Data_num_active),' Act.']; %#ok<SAGROW>
+					Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 				end
 			case 'El_Mobility'
 				Data_num_active = Data_Input.(['Set_',num2str(k)]).(Active_Type).Number;
 				if Data_num_active > 0
-					Labels_Activity{end+1} = [num2str(Data_num_active),' Act.']; %#ok<SAGROW>
+					Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 				end
 			otherwise
 				Data_num_active = 9999;
-				Labels_Activity{end+1} = [num2str(Data_num_active),' Act.']; %#ok<SAGROW>
+				Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 		end
 		figure(fig_infeedsummary); l = plot(Data);
 		set(l, 'Color', Active_Scenarios{j,3}/256);
@@ -156,7 +151,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	% Legend
 	if i == 1
 		legend(Labels_Scenarios);
-	elseif i == 2
+	elseif (i == 2) && Option_Show_Activity
 		legend(Labels_Activity{:});
 	end
 	% X Axis
@@ -177,7 +172,7 @@ clear Active_* Option_* Labels_* Data* tick_* i j k l ax
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 8; % Select only one scenario!
+Option_Active_Scenarios = 6; % Select only one scenario!
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -457,8 +452,8 @@ clear Active_* Option_* ax b Data* Hist_* i j k m Labels_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (sum over appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = [6,8];
+Option_Active_Scenarios = 2:2:10; % Sommer
+% Option_Active_Scenarios = [6,8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
@@ -563,17 +558,17 @@ clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = [6,8];
+Option_Active_Scenarios = 2:2:10; % Sommer
+% Option_Active_Scenarios = [6,8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Number_Bins            = 70;
-Option_Histogramm_x_max_Value = 12; %kW (-1 ... autoscale)
+Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
 Option_Histogramm_x_min_Value =  0; %kW
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 14; % '%' (-1 ... autoscale)
+Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  4; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
