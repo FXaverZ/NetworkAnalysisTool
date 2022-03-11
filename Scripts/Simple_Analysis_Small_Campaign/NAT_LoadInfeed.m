@@ -10,8 +10,8 @@ clear();
 Saved_Data_Input = [];
 
 % Paths to source files:
-Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
-% Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
+Settings_Number_Profiles = 10; Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+% Settings_Number_Profiles = 30; Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
 % Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
 % Add folder with help functions to path:
@@ -40,14 +40,13 @@ Settings_Datasets = {
 	3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
-Settings_Number_Profiles = 10;
-
 % Load data (Load Infeed Data)
 folders = dir(Path_Data_LoadInfeed);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
-
+disp('Loading Input Data...');
 for i = 1: numel(folders)
+	disp(['    Reading File ',num2str(i_d),' of ',num2str(numel(folders))]);
 	if ~isfield(Saved_Data_Input,['Saved_',num2str(i)])
 		Saved_Data_Input.(['Saved_',num2str(i)]) = [];
 	end
@@ -58,15 +57,15 @@ for i = 1: numel(folders)
 		end
 	end
 end
-
+disp('... done!');
 Saved_Data_Input.Number_Datasets = numel(folders);
 clear folders i j Load_Infeed_Data
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot sum over single appliance profiles over scenarios
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-% Option_Active_Scenarios = 2:2:10;   % Sommer
-Option_Active_Scenarios = [6, 8];
+Option_Active_Scenarios = 2:2:10;   % Sommer
+% Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 % Option_Active_Scenarios = 1:10;   % All scenarios (not recomended!)
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -85,7 +84,7 @@ switch Option_Type_Load
 		Option_Plot_step_Value =   5; % kW
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = [];%['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = [];%['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -200,8 +199,8 @@ switch Option_Type_Load
 			};
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
