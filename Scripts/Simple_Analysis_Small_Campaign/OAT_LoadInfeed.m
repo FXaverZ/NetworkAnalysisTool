@@ -21,7 +21,7 @@ addpath([scriptpath, filesep, 'Additional_Resources']);
 addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Analyzing']);
 addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Grid_Representation']);
 
-clear scriptpath 
+clear script*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Additional Set Up / Configuration / Loading of OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -62,20 +62,30 @@ folders = cellfun(@strsplit,folders,sep,'UniformOutput',false);
 folders = cellfun(@(x) x{1},folders,'UniformOutput',false);
 folders = unique(folders);
 
-for i = 1: numel(folders)
-	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i)])
-		Saved_Data_OAT.(['Saved_',num2str(i)]) = load([Path_Data_OAT,...
-			folders{i},' - 000 - OAT-Data.mat'],'NVIEW_Results');
-% 		NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
-% 		if ~isfield(Saved_Data_OAT,['Saved_',num2str(i)])
-% 			Saved_Data_OAT.(['Saved_',num2str(i)]) = load([Path_Data_OAT,...
-% 				folders{i},' - 000 - OAT-Data.mat'],NVIEW_Data_Names{:});
-% 		end
+NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
+disp('Loading OAT Data...');
+if ~isfield(Saved_Data_OAT, 'Extraction_Dates')
+	Saved_Data_OAT.Extraction_Dates = zeros(1,numel(folders));
+end
+for i_d = 1: numel(folders)
+	disp(['    Reading File ',num2str(i_d),' of ',num2str(numel(folders))]);
+	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i_d)])
+		Saved_Data_OAT.(['Saved_',num2str(i_d)]) = load([Path_Data_OAT,...
+			folders{i_d},' - 000 - OAT-Data.mat'],NVIEW_Data_Names{:});
+		% Get the date of input data extraction:
+		NVIEW_Extraction_Date = Saved_Data_OAT.(['Saved_',...
+			num2str(i_d)]).NVIEW_Control.Simulation_Options.NAT_Settings.Simulation.Scenarios_Path;
+		[~,NVIEW_Extraction_Date_1,NVIEW_Extraction_Date_2] = fileparts(NVIEW_Extraction_Date);
+		NVIEW_Extraction_Date = [NVIEW_Extraction_Date_1,NVIEW_Extraction_Date_2];
+		NVIEW_Extraction_Date = datenum(NVIEW_Extraction_Date,'yyyy_mm_dd-HH.MM.SS');
+        Saved_Data_OAT.Extraction_Dates(i_d) = NVIEW_Extraction_Date;
 	end
 end
-
+disp('... done!');
 Saved_Data_OAT.Number_Datasets = numel(folders);
-clear sep folders i NVIEW_*
+[~,NVIEW_IX] = sort(Saved_Data_OAT.Extraction_Dates);
+Saved_Data_OAT.Sorting_Idxs = NVIEW_IX;
+clear sep folders i_* NVIEW_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot a quick summary of the input data 
@@ -105,8 +115,9 @@ Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-for i = 1 : Saved_Data_OAT.Number_Datasets
-	if i <= 1
+for i_d = 1 : Saved_Data_OAT.Number_Datasets
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+	if i_d <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
@@ -125,7 +136,7 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 		Active_Type = 'El_mobility';
 	end
 	
-	Data_All = Saved_Data_OAT.(['Saved_',num2str(i)]).NVIEW_Results.Input_Data.(Active_Type);
+	Data_All = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.Input_Data.(Active_Type);
 	% from W to kW
 	Data_All = Data_All ./ 1000;
 	
@@ -146,9 +157,9 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 	% Format Diagrams:
 	figure(fig_oat_infeedsummary); 
 	ax = gca;
-	ax.Title.String = ['Profilsatz ',num2str(i)];
+	ax.Title.String = ['Profilsatz ',num2str(i_d)];
 	% Legend
-	if i == 1
+	if i_d == 1
 		legend(Labels_Scenarios);
 	end
 	% X Axis
@@ -165,5 +176,5 @@ for i = 1 : Saved_Data_OAT.Number_Datasets
 	figure(fig_oat_infeedsummary); hold off;
 end
 
-clear Active_* ax Data* i j l Labels_* Option_* tick_*
+clear Active_* ax Data* i_* j l Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =

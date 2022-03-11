@@ -33,16 +33,28 @@ folders = cellfun(@strsplit,folders,sep,'UniformOutput',false);
 folders = cellfun(@(x) x{1},folders,'UniformOutput',false);
 folders = unique(folders);
 disp('Loading OAT Data...');
+NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
+if ~isfield(Saved_Data_OAT, 'Extraction_Dates')
+	Saved_Data_OAT.Extraction_Dates = zeros(1,numel(folders));
+end
 for i_d = 1: numel(folders)
 	disp(['    Reading File ',num2str(i_d),' of ',num2str(numel(folders))]);
-	NVIEW_Data_Names = {'NVIEW_Results', 'NVIEW_Analysis_Selection', 'NVIEW_Control', 'NVIEW_Processed'};
 	if ~isfield(Saved_Data_OAT,['Saved_',num2str(i_d)])
 		Saved_Data_OAT.(['Saved_',num2str(i_d)]) = load([Path_Data_OAT,...
 			folders{i_d},' - 000 - OAT-Data.mat'],NVIEW_Data_Names{:});
+		% Get the date of input data extraction:
+		NVIEW_Extraction_Date = Saved_Data_OAT.(['Saved_',...
+			num2str(i_d)]).NVIEW_Control.Simulation_Options.NAT_Settings.Simulation.Scenarios_Path;
+		[~,NVIEW_Extraction_Date_1,NVIEW_Extraction_Date_2] = fileparts(NVIEW_Extraction_Date);
+		NVIEW_Extraction_Date = [NVIEW_Extraction_Date_1,NVIEW_Extraction_Date_2];
+		NVIEW_Extraction_Date = datenum(NVIEW_Extraction_Date,'yyyy_mm_dd-HH.MM.SS');
+        Saved_Data_OAT.Extraction_Dates(i_d) = NVIEW_Extraction_Date;
 	end
 end
 disp('... done!');
 Saved_Data_OAT.Number_Datasets = numel(folders);
+[~,NVIEW_IX] = sort(Saved_Data_OAT.Extraction_Dates);
+Saved_Data_OAT.Sorting_Idxs = NVIEW_IX;
 clear script* sep folders i_* NVIEW_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -105,6 +117,7 @@ Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 	if i_d <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_GridVars  = Settings_GridVariants(Option_Active_GridVariants,:);
@@ -131,7 +144,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 	Labels_Scen_Style = [];
 	Labels_Grid       = {};
 	Labels_Grid_Style = [];
-	Data = Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Processed;
+	Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
 	
 	for i_g = 1:size(Active_GridVars,1)
 		for i_s = 1 : size(Active_Scenarios,1)
@@ -205,8 +218,8 @@ clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Option_Number_Datasets_to_Use = 15;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-% Option_Umin =  90; Option_Umax = 110; % '%' NAT Default (no recalculations!)
-Option_Umin =  95; Option_Umax = 105; % '%'
+Option_Umin =  90; Option_Umax = 110; % '%' NAT Default (no recalculations!)
+% Option_Umin =  95; Option_Umax = 105; % '%'
 % Option_Umin =  92; Option_Umax = 108; % '%'
 % Option_Umin =  93; Option_Umax = 107; % '%'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -214,7 +227,7 @@ Option_Active_Scenarios = 2:2:10;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Active_GridVariants = 3:4;%1:4;     % all grid varaiants
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_x_max_Value  = 100;  % (-1 ... autoscale)
+Option_Histogramm_x_max_Value  = -1;  % (-1 ... autoscale)
 Option_Number_Bins             = 50;
 Option_Histogramm_x_min_Value  =  0; 
 Option_Histogramm_x_step_Value =  2;
@@ -233,6 +246,7 @@ Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
 Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 for i_d = 1 : Option_Number_Datasets_to_Use
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 %     Preprocessing...
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -268,9 +282,9 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	if isempty(Data_Recalculation_Needed)
 		% Check, if data has to be recalculated...
-		Data_ID = Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Processed.Control.ID;
+		Data_ID = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.ID;
 		Data_Timepoints = ...
-			Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+			Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
 		Data_IDs = split(Data_ID,'_');
 		Data_Umin = str2double(Data_IDs{4})/100;
 		Data_Umax = str2double(Data_IDs{5})/100;
@@ -315,9 +329,9 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 			end
 			i_recalc_counter = i_recalc_counter + numel(Data_Recalculate_Scenarios);
 			% Recalculate needed data...
-			Data_bus_voltages_raw = Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Results.(Active_GridVars{i_g,2}).bus_voltages;
+			Data_bus_voltages_raw = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVars{i_g,2}).bus_voltages;
 			Data_bus_voltages_raw = Data_bus_voltages_raw(Data_Recalculate_Scenarios,:,:,:,:);
-			Data_bus_info     = Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Results.(Active_GridVars{i_g,2}).bus;
+			Data_bus_info     = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVars{i_g,2}).bus;
 			[...
 				Data_voltage_violations,...
 				Data_bus_violations,...
@@ -357,7 +371,7 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		disp(['        Processed ',num2str(i_recalc_counter),' Datasets.'])
 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
 	else
-		Data = Saved_Data_OAT.(['Saved_',num2str(i_d)]).NVIEW_Processed;
+		Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		%     Data Extraction of Voltage Band Violation Analysis
 		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
