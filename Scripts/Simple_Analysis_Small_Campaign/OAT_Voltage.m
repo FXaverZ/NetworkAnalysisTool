@@ -1,6 +1,11 @@
+%%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 clear();
 Saved_Data_OAT           = [];
 Saved_Recalculation_Data = []; % Hint: Save this structure for later use...
+% Add folder with help functions / needed classes to path:
+addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
+addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))),filesep,'NAT_Common',filesep,'Analyzing']);
+addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))),filesep,'NAT_Common',filesep,'Grid_Representation']);
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Initial Set Up / Loading of OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -10,19 +15,15 @@ Saved_Recalculation_Data = []; % Hint: Save this structure for later use...
 % Only this cell (loading the data) and the next one (set up of
 % information) have to be executed before every other cell! 
 
-
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Paths to source files:
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
 	'Results_mean\01_Merged_OAT-Data\'];
 
-% Add folder with help functions / needed classes to path:
-scriptpath = fileparts(matlab.desktop.editor.getActiveFilename);
-scriptfolderpath = fileparts(scriptpath);
-addpath([scriptpath, filesep, 'Additional_Resources']);
-addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Analyzing']);
-addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Grid_Representation']);
-
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Load OAT Data
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 folders = dir(Path_Data_OAT);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
@@ -55,14 +56,14 @@ disp('... done!');
 Saved_Data_OAT.Number_Datasets = numel(folders);
 [~,NVIEW_IX] = sort(Saved_Data_OAT.Extraction_Dates);
 Saved_Data_OAT.Sorting_Idxs = NVIEW_IX;
-clear script* sep folders i_* NVIEW_*
+clear sep folders i_* NVIEW_*
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Additional Set Up / Configuration
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Settings_Scenario = {...
-% 1     2                                                 3                 4          5
-% ID ,  Filename                                        , Color           , LineStyle, String for legend 
+% 1      2                                                3                 4          5
+% ID  ,  Filename                                       , Color           , LineStyle, String for legend 
 	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187]/256, '-'      , 'SB Winter';...
 	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187]/256, '-'      , 'SB Summer';...
 	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72]/256, '-'      , 'S1 Winter';...
@@ -76,13 +77,13 @@ Settings_Scenario = {...
 	};
 
 Settings_GridVariants = {...
-% 1     2                                  3                 4          5
-% ID ,  Sub-Structure Name               , Color           , LineStyle, String for legend 
-    1, 'g01_Base_NS_50_Nodes'            ,[256,256,256]/256, '--'     , 'Basisnetz';...
-    2, 'g02_Repalce_OH_Lines_With_Cables',[256,256,256]/256, '-.'     , 'Ersatz Oberleitung';...
-    3, 'g03_Add_Cable_to_First_OH_Line'  ,[256,256,256]/256, ':'      , 'Verstärkung Oberleitung';...
-    4, 'g04_Add_Cable_to_Weak_Cables'    ,[256,256,256]/256, '-'      , 'Verstärkung Kabel';...
-	};
+% 1     2                                                 3                 4          5
+% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend 
+    1, 'g01_Base_NS_50_Nodes'                           ,[256,256,256]/256, '--'     , 'Basisnetz';...
+    2, 'g02_Repalce_OH_Lines_With_Cables'               ,[256,256,256]/256, '-.'     , 'Ersatz Oberleitung';...
+    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstärkung Oberleitung';...
+    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstärkung Kabel';...
+	}; 
 
 Settings_Datasets = {
 	1, 'Households'  , 'Haushaltslast'   ;...

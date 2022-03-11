@@ -1,54 +1,29 @@
+%%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 clear();
+Saved_Data_OAT   = [];
+% Add folder with help functions / needed classes to path:
+addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
+addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))),filesep,'NAT_Common',filesep,'Analyzing']);
+addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))),filesep,'NAT_Common',filesep,'Grid_Representation']);
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Initial Set Up
+%% Initial Set Up / Loading of OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % This is a simple script for the analysis of the small simulation
 % campaign. It is structured into individuall cells to be executed one by
 % one.
-% Only this cell (set up of of datastorage) and the next one (Set up and
-% loading of data) have to be executed before every other cell!
-Saved_Data_OAT   = [];
+% Only this cell (loading the data) and the next one (set up of
+% information) have to be executed before every other cell! 
 
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Paths to source files:
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
 	'Results_mean\01_Merged_OAT-Data_Load_Infeed\'];
 % Path_Data_OAT = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
-% Add folder with help functions / needed classes to path:
-scriptpath = fileparts(matlab.desktop.editor.getActiveFilename);
-scriptfolderpath = fileparts(scriptpath);
-addpath([scriptpath, filesep, 'Additional_Resources']);
-addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Analyzing']);
-addpath([fileparts(scriptfolderpath),filesep,'NAT_Common',filesep,'Grid_Representation']);
-
-clear script*
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Additional Set Up / Configuration / Loading of OAT Data
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Settings_Scenario = {
-% 1     2                                                3             4          5
-% ID  , Filename                                       , Color       , LineStyle, String for legend 
-	 1,'01_SB_Base_Winter_Workda'                      ,[ 74,126,187],'-','Base Winter';...
-	 2,'02_SB_Base_Summer_Workda'                      ,[ 74,126,187],'-','Base Summer';...
-	 3,'03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72],'-','Low Load High Infeed Winter';...
-	 4,'04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72],'-','Low Load High Infeed Summer';...
-	 5,'05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84],'-','High Load High Infeed Winter';...
-	 6,'06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84],'-','High Load High Infeed Summer';...
-	 7,'07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162],'-','High Load High Infeed (2 Nodes) Winter';...
-	 8,'08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162],'-','High Load High Infeed (2 Nodes) Summer';...
-	 9,'09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36],'-','Medium Load High Infeed (2 Nodes) Winter';...
-	10,'10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36],'-','Medium Load High Infeed (2 Nodes) Summer';...
-	};
-
-Settings_Datasets = {
-	1, 'Households'  , 'Haushaltslast'   ;...
-	2, 'Solar'       , 'PV Einspeisung'  ;...
-	3, 'El_Mobility' , 'Elektromobilität';...
-	};
-
-Settings_Number_Profiles = 10;
-
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Load OAT Data
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 folders = dir(Path_Data_OAT);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
@@ -85,7 +60,33 @@ disp('... done!');
 Saved_Data_OAT.Number_Datasets = numel(folders);
 [~,NVIEW_IX] = sort(Saved_Data_OAT.Extraction_Dates);
 Saved_Data_OAT.Sorting_Idxs = NVIEW_IX;
+
 clear sep folders i_* NVIEW_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Additional Set Up / Configuration
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Settings_Scenario = {
+% 1      2                                                3             4          5
+% ID  ,  Filename                                       , Color       , LineStyle, String for legend 
+	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187], '-'      , 'Base Winter';...
+	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187], '-'      , 'Base Summer';...
+	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Winter';...
+	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Summer';...
+	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Winter';...
+	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Summer';...
+	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Winter';...
+	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Summer';...
+	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Winter';...
+	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Summer';...
+	};
+
+Settings_Datasets = {
+	1, 'Households'  , 'Haushaltslast'   ;...
+	2, 'Solar'       , 'PV Einspeisung'  ;...
+	3, 'El_Mobility' , 'Elektromobilität';...
+	};
+
+Settings_Number_Profiles = 10;
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot a quick summary of the input data 

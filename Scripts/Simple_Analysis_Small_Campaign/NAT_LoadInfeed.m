@@ -1,66 +1,70 @@
+%%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 clear();
+Saved_Data_Input = [];
+% Add folder with help functions / needed classes to path:
+addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Initial Set Up
+%% Initial Set Up / Loading of OAT Data
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % This is a simple script for the analysis of the small simulation
 % campaign. It is structured into individuall cells to be executed one by
 % one.
-% Only this cell (set up of of datastorage) and the next one (Set up and
-% loading of data) have to be executed before every other cell!
-Saved_Data_Input = [];
+% Only this cell (loading the data) and the next one (set up of
+% information) have to be executed before every other cell! 
 
-% Paths to source files:
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+% Paths to source files / Number profiles per Set:
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Settings_Number_Profiles = 10; Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 % Settings_Number_Profiles = 30; Path_Data_LoadInfeed = 'C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios_30erSets';
-% Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
+% Settings_Number_Profiles = 10; Path_Data_LoadInfeed = 'D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\Load_Infeed_Data_f_Scenarios';
 
-% Add folder with help functions to path:
-addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Additional Set Up / Configuration / Loading of Input Data
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Settings_Scenario = {
-% 1     2                                                3             4          5
-% ID  , Filename                                       , Color       , LineStyle, String for legend 
-	 1,'01_SB_Base_Winter_Workda'                      ,[ 74,126,187],'-','Base Winter';...
-	 2,'02_SB_Base_Summer_Workda'                      ,[ 74,126,187],'-','Base Summer';...
-	 3,'03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72],'-','Low Load High Infeed Winter';...
-	 4,'04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72],'-','Low Load High Infeed Summer';...
-	 5,'05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84],'-','High Load High Infeed Winter';...
-	 6,'06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84],'-','High Load High Infeed Summer';...
-	 7,'07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162],'-','High Load High Infeed (2 Nodes) Winter';...
-	 8,'08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162],'-','High Load High Infeed (2 Nodes) Summer';...
-	 9,'09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36],'-','Medium Load High Infeed (2 Nodes) Winter';...
-	10,'10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36],'-','Medium Load High Infeed (2 Nodes) Summer';...
-	};
-
-Settings_Datasets = {
-	1, 'Households'  , 'Haushaltslast'   ;...
-	2, 'Solar'       , 'PV Einspeisung'  ;...
-	3, 'El_Mobility' , 'Elektromobilitï¿½t';...
-	};
-
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Load data (Load Infeed Data)
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 folders = dir(Path_Data_LoadInfeed);
 folders = struct2cell(folders);
 folders = folders(1,3:end);
 disp('Loading Input Data...');
-for i = 1: numel(folders)
+for i_d = 1: numel(folders)
 	disp(['    Reading File ',num2str(i_d),' of ',num2str(numel(folders))]);
-	if ~isfield(Saved_Data_Input,['Saved_',num2str(i)])
-		Saved_Data_Input.(['Saved_',num2str(i)]) = [];
+	if ~isfield(Saved_Data_Input,['Saved_',num2str(i_d)])
+		Saved_Data_Input.(['Saved_',num2str(i_d)]) = [];
 	end
-	for j = 1 : size(Settings_Scenario,1)
-		if ~isfield(Saved_Data_Input.(['Saved_',num2str(i)]),['Saved_',num2str(Settings_Scenario{j,1})])
-			Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Settings_Scenario{j,1})]) = ...
-				load([Path_Data_LoadInfeed,filesep,folders{i},'\',Settings_Scenario{j,2},'.mat'],'Load_Infeed_Data');
+	for i_s = 1 : size(Settings_Scenario,1)
+		if ~isfield(Saved_Data_Input.(['Saved_',num2str(i_d)]),['Saved_',num2str(Settings_Scenario{i_s,1})])
+			Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Settings_Scenario{i_s,1})]) = ...
+				load([Path_Data_LoadInfeed,filesep,folders{i_d},'\',Settings_Scenario{i_s,2},'.mat'],'Load_Infeed_Data');
 		end
 	end
 end
 disp('... done!');
 Saved_Data_Input.Number_Datasets = numel(folders);
-clear folders i j Load_Infeed_Data
 
+clear folders i_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Additional Set Up / Configuration / Loading of Input Data
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+Settings_Scenario = {
+% 1      2                                                3             4          5
+% ID  ,  Filename                                       , Color       , LineStyle, String for legend 
+	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187], '-'      , 'Base Winter';...
+	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187], '-'      , 'Base Summer';...
+	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Winter';...
+	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72], '-'      , 'Low Load High Infeed Summer';...
+	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Winter';...
+	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84], '-'      , 'High Load High Infeed Summer';...
+	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Winter';...
+	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162], '-'      , 'High Load High Infeed (2 Nodes) Summer';...
+	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Winter';...
+	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36], '-'      , 'Medium Load High Infeed (2 Nodes) Summer';...
+	};
+
+Settings_Datasets = {
+	1, 'Households'  , 'Haushaltslast'   ;...
+	2, 'Solar'       , 'PV Einspeisung'  ;...
+	3, 'El_Mobility' , 'Elektromobilität';...
+	};
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot sum over single appliance profiles over scenarios
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -84,9 +88,10 @@ switch Option_Type_Load
 		Option_Plot_step_Value =   5; % kW
 end
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = [];%['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -169,7 +174,6 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 end
 
 clear Active_* Option_* Labels_* Data* tick_* i j k l ax  
-
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -203,6 +207,7 @@ Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_
 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -278,9 +283,10 @@ Option_Histogramm_y_max_Value  = 12; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  4; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -370,10 +376,11 @@ Option_Histogramm_y_max_Value  = 20; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  5; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Subplot_Title_Startstr = 'Profilsatz'; % e.g. final format: "Profilsatz 3"
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -447,7 +454,6 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 end
 
 clear Active_* Option_* ax b Data* Hist_* i j k m Labels_* tick_*
-
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (sum over appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -465,10 +471,11 @@ Option_Histogramm_y_max_Value  =  6; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  2; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -553,7 +560,6 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 end
 
 clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
-
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -564,17 +570,18 @@ Option_Active_Scenarios = [6,8];
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Number_Bins            = 70;
-Option_Histogramm_x_max_Value = -1; %kW (-1 ... autoscale)
+Option_Histogramm_x_max_Value = 12; %kW (-1 ... autoscale)
 Option_Histogramm_x_min_Value =  0; %kW
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 10; % '%' (-1 ... autoscale)
+Option_Histogramm_y_max_Value  = 14; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  2; % '%'
+Option_Histogramm_y_step_Value =  4; % '%'
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
+% Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure:
@@ -664,5 +671,4 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 end
 
 clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
-
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
