@@ -1,7 +1,7 @@
-function fig = set_up_tiledlayout(titlestr,xlabestr,ylabelstr)
+function fig = set_up_tiledlayout(titlestr,xlabelstr,ylabelstr)
 %SET_UP_TILEDLAYOUT sets up a tiled figure with title, labes, etc.
 
-Fontsize_big    = 18;
+Fontsize_big    = 14;
 
 % Values of currently working set up:
 %            left,  bottom,    width,  height
@@ -25,9 +25,13 @@ if ~isempty(titlestr)
 	title(t,titlestr,...
 		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold')
 end
-xlabel(t,xlabestr,...
-	'FontName','Palatino Linotype', 'FontSize', Fontsize_big)
-ylabel(t,ylabelstr,...
-	'FontName','Palatino Linotype', 'FontSize', Fontsize_big)
+if ~isempty(xlabelstr)
+	xlabel(t,xlabelstr,...
+		'FontName','Palatino Linotype', 'FontSize', Fontsize_big)
+end
+if ~isempty(ylabelstr)
+	ylabel(t,ylabelstr,...
+		'FontName','Palatino Linotype', 'FontSize', Fontsize_big)
+end
 end
 

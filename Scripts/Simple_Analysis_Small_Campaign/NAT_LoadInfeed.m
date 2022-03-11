@@ -67,23 +67,24 @@ Settings_Datasets = {
 	};
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot sum over single appliance profiles over scenarios
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = 
 % Option_Active_Scenarios = 2:2:10; Option_Show_Season = 0; % Sommer
 Option_Active_Scenarios = [6, 8]; Option_Show_Season = 0;
 % Option_Active_Scenarios = 1:2:10; Option_Show_Season = 0; % Winter
 % Option_Active_Scenarios = 1:10; Option_Show_Season = 1; % All scenarios (not recomended!)
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = 'El_Mobility'
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
 % y-axis Settings (Option_Plot_max_Value = -1 ... autoscale)
-Option_Plot_max_Value  = 110; % kW
-Option_Plot_step_Value =  20; % kW
+Option_Plot_max_Value  =  75; % kW
+Option_Plot_step_Value =  15; % kW
 Option_Show_Activity   =   1;
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
-Labels_X_Direction = 'Datensets';
+% Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
-Labels_Title = []; % No title for Word output
+Labels_X_Direction = []; % No label for Word output
+Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
@@ -171,46 +172,26 @@ end
 clear Active_* Option_* Labels_* Data* tick_* i j k l ax  
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios = 6; % Select only one scenario!
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-% y-axis Settings for each sceanrio and load type
-switch Option_Type_Load
-	case 1 % 'Households'
-		Option_Plot = {...
-			% 1,  2,  3,  4,  5,  6,  7,  8,  9, 10; % Scenario (Option_Active_Scenarios)
-			 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1; % Option_Plot_max_Value ( -1 ... autoscale)
-			 [], [], [], [], [], [], [], -1, [], []; % Option_Plot_step_Value
-			};
-	case 2 % 'Solar'
-		Option_Plot = {...
-			% 1,  2,  3,  4,  5,  6,  7,  8,  9, 10; % Scenario (Option_Active_Scenarios)
-			 -1, -1, -1, -1, -1, 12, -1, 12, -1, -1; % Option_Plot_max_Value ( -1 ... autoscale)
-			 [], [], [], [], [],  4, [],  4, [], []; % Option_Plot_step_Value
-			};
-	case 3 % 'El_Mobility'
-		Option_Plot = {...
-			% 1,  2,  3,  4,  5,  6,  7,  8,  9, 10; % Scenario (Option_Active_Scenarios)
-			 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1; % Option_Plot_max_Value ( -1 ... autoscale)
-			 [], [], [], [], [], [], [], -1, [], []; % Option_Plot_step_Value
-			};
-end
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
-Labels_X_Direction = 'Datensets';
+% = = = = = = = = = = = = = = = = = 
+Option_Active_Scenarios = 8; % Select only one scenario!
+%- - - - - - - - - - - - - - - - - - 
+Option_Type_Load        = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+%- - - - - - - - - - - - - - - - - - 
+% y-axis Settings (Option_Plot_max_Value = -1 ... autoscale)
+Option_Plot_max_Value   = 12; % kW
+Option_Plot_step_Value  =  4; % kW
+% = = = = = = = = = = = = = = = = = 
+% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
-% Labels_Title = []; % No title for Word output
+Labels_X_Direction = []; % No label for Word output
+Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
-		Option_Plot_max_Value  =  Option_Plot{1,Option_Active_Scenarios};
-		Option_Plot_step_Value =  Option_Plot{2,Option_Active_Scenarios};
-		
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_Type = Settings_Datasets{Option_Type_Load,2};
 		
@@ -263,25 +244,25 @@ end
 clear Option_* Active_* tick_* Data* i j k ax
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms over the profile sums over different scenarios
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = 
 % Option_Active_Scenarios = 2:2:10; % Sommer
 Option_Active_Scenarios = [6,8];
 % Option_Active_Scenarios = 1:2:10; % Winter
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
 Option_Number_Bins             = 70;
 Option_Histogramm_x_max_Value  = 70; %kW
 Option_Histogramm_x_min_Value  =  0; %kW
-%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
 Option_Histogramm_y_max_Value  = 12; % '%' (-1 ... autoscale)
 Option_Histogramm_y_min_Value  =  0; % '%'
 Option_Histogramm_y_step_Value =  4; % '%'
-% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% = = = = = = = = = = = = = = = = = 
+% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
 Labels_Y_Direction = '% rel. Häufigkeit';
-% Labels_Title = []; % No title for Word output
+Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 % Plot the figure
