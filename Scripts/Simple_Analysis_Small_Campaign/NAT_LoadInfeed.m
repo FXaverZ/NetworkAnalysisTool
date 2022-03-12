@@ -39,10 +39,21 @@ Settings_Scenario = {
 
 Settings_Datasets = {
 % 1      2               3
-% ID  ,  Data Typ ID  ,  Legendstr.	
+% ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
 	 3, 'El_Mobility' , 'Elektromobilität';...
+	};
+
+Settings_Datatype = {
+	% 1      2                   3
+	% ID  ,  Data Typ ID      ,  Legendstr.
+	1, 'Data_Sample'     , 'Sample';...
+	2, 'Data_Mean'       , 'Mittelwert';...
+	3, 'Data_Min'        , 'Minimum';...
+	4, 'Data_Max'        , 'Maximum';...
+	5, 'Data_05P_Quantil', '5% Quantille';...
+	6, 'Data_95P_Quantil', '95% Quantille';...
 	};
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -98,7 +109,7 @@ Labels_Title       = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_infeedsummary = set_up_tiledlayout(Labels_Title,...
 			Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
@@ -112,31 +123,31 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	Labels_Scenarios = {};
 	for j = 1 : size(Active_Scenarios,1)
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled;...
+				Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
 		end
-		Data = sum(Data,2);
+		Data_Mean_Shuffled = sum(Data_Mean_Shuffled,2);
 		% from W to kW
-		Data = Data ./ 1000;
-		if (~isempty(Data))
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
+		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			if Option_Show_Season
 				Labels_Scenarios{end} = [Labels_Scenarios{end},' ',Active_Scenarios{j,6}]; %#ok<UNRCH>
 			end
 		end
-		switch Active_Type
+		switch Active_LoadType
 			case 'Households'
 				Data_num_active = sum(cell2mat(Data_Input.Set_1.Households.Number(:,2)));
 				Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 			case 'Solar'
-				Data_num_active = size(Data_Input.(['Set_',num2str(k)]).Solar_Plants.Selectable,1)-2;
+				Data_num_active = size(Data_Input.(['Set_',num2str(i_sp)]).Solar_Plants.Selectable,1)-2;
 				if Data_num_active > 0
 					Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 				end
 			case 'El_Mobility'
-				Data_num_active = Data_Input.(['Set_',num2str(k)]).(Active_Type).Number;
+				Data_num_active = Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Number;
 				if Data_num_active > 0
 					Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 				end
@@ -144,9 +155,9 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				Data_num_active = 9999;
 				Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 		end
-		figure(fig_infeedsummary); l = plot(Data);
-		set(l, 'Color', Active_Scenarios{j,3}/256);
-		set(l, 'LineStyle', Active_Scenarios{j,4});
+		figure(fig_infeedsummary); f_l = plot(Data_Mean_Shuffled);
+		set(f_l, 'Color', Active_Scenarios{j,3}/256);
+		set(f_l, 'LineStyle', Active_Scenarios{j,4});
 		drawnow;
 		if j <=1
 			figure(fig_infeedsummary); hold on;
@@ -206,7 +217,7 @@ Labels_Title       = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_infeedsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction,...
 			Labels_Y_Direction, Option_Plot_Size);
@@ -218,18 +229,18 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_infeedsingle); nexttile;
 	for j = 1 : size(Active_Scenarios,1)
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean];  %#ok<AGROW>
-		end	
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled;...
+				Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean];  %#ok<AGROW>
+		end
 		% from W to kW
-		Data = Data ./ 1000;
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
 		% remove zero profiles
-		Data = Data(:,sum(Data)>0);
+		Data_Mean_Shuffled = Data_Mean_Shuffled(:,sum(Data_Mean_Shuffled)>0);
 		% add up all phase data:
-		Data = Data(:,1:3:end)+Data(:,2:3:end)+Data(:,3:3:end);
-		figure(fig_infeedsingle); plot(Data);
+		Data_Mean_Shuffled = Data_Mean_Shuffled(:,1:3:end)+Data_Mean_Shuffled(:,2:3:end)+Data_Mean_Shuffled(:,3:3:end);
+		figure(fig_infeedsingle); plot(Data_Mean_Shuffled);
 		drawnow;
 % 		if j <=1
 % 			figure(fig_infeedsingle); hold on;
@@ -293,7 +304,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		fig_histogrammsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
 		
@@ -302,26 +313,26 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	Labels_Scenarios = {};
 	for j = 1 : size(Active_Scenarios,1)
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean];  %#ok<AGROW>
-		end	
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled;...
+				Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean];  %#ok<AGROW>
+		end
 		% from W to kW
-		Data = Data ./ 1000;
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
 		% Sum all single appliance profiles up
-		Data = sum(Data,2);
-		if (~isempty(Data))
+		Data_Mean_Shuffled = sum(Data_Mean_Shuffled,2);
+		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			
 			% histogramms of sum
 			Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
 			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
-			[~,Hist_binIdx] = histc(Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
+			[~,Hist_binIdx] = histc(Data_Mean_Shuffled,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
 			% calculate the number of elements in bins
 			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
 			figure(fig_histogrammsummary);
-			switch Active_Type
+			switch Active_LoadType
 				case 'Solar'
 					% In case of solar, don't plot the "0" bin, becaus this
 					% is almost 50% of the data (nigthtime!)
@@ -395,7 +406,7 @@ Labels_Title       = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
@@ -406,20 +417,20 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	Labels_Scenarios = {};
 	for j = 1 : size(Active_Scenarios,1)
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data;...
-				Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean];  %#ok<AGROW>
-		end	
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled;...
+				Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean];  %#ok<AGROW>
+		end
 		% from W to kW
-		Data = Data ./ 1000;
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
 		Data_Singlephase = [];
-		for m = 1 : size(Data, 2)/ 6
-			Data_Sing = Data(:,1+(m-1)*6:6+(m-1)*6);
+		for m = 1 : size(Data_Mean_Shuffled, 2)/ 6
+			Data_Sing = Data_Mean_Shuffled(:,1+(m-1)*6:6+(m-1)*6);
 			Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
 		end
 		Data_Singlephase = sum(Data_Singlephase,2);
-		if (~isempty(Data))
+		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			% histogramms of single appliances
 			Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
@@ -428,7 +439,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			% calculate the number of elements in bins
 			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
 			figure(fig_histogrammsingle);
-			switch Active_Type
+			switch Active_LoadType
 				case 'Solar'
 					% In case of solar, don't plot the "0" bin, becaus this
 					% is almost 50% of the data (nigthtime!)
@@ -503,7 +514,7 @@ Labels_Title = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
@@ -522,17 +533,17 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		end
 		% load the raw data
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data; Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
 		end
 		% from W to kW
-		Data = Data ./ 1000;
-		if (~isempty(Data))
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
+		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			% combine the profiles
 			Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
-				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data,2)];
+				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data_Mean_Shuffled,2)];
 			% histogramms of development of profile numbers:
 			if Option_Histogramm_x_max_Value > 0
 				Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
@@ -547,7 +558,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			% calculate the number of elements in bins
 			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
 			figure(fig_histogrammdevsummary);
-			switch Active_Type
+			switch Active_LoadType
 				case 'Solar'
 					% In case of solar, don't plot the "0" bin, becaus this
 					% is almost 50% of the data (nigthtime!)
@@ -622,7 +633,7 @@ Labels_Title = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_Type = Settings_Datasets{Option_Type_Load,2};
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
@@ -641,18 +652,18 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		end
 		% load the raw data
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data = [];
-		for k = 1 : Settings_Number_Profiles
-			Data = [Data; Data_Input.(['Set_',num2str(k)]).(Active_Type).Data_Mean]; %#ok<AGROW>
+		Data_Mean_Shuffled = [];
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
 		end
 		% from W to kW
-		Data = Data ./ 1000;
-		if (~isempty(Data))
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
+		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			% combine the profiles
 			Data_Singlephase = [];
-			for k = 1 : size(Data, 2)/ 6
-				Data_Sing = Data(:,1+(k-1)*6:6+(k-1)*6);
+			for i_sp = 1 : size(Data_Mean_Shuffled, 2)/ 6
+				Data_Sing = Data_Mean_Shuffled(:,1+(i_sp-1)*6:6+(i_sp-1)*6);
 				Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
 			end
 			Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
@@ -671,7 +682,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			% calculate the number of elements in bins
 			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
 			figure(fig_histogrammdevsingle);
-			switch Active_Type
+			switch Active_LoadType
 				case 'Solar'
 					% In case of solar, don't plot the "0" bin, becaus this
 					% is almost 50% of the data (nigthtime!)
@@ -713,3 +724,162 @@ end
 
 clear Active_* ax b Data* Hist_* i j k Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Show development of the RMS between the single runs
+% = = = = = = = = = = = = = = = = =
+% Option_Active_Scenarios = 2:2:10; % Sommer
+Option_Active_Scenarios = [6, 8, 10];
+% Option_Active_Scenarios = 1:2:10; % Winter
+%- - - - - - - - - - - - - - - - - -
+Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+Option_Type_Data = 2; % 2 = 'Mean'
+%- - - - - - - - - - - - - - - - - -
+Option_Profile_Shuffles = 1000;
+%- - - - - - - - - - - - - - - - - -
+Option_Show_Title =       0; % 1 = Show Plot Title
+% = = = = = = = = = = = = = = = = =
+Labels_Title = ['Entwicklung des RMS zwischen den einzelnen Profilen mit ',...
+ 	num2str(Option_Profile_Shuffles),' Permutationen'];
+Labels_X_Direction = 'Profile';
+Labels_Y_Direction = 'RMS';
+% Labels_Title = []; % No title for Word output
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+Data_Mean_Profile = [];
+Data_Min_Profile = [];
+Data_Max_Profile = [];
+for i_d = 1 : Saved_Data_Input.Number_Datasets
+	if i_d <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_LoadType = Settings_Datasets{Option_Type_Load,2};
+		Active_Datatype = Settings_Datatype{Option_Type_Data,2};
+	end
+	
+	for i_s = 1 : size(Active_Scenarios,1)
+		if ~isfield(Data_Mean_Profile, ['Saved_',num2str(Active_Scenarios{i_s,1})])
+			Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
+			Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
+			Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
+		end
+		Data_Input = Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).Load_Infeed_Data;
+		Data_Mean_Shuffled = [];
+		for i_p = 1 : Settings_Number_Profiles
+			Data_Mean_Shuffled = [Data_Mean_Shuffled, Data_Input.(['Set_',num2str(i_p)]).(Active_LoadType).(Active_Datatype)]; %#ok<AGROW>
+		end
+		% from W to kW
+		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
+		% get the single appliances profiles
+		Data_Singlephase = [];
+		num_single_profiles = size(Data_Mean_Shuffled, 2)/ 6;
+		for i_sp = 1 : num_single_profiles
+			Data_Sing = sum(Data_Mean_Shuffled(:,1+(i_sp-1)*6:2:(i_sp)*6),2);
+			Data_Singlephase = [Data_Singlephase, Data_Sing]; %#ok<AGROW>
+		end
+		% get the mean profile
+		num_profiles_per_dataset = size(Data_Singlephase, 2)/Settings_Number_Profiles;
+		for i_sp = 1 : Settings_Number_Profiles
+			Data_Sing = sum(Data_Singlephase(:,1+(i_sp-1)*num_profiles_per_dataset:i_sp*num_profiles_per_dataset),2)/num_profiles_per_dataset;
+			Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) =...
+				[Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]), Data_Sing];
+			Data_Sing = quantile(Data_Singlephase(:,1+(i_sp-1)*num_profiles_per_dataset:i_sp*num_profiles_per_dataset),0.05,2);
+			Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) =...
+				[Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]), Data_Sing];
+			Data_Sing = quantile(Data_Singlephase(:,1+(i_sp-1)*num_profiles_per_dataset:i_sp*num_profiles_per_dataset),0.95,2);
+			Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) =...
+				[Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]), Data_Sing];
+		end
+		
+% 		num_profiles = size(Data_Single_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]),2);
+% 		Data_Energy_Diff = zeros(num_profiles-1,Option_Profile_Shuffles);
+% 		Data_Energy_Diff_sorted = Data_Energy_Diff;
+% 		Data_Energy_Start = sum(Data_Single_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})])(:,1:num_profiles));
+% 		Data_Energy_Start = Data_Energy_Start / max(Data_Energy_Start);
+% 		for i_rs = 1 : Option_Profile_Shuffles
+% 			Data_Energy = Data_Energy_Start(randperm(length(Data_Energy_Start)));
+% 			Data_Energy_Diff(:,i_rs) = Data_Energy(2:end)-Data_Energy(1:end-1);
+% 			Data_Energy_Diff_sorted(:,i_rs) = sort(Data_Energy(2:end)-Data_Energy(1:end-1));
+% 		end
+% 		Data_Energy_Diff_Boundaries = [min(Data_Energy_Diff,[],2),max(Data_Energy_Diff,[],2)];
+% 		Data_Energy_Diff_sorted_Boundaries = [min(Data_Energy_Diff_sorted,[],2),max(Data_Energy_Diff_sorted,[],2)];
+% 		
+% 		figure(fig_profiledevelopment); f_l = plot(Data_Energy_Diff_sorted_Boundaries);
+% 		set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+% 		set(f_l, 'LineStyle', Active_Scenarios{i_s,4});
+% 		drawnow;
+% 		if i_s <=1
+% 			figure(fig_profiledevelopment); hold on;
+% 		end		
+% 		figure; plot(Data_Energy_Diff_Boundaries);
+% 		figure; plot(Data_Energy_Diff_sorted_Boundaries);
+	end
+end
+
+fig_profiledevelopment = set_up_singleplot();
+Labels_Scenarios = {};
+Labels_Scen_Style = [];
+for i_s = 1 : size(Active_Scenarios,1)
+	Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+	f_l = plot(nan, nan);	                         % make an invisible line for legend
+	set(f_l,...
+		'Color', Active_Scenarios{i_s,3}/256,...       % set color of invisible line
+		'LineStyle', Active_Scenarios{i_s,4});         % set linestyle of invisible line
+	Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+	
+	Data_Mean_Start = Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+	Data_Min_Start = Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+	Data_Max_Start = Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+	Data_Mean = zeros([size(Data_Mean_Start),Option_Profile_Shuffles]);
+	Data_Min = zeros([size(Data_Min_Start),Option_Profile_Shuffles]);
+	Data_Max = zeros([size(Data_Max_Start),Option_Profile_Shuffles]);
+	for i_rs = 1 : Option_Profile_Shuffles
+		num_shuffle_idx = randperm(size(Data_Mean_Start,2));
+		Data_Mean_Shuffled = Data_Mean_Start(:,num_shuffle_idx);
+		Data_Min_Shuffled = Data_Min_Start(:,num_shuffle_idx);
+		Data_Max_Shuffled = Data_Max_Start(:,num_shuffle_idx);
+		for i_sp = 1 : size(Data_Mean_Start,2)
+			Data_Mean_Sing = Data_Mean_Shuffled(:,i_sp);
+			Data_Min_Sing = Data_Min_Shuffled(:,i_sp);
+			Data_Max_Sing = Data_Max_Shuffled(:,i_sp);
+			if i_sp <= 1
+				Data_Mean(:,i_sp,i_rs) = Data_Mean_Sing;
+				Data_Min(:,i_sp,i_rs) = Data_Min_Sing;
+				Data_Max(:,i_sp,i_rs) = Data_Max_Sing;
+			else
+				Data_Mean(:,i_sp,i_rs) = mean([Data_Mean(:,1:i_sp-1,i_rs),Data_Mean_Sing],2);
+				Data_Min(:,i_sp,i_rs) = min([Data_Min(:,1:i_sp-1,i_rs),Data_Min_Sing],[],2);
+				Data_Max(:,i_sp,i_rs) = max([Data_Max(:,1:i_sp-1,i_rs),Data_Max_Sing],[],2);
+			end
+		end
+	end
+	
+	Data_Mean_Boundaries = calculate_rms_error(Data_Mean);
+	Data_Min_Boundaries = calculate_rms_error(Data_Min);
+	Data_Max_Boundaries = calculate_rms_error(Data_Max);
+	
+	f_l = plot(Data_Mean_Boundaries);
+	set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+	set(f_l, 'LineStyle', '-');
+	drawnow;
+	hold on;
+	f_l = plot(Data_Max_Boundaries);
+	set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+	set(f_l, 'LineStyle', '-.');
+	drawnow;
+	f_l = plot(Data_Min_Boundaries);
+	set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+	set(f_l, 'LineStyle', ':');
+	drawnow;
+	if i_s <=1
+		hold on;
+	end
+end
+
+ax = gca;
+ax.YAxis.Scale = 'log';
+legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+set_default_plot_properties(ax);
+set_single_plot_properties(ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Show_Title)
+
+
+
+
+
