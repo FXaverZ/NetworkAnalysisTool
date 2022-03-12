@@ -2,14 +2,14 @@ function set_default_plot_properties(ax)
 %SET_DEFAULT_PLOT_PROPERTIES Summary of this function goes here
 %   Detailed explanation goes here
 
-Fontsize_big     = 14;
+Fontsize_big     = 16;
 Fontsize_normal  = 14;
-Fontsize_small   =  8;
+Fontsize_small   = 12;
 
 ax.FontName                = 'Palatino Linotype';
 ax.FontSize                = Fontsize_big;
 ax.LabelFontSizeMultiplier = 1;
-ax.TitleFontSizeMultiplier = 1;
+ax.TitleFontSizeMultiplier = Fontsize_normal/Fontsize_big;
 ax.TitleFontWeight         = 'normal';
 ax.Box                     = 'off';
 ax.LineWidth               = 1;
@@ -22,6 +22,7 @@ lg = get(ax, 'Legend');
 if(~isempty(lg))
 	lg.FontSize            = Fontsize_small;
 	lg.LineWidth           = 1;
+	lg.ItemTokenSize       = [10 6];
 end
 % X Axis
 ax.XAxis.TickDirection     = 'out';
