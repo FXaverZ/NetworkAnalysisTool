@@ -233,6 +233,8 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		Active_Datatype = Settings_Datatype(Option_Type_Data,:);
 		
+		f_max_area = [];
+		
 		if ~isfield(Saved_Data_Profiles, ['Loadtype_',Active_LoadType])
 			Saved_Data_Profiles.(['Loadtype_',Active_LoadType])= [];
 		end
@@ -358,7 +360,10 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			if (strcmp(Option_Plot_Size, 'compact') && i_t >= 2)
 				Labels_Y_Direction = [];
 				Option_Show_Legend = 0;
+			else
+				f_max_area = [];
 			end
+			
 			% Format the plot:
 			f_ax = gca;
 			% X Axis
@@ -390,12 +395,12 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			end
 			% Configuration
 			set_default_plot_properties(f_ax);
- 			set_single_plot_properties(f_ax, ...
+ 			f_max_area = set_single_plot_properties(f_ax, ...
 				[Labels_Title,Active_Datatype{i_t,3}],...
 				[],...
 				Labels_Y_Direction,...
 				Option_Show_Title,...
-				Option_Plot_Size);
+				f_max_area);
 			% adjust legend properties a little bit for this kind of graph
 			if Option_Show_Legend
 				f_lg = get(f_ax, 'Legend');

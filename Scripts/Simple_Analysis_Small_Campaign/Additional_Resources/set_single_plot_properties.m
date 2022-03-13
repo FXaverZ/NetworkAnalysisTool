@@ -1,11 +1,6 @@
-function set_single_plot_properties(ax, titlestr, xlabelstr, ylabelstr, show_title, varargin)
+function max_area = set_single_plot_properties(ax, titlestr, xlabelstr, ylabelstr, show_title, varargin)
 %SET_SINGLE_PLOT_PROPERTIES Summary of this function goes here
 %   Detailed explanation goes here
-size     = 'large';
-
-if nargin >= 6 % user specifies size of graph
-	size = varargin{1};
-end
 
 % get the labels correctly
 if ~isempty(xlabelstr)
@@ -20,33 +15,15 @@ if show_title && ~isempty(titlestr)
 	ax.Title.String = titlestr;
 end
 
-switch size
-	case 'large'
-		% determine the correct size
-		if show_title && ~isempty(titlestr)
-			Position = [0.06, 0.11, 0.92, 0.83];
-		else
-			Position = [0.06, 0.11, 0.92, 0.86];
-		end
-	case 'medium'
-		if show_title && ~isempty(titlestr)
-			Position = [0.1, 0.11, 0.88, 0.83];
-		else
-			Position = [0.1, 0.11, 0.88, 0.86];
-		end
-	case 'compact'
-		if show_title && ~isempty(titlestr)
-			Position = [0.14, 0.18, 0.82, 0.72];
-		else
-			if ~isempty(ylabelstr)
-				Position = [0.14, 0.18, 0.82, 0.76];
-			else
-				Position = [0.09, 0.18, 0.88, 0.76];
-			end
-		end
+% Set the area of the plot axes:
+if nargin >= 6 && ~isempty(varargin{1})
+	% Working with a given maximum area:
+	max_area = varargin{1};
+else
+	% Maximise area of plot axes:
+	max_area = ax.TightInset;
 end
-
-ax.Position = Position;
+ax.Position = [max_area(1:2), 1-max_area(1)-max_area(3), 1-max_area(2)-max_area(4)];
 
 end
 
