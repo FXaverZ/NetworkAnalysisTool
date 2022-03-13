@@ -495,22 +495,22 @@ Option_Active_Scenarios = [6,8];
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - 
 Option_Number_Bins             = 75;
-Option_Histogramm_x_max_Value  = 75; %kW
-Option_Histogramm_x_min_Value  =  0; %kW
-Option_Histogramm_x_step_Value =  5;
-Option_Histogramm_x_Label_Step =  2;
+Option_Bar_x_max_Value  = 75; %kW
+Option_Bar_x_min_Value  =  0; %kW
+Option_Bar_x_step_Value =  5;
+Option_Bar_x_Label_Step =  2;
 %- - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 12; % '%' (-1 ... autoscale)
-Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  2; % '%'
-Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
+Option_Bar_y_max_Value  = 12; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  2; % '%'
+Option_Bar_y_Label_Step =  2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -518,8 +518,8 @@ Labels_Title       = []; % No title for Word output
 for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		% Prepare everything:
-		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
+		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
+		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		
@@ -543,7 +543,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			
 			% histogramms of sum
-			Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
 			[~,Hist_binIdx] = histc(Data_Mean_Shuffled,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
 			% calculate the number of elements in bins
@@ -570,14 +570,14 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% X Axis
-	if Option_Histogramm_x_max_Value > 0
-		f_ax.XAxis.Limits       = [Option_Histogramm_x_min_Value, Option_Histogramm_x_max_Value];
+	if Option_Bar_x_max_Value > 0
+		f_ax.XAxis.Limits       = [Option_Bar_x_min_Value, Option_Bar_x_max_Value];
 		f_ax.XAxis.TickValues   = tick_x_Positions;
 		f_ax.XAxis.TickLabels   = tick_x_Labels;
 	end
 	% Y Axis
-	if Option_Histogramm_y_max_Value > 0
-		f_ax.YAxis.Limits       = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+	if Option_Bar_y_max_Value > 0
+		f_ax.YAxis.Limits       = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 		f_ax.YAxis.TickValues   = tick_y_Positions;
 		f_ax.YAxis.TickLabels   = tick_y_Labels;
 	end
@@ -600,22 +600,22 @@ Option_Active_Scenarios = [6,8];
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - 
 Option_Number_Bins             = 60;
-Option_Histogramm_x_max_Value  = 12; %kW (-1 ... autoscale)
-Option_Histogramm_x_min_Value  =  0; %kW
-Option_Histogramm_x_step_Value =  1; %kW
-Option_Histogramm_x_Label_Step =  1; % Spacing between label entries
+Option_Bar_x_max_Value  = 12; %kW (-1 ... autoscale)
+Option_Bar_x_min_Value  =  0; %kW
+Option_Bar_x_step_Value =  1; %kW
+Option_Bar_x_Label_Step =  1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 20; % '%' (-1 ... autoscale)
-Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  5; % '%'
-Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
+Option_Bar_y_max_Value  = 20; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  5; % '%'
+Option_Bar_y_Label_Step =  1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -625,8 +625,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		
-		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
+		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
+		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		
 		fig_histogrammsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
 	end
@@ -650,7 +650,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			% histogramms of single appliances
-			Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2; % center
 			[~,Hist_binIdx] = histc(Data_Singlephase,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
 			% calculate the number of elements in bins
@@ -677,14 +677,14 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% X Axis
-	if Option_Histogramm_x_max_Value > 0
-		f_ax.XAxis.Limits       = [Option_Histogramm_x_min_Value, Option_Histogramm_x_max_Value];
+	if Option_Bar_x_max_Value > 0
+		f_ax.XAxis.Limits       = [Option_Bar_x_min_Value, Option_Bar_x_max_Value];
 		f_ax.XAxis.TickValues   = tick_x_Positions;
 		f_ax.XAxis.TickLabels   = tick_x_Labels;
 	end
 	% Y Axis
-	if Option_Histogramm_y_max_Value > 0
-		f_ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+	if Option_Bar_y_max_Value > 0
+		f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 		f_ax.YAxis.TickValues   = tick_y_Positions;
 		f_ax.YAxis.TickLabels   = tick_y_Labels;
 	end
@@ -707,15 +707,15 @@ Option_Active_Scenarios = [6,8];
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -  
 Option_Number_Bins             = 75;
-Option_Histogramm_x_max_Value  = 75; %kW (-1 ... autoscale)
-Option_Histogramm_x_min_Value  =  0; %kW
-Option_Histogramm_x_step_Value =  5; %kW
-Option_Histogramm_x_Label_Step =  2; % Spacing between label entries
+Option_Bar_x_max_Value  = 75; %kW (-1 ... autoscale)
+Option_Bar_x_min_Value  =  0; %kW
+Option_Bar_x_step_Value =  5; %kW
+Option_Bar_x_Label_Step =  2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 12; % '%' (-1 ... autoscale)
-Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  2; % '%'
-Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
+Option_Bar_y_max_Value  = 12; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  2; % '%'
+Option_Bar_y_Label_Step =  2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
@@ -723,7 +723,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -733,8 +733,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		
-		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
+		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
+		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		
 		fig_histogrammdevsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
 		
@@ -762,8 +762,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
 				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data_Mean_Shuffled,2)];
 			% histogramms of development of profile numbers:
-			if Option_Histogramm_x_max_Value > 0
-				Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			if Option_Bar_x_max_Value > 0
+				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 			else
 				Hist_x_max_Value = max(Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]));
 				Hist_x_min_Value = min(Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]));
@@ -796,14 +796,14 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		f_ax.Title.String = [num2str(i*Settings_Number_Profiles),' Profile'];
 	end
 	% X Axis
-	if Option_Histogramm_x_max_Value > 0
-		f_ax.XAxis.Limits       = [Option_Histogramm_x_min_Value, Option_Histogramm_x_max_Value];
+	if Option_Bar_x_max_Value > 0
+		f_ax.XAxis.Limits       = [Option_Bar_x_min_Value, Option_Bar_x_max_Value];
 		f_ax.XAxis.TickValues   = tick_x_Positions;
 		f_ax.XAxis.TickLabels   = tick_x_Labels;
 	end
 	% Y Axis
-	if Option_Histogramm_y_max_Value > 0
-		f_ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+	if Option_Bar_y_max_Value > 0
+		f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 		f_ax.YAxis.TickValues   = tick_y_Positions;
 		f_ax.YAxis.TickLabels   = tick_y_Labels;
 	end
@@ -826,15 +826,15 @@ Option_Active_Scenarios = [6,8];
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -  
 Option_Number_Bins             = 60;
-Option_Histogramm_x_max_Value  = 12; %kW (-1 ... autoscale)
-Option_Histogramm_x_min_Value  =  0; %kW
-Option_Histogramm_x_step_Value =  1; %kW
-Option_Histogramm_x_Label_Step =  1; % Spacing between label entries
+Option_Bar_x_max_Value  = 12; %kW (-1 ... autoscale)
+Option_Bar_x_min_Value  =  0; %kW
+Option_Bar_x_step_Value =  1; %kW
+Option_Bar_x_Label_Step =  1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = 20; % '%' (-1 ... autoscale)
-Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  5; % '%'
-Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
+Option_Bar_y_max_Value  = 20; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  5; % '%'
+Option_Bar_y_Label_Step =  1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
@@ -842,7 +842,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -852,8 +852,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		
-		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Histogramm_y_min_Value,Option_Histogramm_y_step_Value, Option_Histogramm_y_max_Value, Option_Histogramm_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Histogramm_x_min_Value,Option_Histogramm_x_step_Value, Option_Histogramm_x_max_Value, Option_Histogramm_x_Label_Step);
+		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
+		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		
 		fig_histogrammdevsingle = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
 		
@@ -886,8 +886,8 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
 				[Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data_Singlephase,2)];
 			% histogramms of development of profile numbers:
-			if Option_Histogramm_x_max_Value > 0
-				Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+			if Option_Bar_x_max_Value > 0
+				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 			else
 				Hist_x_max_Value = max(Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]));
 				Hist_x_min_Value = min(Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]));
@@ -920,14 +920,14 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		f_ax.Title.String = [num2str(i*Settings_Number_Profiles),' Profile'];
 	end
 	% X Axis
-	if Option_Histogramm_x_max_Value > 0
-		f_ax.XAxis.Limits  = [Option_Histogramm_x_min_Value, Option_Histogramm_x_max_Value];
+	if Option_Bar_x_max_Value > 0
+		f_ax.XAxis.Limits  = [Option_Bar_x_min_Value, Option_Bar_x_max_Value];
 		f_ax.XAxis.TickValues   = tick_x_Positions;
 		f_ax.XAxis.TickLabels   = tick_x_Labels;
 	end
 	% Y Axis
-	if Option_Histogramm_y_max_Value > 0
-		f_ax.YAxis.Limits  = [Option_Histogramm_y_min_Value, Option_Histogramm_y_max_Value];
+	if Option_Bar_y_max_Value > 0
+		f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 		f_ax.YAxis.TickValues   = tick_y_Positions;
 		f_ax.YAxis.TickLabels   = tick_y_Labels;
 	end
