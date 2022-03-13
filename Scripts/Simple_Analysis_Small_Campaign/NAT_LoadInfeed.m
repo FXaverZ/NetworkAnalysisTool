@@ -3,6 +3,7 @@ clear();
 Saved_Data_Input = [];
 % Add folder with help functions / needed classes to path:
 addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
+%#ok<*UNRCH>
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Initial Set Up
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -42,7 +43,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
+	 3, 'El_Mobility' , 'Elektromobilität';...
 	};
 
 Settings_Datatype = {
@@ -98,7 +99,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -134,7 +135,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		if (~isempty(Data_Mean_Shuffled))
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			if Option_Show_Season
-				Labels_Scenarios{end} = [Labels_Scenarios{end},' ',Active_Scenarios{j,6}]; %#ok<UNRCH>
+				Labels_Scenarios{end} = [Labels_Scenarios{end},' ',Active_Scenarios{j,6}]; 
 			end
 		end
 		switch Active_LoadType
@@ -167,7 +168,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_infeedsummary); 
 	f_ax = gca;
 	if Option_Show_SubTitle
-		f_ax.Title.String = ['Profilsatz ',num2str(i)]; %#ok<UNRCH>
+		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% Legend
 	if i == 1
@@ -191,6 +192,202 @@ end
 
 clear Active_* Option_* Labels_* Data* tick_* i j k l f_* 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Plot timeline summary figures 
+% = = = = = = = = = = = = = = = = =
+% Option_Active_Scenarios = 2:2:10; % Sommer
+% Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
+% Option_Active_Scenarios = 1:2:10; % Winter
+Option_Active_Scenarios = 2;
+%- - - - - - - - - - - - - - - - - -
+Option_Type_Load = 1; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+Option_Type_Data = 2; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+%- - - - - - - - - - - - - - - - - -
+Option_Show_Title         = 0; % 1 = Show Plot Title
+Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
+Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
+Option_Default_Line_Width = 1.5;
+Option_Show_Legend        = 0;
+Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
+Option_Plot_x_min_Value  =   0; % x10 minutes
+Option_Plot_x_step_Value =  60; % minutes
+Option_Plot_x_Label_Step =   2; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - - 
+Option_Plot_y_max_Value  =  26; % 'kW' (-1 ... autoscale)
+Option_Plot_y_min_Value  =   0; % 'kW'
+Option_Plot_y_step_Value =   2.5; % 'kW'
+Option_Plot_y_Label_Step =   2; % Spacing between label entries
+% = = = = = = = = = = = = = = = = =
+Labels_Title       = 'Mittlere Profilverlauf für Datentyp ';
+Labels_Y_Direction = 'Leistung [kW]';
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+for i_d = 1 : Saved_Data_Input.Number_Datasets
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d <= 1
+		Data_Profiles = [];
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
+		Active_Datatype = Settings_Datatype(Option_Type_Data,:);
+		
+		[tick_y_Positions, tick_y_Labels] = get_tick(...
+			Option_Plot_y_min_Value,...
+			Option_Plot_y_step_Value,...
+			Option_Plot_y_max_Value,...
+			Option_Plot_y_Label_Step);
+		[tick_x_Positions, tick_x_Labels] = get_tick_x_dayprofile(...
+			Option_Plot_x_min_Value,...
+			Option_Plot_x_step_Value,...
+			Option_Plot_x_max_Value,...
+			Option_Plot_x_Label_Step);
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	for i_s = 1 : size(Active_Scenarios,1)
+		if ~isfield(Data_Profiles, ['Saved_',num2str(Active_Scenarios{i_s,1})])
+			Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
+		end
+		Data_Input = Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).Load_Infeed_Data;
+		for i_t = 1 : size(Active_Datatype,1)
+			if ~isfield(Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]),Active_Datatype{i_t,2})
+				Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2}) = [];
+			end
+			Data = [];
+			for i_p = 1 : Settings_Number_Profiles
+				Data = [Data, Data_Input.(['Set_',num2str(i_p)]).(Active_LoadType).(Active_Datatype{i_t,2})]; %#ok<AGROW>
+			end
+			% from W to kW
+			Data = Data ./ 1000;
+			% get the single appliances profiles
+			Data_Singlephase = [];
+			Data_Stored = Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
+			num_single_profiles = size(Data, 2)/ 6;
+			for i_sp = 1 : num_single_profiles
+				Data_Sing = sum(Data(:,1+(i_sp-1)*6:2:(i_sp)*6),2);
+				Data_Singlephase = [Data_Singlephase, Data_Sing]; %#ok<AGROW>
+			end
+			Data_Stored = [Data_Stored, Data_Singlephase]; %#ok<AGROW>
+			Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2}) = Data_Stored;
+		end
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d >= Saved_Data_Input.Number_Datasets
+		% Timelines
+		for i_t = 1 : size(Active_Datatype,1)
+			fig_profilesummary.(Active_Datatype{i_t,2}) = set_up_singleplot(Option_Plot_Size);
+			Labels_Scenarios = {};
+			Labels_Scen_Style = [];
+			for i_s = 1 : size(Active_Scenarios,1)
+				Data_Stored = Data_Profiles.(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
+				Data_Plot_Mean = mean(Data_Stored,2);
+				% excluding all zero profiles (no infeed):
+				num_idx_nonzero_profiles = sum(Data_Stored)>0;
+				Data_Plot_Min  = min(Data_Stored(:,num_idx_nonzero_profiles),[],2);
+				Data_Plot_Max  = max(Data_Stored,[],2);
+				% Plot mean
+				figure(fig_profilesummary.(Active_Datatype{i_t,2}));
+				f_l = plot(Data_Plot_Mean);
+				f_l.Color = Active_Scenarios{i_s,3} / 256;
+				f_l.LineStyle = '-';
+				f_l.LineWidth = Option_Default_Line_Width;
+				if Option_Distinct_Seasons 
+					switch Active_Scenarios{i_s, 6}
+						case 'Sommer'
+							f_l.LineStyle = ':';
+							f_l.LineWidth = Option_Default_Line_Width;
+						case 'Winter'
+							f_l.LineStyle = '-';
+							f_l.LineWidth = Option_Default_Line_Width;
+					end
+				end
+				drawnow;
+				hold on;
+				% get the data for the legend:
+				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
+					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+					f_l = plot(nan, nan);	                        % make an invisible line for legend
+					f_l.Color = Active_Scenarios{i_s,3} / 256; % set color of invisible line
+					f_l.LineStyle = Active_Scenarios{i_s,4}; % set linestyle of invisible line
+					f_l.LineWidth = Option_Default_Line_Width;
+					Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+				end
+				if Option_Show_Min_Max
+					if size(Active_Scenarios,1) <= 1 
+						% fill the area between min and max:
+						f_inBetweenRegionX = [1:length(Data_Plot_Max), length(Data_Plot_Min):-1:1];
+						f_inBetweenRegionY = [Data_Plot_Max', fliplr(Data_Plot_Min')];
+						f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
+						f_f.FaceColor = Active_Scenarios{i_s,3} / 256;
+						f_f.FaceAlpha = 0.25;
+						f_f.LineStyle = 'none';
+					end
+					% Plot max
+					f_l = plot(Data_Plot_Max);
+					f_l.Color = Active_Scenarios{i_s,3} / 256;
+					f_l.LineStyle = '-.';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+					%plot min
+					f_l = plot(Data_Plot_Min);
+					f_l.Color = Active_Scenarios{i_s,3} / 256;
+					f_l.LineStyle = ':';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+				end
+			end
+			f_ax = gca;
+			% X Axis
+			if Option_Plot_x_max_Value > 0
+				f_ax.XAxis.Limits  = [Option_Plot_x_min_Value, Option_Plot_x_max_Value];
+				f_ax.XAxis.TickValues   = tick_x_Positions;
+				f_ax.XAxis.TickLabels   = tick_x_Labels;
+				f_ax.XAxis.TickLabelRotation = 45;
+			end
+			% Y Axis
+			if Option_Plot_y_max_Value > 0
+				f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+				f_ax.YAxis.TickValues   = tick_y_Positions;
+				f_ax.YAxis.TickLabels   = tick_y_Labels;
+			end
+			% Legend
+			if Option_Show_Legend
+				if Option_Show_Min_Max
+					[Labels_Scenarios,Labels_Scen_Style] =...
+						add_mean_min_max_entry_to_legend(fig_profilesummary.(Active_Datatype{i_t,2}),...
+						Labels_Scenarios, Labels_Scen_Style);
+				end
+				if Option_Distinct_Seasons
+					[Labels_Scenarios,Labels_Scen_Style] =...
+						add_season_entry_to_legend(fig_profilesummary.(Active_Datatype{i_t,2}),...
+						Labels_Scenarios, Labels_Scen_Style);
+				end
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+			end
+			% Configuration
+			set_default_plot_properties(f_ax);
+ 			set_single_plot_properties(f_ax, ...
+				[Labels_Title,'"',Active_Datatype{i_t,3},'"'],...
+				[],...
+				Labels_Y_Direction,...
+				Option_Show_Title,...
+				Option_Plot_Size);
+			% adjust legend properties a little bit for this kind of graph
+			if Option_Show_Legend
+				f_lg = get(f_ax, 'Legend');
+				f_lg.ItemTokenSize = [17, 6];
+			end
+			hold off
+		end
+	end
+end
+
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
 % = = = = = = = = = = = = = = = = = 
 Option_Active_Scenarios = 8; % Select only one scenario!
@@ -205,8 +402,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -251,7 +448,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_infeedsingle); 
 	f_ax = gca;
 	if Option_Show_SubTitle
-		f_ax.Title.String = ['Profilsatz ',num2str(i)]; %#ok<UNRCH>
+		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% X Axis
 	f_ax.XAxis.Limits       = [0 144*Settings_Number_Profiles];
@@ -291,9 +488,9 @@ Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -350,7 +547,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	f_ax = gca;
 	% General:
 	if Option_Show_SubTitle
-		f_ax.Title.String = ['Profilsatz ',num2str(i)]; %#ok<UNRCH>
+		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% X Axis
 	if Option_Histogramm_x_max_Value > 0
@@ -396,9 +593,9 @@ Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -457,7 +654,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	f_ax = gca;
 	% General:
 	if Option_Show_SubTitle
-		f_ax.Title.String = ['Profilsatz ',num2str(i)]; %#ok<UNRCH>
+		f_ax.Title.String = ['Profilsatz ',num2str(i)]; 
 	end
 	% X Axis
 	if Option_Histogramm_x_max_Value > 0
@@ -503,10 +700,10 @@ Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -622,10 +819,10 @@ Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 

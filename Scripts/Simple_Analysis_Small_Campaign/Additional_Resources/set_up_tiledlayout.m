@@ -9,7 +9,7 @@ Fontsize_big    = 16;
 % pixel: -1279.00,   52.00,  1280.00,  934.00
 % scr = get(0,'Screensize');
 
-if nargin == 4 % User gives size wishes
+if nargin >= 4 % User gives size wishes
 	if strcmpi(varargin{1},'compact')
 		pos = [0,89,1280,602];   % H: 16.00 cm -->  8.0cm in Word
 	elseif strcmpi(varargin{1},'medium')
