@@ -43,7 +43,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilität';...
+	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
 Settings_Datatype = {
@@ -99,7 +99,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -219,7 +219,7 @@ Option_Plot_y_min_Value  =   0; % 'kW'
 Option_Plot_y_step_Value =   2.5; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Title       = 'Mittlere Profilverlauf für Datentyp ';
+Labels_Title       = '';
 Labels_Y_Direction = 'Leistung [kW]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -341,6 +341,13 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 					drawnow;
 				end
 			end
+			
+			% Disable y-label and legend in subsequent plots
+			if (strcmp(Option_Plot_Size, 'compact') && i_t >= 2)
+				Labels_Y_Direction = [];
+				Option_Show_Legend = 0;
+			end
+			% Format the plot:
 			f_ax = gca;
 			% X Axis
 			if Option_Plot_x_max_Value > 0
@@ -372,7 +379,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			% Configuration
 			set_default_plot_properties(f_ax);
  			set_single_plot_properties(f_ax, ...
-				[Labels_Title,'"',Active_Datatype{i_t,3},'"'],...
+				[Labels_Title,Active_Datatype{i_t,3}],...
 				[],...
 				Labels_Y_Direction,...
 				Option_Show_Title,...
@@ -402,8 +409,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -488,9 +495,9 @@ Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -593,9 +600,9 @@ Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -700,10 +707,10 @@ Option_Histogramm_y_Label_Step =  2; % Spacing between label entries
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -819,10 +826,10 @@ Option_Histogramm_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 

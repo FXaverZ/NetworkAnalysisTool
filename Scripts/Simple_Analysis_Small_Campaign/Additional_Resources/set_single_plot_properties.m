@@ -36,7 +36,7 @@ switch size
 		end
 	case 'compact'
 		if show_title && ~isempty(titlestr)
-			Position = [0.14, 0.18, 0.82, 0.73];
+			Position = [0.14, 0.18, 0.82, 0.72];
 		else
 			if ~isempty(ylabelstr)
 				Position = [0.14, 0.18, 0.82, 0.76];
