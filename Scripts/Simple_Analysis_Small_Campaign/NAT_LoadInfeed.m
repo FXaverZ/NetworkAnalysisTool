@@ -208,16 +208,16 @@ Option_Show_Min_Max       = 0; % 1 = Plot also min and max of the profiles    --
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend        = 1;
-Option_Plot_Size          = 'compact'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
 Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
-Option_Plot_x_Label_Step =   2; % Spacing between label entries
+Option_Plot_x_Label_Step =   4; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  -1; % 'kW' (-1 ... autoscale)
+Option_Plot_y_max_Value  =   1; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
-Option_Plot_y_step_Value =   2.5; % 'kW'
+Option_Plot_y_step_Value =   0.25; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -244,11 +244,6 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			Option_Plot_y_step_Value,...
 			Option_Plot_y_max_Value,...
 			Option_Plot_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick_x_dayprofile(...
-			Option_Plot_x_min_Value,...
-			Option_Plot_x_step_Value,...
-			Option_Plot_x_max_Value,...
-			Option_Plot_x_Label_Step);
 	end
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %     Prepare Data...
@@ -368,10 +363,11 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			f_ax = gca;
 			% X Axis
 			if Option_Plot_x_max_Value > 0
-				f_ax.XAxis.Limits  = [Option_Plot_x_min_Value, Option_Plot_x_max_Value];
-				f_ax.XAxis.TickValues   = tick_x_Positions;
-				f_ax.XAxis.TickLabels   = tick_x_Labels;
-				f_ax.XAxis.TickLabelRotation = 45;
+				set_tick_x_dayprofile(f_ax,...
+					Option_Plot_x_min_Value,...
+					Option_Plot_x_step_Value,...
+					Option_Plot_x_max_Value,...
+					Option_Plot_x_Label_Step);
 			end
 			% Y Axis
 			if Option_Plot_y_max_Value > 0
@@ -810,7 +806,7 @@ Option_Active_Scenarios = [6,8];
 %- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - 
-Option_Number_Bins             = 60;
+Option_Number_Bins      = 60;
 Option_Bar_x_max_Value  = 12; %kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =  0; %kW
 Option_Bar_x_step_Value =  1; %kW
