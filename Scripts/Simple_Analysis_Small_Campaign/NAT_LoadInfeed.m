@@ -443,7 +443,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -717,7 +717,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -822,7 +822,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -930,7 +930,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1049,7 +1049,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1155,7 +1155,7 @@ Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-Option_Type_Data = 4; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+Option_Type_Data = 2; % 2 = 'Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
 %- - - - - - - - - - - - - - - - - -
 Option_Profile_Shuffles = 10;
 %- - - - - - - - - - - - - - - - - -
@@ -1164,7 +1164,7 @@ Option_Show_Title =        0; % 1 = Show Plot Title
 Labels_Title = ['Entwicklung des RMS zwischen den einzelnen Profilen mit ',...
  	num2str(Option_Profile_Shuffles),' Permutationen'];
 Labels_X_Direction = 'Profile';
-Labels_Y_Direction = 'RMS';
+Labels_Y_Direction = 'RMS [%]';
 % Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1226,6 +1226,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		Labels_Scenarios = {};
 		Labels_Scen_Style = [];
 		for i_s = 1 : size(Active_Scenarios,1)
+			disp(['Preparing Szenario "',Active_Scenarios{i_s,2},'"']);
 			Data_Mean_Start = Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
 			Data_Min_Start = Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
 			Data_Max_Start = Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
@@ -1233,6 +1234,9 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			Data_Min = zeros([size(Data_Min_Start),Option_Profile_Shuffles]);
 			Data_Max = zeros([size(Data_Max_Start),Option_Profile_Shuffles]);
 			for i_rs = 1 : Option_Profile_Shuffles
+				if mod(i_rs,Option_Profile_Shuffles/40) == 0
+					disp(['   ',num2str(i_rs*100/Option_Profile_Shuffles),'% finished.']);
+				end
 				num_shuffle_idx = randperm(size(Data_Mean_Start,2));
 				Data_Mean_Shuffled = Data_Mean_Start(:,num_shuffle_idx);
 				Data_Min_Shuffled = Data_Min_Start(:,num_shuffle_idx);
