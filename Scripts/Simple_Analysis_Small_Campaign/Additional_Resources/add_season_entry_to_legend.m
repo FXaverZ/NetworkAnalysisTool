@@ -1,4 +1,4 @@
-function [Labels_Text,Labels_Style] = add_season_entry_to_legend(fig_handle,Labels_Text,Labels_Style)
+function [Labels_Text,Labels_Style] = add_season_entry_to_legend(fig_handle,linewidth,Labels_Text,Labels_Style,plottype)
 
 figure(fig_handle);
 
@@ -10,11 +10,19 @@ styles_to_add = {
 for i = 1: size(styles_to_add,1)
 % get the legend entries for the grid variants:
 Labels_Text{end+1} = styles_to_add{i,1}; %#ok<AGROW>
-f_l = plot(nan, nan);	                 % make an invisible line for legend
-set(f_l,...
-	'Color', 'k',...                     % set color of invisible line
-	'LineStyle', styles_to_add{i,2});    % set linestyle of invisible line
-Labels_Style(end+1) = f_l;               %#ok<AGROW>
+if strcmpi(plottype, 'line')
+	invisiblePlot = plot(nan, nan);	               % make an invisible line for legend
+	invisiblePlot.Color='k';                         % set color of invisible line
+end
+if strcmpi(plottype, 'bar')
+	invisiblePlot = bar(nan, nan);	                       
+	invisiblePlot.EdgeColor = 'k';
+	invisiblePlot.FaceColor = 'k';
+	invisiblePlot.FaceAlpha = 0.25;
+end
+invisiblePlot.LineStyle = styles_to_add{i,2}; % set linestyle of invisible line
+invisiblePlot.LineWidth = linewidth;
+Labels_Style(end+1) = invisiblePlot;               %#ok<AGROW>
 end
 
 
