@@ -1163,15 +1163,38 @@ clear Active_* f_* Data* Hist_* i j k Labels_* Option_* tick_*
 %% Show development of the RMS between the single runs
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = [4, 6, 8, 10];
+% Option_Active_Scenarios = [3, 4, 5, 7, 8, 10];
+% Option_Active_Scenarios = [3, 5, 7];
+Option_Active_Scenarios = [4, 8, 10];
+% Option_Active_Scenarios = [4, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Type_Data = 2; % 2 = 'Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
 %- - - - - - - - - - - - - - - - - -
-Option_Profile_Shuffles = 10000;
+Option_Profile_Shuffles = 500;
 %- - - - - - - - - - - - - - - - - -
-Option_Show_Title =        0; % 1 = Show Plot Title
+Option_Show_Title         = 0; % 1 = Show Plot Title
+Option_Show_Legend        = 0;
+Option_Show_Min_Max       = 0;
+Option_Show_Area          = 1;
+Option_Default_Line_Width = 1.5;
+Option_Show_Y_Label       = 0;
+Option_Plot_Size          = 'compact'; % 'compact', 'medium', 'large'
+Settings_Max_Fig_Area     = [0.1687    0.2141    0.0329    0.0550];
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  =  450; % (-1 ... autoscale)
+Option_Plot_x_min_Value  =    0; % 
+Option_Plot_x_step_Value =   50; % 
+Option_Plot_x_Label_Step =    1; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_y_max_Value  =   -1; % '%' (-1 ... autoscale)
+Option_Plot_y_min_Value  =   0; % '%'
+Option_Plot_y_step_Value =   0.05; % '%'
+Option_Plot_y_Label_Step =   2; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_y_logScale     = 1;
+Option_Plot_y_logLimits    = [-3, 2]; % 10^x
 % = = = = = = = = = = = = = = = = =
 Labels_Title = ['Entwicklung des RMS zwischen den einzelnen Profilen mit ',...
  	num2str(Option_Profile_Shuffles),' Permutationen'];
@@ -1189,6 +1212,9 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		Data_Mean_Profile = [];
 		Data_Min_Profile = [];
 		Data_Max_Profile = [];
+		
+		f_max_area = [];
+		
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
 		Active_Datatype = Settings_Datatype{Option_Type_Data,2};
@@ -1197,6 +1223,12 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 %     Prepare Data...
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	for i_s = 1 : size(Active_Scenarios,1)
+		if isfield(Saved_Data_Shuffeld, ['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)])
+				continue;
+		end
 		if ~isfield(Data_Mean_Profile, ['Saved_',num2str(Active_Scenarios{i_s,1})])
 			Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
 			Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]) = [];
@@ -1234,7 +1266,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 %     Plotting Data...
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	if i_d >= Saved_Data_Input.Number_Datasets
-		fig_profiledevelopment = set_up_singleplot();
+		fig_profiledevelopment = set_up_singleplot(Option_Plot_Size);
 		Labels_Scenarios = {};
 		Labels_Scen_Style = [];
 		for i_s = 1 : size(Active_Scenarios,1)
@@ -1291,50 +1323,125 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			end
 			
 			Data_Mean_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
-					'_',num2str(Option_Profile_Shuffles),...
-					'_',num2str(Option_Type_Load),...
-					'_',num2str(Option_Type_Data)]).Data_Mean);
+				'_',num2str(Option_Profile_Shuffles),...
+				'_',num2str(Option_Type_Load),...
+				'_',num2str(Option_Type_Data)]).Data_Mean);
 			Data_Min_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
-					'_',num2str(Option_Profile_Shuffles),...
-					'_',num2str(Option_Type_Load),...
-					'_',num2str(Option_Type_Data)]).Data_Min);
+				'_',num2str(Option_Profile_Shuffles),...
+				'_',num2str(Option_Type_Load),...
+				'_',num2str(Option_Type_Data)]).Data_Min);
 			Data_Max_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
-					'_',num2str(Option_Profile_Shuffles),...
-					'_',num2str(Option_Type_Load),...
-					'_',num2str(Option_Type_Data)]).Data_Max);
+				'_',num2str(Option_Profile_Shuffles),...
+				'_',num2str(Option_Type_Load),...
+				'_',num2str(Option_Type_Data)]).Data_Max);
 			
-			f_l = plot(Data_Mean_Boundaries);
-			set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
-			set(f_l, 'LineStyle', '-');
-			drawnow;
-			hold on;
+			
+			% fill the area between min and max:
+			if Option_Show_Area
+				f_inBetweenRegionX = [1:length(Data_Mean_Boundaries(:,2)), length(Data_Mean_Boundaries(:,1)):-1:1];
+				f_inBetweenRegionY = [Data_Mean_Boundaries(:,2)', fliplr(Data_Mean_Boundaries(:,1)')];
+				figure(fig_profiledevelopment);
+				f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
+				f_f.FaceColor = Active_Scenarios{i_s,3} / 256;
+				f_f.FaceAlpha = 0.25;
+				f_f.LineStyle = 'none';
+				figure(fig_profiledevelopment); hold on;
+				
+				f_l = plot(Data_Mean_Boundaries(:,1:2));
+				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'LineStyle', '-');
+				figure(fig_profiledevelopment); drawnow;
+				
+				if ~Option_Show_Min_Max
+					f_l(1).LineStyle = ':';
+					f_l(2).LineStyle = '-.';
+				end
+			end
+			
+			f_l = plot(Data_Mean_Boundaries(:,3));
+			f_l.Color = Active_Scenarios{i_s,3}/256;
+			f_l.LineStyle = '-';
+			f_l.LineWidth = Option_Default_Line_Width;
+			figure(fig_profiledevelopment); drawnow;
 			
 			% get the data for the legend:
-			Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
-			f_l = plot(nan, nan);	                     % make an invisible line for legend
-			set(f_l,...
-				'Color', Active_Scenarios{i_s,3}/256,... % set color of invisible line
-				'LineStyle', Active_Scenarios{i_s,4});   % set linestyle of invisible line
-			Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
-			
-			f_l = plot(Data_Max_Boundaries);
-			set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
-			set(f_l, 'LineStyle', '-.');
-			drawnow;
-			f_l = plot(Data_Min_Boundaries);
-			set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
-			set(f_l, 'LineStyle', ':');
-			drawnow;
+			if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
+				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+				figure(fig_profiledevelopment);
+				f_l = plot(nan, nan);	                     % make an invisible line for legend
+				set(f_l,...
+					'Color', Active_Scenarios{i_s,3}/256,... % set color of invisible line
+					'LineStyle', Active_Scenarios{i_s,4});   % set linestyle of invisible line
+				Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+			end
+			if Option_Show_Min_Max
+				figure(fig_profiledevelopment); 
+				f_l = plot(Data_Max_Boundaries);
+				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'LineStyle', '-.');
+				drawnow;
+				f_l = plot(Data_Min_Boundaries);
+				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'LineStyle', ':');
+				figure(fig_profiledevelopment); drawnow;
+			end
 			if i_s <=1
-				hold on;
+				figure(fig_profiledevelopment);  hold on;
 			end
 		end
 		
+		figure(fig_profiledevelopment); 
 		f_ax = gca;
-		f_ax.YAxis.Scale = 'log';
-		legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+		% X Axis
+		if Option_Plot_x_max_Value > 0
+			f_ax.XAxis.Limits = [Option_Plot_x_min_Value, Option_Plot_x_max_Value];
+			[tick_x_Positions, tick_x_Labels] = get_tick(...
+				Option_Plot_x_min_Value,...
+				Option_Plot_x_step_Value,...
+				Option_Plot_x_max_Value,...
+				Option_Plot_x_Label_Step);
+			f_ax.XAxis.TickValues   = tick_x_Positions;
+			f_ax.XAxis.TickLabels   = tick_x_Labels;
+		end
+		% Y Axis
+		if ~Option_Show_Y_Label
+			Labels_Y_Direction = [];
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		if Option_Plot_y_logScale
+			f_ax.YAxis.Scale = 'log';
+			f_ax.YAxis.Limits  = 10.^Option_Plot_y_logLimits;
+			f_ax.YAxis.TickValues = 10.^(Option_Plot_y_logLimits(1):Option_Plot_y_logLimits(2));
+		end
+		if Option_Plot_y_max_Value > 0 && ~Option_Plot_y_logScale
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Plot_y_min_Value,...
+				Option_Plot_y_step_Value,...
+				Option_Plot_y_max_Value,...
+				Option_Plot_y_Label_Step);
+			f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+			f_ax.YAxis.TickValues   = tick_y_Positions;
+			f_ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+		if Option_Show_Legend
+			if Option_Show_Area
+				[Labels_Scenarios,Labels_Scen_Style] = add_mean_min_max_entry_to_legend(fig_profiledevelopment,Labels_Scenarios,Labels_Scen_Style);
+			end
+			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+		end
 		set_default_plot_properties(f_ax);
-		set_single_plot_properties(f_ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Show_Title);
+		Settings_Max_Fig_Area = set_single_plot_properties(f_ax, ...
+			Labels_Title, ...
+			Labels_X_Direction, ...
+			Labels_Y_Direction, ...
+			Option_Show_Title, ...
+			f_max_area);
+		if Option_Show_Legend
+			f_lg = get(f_ax, 'Legend');
+			f_lg.ItemTokenSize = [17, 6];
+		end
 	end
 end
 
