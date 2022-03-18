@@ -414,37 +414,39 @@ clear Active_* Data* f_* i_* Labels_* num_* Option_* tick_*
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
 % Option_Active_Scenarios = 1:10; % All
-Option_Active_Scenarios = [5,6];
-% Option_Active_Scenarios = 1:2:10; % Winter
+% Option_Active_Scenarios = 2;
+Option_Active_Scenarios = 1:2:10; % Winter
 % Option_Active_Scenarios = 2;
 %- - - - - - - - - - - - - - - - - -
-Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-% Option_Type_Data = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+Option_Type_Load = 1; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+Option_Type_Data = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
 % Option_Type_Data = [2,3,4]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
-Option_Type_Data = 2;
+% Option_Type_Data = 2;
 %- - - - - - - - - - - - - - - - - -
-Option_Show_Title         = 0; % 1 = Show Plot Title
-Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
+Option_Show_Title         = 1; % 1 = Show Plot Title
+Option_Show_Legend        = 0;
+Option_Show_Y_Label       = 1;
+Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
+Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyles
 Option_Default_Line_Width = 1.5;
-Option_Show_Legend        = 1;
-Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'compact'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
-Option_Number_Bins      =  24;
-Option_Bar_x_max_Value  =  12; % kW (-1 ... autoscale)
+Option_Number_Bins      =  25;
+Option_Bar_x_max_Value  =  10; % kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =   0; % kW
-Option_Bar_x_Label_Step =   2; % Spacing between label entries
+Option_Bar_x_Label_Step =   2.5; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_logScale   =   0;
+Option_Bar_y_logScale   =   1;
 Option_Bar_y_logLimits  = [-3, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - - 
 Option_Bar_y_max_Value  =  -1; % 'kW' (-1 ... autoscale)
 Option_Bar_y_min_Value  =   0; % 'kW'
-Option_Bar_y_step_Value =  10; % 'kW'
+Option_Bar_y_step_Value =   5; % 'kW'
 Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
+Labels_Y_Direction = 'rel. Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -457,7 +459,6 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		Active_Datatype = Settings_Datatype(Option_Type_Data,:);
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
-		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		
 		f_max_area = [];
 		
@@ -569,7 +570,12 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Labels_Y_Direction = [];
 				Option_Show_Legend = 0;
 			else
-				f_max_area = [];
+				if ~Option_Show_Y_Label
+					Labels_Y_Direction = [];
+					f_max_area         = Settings_Max_Fig_Area;
+				else
+					f_max_area = [];
+				end
 			end
 			% Format the plot:
 			f_ax = gca;
@@ -605,6 +611,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Labels_Y_Direction,...
 				Option_Show_Title,...
 				f_max_area);
+			Settings_Max_Fig_Area = f_max_area;
 			% adjust legend properties a little bit for this kind of graph
 			if Option_Show_Legend
 				f_lg = get(f_ax, 'Legend');
@@ -718,7 +725,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -823,7 +830,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -931,7 +938,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1050,7 +1057,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1152,13 +1159,13 @@ clear Active_* f_* Data* Hist_* i j k Labels_* Option_* tick_*
 %% Show development of the RMS between the single runs
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = [6, 8];
+Option_Active_Scenarios = [4, 6, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Type_Data = 2; % 2 = 'Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
 %- - - - - - - - - - - - - - - - - -
-Option_Profile_Shuffles = 10;
+Option_Profile_Shuffles = 10000;
 %- - - - - - - - - - - - - - - - - -
 Option_Show_Title =        0; % 1 = Show Plot Title
 % = = = = = = = = = = = = = = = = =
