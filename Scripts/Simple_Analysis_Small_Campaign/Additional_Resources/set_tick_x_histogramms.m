@@ -17,6 +17,10 @@ else
 		tick_x_Labels{end+1} = tick_Positions(i)-step_Value/2; %#ok<*AGROW>
 	end
 end
+% Last Label is different, greater than
+main_tick_Position(end) = tick_Positions(end-1);
+tick_x_Labels{end} = ['>',num2str(tick_x_Labels{end})];
+tick_Positions(end) = [];
 
 ax.XAxis.Limits       = [min_Value max_Value+step_Value/2];
 ax.XAxis.TickValues   = main_tick_Position;
