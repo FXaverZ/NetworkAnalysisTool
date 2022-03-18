@@ -2,6 +2,7 @@
 clear();
 Saved_Data_Input = [];
 Saved_Data_Profiles = [];
+Saved_Data_Shuffeld = [];
 % Add folder with help functions / needed classes to path:
 addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
 %#ok<*UNRCH>
@@ -1227,39 +1228,69 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		Labels_Scen_Style = [];
 		for i_s = 1 : size(Active_Scenarios,1)
 			disp(['Preparing Szenario "',Active_Scenarios{i_s,2},'"']);
-			Data_Mean_Start = Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
-			Data_Min_Start = Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
-			Data_Max_Start = Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
-			Data_Mean = zeros([size(Data_Mean_Start),Option_Profile_Shuffles]);
-			Data_Min = zeros([size(Data_Min_Start),Option_Profile_Shuffles]);
-			Data_Max = zeros([size(Data_Max_Start),Option_Profile_Shuffles]);
-			for i_rs = 1 : Option_Profile_Shuffles
-				if mod(i_rs,Option_Profile_Shuffles/40) == 0
-					disp(['   ',num2str(i_rs*100/Option_Profile_Shuffles),'% finished.']);
-				end
-				num_shuffle_idx = randperm(size(Data_Mean_Start,2));
-				Data_Mean_Shuffled = Data_Mean_Start(:,num_shuffle_idx);
-				Data_Min_Shuffled = Data_Min_Start(:,num_shuffle_idx);
-				Data_Max_Shuffled = Data_Max_Start(:,num_shuffle_idx);
-				for i_sp = 1 : size(Data_Mean_Start,2)
-					Data_Mean_Sing = Data_Mean_Shuffled(:,i_sp);
-					Data_Min_Sing = Data_Min_Shuffled(:,i_sp);
-					Data_Max_Sing = Data_Max_Shuffled(:,i_sp);
-					if i_sp <= 1
-						Data_Mean(:,i_sp,i_rs) = Data_Mean_Sing;
-						Data_Min(:,i_sp,i_rs) = Data_Min_Sing;
-						Data_Max(:,i_sp,i_rs) = Data_Max_Sing;
-					else
-						Data_Mean(:,i_sp,i_rs) = mean([Data_Mean(:,1:i_sp-1,i_rs),Data_Mean_Sing],2);
-						Data_Min(:,i_sp,i_rs) = min([Data_Min(:,1:i_sp-1,i_rs),Data_Min_Sing],[],2);
-						Data_Max(:,i_sp,i_rs) = max([Data_Max(:,1:i_sp-1,i_rs),Data_Max_Sing],[],2);
+			if ~isfield(Saved_Data_Shuffeld, ['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)])
+				Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]) = [];
+				Data_Mean_Start = Data_Mean_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+				Data_Min_Start = Data_Min_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+				Data_Max_Start = Data_Max_Profile.(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+				Data_Mean = zeros([size(Data_Mean_Start),Option_Profile_Shuffles]);
+				Data_Min = zeros([size(Data_Min_Start),Option_Profile_Shuffles]);
+				Data_Max = zeros([size(Data_Max_Start),Option_Profile_Shuffles]);
+				for i_rs = 1 : Option_Profile_Shuffles
+					if mod(i_rs,Option_Profile_Shuffles/40) == 0
+						disp(['   ',num2str(i_rs*100/Option_Profile_Shuffles),'% finished.']);
+					end
+					num_shuffle_idx = randperm(size(Data_Mean_Start,2));
+					Data_Mean_Shuffled = Data_Mean_Start(:,num_shuffle_idx);
+					Data_Min_Shuffled = Data_Min_Start(:,num_shuffle_idx);
+					Data_Max_Shuffled = Data_Max_Start(:,num_shuffle_idx);
+					for i_sp = 1 : size(Data_Mean_Start,2)
+						Data_Mean_Sing = Data_Mean_Shuffled(:,i_sp);
+						Data_Min_Sing = Data_Min_Shuffled(:,i_sp);
+						Data_Max_Sing = Data_Max_Shuffled(:,i_sp);
+						if i_sp <= 1
+							Data_Mean(:,i_sp,i_rs) = Data_Mean_Sing;
+							Data_Min(:,i_sp,i_rs) = Data_Min_Sing;
+							Data_Max(:,i_sp,i_rs) = Data_Max_Sing;
+						else
+							Data_Mean(:,i_sp,i_rs) = mean([Data_Mean(:,1:i_sp-1,i_rs),Data_Mean_Sing],2);
+							Data_Min(:,i_sp,i_rs) = min([Data_Min(:,1:i_sp-1,i_rs),Data_Min_Sing],[],2);
+							Data_Max(:,i_sp,i_rs) = max([Data_Max(:,1:i_sp-1,i_rs),Data_Max_Sing],[],2);
+						end
 					end
 				end
+				Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Mean = Data_Mean;
+				Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Min = Data_Min;
+				Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Max = Data_Min;
 			end
 			
-			Data_Mean_Boundaries = calculate_rms_error(Data_Mean);
-			Data_Min_Boundaries = calculate_rms_error(Data_Min);
-			Data_Max_Boundaries = calculate_rms_error(Data_Max);
+			Data_Mean_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Mean);
+			Data_Min_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Min);
+			Data_Max_Boundaries = calculate_rms_error(Saved_Data_Shuffeld.(['Saved_',num2str(Active_Scenarios{i_s,1}),...
+					'_',num2str(Option_Profile_Shuffles),...
+					'_',num2str(Option_Type_Load),...
+					'_',num2str(Option_Type_Data)]).Data_Max);
 			
 			f_l = plot(Data_Mean_Boundaries);
 			set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
@@ -1292,7 +1323,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		f_ax.YAxis.Scale = 'log';
 		legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		set_default_plot_properties(f_ax);
-		set_single_plot_properties(f_ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Show_Title)
+		set_single_plot_properties(f_ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Show_Title);
 	end
 end
 
