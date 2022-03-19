@@ -45,7 +45,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilität';...
+	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
 Settings_Datatype = {
@@ -259,6 +259,11 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		for i_t = 1 : size(Active_Datatype,1)
 			if ~isfield(Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]),Active_Datatype{i_t,2})
 				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2}) = [];
+				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 0;
+			else
+				if Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete'])
+					continue;
+				end
 			end
 			if isempty(Data_Input)
 				Data_Input = Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).Load_Infeed_Data;
@@ -291,6 +296,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			Labels_Scenarios = {};
 			Labels_Scen_Style = [];
 			for i_s = 1 : size(Active_Scenarios,1)
+				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 1;
 				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
 				Data_Plot_Mean = mean(Data_Stored,2);
 				% excluding all zero profiles (no infeed):
@@ -483,8 +489,11 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		for i_t = 1 : size(Active_Datatype,1)
 			if ~isfield(Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]),Active_Datatype{i_t,2})
 				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2}) = [];
+				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 0;
 			else
-				continue;
+				if Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete'])
+					continue;
+				end
 			end
 			if isempty(Data_Input)
 				Data_Input = Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).Load_Infeed_Data;
@@ -516,6 +525,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			Labels_Scenarios = {};
 			Labels_Scen_Style = [];
 			for i_s = 1 : size(Active_Scenarios,1)
+				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 1;
 				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
 				if isempty(Data_Stored)
 					continue;
