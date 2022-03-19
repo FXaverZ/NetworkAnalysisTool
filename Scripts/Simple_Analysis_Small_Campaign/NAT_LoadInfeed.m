@@ -209,6 +209,8 @@ Option_Show_Min_Max       = 0; % 1 = Plot also min and max of the profiles    --
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend        = 1;
+Option_Show_Y_Label       = 1;
+Settings_Max_Fig_Area     = [0.0939    0.1118    0.0298    0.0256];
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
@@ -355,7 +357,12 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Labels_Y_Direction = [];
 				Option_Show_Legend = 0;
 			else
-				f_max_area = [];
+				if ~Option_Show_Y_Label
+					Labels_Y_Direction = [];
+					f_max_area         = Settings_Max_Fig_Area;
+				else
+					f_max_area = [];
+				end
 			end
 			
 			% Format the plot:
@@ -396,6 +403,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Labels_Y_Direction,...
 				Option_Show_Title,...
 				f_max_area);
+			Settings_Max_Fig_Area = f_max_area;
 			% adjust legend properties a little bit for this kind of graph
 			if Option_Show_Legend
 				f_lg = get(f_ax, 'Legend');
