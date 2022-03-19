@@ -257,8 +257,6 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		for i_t = 1 : size(Active_Datatype,1)
 			if ~isfield(Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]),Active_Datatype{i_t,2})
 				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2}) = [];
-			else
-				continue;
 			end
 			if isempty(Data_Input)
 				Data_Input = Saved_Data_Input.(['Saved_',num2str(i_d)]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).Load_Infeed_Data;
