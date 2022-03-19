@@ -101,7 +101,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -192,7 +192,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	figure(fig_infeedsummary); hold off;
 end
 
-clear Active_* Option_* Labels_* Data* tick_* i j k l f_* 
+clear Active_* Option_* Labels_* Data* tick_* i j k l f_* i_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot timeline summary figures 
 % = = = = = = = = = = = = = = = = =
@@ -458,7 +458,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -657,8 +657,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -729,7 +729,7 @@ Option_Active_Scenarios = [6,8];
 %- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - - 
-Option_Number_Bins             = 75;
+Option_Number_Bins      = 75;
 Option_Bar_x_max_Value  = 75; %kW
 Option_Bar_x_min_Value  =  0; %kW
 Option_Bar_x_step_Value =  5;
@@ -741,11 +741,16 @@ Option_Bar_y_step_Value =  2; % '%'
 Option_Bar_y_Label_Step =  2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
+Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (for this the 
+% 'Saved_Data_Profiles' structure has to be already filled with the correct data by  
+% calling a previous cell. E.g. "%% Plot timeline summary figures" or "%%Plot histogramm  
+% summary figures"...
+Option_Comparison_Scenario = 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -757,30 +762,32 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
+		Active_Datatype = Settings_Datatype(2,:);
 		
 		fig_histogrammsummary = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_Plot_Size);
 		
 	end
 	figure(fig_histogrammsummary); nexttile;
 	Labels_Scenarios = {};
+	Labels_Scen_Style = [];
+	Labels_Comp_Scenarios = {};
+	Labels_Comp_Scen_Style = [];
 	for j = 1 : size(Active_Scenarios,1)
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data_Mean_Shuffled = [];
+		Data = [];
 		for i_sp = 1 : Settings_Number_Profiles
-			Data_Mean_Shuffled = [Data_Mean_Shuffled;...
+			Data = [Data;...
 				Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean];  %#ok<AGROW>
 		end
 		% from W to kW
-		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
+		Data = Data ./ 1000;
 		% Sum all single appliance profiles up
-		Data_Mean_Shuffled = sum(Data_Mean_Shuffled,2);
-		if (~isempty(Data_Mean_Shuffled))
-			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
-			
+		Data = sum(Data,2);
+		if (~isempty(Data))
 			% histogramms of sum
 			Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
-			[~,Hist_binIdx] = histc(Data_Mean_Shuffled,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
+			[~,Hist_binIdx] = histc(Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
 			% calculate the number of elements in bins
 			Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
 			figure(fig_histogrammsummary);
@@ -794,8 +801,55 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			end
 			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
 			alpha(f_b,.5)
+			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+			figure(fig_histogrammsummary); hold on;
+			
+			if Option_Comparison_Full 
+				if ~isempty(Option_Comparison_Scenario)
+					if Option_Comparison_Scenario ~= Active_Scenarios{j,1}
+						continue;
+					end
+				end
+				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{j,1})]).(Active_Datatype{1,2});
+				num_profiles_per_Dataset = (size(Data_Stored,2)/Settings_Number_Profiles)/Saved_Data_Input.Number_Datasets;
+				num_timepoints = size(Data_Stored,1);
+				Data_Full = zeros(num_timepoints*Settings_Number_Profiles*Saved_Data_Input.Number_Datasets,num_profiles_per_Dataset);
+				for k = 1:Settings_Number_Profiles*Saved_Data_Input.Number_Datasets
+					Data_Full((k-1)*num_timepoints+1:k*num_timepoints,:) = ...
+						Data_Stored(:,(k-1)*num_profiles_per_Dataset+1:k*num_profiles_per_Dataset);
+				end
+				% histogramms of sum
+				Data_Full = sum(Data_Full,2);
+				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
+				Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
+				[~,Hist_binIdx] = histc(Data_Full,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
+				% calculate the number of elements in bins
+				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				figure(fig_histogrammsummary);
+				switch Active_LoadType
+					case 'Solar'
+						% In case of solar, don't plot the "0" bin, becaus this
+						% is almost 50% of the data (nigthtime!)
+						f_b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
+					otherwise
+						f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+				end
+				if ~isempty(Option_Comparison_Scenario) && numel(Option_Comparison_Scenario) == 1
+					set(f_b,'EdgeColor','k','FaceColor','none');
+					f_b.EdgeAlpha = 0.25;
+					f_comp_legend_pos = 'northeast';
+				else
+					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					f_b.EdgeAlpha = 0.5;
+					f_comp_legend_pos = 'southeast';
+				end
+				f_b.LineStyle = '-';
+				Labels_Comp_Scenarios{end+1} = [Active_Scenarios{j,5},' Kompl. Datens.']; %#ok<SAGROW>
+				Labels_Comp_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+				figure(fig_histogrammsummary); hold on;
+			end
 		end
-		hold on;
 	end
 	% Format Diagrams:
 	figure(fig_histogrammsummary); 
@@ -818,7 +872,10 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	end
 	% Legend
 	if i == 1
-		legend(Labels_Scenarios, 'Location','southeast');
+		legend(Labels_Scen_Style, Labels_Scenarios, 'Location','southeast');
+	end
+	if i == 2 && Option_Comparison_Full
+		legend(Labels_Comp_Scen_Style, Labels_Comp_Scenarios, 'Location',f_comp_legend_pos);
 	end
 	set_default_plot_properties(f_ax);
 	figure(fig_histogrammsummary); hold off;
@@ -848,9 +905,9 @@ Option_Bar_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -941,7 +998,7 @@ Option_Active_Scenarios = [6,8];
 %- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -  
-Option_Number_Bins             = 75;
+Option_Number_Bins      = 75;
 Option_Bar_x_max_Value  = 75; %kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =  0; %kW
 Option_Bar_x_step_Value =  5; %kW
@@ -953,12 +1010,17 @@ Option_Bar_y_step_Value =  2; % '%'
 Option_Bar_y_Label_Step =  2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
+Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (for this the 
+% 'Saved_Data_Profiles' structure has to be already filled with the correct data by  
+% calling a previous cell. E.g. "%% Plot timeline summary figures" or "%%Plot histogramm  
+% summary figures"...
+Option_Comparison_Scenario= 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -967,6 +1029,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
+		Active_Datatype = Settings_Datatype(2,:);
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
@@ -978,6 +1041,9 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	
 	figure(fig_histogrammdevsummary); nexttile;
 	Labels_Scenarios = {};
+	Labels_Scen_Style = [];
+	Labels_Comp_Scenarios = {};
+	Labels_Comp_Scen_Style = [];
 	for j = 1 : size(Active_Scenarios,1)
 		% prepare a structure to keep the scenario data
 		if (~isfield(Data_Dev_Hist, ['Saved_',num2str(Active_Scenarios{j,1})]))
@@ -985,17 +1051,16 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		end
 		% load the raw data
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data_Mean_Shuffled = [];
+		Data = [];
 		for i_sp = 1 : Settings_Number_Profiles
-			Data_Mean_Shuffled = [Data_Mean_Shuffled; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
+			Data = [Data; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
 		end
 		% from W to kW
-		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
-		if (~isempty(Data_Mean_Shuffled))
-			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+		Data = Data ./ 1000;
+		if (~isempty(Data))
 			% combine the profiles
 			Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
-				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data_Mean_Shuffled,2)];
+				[Data_Dev_Hist.(['Saved_',num2str(Active_Scenarios{j,1})]); sum(Data,2)];
 			% histogramms of development of profile numbers:
 			if Option_Bar_x_max_Value > 0
 				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
@@ -1019,9 +1084,56 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 					f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
 			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
-			alpha(f_b,.5)
+			alpha(f_b,.5);
+			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+			figure(fig_histogrammdevsummary); hold on;
+			
+			if Option_Comparison_Full 
+				if ~isempty(Option_Comparison_Scenario)
+					if Option_Comparison_Scenario ~= Active_Scenarios{j,1}
+						continue;
+					end
+				end
+				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{j,1})]).(Active_Datatype{1,2});
+				num_profiles_per_Dataset = (size(Data_Stored,2)/Settings_Number_Profiles)/Saved_Data_Input.Number_Datasets;
+				num_timepoints = size(Data_Stored,1);
+				Data_Full = zeros(num_timepoints*Settings_Number_Profiles*Saved_Data_Input.Number_Datasets,num_profiles_per_Dataset);
+				for k = 1:Settings_Number_Profiles*Saved_Data_Input.Number_Datasets
+					Data_Full((k-1)*num_timepoints+1:k*num_timepoints,:) = ...
+						Data_Stored(:,(k-1)*num_profiles_per_Dataset+1:k*num_profiles_per_Dataset);
+				end
+				% histogramms of sum
+				Data_Full = sum(Data_Full,2);
+				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
+				Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
+				[~,Hist_binIdx] = histc(Data_Full,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
+				% calculate the number of elements in bins
+				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				figure(fig_histogrammdevsummary);
+				switch Active_LoadType
+					case 'Solar'
+						% In case of solar, don't plot the "0" bin, becaus this
+						% is almost 50% of the data (nigthtime!)
+						f_b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
+					otherwise
+						f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+				end
+				if ~isempty(Option_Comparison_Scenario) && numel(Option_Comparison_Scenario) == 1
+					set(f_b,'EdgeColor','k','FaceColor','none');
+					f_b.EdgeAlpha = 0.25;
+					f_comp_legend_pos = 'northeast';
+				else
+					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					f_b.EdgeAlpha = 0.5;
+					f_comp_legend_pos = 'southeast';
+				end
+				f_b.LineStyle = '-';
+				Labels_Comp_Scenarios{end+1} = [Active_Scenarios{j,5},' Kompl. Datens.']; %#ok<SAGROW>
+				Labels_Comp_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+				figure(fig_histogrammdevsummary); hold on;
+			end
 		end
-		hold on;
 	end
 	% Format Diagrams:
 	figure(fig_histogrammdevsummary); 
@@ -1044,13 +1156,16 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	end
 	% Legend
 	if i == 1
-		legend(Labels_Scenarios, 'Location','southeast');
+		legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+	end
+	if i == 2 && Option_Comparison_Full
+		legend(Labels_Comp_Scen_Style, Labels_Comp_Scenarios, 'Location',f_comp_legend_pos);
 	end
 	set_default_plot_properties(f_ax);
 	figure(fig_histogrammdevsummary); hold off;
 end
 
-clear Active_* f_* Data* Hist_* i j k Labels_* Option_* tick_*
+clear Active_* f_* Data* Hist_* i j k i_* num_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Histogramms with adding up profile number (single appliance profiles)
 % = = = = = = = = = = = = = = = = = 
@@ -1060,7 +1175,7 @@ Option_Active_Scenarios = [6,8];
 %- - - - - - - - - - - - - - - - - - 
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -  
-Option_Number_Bins             = 60;
+Option_Number_Bins      = 60;
 Option_Bar_x_max_Value  = 12; %kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =  0; %kW
 Option_Bar_x_step_Value =  1; %kW
@@ -1072,12 +1187,17 @@ Option_Bar_y_step_Value =  5; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Show_SubTitle =      1; % 1 = Show subplot titles
+Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (for this the 
+% 'Saved_Data_Profiles' structure has to be already filled with the correct data by  
+% calling a previous cell. E.g. "%% Plot timeline summary figures" or "%%Plot histogramm  
+% summary figures"...
+Option_Comparison_Scenario=[]; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1086,6 +1206,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	if i <= 1
 		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
 		Active_LoadType = Settings_Loadtype{Option_Type_Load,2};
+		Active_Datatype = Settings_Datatype(2,:);
 		
 		[tick_y_Positions, tick_y_Labels] = get_tick(Option_Bar_y_min_Value,Option_Bar_y_step_Value, Option_Bar_y_max_Value, Option_Bar_y_Label_Step);
 		[tick_x_Positions, tick_x_Labels] = get_tick(Option_Bar_x_min_Value,Option_Bar_x_step_Value, Option_Bar_x_max_Value, Option_Bar_x_Label_Step);
@@ -1097,6 +1218,9 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	
 	figure(fig_histogrammdevsingle); nexttile;
 	Labels_Scenarios = {};
+	Labels_Scen_Style = [];
+	Labels_Comp_Scenarios = {};
+	Labels_Comp_Scen_Style = [];
 	for j = 1 : size(Active_Scenarios,1)
 		% prepare a structure to keep the scenario data
 		if (~isfield(Data_Dev_Hist_Single, ['Saved_',num2str(Active_Scenarios{j,1})]))
@@ -1104,18 +1228,17 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 		end
 		% load the raw data
 		Data_Input = Saved_Data_Input.(['Saved_',num2str(i)]).(['Saved_',num2str(Active_Scenarios{j,1})]).Load_Infeed_Data;
-		Data_Mean_Shuffled = [];
+		Data = [];
 		for i_sp = 1 : Settings_Number_Profiles
-			Data_Mean_Shuffled = [Data_Mean_Shuffled; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
+			Data = [Data; Data_Input.(['Set_',num2str(i_sp)]).(Active_LoadType).Data_Mean]; %#ok<AGROW>
 		end
 		% from W to kW
-		Data_Mean_Shuffled = Data_Mean_Shuffled ./ 1000;
-		if (~isempty(Data_Mean_Shuffled))
-			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+		Data = Data ./ 1000;
+		if (~isempty(Data))
 			% combine the profiles
 			Data_Singlephase = [];
-			for i_sp = 1 : size(Data_Mean_Shuffled, 2)/ 6
-				Data_Sing = Data_Mean_Shuffled(:,1+(i_sp-1)*6:6+(i_sp-1)*6);
+			for i_sp = 1 : size(Data, 2)/ 6
+				Data_Sing = Data(:,1+(i_sp-1)*6:6+(i_sp-1)*6);
 				Data_Singlephase = [Data_Singlephase; Data_Sing]; %#ok<AGROW>
 			end
 			Data_Dev_Hist_Single.(['Saved_',num2str(Active_Scenarios{j,1})]) = ...
@@ -1144,6 +1267,48 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 			end
 			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
 			alpha(f_b,.5)
+			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
+			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+			figure(fig_histogrammdevsingle); hold on;
+			
+			if Option_Comparison_Full 
+				if ~isempty(Option_Comparison_Scenario)
+					if Option_Comparison_Scenario ~= Active_Scenarios{j,1}
+						continue;
+					end
+				end
+				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{j,1})]).(Active_Datatype{1,2});
+				num_profiles_per_Dataset = (size(Data_Stored,2)/Settings_Number_Profiles)/Saved_Data_Input.Number_Datasets;
+				num_timepoints = size(Data_Stored,1);
+				Data_Full = reshape(Data_Stored,[],1);
+				Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
+				Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;     % center
+				[~,Hist_binIdx] = histc(Data_Full,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC> % histc
+				% calculate the number of elements in bins
+				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				figure(fig_histogrammdevsingle);
+				switch Active_LoadType
+					case 'Solar'
+						% In case of solar, don't plot the "0" bin, becaus this
+						% is almost 50% of the data (nigthtime!)
+						f_b=bar(Hist_cj(2:end),100*Hist_nj(2:end)/sum(Hist_nj(2:end)),'hist');
+					otherwise
+						f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+				end
+				if ~isempty(Option_Comparison_Scenario) && numel(Option_Comparison_Scenario) == 1
+					set(f_b,'EdgeColor','k','FaceColor','none');
+					f_b.EdgeAlpha = 0.25;
+					f_comp_legend_pos = 'northeast';
+				else
+					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					f_b.EdgeAlpha = 0.5;
+					f_comp_legend_pos = 'northeast';
+				end
+				f_b.LineStyle = '-';
+				Labels_Comp_Scenarios{end+1} = [Active_Scenarios{j,5},' Kompl. Datens.']; %#ok<SAGROW>
+				Labels_Comp_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+				figure(fig_histogrammdevsingle); hold on;
+			end
 		end
 		hold on;
 	end
@@ -1168,13 +1333,16 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 	end
 	% Legend
 	if i == 1
-		legend(Labels_Scenarios, 'Location','southeast');
+		legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+	end
+	if i == 2 && Option_Comparison_Full
+		legend(Labels_Comp_Scen_Style, Labels_Comp_Scenarios, 'Location',f_comp_legend_pos);
 	end
 	set_default_plot_properties(f_ax);
 	figure(fig_histogrammdevsingle); hold off;
 end
 
-clear Active_* f_* Data* Hist_* i j k Labels_* Option_* tick_*
+clear Active_* f_* Data* Hist_* i j k i_* num_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Show development of the RMS between the single runs
 % = = = = = = = = = = = = = = = = =
