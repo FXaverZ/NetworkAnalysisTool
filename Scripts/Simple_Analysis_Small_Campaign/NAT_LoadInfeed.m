@@ -45,7 +45,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
+	 3, 'El_Mobility' , 'Elektromobilität';...
 	};
 
 Settings_Datatype = {
@@ -101,7 +101,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -458,7 +458,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
+Labels_Y_Direction = 'rel. Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -642,6 +642,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 	end
 end
 
+clear Active_* Data* f_* Hist_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot the single profiles for a specific scenario
 % = = = = = = = = = = = = = = = = = 
@@ -657,8 +658,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -748,9 +749,9 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario = 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -905,9 +906,9 @@ Option_Bar_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1017,10 +1018,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario= 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1194,10 +1195,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario=[]; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1348,37 +1349,40 @@ clear Active_* f_* Data* Hist_* i j k i_* num_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
 % Option_Active_Scenarios = [3, 4, 5, 7, 8, 10];
+Option_Active_Scenarios = [6, 8];
 % Option_Active_Scenarios = [3, 5, 7];
-Option_Active_Scenarios = [4, 8, 10];
+% Option_Active_Scenarios = [4, 8, 10];
 % Option_Active_Scenarios = [4, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Type_Data = 2; % 2 = 'Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
 %- - - - - - - - - - - - - - - - - -
-Option_Profile_Shuffles = 500;
+Option_Profile_Shuffles  = 2000;
 %- - - - - - - - - - - - - - - - - -
-Option_Show_Title         = 0; % 1 = Show Plot Title
-Option_Show_Legend        = 0;
-Option_Show_Min_Max       = 0;
-Option_Show_Area          = 1;
-Option_Default_Line_Width = 1.5;
-Option_Show_Y_Label       = 0;
-Option_Plot_Size          = 'compact'; % 'compact', 'medium', 'large'
-Settings_Max_Fig_Area     = [0.1687    0.2141    0.0329    0.0550];
+Option_Show_Title        = 0; % 1 = Show Plot Title
+Option_Show_Legend       = 1;
+Option_Show_Legend_Detail= 1;
+Option_Show_Legend_Season= 0;
+Option_Show_Min_Max      = 0;
+Option_Show_Area         = 1;
+Option_Default_Line_Width= 1.5;
+Option_Show_Y_Label      = 1;
+Option_Plot_Size         = 'large'; % 'compact', 'medium', 'large'
+Settings_Max_Fig_Area    = [0.1142    0.1242    0.0219    0.0313];
 %- - - - - - - - - - - - - - - - - -
-Option_Plot_x_max_Value  =  450; % (-1 ... autoscale)
-Option_Plot_x_min_Value  =    0; % 
-Option_Plot_x_step_Value =   50; % 
-Option_Plot_x_Label_Step =    1; % Spacing between label entries
+Option_Plot_x_max_Value  = 450; % (-1 ... autoscale)
+Option_Plot_x_min_Value  =   0; % 
+Option_Plot_x_step_Value =  50; % 
+Option_Plot_x_Label_Step =   1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - -
-Option_Plot_y_max_Value  =   -1; % '%' (-1 ... autoscale)
+Option_Plot_y_max_Value  =  -1; % '%' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % '%'
-Option_Plot_y_step_Value =   0.05; % '%'
+Option_Plot_y_step_Value =0.05; % '%'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - -
-Option_Plot_y_logScale     = 1;
-Option_Plot_y_logLimits    = [-3, 2]; % 10^x
+Option_Plot_y_logScale   = 1;
+Option_Plot_y_logLimits  = [-3, 2]; % 10^x
 % = = = = = = = = = = = = = = = = =
 Labels_Title = ['Entwicklung des RMS zwischen den einzelnen Profilen mit ',...
  	num2str(Option_Profile_Shuffles),' Permutationen'];
@@ -1550,7 +1554,11 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			
 			% get the data for the legend:
 			if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
-				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+				if Option_Show_Legend_Season
+					Labels_Scenarios{end+1} = [Active_Scenarios{i_s,5},' - ',Active_Scenarios{i_s,6}];%#ok<SAGROW>
+				else 
+					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+				end
 				figure(fig_profiledevelopment);
 				f_l = plot(nan, nan);	                     % make an invisible line for legend
 				set(f_l,...
@@ -1610,7 +1618,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			f_ax.YAxis.TickLabels   = tick_y_Labels;
 		end
 		if Option_Show_Legend
-			if Option_Show_Area
+			if Option_Show_Area && Option_Show_Legend_Detail
 				[Labels_Scenarios,Labels_Scen_Style] = add_mean_min_max_entry_to_legend(fig_profiledevelopment,Labels_Scenarios,Labels_Scen_Style);
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
@@ -1629,5 +1637,5 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 	end
 end
 
-clear Active_* Data* f_* i_* Labels_* num_* Option_*
+clear Active_* Data* f_* i_* Labels_* num_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
