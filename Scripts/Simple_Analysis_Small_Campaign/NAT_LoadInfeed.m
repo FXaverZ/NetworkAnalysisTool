@@ -1,5 +1,5 @@
 %%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-clear();
+% clear();
 Saved_Data_Input = [];
 Saved_Data_Profiles = [];
 Saved_Data_Shuffeld = [];
@@ -40,12 +40,14 @@ Settings_Scenario = {
 	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36]/256, '-'      , 'S4'                 , 'Sommer';...
 	};
 
+Settings_Grid_Size = 23; % Mean number of connection points within the Grid
+
 Settings_Loadtype = {
 % 1      2               3
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
+	 3, 'El_Mobility' , 'Elektromobilität';...
 	};
 
 Settings_Datatype = {
@@ -101,7 +103,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -197,16 +199,18 @@ clear Active_* Option_* Labels_* Data* tick_* i j k l f_* i_*
 %% Plot timeline summary figures 
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
+% Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
-% Option_Active_Scenarios = 2;
+Option_Active_Scenarios = 3;
 %- - - - - - - - - - - - - - - - - -
-Option_Type_Load = 3; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-Option_Type_Data = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+Option_Type_Load      = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+Option_Type_Data      = 2; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+Option_Use_GridSum    = 1; % 1 = Use the sum over all single profiles per grid
+Option_Show_Mean_Grid = 1; % 1 = Calulculate mean profile over all grid connection points
 %- - - - - - - - - - - - - - - - - -
-Option_Show_Title         = 1; % 1 = Show Plot Title
-Option_Show_Min_Max       = 0; % 1 = Plot also min and max of the profiles    --+
-Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
+Option_Show_Title         = 0; % 1 = Show Plot Title
+Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
+Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend        = 1;
 Option_Show_Y_Label       = 1;
@@ -216,11 +220,11 @@ Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
 Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
-Option_Plot_x_Label_Step =   4; % Spacing between label entries
+Option_Plot_x_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =   1; % 'kW' (-1 ... autoscale)
+Option_Plot_y_max_Value  =  5; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
-Option_Plot_y_step_Value =   0.25; % 'kW'
+Option_Plot_y_step_Value =   0.5; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -298,6 +302,24 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			for i_s = 1 : size(Active_Scenarios,1)
 				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 1;
 				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
+				if isempty(Data_Stored)
+					continue
+				end
+				if Option_Use_GridSum || Option_Show_Mean_Grid
+					% Reshape the Data to show the sum within one grid
+					% (set):
+					num_single_profiles = size(Data_Stored,2)/(Settings_Number_Profiles*Saved_Data_Input.Number_Datasets);
+					Data = zeros(size(Data_Stored,1),Settings_Number_Profiles*Saved_Data_Input.Number_Datasets);
+					for i_sp = 1 : Settings_Number_Profiles*Saved_Data_Input.Number_Datasets
+						Data(:,i_sp) = sum(Data_Stored(:,1+(i_sp-1)*num_single_profiles:i_sp*num_single_profiles),2);
+					end
+					if Option_Show_Mean_Grid
+						Data_Stored = Data / Settings_Grid_Size;
+					else
+						Data_Stored = Data;
+					end
+				end
+				
 				Data_Plot_Mean = mean(Data_Stored,2);
 				% excluding all zero profiles (no infeed):
 				num_idx_nonzero_profiles = sum(Data_Stored)>0;
@@ -305,9 +327,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Data_Plot_Max  = max(Data_Stored,[],2);
 				% Plot mean
 				figure(fig_profilesummary.(Active_Datatype{i_t,2}));
-				if isempty(Data_Plot_Mean)
-					continue
-				end
+				
 				f_l = plot(Data_Plot_Mean);
 				f_l.Color = Active_Scenarios{i_s,3};
 				f_l.LineStyle = '-';
@@ -420,35 +440,37 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 	end
 end
 
-clear Active_* Data* f_* i_* Labels_* num_* Option_* tick_*
+clear Active_* Data* f_* fig_* i_* Labels_* num_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Plot histogramm summary figures 
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
 % Option_Active_Scenarios = 1:10; % All
 % Option_Active_Scenarios = 2;
-Option_Active_Scenarios = 1:2:10; % Winter
-% Option_Active_Scenarios = 2;
+% Option_Active_Scenarios = 1:2:10; % Winter
+Option_Active_Scenarios = 4;
 %- - - - - - - - - - - - - - - - - -
-Option_Type_Load = 1; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
-Option_Type_Data = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
-% Option_Type_Data = [2,3,4]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
-% Option_Type_Data = 2;
+Option_Type_Load      = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+% Option_Type_Data    = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+% Option_Type_Data    = [2,3,4]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
+Option_Type_Data      = 2;
+Option_Use_GridSum    = 1; % 1 = Use the sum over all single profiles per grid
+Option_Show_Mean_Grid = 1; % 1 = Calulculate mean profile over all grid connection points
 %- - - - - - - - - - - - - - - - - -
-Option_Show_Title         = 1; % 1 = Show Plot Title
-Option_Show_Legend        = 0;
+Option_Show_Title         = 0; % 1 = Show Plot Title
+Option_Show_Legend        = 1;
 Option_Show_Y_Label       = 1;
 Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
 Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyles
 Option_Default_Line_Width = 1.5;
-Option_Plot_Size          = 'compact'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
-Option_Number_Bins      =  25;
-Option_Bar_x_max_Value  =  10; % kW (-1 ... autoscale)
+Option_Number_Bins      =  50;
+Option_Bar_x_max_Value  =   5; % kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =   0; % kW
-Option_Bar_x_Label_Step =   2.5; % Spacing between label entries
+Option_Bar_x_Label_Step =  10; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_logScale   =   1;
+Option_Bar_y_logScale   =   0;
 Option_Bar_y_logLimits  = [-3, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - - 
 Option_Bar_y_max_Value  =  -1; % 'kW' (-1 ... autoscale)
@@ -458,7 +480,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
+Labels_Y_Direction = 'rel. Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -529,6 +551,20 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
 				if isempty(Data_Stored)
 					continue;
+				end
+				if Option_Use_GridSum || Option_Show_Mean_Grid
+					% Reshape the Data to show the sum within one grid
+					% (set):
+					num_single_profiles = size(Data_Stored,2)/(Settings_Number_Profiles*Saved_Data_Input.Number_Datasets);
+					Data = zeros(size(Data_Stored,1),Settings_Number_Profiles*Saved_Data_Input.Number_Datasets);
+					for i_sp = 1 : Settings_Number_Profiles*Saved_Data_Input.Number_Datasets
+						Data(:,i_sp) = sum(Data_Stored(:,1+(i_sp-1)*num_single_profiles:i_sp*num_single_profiles),2);
+					end
+					if Option_Show_Mean_Grid
+						Data_Stored = Data / Settings_Grid_Size;
+					else
+						Data_Stored = Data;
+					end
 				end
 				Data = reshape(Data_Stored,[],1);
 				if Option_Bar_x_max_Value < 1
@@ -658,8 +694,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -749,9 +785,9 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario = 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -906,9 +942,9 @@ Option_Bar_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1018,10 +1054,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario= 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1195,10 +1231,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario=[]; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
+Labels_Y_Direction = '% rel. Häufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
