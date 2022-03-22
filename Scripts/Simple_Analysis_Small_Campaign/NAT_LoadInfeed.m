@@ -26,18 +26,18 @@ Settings_Number_Profiles = 10; Path_Data_LoadInfeed = 'C:\Dissertation - Daten\D
 % Additional Set Up
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Settings_Scenario = {
-% 1      2                                                3             4          5                      6 
-% ID  ,  Filename                                       , Color       , LineStyle, Legendstr w.o. Season, Season 
-	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187], '-'      , 'SB'                 , 'Winter';...
-	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187], '-'      , 'SB'                 , 'Sommer';...
-	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72], '-'      , 'S1'                 , 'Winter';...
-	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72], '-'      , 'S1'                 , 'Sommer';...
-	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84], '-'      , 'S2'                 , 'Winter';...
-	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84], '-'      , 'S2'                 , 'Sommer';...
-	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162], '-'      , 'S3'                 , 'Winter';...
-	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162], '-'      , 'S3'                 , 'Sommer';...
-	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36], '-'      , 'S4'                 , 'Winter';...
-	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36], '-'      , 'S4'                 , 'Sommer';...
+% 1      2                                                3                 4          5                      6 
+% ID  ,  Filename                                       , Color           , LineStyle, Legendstr w.o. Season, Season 
+	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187]/256, '-'      , 'SB'                 , 'Winter';...
+	 2, '02_SB_Base_Summer_Workda'                      ,[ 74,126,187]/256, '-'      , 'SB'                 , 'Sommer';...
+	 3, '03_S1_LowLoadHighInfeed_Winter_Workda'         ,[190, 75, 72]/256, '-'      , 'S1'                 , 'Winter';...
+	 4, '04_S1_LowLoadHighInfeed_Summer_Workda'         ,[190, 75, 72]/256, '-'      , 'S1'                 , 'Sommer';...
+	 5, '05_S2_HighLoadHighInfeed_Winter_Workda'        ,[152,185, 84]/256, '-'      , 'S2'                 , 'Winter';...
+	 6, '06_S2_HighLoadHighInfeed_Summer_Workda'        ,[152,185, 84]/256, '-'      , 'S2'                 , 'Sommer';...
+	 7, '07_S3_HighLoadHighInfeed2Nodes_Winter_Workda'  ,[128,100,162]/256, '-'      , 'S3'                 , 'Winter';...
+	 8, '08_S3_HighLoadHighInfeed2Nodes_Summer_Workda'  ,[128,100,162]/256, '-'      , 'S3'                 , 'Sommer';...
+	 9, '09_S4_MediumLoadHighInfeed2Nodes_Winter_Workda',[247,173, 36]/256, '-'      , 'S4'                 , 'Winter';...
+	10, '10_S4_MediumLoadHighInfeed2Nodes_Summer_Workda',[247,173, 36]/256, '-'      , 'S4'                 , 'Sommer';...
 	};
 
 Settings_Loadtype = {
@@ -45,7 +45,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilität';...
+	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
 Settings_Datatype = {
@@ -101,7 +101,7 @@ Option_Show_Activity   =   1; % Show, how many profiles are active
 Option_Show_SubTitle   =   0; % 1 = Show supplot titles
 Option_Plot_Size  = 'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Profilsummen über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Profilsummen ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -159,7 +159,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				Labels_Activity{end+1} = [num2str(Data_num_active),' Akt.']; %#ok<SAGROW>
 		end
 		figure(fig_infeedsummary); f_l = plot(Data_Mean_Shuffled);
-		set(f_l, 'Color', Active_Scenarios{j,3}/256);
+		set(f_l, 'Color', Active_Scenarios{j,3});
 		set(f_l, 'LineStyle', Active_Scenarios{j,4});
 		drawnow;
 		if j <=1
@@ -309,7 +309,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 					continue
 				end
 				f_l = plot(Data_Plot_Mean);
-				f_l.Color = Active_Scenarios{i_s,3} / 256;
+				f_l.Color = Active_Scenarios{i_s,3};
 				f_l.LineStyle = '-';
 				f_l.LineWidth = Option_Default_Line_Width;
 				if Option_Distinct_Seasons 
@@ -328,7 +328,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
 					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
 					f_l = plot(nan, nan);	                        % make an invisible line for legend
-					f_l.Color = Active_Scenarios{i_s,3} / 256; % set color of invisible line
+					f_l.Color = Active_Scenarios{i_s,3}; % set color of invisible line
 					f_l.LineStyle = Active_Scenarios{i_s,4}; % set linestyle of invisible line
 					f_l.LineWidth = Option_Default_Line_Width;
 					Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
@@ -339,19 +339,19 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 						f_inBetweenRegionX = [1:length(Data_Plot_Max), length(Data_Plot_Min):-1:1];
 						f_inBetweenRegionY = [Data_Plot_Max', fliplr(Data_Plot_Min')];
 						f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
-						f_f.FaceColor = Active_Scenarios{i_s,3} / 256;
+						f_f.FaceColor = Active_Scenarios{i_s,3};
 						f_f.FaceAlpha = 0.25;
 						f_f.LineStyle = 'none';
 					end
 					% Plot max
 					f_l = plot(Data_Plot_Max);
-					f_l.Color = Active_Scenarios{i_s,3} / 256;
+					f_l.Color = Active_Scenarios{i_s,3};
 					f_l.LineStyle = '-.';
 					f_l.LineWidth = Option_Default_Line_Width;
 					drawnow;
 					%plot min
 					f_l = plot(Data_Plot_Min);
-					f_l.Color = Active_Scenarios{i_s,3} / 256;
+					f_l.Color = Active_Scenarios{i_s,3};
 					f_l.LineStyle = ':';
 					f_l.LineWidth = Option_Default_Line_Width;
 					drawnow;
@@ -458,7 +458,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -555,8 +555,8 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 					otherwise
 						f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 				end
-				f_b.EdgeColor = Active_Scenarios{i_s,3}/256;
-				f_b.FaceColor = Active_Scenarios{i_s,3}/256;
+				f_b.EdgeColor = Active_Scenarios{i_s,3};
+				f_b.FaceColor = Active_Scenarios{i_s,3};
 				f_b.FaceAlpha = 0.5;
 				f_b.LineStyle = Active_Scenarios{i_s,4}; 
 				f_b.LineWidth = Option_Default_Line_Width;
@@ -576,8 +576,8 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
 					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
 					f_b = bar(nan, nan);	                        % make an invisible line for legend
-					f_b.EdgeColor = Active_Scenarios{i_s,3}/256;
-					f_b.FaceColor = Active_Scenarios{i_s,3}/256;
+					f_b.EdgeColor = Active_Scenarios{i_s,3};
+					f_b.FaceColor = Active_Scenarios{i_s,3};
 					f_b.FaceAlpha = 0.5;
 					f_b.LineStyle = Active_Scenarios{i_s,4}; % set linestyle of invisible line
 					f_b.LineWidth = Option_Default_Line_Width;
@@ -658,8 +658,8 @@ Option_Plot_Label_Step  =  2; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show supplot titles
 Option_Plot_Size =  'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Einzelprofile über Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
-% 	'" für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Einzelprofile ï¿½ber Szenario "',Settings_Scenario{Option_Active_Scenarios,5},...
+% 	'" fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 % Labels_X_Direction = 'Datensets';
 Labels_Y_Direction = 'Leistung [kW]';
 Labels_X_Direction = []; % No label for Word output
@@ -749,9 +749,9 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario = 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über Szenarien für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -800,7 +800,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				otherwise
 					f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
-			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
+			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3});
 			alpha(f_b,.5)
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
@@ -841,7 +841,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 					f_b.EdgeAlpha = 0.25;
 					f_comp_legend_pos = 'northeast';
 				else
-					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					set(f_b,'EdgeColor',Active_Scenarios{j,3},'FaceColor','none');
 					f_b.EdgeAlpha = 0.5;
 					f_comp_legend_pos = 'southeast';
 				end
@@ -906,9 +906,9 @@ Option_Bar_y_Label_Step =  1; % Spacing between label entries
 Option_Show_SubTitle =      0; % 1 = Show subplot titles
 Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Histogramme über die Einzelprofile für Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
+% Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -957,7 +957,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				otherwise
 					f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
-			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
+			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3});
 			alpha(f_b,.5)
 		end
 		hold on;
@@ -1018,10 +1018,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario= 8; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1084,7 +1084,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				otherwise
 					f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
-			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
+			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3});
 			alpha(f_b,.5);
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
@@ -1125,7 +1125,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 					f_b.EdgeAlpha = 0.25;
 					f_comp_legend_pos = 'northeast';
 				else
-					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					set(f_b,'EdgeColor',Active_Scenarios{j,3},'FaceColor','none');
 					f_b.EdgeAlpha = 0.5;
 					f_comp_legend_pos = 'southeast';
 				end
@@ -1195,10 +1195,10 @@ Option_Comparison_Full =    1; % 1 = Show a comparison with the full dataset (fo
 Option_Comparison_Scenario=[]; % [] = compare with all Scenarios 
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
-% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl für Datensatz "',...
+% Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1266,7 +1266,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 				otherwise
 					f_b=bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
 			end
-			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3}/256);
+			set(f_b,'EdgeColor','none','FaceColor',Active_Scenarios{j,3});
 			alpha(f_b,.5)
 			Labels_Scenarios{end+1} = Active_Scenarios{j,5}; %#ok<SAGROW>
 			Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
@@ -1301,7 +1301,7 @@ for i = 1 : Saved_Data_Input.Number_Datasets
 					f_b.EdgeAlpha = 0.25;
 					f_comp_legend_pos = 'northeast';
 				else
-					set(f_b,'EdgeColor',Active_Scenarios{j,3}/256,'FaceColor','none');
+					set(f_b,'EdgeColor',Active_Scenarios{j,3},'FaceColor','none');
 					f_b.EdgeAlpha = 0.5;
 					f_comp_legend_pos = 'northeast';
 				end
@@ -1530,13 +1530,13 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				f_inBetweenRegionY = [Data_Mean_Boundaries(:,2)', fliplr(Data_Mean_Boundaries(:,1)')];
 				figure(fig_profiledevelopment);
 				f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
-				f_f.FaceColor = Active_Scenarios{i_s,3} / 256;
+				f_f.FaceColor = Active_Scenarios{i_s,3};
 				f_f.FaceAlpha = 0.25;
 				f_f.LineStyle = 'none';
 				figure(fig_profiledevelopment); hold on;
 				
 				f_l = plot(Data_Mean_Boundaries(:,1:2));
-				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'Color', Active_Scenarios{i_s,3});
 				set(f_l, 'LineStyle', '-');
 				figure(fig_profiledevelopment); drawnow;
 				
@@ -1547,7 +1547,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			end
 			
 			f_l = plot(Data_Mean_Boundaries(:,3));
-			f_l.Color = Active_Scenarios{i_s,3}/256;
+			f_l.Color = Active_Scenarios{i_s,3};
 			f_l.LineStyle = '-';
 			f_l.LineWidth = Option_Default_Line_Width;
 			figure(fig_profiledevelopment); drawnow;
@@ -1562,18 +1562,18 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				figure(fig_profiledevelopment);
 				f_l = plot(nan, nan);	                     % make an invisible line for legend
 				set(f_l,...
-					'Color', Active_Scenarios{i_s,3}/256,... % set color of invisible line
+					'Color', Active_Scenarios{i_s,3},... % set color of invisible line
 					'LineStyle', Active_Scenarios{i_s,4});   % set linestyle of invisible line
 				Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
 			end
 			if Option_Show_Min_Max
 				figure(fig_profiledevelopment); 
 				f_l = plot(Data_Max_Boundaries);
-				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'Color', Active_Scenarios{i_s,3});
 				set(f_l, 'LineStyle', '-.');
 				drawnow;
 				f_l = plot(Data_Min_Boundaries);
-				set(f_l, 'Color', Active_Scenarios{i_s,3}/256);
+				set(f_l, 'Color', Active_Scenarios{i_s,3});
 				set(f_l, 'LineStyle', ':');
 				figure(fig_profiledevelopment); drawnow;
 			end
