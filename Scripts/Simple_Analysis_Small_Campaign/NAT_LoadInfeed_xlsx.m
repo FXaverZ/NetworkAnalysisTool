@@ -70,7 +70,7 @@ Option_Active_Scenarios = 13; %and 15
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -
-% Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut Excel)
+% Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut D5.1)
 % Option_Data_Scaling_Factor = 1/175;   % Umrechnung P/NS-Netz Baden IST (siehe \Langfassung\05_Tabellen\Auswertungen_Baden_Zusammenfassung_140605.xlsx)
 % Option_Data_Scaling_Factor = 1/26030; % Umrechnung Netzanschluss Baden IST (siehe \Langfassung\05_Tabellen\Auswertungen_Baden_Zusammenfassung_140605.xlsx)
 Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flächenfaktor
@@ -78,11 +78,12 @@ Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 4
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
 Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
+Option_Show_Zeroprofiles  = 0; % 0 = ignore profiles with only zero values
 Option_Default_Line_Width = 1.5;
-Option_Show_Legend        = 1; %and 0
-Option_Show_Legend_Detail = 0;
-Option_Show_Legend_Season = 0;
-Option_Show_Y_Label       = 1; %and 0
+Option_Show_Legend        = 1; 
+Option_Show_Legend_Detail = 0; % 1 = show 'Min/Max' entries in legend
+Option_Show_Legend_Season = 0; % 1 = show 'Summer/Winter' entries in legend
+Option_Show_Y_Label       = 1; 
 Settings_Max_Fig_Area     = [0.1080    0.1118    0.0298    0.0256];
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
@@ -116,9 +117,6 @@ for i_s = 1:numel(Option_Active_Scenarios)
 			end
 			if ~isfield(Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]), ['Saved_',num2str(Active_Scenarios{i_ss,1})])
 				Data_Scen = reshape(Data_Stored(:,i_ss),num_timepoints,[]);
-				if sum(sum(Data_Scen)) == 0
-					Data_Scen = [];
-				end
 				Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_ss,1})]) = Data_Scen;
 			end
 		end
@@ -131,6 +129,9 @@ for i_s = 1:numel(Option_Active_Scenarios)
 	
 	Data_Stored = Option_Data_Scaling_Factor * ...
 		Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+	if (sum(sum(Data_Stored)) == 0) && ~Option_Show_Zeroprofiles
+		Data_Stored = [];
+	end
 	if isempty(Data_Stored)
 		continue;
 	end
