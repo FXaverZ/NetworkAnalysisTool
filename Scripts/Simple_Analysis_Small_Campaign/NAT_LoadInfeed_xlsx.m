@@ -268,11 +268,13 @@ Option_Type_Load           = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut Excel)
 % Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Fl�chenfaktor
 %- - - - - - - - - - - - - - - - - -
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
+Option_Show_Zeroprofiles  = 0; % 0 = ignore profiles with only zero values
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Legend        = 1;
+Option_Show_Legend_Season = 1; % 1 = show 'Summer/Winter' entries in legend
 Option_Show_Y_Label       = 1;
 Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
-Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyles
 Option_Default_Line_Width = 1.5;
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
@@ -309,14 +311,11 @@ for i_s = 1:numel(Option_Active_Scenarios)
 			end
 			if ~isfield(Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]), ['Saved_',num2str(Active_Scenarios{i_ss,1})])
 				Data_Scen = reshape(Data_Stored(:,i_ss),num_timepoints,[]);
-				if sum(sum(Data_Scen)) == 0
-					Data_Scen = [];
-				end
 				Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_ss,1})]) = Data_Scen;
 			end
 		end
 		
-		fig_profilesummary = set_up_singleplot(Option_Plot_Size);
+		fig_histogrammsummary = set_up_singleplot(Option_Plot_Size);
 		
 		Labels_Scenarios = {};
 		Labels_Scen_Style = [];
@@ -324,6 +323,9 @@ for i_s = 1:numel(Option_Active_Scenarios)
 	
 	Data_Stored = Option_Data_Scaling_Factor * ...
 		Saved_XLX_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]);
+	if (sum(sum(Data_Stored)) == 0) && ~Option_Show_Zeroprofiles
+		Data_Stored = [];
+	end
 	if isempty(Data_Stored)
 		continue;
 	end
@@ -407,9 +409,9 @@ for i_s = 1:numel(Option_Active_Scenarios)
 		end
 		% Legend
 		if Option_Show_Legend
-			if Option_Distinct_Seasons
+			if Option_Distinct_Seasons && Option_Show_Legend_Season
 				[Labels_Scenarios,Labels_Scen_Style] =...
-					add_season_entry_to_legend(fig_histogrammsummary.(Active_Datatype{i_t,2}),...
+					add_season_entry_to_legend(fig_histogrammsummary,...
 					Option_Default_Line_Width,Labels_Scenarios, Labels_Scen_Style, 'bar');
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
