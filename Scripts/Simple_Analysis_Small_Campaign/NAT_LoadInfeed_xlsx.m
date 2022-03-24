@@ -403,8 +403,13 @@ for i_s = 1:numel(Option_Active_Scenarios)
 			f_ax.YAxis.TickValues = 10.^(Option_Bar_y_logLimits(1):Option_Bar_y_logLimits(2));
 		end
 		if Option_Bar_y_max_Value > 0 && ~Option_Bar_y_logScale
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Bar_y_min_Value,...
+				Option_Bar_y_step_Value,...
+				Option_Bar_y_max_Value,...
+				Option_Bar_y_Label_Step);
 			f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
-			f_ax.YAxis.TickValues   = tick_y_Positions;
+			sf_ax.YAxis.TickValue   = tick_y_Positions;
 			f_ax.YAxis.TickLabels   = tick_y_Labels;
 		end
 		% Legend
@@ -433,3 +438,6 @@ for i_s = 1:numel(Option_Active_Scenarios)
 		hold off
 	end
 end
+
+clear Active_* Data* f_* fig_* i_* Hist_* Labels_* num_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
