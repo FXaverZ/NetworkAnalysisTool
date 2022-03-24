@@ -201,7 +201,7 @@ clear Active_* Option_* Labels_* Data* tick_* i j k l f_* i_*
 % Option_Active_Scenarios = 2:2:10; % Sommer
 % Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
-Option_Active_Scenarios = 3;
+Option_Active_Scenarios = 3; %and 4
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load      = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Type_Data      = 2; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
@@ -212,9 +212,9 @@ Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
 Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Default_Line_Width = 1.5;
-Option_Show_Legend        = 1;
-Option_Show_Y_Label       = 1;
-Settings_Max_Fig_Area     = [0.0939    0.1118    0.0298    0.0256];
+Option_Show_Legend        = 1; %and 0
+Option_Show_Y_Label       = 1; %and 0
+Settings_Max_Fig_Area     = [0.0918    0.1236    0.0364    0.0294];
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
@@ -222,9 +222,9 @@ Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
 Option_Plot_x_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  5; % 'kW' (-1 ... autoscale)
+Option_Plot_y_max_Value  =   5; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
-Option_Plot_y_step_Value =   0.5; % 'kW'
+Option_Plot_y_step_Value = 0.5; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -412,7 +412,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 				if Option_Show_Min_Max
 					[Labels_Scenarios,Labels_Scen_Style] =...
 						add_mean_min_max_entry_to_legend(fig_profilesummary.(Active_Datatype{i_t,2}),...
-						Labels_Scenarios, Labels_Scen_Style);
+						Labels_Scenarios, Labels_Scen_Style, []);
 				end
 				if Option_Distinct_Seasons
 					[Labels_Scenarios,Labels_Scen_Style] =...
@@ -448,7 +448,7 @@ clear Active_* Data* f_* fig_* i_* Labels_* num_* Option_* tick_*
 % Option_Active_Scenarios = 1:10; % All
 % Option_Active_Scenarios = 2;
 % Option_Active_Scenarios = 1:2:10; % Winter
-Option_Active_Scenarios = 4;
+Option_Active_Scenarios = [3,4];
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load      = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 % Option_Type_Data    = [2,5,6]; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
@@ -459,9 +459,10 @@ Option_Show_Mean_Grid = 1; % 1 = Calulculate mean profile over all grid connecti
 %- - - - - - - - - - - - - - - - - -
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Legend        = 1;
-Option_Show_Y_Label       = 1;
-Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
-Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyles
+Option_Show_Legend_Season = 0; % 1 = show 'Summer/Winter' entries in legend
+Option_Show_Y_Label       = 0;
+Settings_Max_Fig_Area     = [0.1350    0.1378    0.0029    0.0351];
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
 Option_Default_Line_Width = 1.5;
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
@@ -470,12 +471,12 @@ Option_Bar_x_max_Value  =   5; % kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =   0; % kW
 Option_Bar_x_Label_Step =  10; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_logScale   =   0;
-Option_Bar_y_logLimits  = [-3, 2]; % 10^x
+Option_Bar_y_logScale   =   1;
+Option_Bar_y_logLimits  = [-2, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_max_Value  =  -1; % 'kW' (-1 ... autoscale)
-Option_Bar_y_min_Value  =   0; % 'kW'
-Option_Bar_y_step_Value =   5; % 'kW'
+Option_Bar_y_max_Value  =  -1; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =   0; % '%'
+Option_Bar_y_step_Value =   5; % '%'
 Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -652,7 +653,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			end
 			% Legend
 			if Option_Show_Legend
-				if Option_Distinct_Seasons
+				if Option_Distinct_Seasons && Option_Show_Legend_Season
 					[Labels_Scenarios,Labels_Scen_Style] =...
 						add_season_entry_to_legend(fig_histogrammsummary.(Active_Datatype{i_t,2}),...
 						Option_Default_Line_Width,Labels_Scenarios, Labels_Scen_Style, 'bar');
@@ -671,7 +672,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			% adjust legend properties a little bit for this kind of graph
 			if Option_Show_Legend
 				f_lg = get(f_ax, 'Legend');
-				f_lg.ItemTokenSize = [17, 6];
+				f_lg.ItemTokenSize = [8, 8];
 			end
 			hold off
 		end
@@ -1668,7 +1669,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			f_max_area);
 		if Option_Show_Legend
 			f_lg = get(f_ax, 'Legend');
-			f_lg.ItemTokenSize = [17, 6];
+			f_lg.ItemTokenSize = [8, 8];
 		end
 	end
 end

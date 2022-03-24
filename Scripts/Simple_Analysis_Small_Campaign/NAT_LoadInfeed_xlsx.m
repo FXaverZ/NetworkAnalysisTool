@@ -80,11 +80,11 @@ Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --
 Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Show_Zeroprofiles  = 0; % 0 = ignore profiles with only zero values
 Option_Default_Line_Width = 1.5;
-Option_Show_Legend        = 1; 
-Option_Show_Legend_Detail = 0; % 1 = show 'Min/Max' entries in legend
-Option_Show_Legend_Season = 0; % 1 = show 'Summer/Winter' entries in legend
-Option_Show_Y_Label       = 1; 
-Settings_Max_Fig_Area     = [0.1080    0.1118    0.0298    0.0256];
+Option_Show_Legend        = 1; %and 0 
+Option_Show_Legend_Detail = 1; % 1 = show 'Min/Max' entries in legend
+Option_Show_Legend_Season = 1; % 1 = show 'Summer/Winter' entries in legend
+Option_Show_Y_Label       = 1; %and 0 
+Settings_Max_Fig_Area     = [0.0918    0.1236    0.0364    0.0294];
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
@@ -92,9 +92,9 @@ Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
 Option_Plot_x_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  5; % 'kW' (-1 ... autoscale)
+Option_Plot_y_max_Value  =   5; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
-Option_Plot_y_step_Value =  0.5; % 'kW'
+Option_Plot_y_step_Value = 0.5; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -229,7 +229,7 @@ for i_s = 1:numel(Option_Active_Scenarios)
 			if Option_Show_Min_Max && Option_Show_Legend_Detail
 				[Labels_Scenarios,Labels_Scen_Style] =...
 					add_mean_min_max_entry_to_legend(fig_profilesummary,...
-					Labels_Scenarios, Labels_Scen_Style);
+					Labels_Scenarios, Labels_Scen_Style,[]);
 			end
 			if Option_Distinct_Seasons && Option_Show_Legend_Season
 				[Labels_Scenarios,Labels_Scen_Style] =...
@@ -262,31 +262,32 @@ clear Active_* Data* f_* fig_* i_* Labels_* num_* Option_* tick_*
 %% Plot histogramm summary figures 
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios    = [1,5,9,13,17];
-Option_Active_Scenarios    = [2,6,10,14,18];
+% Option_Active_Scenarios    = [2,6,10,14,18];
 % Option_Active_Scenarios    = [5,9,13,17];
+Option_Active_Scenarios = [13,15];
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load           = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -
-Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut D5.1)
-% Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flächenfaktor
+% Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut D5.1)
+Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flächenfaktor
 %- - - - - - - - - - - - - - - - - -
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
-Option_Show_Zeroprofiles  = 1; % 0 = ignore profiles with only zero values
+Option_Show_Zeroprofiles  = 0; % 0 = ignore profiles with only zero values
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Legend        = 1;
-Option_Show_Legend_Season = 0; % 1 = show 'Summer/Winter' entries in legend
+Option_Show_Legend_Season = 1; % 1 = show 'Summer/Winter' entries in legend
 Option_Show_Y_Label       = 1;
 Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
 Option_Default_Line_Width = 1.5;
-Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Number_Bins      =  50;
-Option_Bar_x_max_Value  = 250; % kW (-1 ... autoscale)
+Option_Bar_x_max_Value  =   5; % kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =   0; % kW
-Option_Bar_x_Label_Step =   5; % Spacing between label entries
+Option_Bar_x_Label_Step =  10; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_logScale   =   0;
-Option_Bar_y_logLimits  = [-3, 2]; % 10^x
+Option_Bar_y_logScale   =   1;
+Option_Bar_y_logLimits  = [-2, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - - 
 Option_Bar_y_max_Value  =  30; % '%' (-1 ... autoscale)
 Option_Bar_y_min_Value  =   0; % '%'
