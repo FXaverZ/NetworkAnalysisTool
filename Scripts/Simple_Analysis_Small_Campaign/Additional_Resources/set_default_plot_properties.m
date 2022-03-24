@@ -14,9 +14,13 @@ ax.TitleFontWeight         = 'normal';
 ax.Box                     = 'off';
 ax.LineWidth               = 1;
 ax.GridAlphaMode           = 'manual';
+ax.MinorGridAlphaMode      = 'manual';
 ax.GridAlpha               = 1;
+ax.MinorGridAlpha          = 1;
 ax.GridColorMode           = 'manual';
+ax.MinorGridColorMode      = 'manual';
 ax.GridColor               = [217, 217, 217]/256;
+ax.MinorGridColor          = [217, 217, 217]/256;
 % Legend
 lg = get(ax, 'Legend');
 if(~isempty(lg))
@@ -26,15 +30,22 @@ if(~isempty(lg))
 end
 % X Axis
 ax.XAxis.TickDirection     = 'out';
-ax.XAxis.TickLength        = [0.0075 0.025];
+ax.XAxis.TickLength        = [0.005 0.0167];
 ax.XAxis.FontSize          = Fontsize_normal;
-ax.XAxis.LineWidth         = 1.5;
+ax.XAxis.LineWidth         = 1.0;
 ax.XGrid                   = 'on';
 % Y Axis
 ax.YAxis.TickDirection     = 'out';
-ax.YAxis.TickLength        = [0.0075 0.025];
+ax.YAxis.TickLength        = [0.005 0.00167];
 ax.YAxis.FontSize          = Fontsize_normal;
-ax.YAxis.LineWidth         = 1.5;
+ax.YAxis.LineWidth         = 1.0;
 ax.YGrid                   = 'on';
+% bring axis to front and grid to back:
+ax.Layer                   = 'top';
+ax.XGridHandle.FrontMajorEdge.Layer = 'back';
+ax.XGridHandle.FrontMinorEdge.Layer = 'back';
+pause(0.5);
+ax.YGridHandle.FrontMajorEdge.Layer = 'back';
+ax.YGridHandle.FrontMinorEdge.Layer = 'back';
 end
 
