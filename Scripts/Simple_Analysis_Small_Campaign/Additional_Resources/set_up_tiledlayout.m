@@ -11,11 +11,11 @@ Fontsize_big    = 16;
 
 if nargin >= 4 % User gives size wishes
 	if strcmpi(varargin{1},'compact')
-		pos = [0,89,1280,602];   % H: 16.00 cm -->  8.0cm in Word
+		pos = [0,89,1204,602];   % H: 16.00 cm -->  8.0cm in Word
 	elseif strcmpi(varargin{1},'medium')
-		pos = [0,89,1280,753];   % H: 20.00 cm --> 10.0cm in Word
+		pos = [0,89,1204,753];   % H: 20.00 cm --> 10.0cm in Word
 	elseif strcmpi(varargin{1},'large')
-		pos = [0,89,1280,934];   % H: 24.71 cm --> 12.4cm in Word
+		pos = [0,89,1204,934];   % H: 24.71 cm --> 12.4cm in Word
 	else
 		warning('Not known input!');
 	end

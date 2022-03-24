@@ -3,7 +3,7 @@ function set_default_plot_properties(ax)
 %   Detailed explanation goes here
 
 Fontsize_big     = 16;
-Fontsize_normal  = 14;
+Fontsize_normal  = 16;
 Fontsize_small   = 12;
 
 ax.FontName                = 'Palatino Linotype';
@@ -26,22 +26,28 @@ lg = get(ax, 'Legend');
 if(~isempty(lg))
 	lg.FontSize            = Fontsize_small;
 	lg.LineWidth           = 1;
+	lg.Color               = [1 1 1];
+	lg.EdgeColor           = [0 0 0];
 	lg.ItemTokenSize       = [10 6];
 end
 % X Axis
 ax.XAxis.TickDirection     = 'out';
 ax.XAxis.TickLength        = [0.005 0.0167];
 ax.XAxis.FontSize          = Fontsize_normal;
-ax.XAxis.LineWidth         = 1.0;
+ax.XAxis.LineWidth         = 1.5;
+ax.XAxis.Color             = [0 0 0];
 ax.XGrid                   = 'on';
 % Y Axis
 ax.YAxis.TickDirection     = 'out';
 ax.YAxis.TickLength        = [0.005 0.00167];
 ax.YAxis.FontSize          = Fontsize_normal;
-ax.YAxis.LineWidth         = 1.0;
+ax.YAxis.LineWidth         = 1.5;
+ax.YAxis.Color             = [0 0 0];
+ax.XAxis.Color             = [0 0 0];
 ax.YGrid                   = 'on';
 % bring axis to front and grid to back:
 ax.Layer                   = 'top';
+pause(0.5);
 ax.XGridHandle.FrontMajorEdge.Layer = 'back';
 ax.XGridHandle.FrontMinorEdge.Layer = 'back';
 pause(0.5);

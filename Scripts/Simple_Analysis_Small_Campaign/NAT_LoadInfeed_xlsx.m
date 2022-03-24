@@ -356,7 +356,7 @@ for i_s = 1:numel(Option_Active_Scenarios)
 	end
 	f_b.EdgeColor = Active_Scenarios{i_s,3};
 	f_b.FaceColor = Active_Scenarios{i_s,3};
-	f_b.FaceAlpha = 0.5;
+	f_b.FaceAlpha = 0.25;
 	f_b.LineStyle = Active_Scenarios{i_s,4};
 	f_b.LineWidth = Option_Default_Line_Width;
 	if Option_Distinct_Seasons
@@ -377,7 +377,7 @@ for i_s = 1:numel(Option_Active_Scenarios)
 		f_b = bar(nan, nan);	                        % make an invisible line for legend
 		f_b.EdgeColor = Active_Scenarios{i_s,3};
 		f_b.FaceColor = Active_Scenarios{i_s,3};
-		f_b.FaceAlpha = 0.5;
+		f_b.FaceAlpha = 0.25;
 		f_b.LineStyle = Active_Scenarios{i_s,4}; % set linestyle of invisible line
 		f_b.LineWidth = Option_Default_Line_Width;
 		Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
@@ -434,7 +434,7 @@ for i_s = 1:numel(Option_Active_Scenarios)
 		% adjust legend properties a little bit for this kind of graph
 		if Option_Show_Legend
 			f_lg = get(f_ax, 'Legend');
-			f_lg.ItemTokenSize = [17, 6];
+			f_lg.ItemTokenSize = [8, 8];
 		end
 		hold off
 	end
