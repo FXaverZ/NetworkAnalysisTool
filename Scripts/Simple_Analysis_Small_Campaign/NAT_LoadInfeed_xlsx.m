@@ -32,14 +32,14 @@ Settings_XLX_Scenario = {
 	10, '10_High_load_Medium_infeed_High_e_mobility_Winter_Sunday'   ,[152,185, 84]/256, '-'      , 'Hohe Last, mittlere Einspeisung'  , 'Winter','Sonntag';...
 	11, '11_High_load_Medium_infeed_High_e_mobility_Summer_Workda'   ,[152,185, 84]/256, '-'      , 'Hohe Last, mittlere Einspeisung'  , 'Sommer','Werktag';...
 	12, '12_High_load_Medium_infeed_High_e_mobility_Summer_Sunday'   ,[152,185, 84]/256, '-'      , 'Hohe Last, mittlere Einspeisung'  , 'Sommer','Sonntag';...
-	13, '13_Low_load_Higher_infeed_Winter_Workda'                    ,[128,100,162]/256, '-'      , 'Schwachlast, hï¿½here Einspeisung'  , 'Winter','Werktag';...
-	14, '14_Low_load_Higher_infeed_Winter_Sunday'                    ,[128,100,162]/256, '-'      , 'Schwachlast, hï¿½here Einspeisung'  , 'Winter','Sonntag';...
-	15, '15_Low_load_Higher_infeed_Summer_Workda'                    ,[128,100,162]/256, '-'      , 'Schwachlast, hï¿½here Einspeisung'  , 'Sommer','Werktag';...
-	16, '16_Low_load_Higher_infeed_Summer_Sunday'                    ,[128,100,162]/256, '-'      , 'Schwachlast, hï¿½here Einspeisung'  , 'Sommer','Sonntag';...
-	17, '17_Higher_load_Medium_infeed_High_e_mobility_Winter_Workda' ,[247,150, 73]/256, '-'      , 'Hï¿½here Last, mittlere Einspeisung', 'Winter','Werktag';...
-	18, '18_Higher_load_Medium_infeed_High_e_mobility_Winter_Sunday' ,[247,150, 73]/256, '-'      , 'Hï¿½here Last, mittlere Einspeisung', 'Winter','Sonntag';...
-	19, '19_Higher_load_Medium_infeed_High_e_mobility_Summer_Workda' ,[247,150, 73]/256, '-'      , 'Hï¿½here Last, mittlere Einspeisung', 'Sommer','Werktag';...
-	20, '20_Higher_load_Medium_infeed_High_e_mobility_Summer_Sunday' ,[247,150, 73]/256, '-'      , 'Hï¿½here Last, mittlere Einspeisung', 'Sommer','Sonntag';...
+	13, '13_Low_load_Higher_infeed_Winter_Workda'                    ,[128,100,162]/256, '-'      , 'Schwachlast, höhere Einspeisung'  , 'Winter','Werktag';...
+	14, '14_Low_load_Higher_infeed_Winter_Sunday'                    ,[128,100,162]/256, '-'      , 'Schwachlast, höhere Einspeisung'  , 'Winter','Sonntag';...
+	15, '15_Low_load_Higher_infeed_Summer_Workda'                    ,[128,100,162]/256, '-'      , 'Schwachlast, höhere Einspeisung'  , 'Sommer','Werktag';...
+	16, '16_Low_load_Higher_infeed_Summer_Sunday'                    ,[128,100,162]/256, '-'      , 'Schwachlast, höhere Einspeisung'  , 'Sommer','Sonntag';...
+	17, '17_Higher_load_Medium_infeed_High_e_mobility_Winter_Workda' ,[247,150, 73]/256, '-'      , 'Höhere Last, mittlere Einspeisung', 'Winter','Werktag';...
+	18, '18_Higher_load_Medium_infeed_High_e_mobility_Winter_Sunday' ,[247,150, 73]/256, '-'      , 'Höhere Last, mittlere Einspeisung', 'Winter','Sonntag';...
+	19, '19_Higher_load_Medium_infeed_High_e_mobility_Summer_Workda' ,[247,150, 73]/256, '-'      , 'Höhere Last, mittlere Einspeisung', 'Sommer','Werktag';...
+	20, '20_Higher_load_Medium_infeed_High_e_mobility_Summer_Sunday' ,[247,150, 73]/256, '-'      , 'Höhere Last, mittlere Einspeisung', 'Sommer','Sonntag';...
 	};
 
 Settings_XLX_Loadtype = {
@@ -47,7 +47,7 @@ Settings_XLX_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr.        Exceldatei
 	 1, 'Households'  , 'Haushaltslast'   ,[];...
 	 2, 'Solar'       , 'PV Einspeisung'  ,'MS_Auswertungsexcel_Szenarien_PV.xlsm';...
-	 3, 'El_Mobility' , 'Elektromobilitï¿½t',[];...
+	 3, 'El_Mobility' , 'Elektromobilität',[];...
 	 4, 'LV_Griddata' , 'NS-Netzdaten'    ,[];...
 	};
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -73,7 +73,7 @@ Option_Type_Load = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 % Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut D5.1)
 % Option_Data_Scaling_Factor = 1/175;   % Umrechnung P/NS-Netz Baden IST (siehe \Langfassung\05_Tabellen\Auswertungen_Baden_Zusammenfassung_140605.xlsx)
 % Option_Data_Scaling_Factor = 1/26030; % Umrechnung Netzanschluss Baden IST (siehe \Langfassung\05_Tabellen\Auswertungen_Baden_Zusammenfassung_140605.xlsx)
-Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flï¿½chenfaktor
+Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flächenfaktor
 %- - - - - - - - - - - - - - - - - -
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
@@ -261,39 +261,41 @@ clear Active_* Data* f_* fig_* i_* Labels_* num_* Option_* tick_*
 
 %% Plot histogramm summary figures 
 % = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios    = 15;
+% Option_Active_Scenarios    = [1,5,9,13,17];
+Option_Active_Scenarios    = [2,6,10,14,18];
+% Option_Active_Scenarios    = [5,9,13,17];
 %- - - - - - - - - - - - - - - - - -
 Option_Type_Load           = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 %- - - - - - - - - - - - - - - - - -
-Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut Excel)
-% Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flï¿½chenfaktor
+Option_Data_Scaling_Factor = 1/213;   % Umrechnung P/NS-Netz Baden IST (laut D5.1)
+% Option_Data_Scaling_Factor = 1.4/26030; % Umrechnung Netzanschluss Baden IST + 40% Fehlerkorrektur Flächenfaktor
 %- - - - - - - - - - - - - - - - - -
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
-Option_Show_Zeroprofiles  = 0; % 0 = ignore profiles with only zero values
+Option_Show_Zeroprofiles  = 1; % 0 = ignore profiles with only zero values
 Option_Show_Title         = 0; % 1 = Show Plot Title
 Option_Show_Legend        = 1;
-Option_Show_Legend_Season = 1; % 1 = show 'Summer/Winter' entries in legend
+Option_Show_Legend_Season = 0; % 1 = show 'Summer/Winter' entries in legend
 Option_Show_Y_Label       = 1;
 Settings_Max_Fig_Area     = [0.1142    0.1242    0.0027    0.0313];
 Option_Default_Line_Width = 1.5;
-Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Number_Bins      =  50;
-Option_Bar_x_max_Value  =   250; % kW (-1 ... autoscale)
+Option_Bar_x_max_Value  = 250; % kW (-1 ... autoscale)
 Option_Bar_x_min_Value  =   0; % kW
-Option_Bar_x_Label_Step =  5; % Spacing between label entries
+Option_Bar_x_Label_Step =   5; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 Option_Bar_y_logScale   =   0;
 Option_Bar_y_logLimits  = [-3, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - - 
-Option_Bar_y_max_Value  =  -1; % 'kW' (-1 ... autoscale)
-Option_Bar_y_min_Value  =   0; % 'kW'
-Option_Bar_y_step_Value =   5; % 'kW'
+Option_Bar_y_max_Value  =  30; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =   0; % '%'
+Option_Bar_y_step_Value =   5; % '%'
 Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [-]';
+Labels_Y_Direction = 'rel. Häufigkeit [-]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_s = 1:numel(Option_Active_Scenarios)
@@ -423,7 +425,7 @@ for i_s = 1:numel(Option_Active_Scenarios)
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		end
 		% Configuration
-		set_default_plot_properties(f_ax);
+		set_default_plot_properties(f_ax,'axes_on_top');
 		f_max_area = set_single_plot_properties(f_ax, ...
 			Labels_Title,...
 			Labels_X_Direction,...

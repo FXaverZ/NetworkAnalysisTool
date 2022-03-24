@@ -1,10 +1,20 @@
-function set_default_plot_properties(ax)
+function set_default_plot_properties(ax,varargin)
 %SET_DEFAULT_PLOT_PROPERTIES Summary of this function goes here
 %   Detailed explanation goes here
 
 Fontsize_big     = 16;
 Fontsize_normal  = 16;
 Fontsize_small   = 12;
+
+axes_on_top = false;
+
+if nargin == 2
+	if strcmpi(varargin{1},'axes_on_top')
+		axes_on_top = true;
+	elseif strcmpi(varargin{1},'axes_to_back')
+		axes_on_top = false;
+	end
+end
 
 ax.FontName                = 'Palatino Linotype';
 ax.FontSize                = Fontsize_big;
@@ -45,13 +55,15 @@ ax.YAxis.LineWidth         = 1.5;
 ax.YAxis.Color             = [0 0 0];
 ax.XAxis.Color             = [0 0 0];
 ax.YGrid                   = 'on';
-% bring axis to front and grid to back:
-ax.Layer                   = 'top';
-pause(0.5);
-ax.XGridHandle.FrontMajorEdge.Layer = 'back';
-ax.XGridHandle.FrontMinorEdge.Layer = 'back';
-pause(0.5);
-ax.YGridHandle.FrontMajorEdge.Layer = 'back';
-ax.YGridHandle.FrontMinorEdge.Layer = 'back';
+if axes_on_top
+	% (optional) bring axis to front and grid to back:
+	ax.Layer                   = 'top';
+	pause(0.5);
+	ax.XGridHandle.FrontMajorEdge.Layer = 'back';
+	ax.XGridHandle.FrontMinorEdge.Layer = 'back';
+	pause(0.5);
+	ax.YGridHandle.FrontMajorEdge.Layer = 'back';
+	ax.YGridHandle.FrontMinorEdge.Layer = 'back';
+end
 end
 
