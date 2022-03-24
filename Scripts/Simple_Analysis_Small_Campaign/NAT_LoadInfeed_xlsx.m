@@ -293,7 +293,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. H�ufigkeit [%]';
+Labels_Y_Direction = 'rel. H�ufigkeit [-]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_s = 1:numel(Option_Active_Scenarios)
@@ -407,7 +407,8 @@ for i_s = 1:numel(Option_Active_Scenarios)
 				Option_Bar_y_min_Value,...
 				Option_Bar_y_step_Value,...
 				Option_Bar_y_max_Value,...
-				Option_Bar_y_Label_Step);
+				Option_Bar_y_Label_Step,...
+				'%');
 			f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 			sf_ax.YAxis.TickValue   = tick_y_Positions;
 			f_ax.YAxis.TickLabels   = tick_y_Labels;
