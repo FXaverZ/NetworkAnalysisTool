@@ -1,5 +1,5 @@
 %%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-clear();
+% clear();
 Saved_Data_OAT           = [];
 Saved_Recalculation_Data = []; % Hint: Save this structure for later use...
 % Add folder with help functions / needed classes to path:
@@ -389,6 +389,8 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		if (Data_Recalculation_Needed)
 			disp('    ... done!');
 		end
+		Option_Histogramm_Autoscale = true;
+		
 		Labels_Scenarios  = {};
 		Labels_Scen_Style = [];
 		
@@ -396,6 +398,8 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 			Option_Histogramm_x_max_Value = max(Data_Violation_Numbers,[],'all');
 			Option_Histogramm_x_min_Value = min(Data_Violation_Numbers,[],'all');
 			Option_Number_Bins            = Option_Histogramm_x_max_Value - Option_Histogramm_x_min_Value;
+		else
+			Option_Histogramm_Autoscale = false;
 		end
 		Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
 		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;
@@ -427,8 +431,8 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		end
 		figure(fig_oat_histogram);
 		f_ax = gca;
-		if Option_Histogramm_x_max_Value > 0
-			[tick_x_Positions, tick_x_Labels] = set_tick_x_histogramms(...
+		if ~Option_Histogramm_Autoscale
+			set_tick_x_histogramms(...
 				Option_Histogramm_x_min_Value,...
 				Option_Histogramm_x_max_Value,...
 				Option_Histogramm_x_step_Value,...
