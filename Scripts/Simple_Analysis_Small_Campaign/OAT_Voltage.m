@@ -473,6 +473,7 @@ Option_Plot_x_Label_Step =   1; % Spacing between label entries
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 Option_Scen_Divider = 2;       % Divider every X scenarios  
 Option_Show_Legend  = 1;
+Option_Show_Max_Marker = 0; % 1 = a marker indicates the maximum value occuring in the datasets
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_v = 1:numel(Option_VoltageBand)
@@ -543,11 +544,21 @@ for i_v = 1:numel(Option_VoltageBand)
 			case 'Time'
 				Data_Plot = squeeze(sum(Data_Violation_Numbers,2));
 				Data_Plot = Data_Plot * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Timepoints);
+				Data_Plot_Max = squeeze(max(Data_Violation_Numbers,[],2));
+				Data_Plot_Max = Data_Plot_Max * 100 / Data_Timepoints;
+				Data_Plot_Max = Data_Plot_Max - Data_Plot;
 			case 'Node'
 				Data_Plot = squeeze(sum(Data_Violation_Bus_Numbers,2));
 				Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_name);
 				Data_Plot = Data_Plot * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Number_total_Busses);
+				Data_Plot_Max = squeeze(max(Data_Violation_Bus_Numbers,[],2));
+				Data_Plot_Max = Data_Plot_Max * 100 / Number_total_Busses;
+				Data_Plot_Max = Data_Plot_Max - Data_Plot;
 		end
+		
+		% Reverse order
+		Data_Plot     = flip(Data_Plot',2);
+		Data_Plot_Max = flip(Data_Plot_Max',2);
 		
 		fig_oat_summary_violation = set_up_singleplot(Option_Plot_Size);
 		% crate a axis under the real one for Labeling between the Ticks
@@ -556,7 +567,7 @@ for i_v = 1:numel(Option_VoltageBand)
 		f_ax = copyobj(f_under_ax, ancestor(f_under_ax,'figure')); 
 		
 		% plot the data
-		f_b = barh(f_ax, cell2mat(Active_Scenarios(:,1)),flip(Data_Plot',2),'BarLayout','grouped');
+		f_b = barh(f_ax, cell2mat(Active_Scenarios(:,1)),Data_Plot,'BarLayout','grouped');
 		% plot invisible data to underlying axis:
 		f_under_b = barh(f_under_ax, cell2mat(Active_Scenarios(:,1)),nan);
 		% format the bars:
@@ -567,6 +578,22 @@ for i_v = 1:numel(Option_VoltageBand)
 			f_bb.FaceColor = Active_Voltagebands{idx_fliped(i_vb),4};
 			f_bb.FaceAlpha = Active_Voltagebands{idx_fliped(i_vb),6};
 			f_bb.BarWidth = 1;
+		end
+		if Option_Show_Max_Marker
+			hold(f_ax,'on');
+			f_ngroups = size(Data_Plot, 1);
+			f_nbars = size(Data_Plot, 2);
+			f_groupwidth = min(0.8, f_nbars/(f_nbars + 1.5));
+			for i_eb = 1:f_nbars
+				f_x = (1:f_ngroups) - f_groupwidth/2 + (2*i_eb-1) * f_groupwidth / (2*f_nbars);
+				f_er = errorbar(f_ax,Data_Plot(:,i_eb),f_x, zeros(1,f_ngroups),Data_Plot_Max(:,i_eb),'horizontal','k', 'linestyle', 'none');
+				f_er.Color = Active_Voltagebands{idx_fliped(i_eb),4};
+				% Set transparency (undocumented)
+				set(f_er.Bar, 'ColorType', 'truecoloralpha', 'ColorData', [f_er.Line.ColorData(1:3); 255*Active_Voltagebands{idx_fliped(i_vb),6}])
+				set(f_er.Line, 'ColorType', 'truecoloralpha', 'ColorData', [f_er.Line.ColorData(1:3); 255*Active_Voltagebands{idx_fliped(i_vb),6}])
+				set(f_er.CapH, 'EdgeColorType', 'truecoloralpha', 'EdgeColorData', [f_er.Cap.EdgeColorData(1:3); 255*Active_Voltagebands{idx_fliped(i_vb),6}])
+				set(f_er.MarkerHandle, 'visible', 'off')
+			end
 		end
 		
 		figure(fig_oat_summary_violation);
