@@ -82,17 +82,17 @@ Settings_GridVariants = {...
 % ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend 
     1, 'g01_Base_NS_50_Nodes'                           ,[256,256,256]/256, '--'     , 'Basisnetz';...
     2, 'g02_Repalce_OH_Lines_With_Cables'               ,[256,256,256]/256, '-.'     , 'Ersatz Oberleitung';...
-    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstärkung Oberleitung';...
-    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstärkung Kabel';...
+    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
+    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstï¿½rkung Kabel';...
 	}; 
 
 Settings_VoltageBands = {
 % 1     2     3      4                 5          6
 % ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
-    1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '-10...+10%';...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, ' -5... +5%';...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, ' -2... +7%';...
-	4,    97,  103, [255,255,255]/256, '-'      ,  0.25, ' -3... +3%';...
+    1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%';...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%';...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½-2%';...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, 'ï¿½3%';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -115,8 +115,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenarios{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenarios{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -241,11 +241,11 @@ Option_Bar_y_step_Value =  4; % '%'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenarios{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenarios{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Häufigkeit [%]';
+Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 for i_d = 1 : Option_Number_Datasets_to_Use
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
@@ -457,4 +457,127 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 end
 
 clear Active_* Data* f_* Hist_* i_* idx_* Labels_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Plot violation Summary over all Scenarios
+% = = = = = = = = = = = = = = = = =
+Option_VoltageBand         = 1:4;
+Option_Active_Scenarios    = 1:1:10;
+Option_Active_GridVariants = 4; % only one can be active here!
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
+Option_Scen_Divider = 2;       % Divider every X scenarios  
+Option_Show_Legend  = 1;
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+for i_v = 1:numel(Option_VoltageBand)
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	if i_v <= 1
+		Active_Scenarios = Settings_Scenarios(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_VoltageBand,:);
+		% get the Timepointsnumber from the first saved Dataset
+		Data_Timepoints = ...
+			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		% [voltagebands datasets scenarios]:
+		Data_Violation_Numbers      = zeros(...
+			numel(Option_VoltageBand),...
+			Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
+			numel(Option_Active_Scenarios));
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	Option_Umin =  Settings_VoltageBands{i_v,2};
+	Option_Umax =  Settings_VoltageBands{i_v,3};
+	for i_d = 1 : Saved_Data_OAT.Number_Datasets
+		idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
+		% Read out out the needed data...
+		if Settings_VoltageBands{i_v,1} == 1
+			% when using OAT data directly, use the sorted idxs to have
+			% always the correct order of used data based on the input data
+			% creation time!
+			i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
+			% idx == 1 means, default values of OAT analysis can be used
+			Data_Violation_Numbers(i_v,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
+		else
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				try
+					Data_Violation_Numbers(i_v,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{Option_Active_GridVariants,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
+				catch
+					% if this error occurs, the previous cell has to to be run
+					% or the correct data has to be loaded into the
+					% "Saved_Recalculation_Data" structure!
+					error('Error loading data, get sure, the structure "Saved_Recalculation_Data" has all needed data!')
+				end
+			end
+		end
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	if i_v >= numel(Option_VoltageBand)
+		% rearrange data for plot
+		
+		Data_Plot = squeeze(sum(Data_Violation_Numbers,2));
+		Data_Plot = Data_Plot * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Timepoints);
+		
+		fig_oat_summary_violation = set_up_singleplot(Option_Plot_Size);
+		% crate a axis under the real one for Labeling between the Ticks
+		f_under_ax = cla();
+		% creat the visible axis
+		f_ax = copyobj(f_under_ax, ancestor(f_under_ax,'figure')); 
+		
+		% plot the data
+		f_b = barh(f_ax, cell2mat(Active_Scenarios(:,1)),flip(Data_Plot',2),'BarLayout','grouped');
+		% plot invisible data to underlying axis:
+		f_under_b = barh(f_under_ax, cell2mat(Active_Scenarios(:,1)),nan);
+		% format the bars:
+		idx_fliped = flip(1 : numel(Option_VoltageBand));
+		for i_vb = 1 : numel(Option_VoltageBand)
+			f_bb = f_b(i_vb);
+			f_bb.LineStyle = 'none';
+			f_bb.FaceColor = Active_Voltagebands{idx_fliped(i_vb),4};
+			f_bb.FaceAlpha = Active_Voltagebands{idx_fliped(i_vb),6};
+			f_bb.BarWidth = 1;
+		end
+		
+		figure(fig_oat_summary_violation);
+		if Option_Show_Legend
+			legend(f_ax, Active_Voltagebands(:,7));
+		end
+		
+		set_default_plot_properties(f_ax);
+		
+		% Set the special properties for this plot
+		f_ax.YDir = 'reverse';
+		f_under_ax.YDir = 'reverse';
+		% Set y tick to 1/2 way between bar groups
+        f_ax.YTick = (floor(min(ylim(f_ax))) : Option_Scen_Divider : ceil(max(ylim(f_ax)))) + 0.5;
+		f_ax.YTickLabel = [];
+		f_under_ax.XTickLabel = [];
+		f_under_ax.YAxis.Limits = f_ax.YAxis.Limits;
+		f_under_ax.Position = f_ax.Position;
+		% Generate the labels:
+		YTickLabel = cell(1,numel(Option_Active_Scenarios));
+		for i_s = 1 : numel(Option_Active_Scenarios)
+			YTickLabel{i_s} = num2str(Active_Scenarios{i_s,1},'%02.0f');
+		end
+		f_under_ax.YTickLabel = YTickLabel;
+		f_under_ax.FontName   = 'Palatino Linotype';
+		f_under_ax.FontSize   = 16; %Fontsize_normal  = 16; in "set_default_plot_properties"
+		
+		if Option_Show_Legend
+			legend(f_ax, flip(Active_Voltagebands(:,7)));
+		end
+	end
+end
+
+clear Active_* Data* f_* i_* idx_* Option_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
