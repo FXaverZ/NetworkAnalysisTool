@@ -645,7 +645,7 @@ clear Active_* Data* f_* i_* idx_* Option_*
 % = = = = = = = = = = = = = = = = =
 Option_VoltageBand         = 4;
 Option_Active_Scenarios    = 2;
-Option_Active_GridVariants = 1; % only one can be active here!
+Option_Active_GridVariants = 4; % only one can be active here!
 %- - - - - - - - - - - - - - - - - -
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_y_max_Value  = 100; % (-1 ... autoscale)
@@ -665,6 +665,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 	if i_d <= 1
 		Active_Scenarios = Settings_Scenarios(Option_Active_Scenarios,:);
 		Active_Voltagebands = Settings_VoltageBands(Option_VoltageBand,:);
+		Active_GridVariant = Settings_GridVariants(Option_Active_GridVariants,:);
 		% get the Timepointsnumber from the first saved Dataset
 		Data_Timepoints = ...
 			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
@@ -728,12 +729,13 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 		figure(fig_oat_development_boxplot);
 		f_ax = gca;
 		
-		f_bx = findobj('Tag','boxplot');
-		set(findobj(f_bx,'Tag','Box'),'LineWidth',1.5);
-		set(findobj(f_bx,'Tag','Upper Whisker'),'LineStyle','-');
-		set(findobj(f_bx,'Tag','Lower Whisker'),'LineStyle','-');
-		set(findobj(f_bx,'Tag','Median'),'LineWidth',2);
-		
+		f_bx = findobj(fig_oat_development_boxplot,'Tag','boxplot');
+		set(findobj(f_bx,'Tag','Box'),'LineWidth',1.5, 'Color', Active_GridVariant{1,3});
+		set(findobj(f_bx,'Tag','Upper Whisker'),'LineStyle','-', 'Color', Active_GridVariant{1,3});
+		set(findobj(f_bx,'Tag','Lower Whisker'),'LineStyle','-', 'Color', Active_GridVariant{1,3});
+		set(findobj(f_bx,'Tag','Median'),'LineWidth',2, 'Color', Active_GridVariant{1,3});
+		set(findobj(f_bx,'Tag','Lower Adjacent Value'), 'Color', Active_GridVariant{1,3});
+		set(findobj(f_bx,'Tag','Upper Adjacent Value'), 'Color', Active_GridVariant{1,3});
 		f_ol = findobj(fig_oat_development_boxplot,'tag','Outliers');
 		for i_ol = 1:numel(f_ol)
 			f_ol(i_ol).MarkerEdgeColor = [190, 75, 72]/256;
