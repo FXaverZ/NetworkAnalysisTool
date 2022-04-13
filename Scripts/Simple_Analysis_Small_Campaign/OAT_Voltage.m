@@ -18,7 +18,8 @@ addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Paths to source files:
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
+% Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
+Path_Data_OAT = ['D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\'...
 	'Results_mean\01_Merged_OAT-Data\'];
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -61,7 +62,7 @@ clear sep folders i_* NVIEW_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Additional Set Up / Configuration
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-Settings_Scenario = {...
+Settings_Scenarios = {...
 % 1      2                                                3                 4          5
 % ID  ,  Filename                                       , Color           , LineStyle, String for legend 
 	 1, '01_SB_Base_Winter_Workda'                      ,[ 74,126,187]/256, '-'      , 'SB Winter';...
@@ -81,14 +82,17 @@ Settings_GridVariants = {...
 % ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend 
     1, 'g01_Base_NS_50_Nodes'                           ,[256,256,256]/256, '--'     , 'Basisnetz';...
     2, 'g02_Repalce_OH_Lines_With_Cables'               ,[256,256,256]/256, '-.'     , 'Ersatz Oberleitung';...
-    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
-    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstï¿½rkung Kabel';...
+    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstärkung Oberleitung';...
+    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstärkung Kabel';...
 	}; 
 
-Settings_Datasets = {
-	1, 'Households'  , 'Haushaltslast'   ;...
-	2, 'Solar'       , 'PV Einspeisung'  ;...
-	3, 'El_Mobility' , 'Elektromobilitï¿½t';...
+Settings_VoltageBands = {
+% 1     2     3      4                 5          6
+% ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
+    1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '-10...+10%';...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, ' -5... +5%';...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, ' -2... +7%';...
+	4,    97,  103, [255,255,255]/256, '-'      ,  0.25, ' -3... +3%';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -111,8 +115,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenarios{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -120,7 +124,7 @@ Labels_Y_Direction = 'Spannung [p.u.]';
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 	if i_d <= 1
-		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Scenarios = Settings_Scenarios(Option_Active_Scenarios,:);
 		Active_GridVars  = Settings_GridVariants(Option_Active_GridVariants,:);
 		
 		if Option_show_Title
@@ -219,14 +223,11 @@ clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 Option_Number_Datasets_to_Use = 15;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Umin =  90; Option_Umax = 110; % '%' NAT Default (no recalculations!)
-% Option_Umin =  95; Option_Umax = 105; % '%'
-% Option_Umin =  92; Option_Umax = 108; % '%'
-% Option_Umin =  93; Option_Umax = 107; % '%'
+Option_VoltageBand = 3; % 1: +-10% Default (no recalculations!), 2: +-5%, 3: -2...+7%, 4: +-3%
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Active_Scenarios = 2:2:10;
+Option_Active_Scenarios = 1;%1:1:10;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Active_GridVariants = 3:4;%1:4;     % all grid varaiants
+Option_Active_GridVariants = 2;%1:4;     % all grid varaiants
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Bar_x_max_Value  = 100;  % (-1 ... autoscale)
 Option_Number_Bins      = 100;
@@ -240,11 +241,11 @@ Option_Bar_y_step_Value =  4; % '%'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenarios{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
+Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 for i_d = 1 : Option_Number_Datasets_to_Use
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
@@ -252,8 +253,11 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 %     Preprocessing...
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	if i_d <= 1
-		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Scenarios = Settings_Scenarios(Option_Active_Scenarios,:);
 		Active_GridVars  = Settings_GridVariants(Option_Active_GridVariants,:);
+		
+		Option_Umin =  Settings_VoltageBands{Option_VoltageBand,2};
+		Option_Umax =  Settings_VoltageBands{Option_VoltageBand,3};
 		
 		if Option_show_Title
 			if numel(Option_Active_GridVariants) < 2
@@ -357,7 +361,7 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
 					['Saved_',num2str(i_d)]).(...
 					Active_GridVars{i_g,2}).(...
-					['Sc_',num2str(Settings_Scenario{Data_Recalculate_Scenarios(i_s),1})]) = Data_res;
+					['Sc_',num2str(Settings_Scenarios{Data_Recalculate_Scenarios(i_s),1})]) = Data_res;
 			end
 			
 			% Read out out the needed data... 
@@ -394,10 +398,13 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		Labels_Scenarios  = {};
 		Labels_Scen_Style = [];
 		
-		if Option_Histogramm_x_max_Value < 0
-			Option_Histogramm_x_max_Value = max(Data_Violation_Numbers,[],'all');
-			Option_Histogramm_x_min_Value = min(Data_Violation_Numbers,[],'all');
-			Option_Number_Bins            = Option_Histogramm_x_max_Value - Option_Histogramm_x_min_Value;
+		% Convert from Number of Timepoints voilation occured to % of
+		% profile time:
+		Data_Violation_Numbers = Data_Violation_Numbers * 100 ./ Data_Timepoints;
+		
+		if Option_Bar_x_max_Value < 0
+			Option_Bar_x_max_Value = max(Data_Violation_Numbers,[],'all');
+			Option_Bar_x_min_Value = min(Data_Violation_Numbers,[],'all');
 		else
 			Option_Histogramm_Autoscale = false;
 		end
