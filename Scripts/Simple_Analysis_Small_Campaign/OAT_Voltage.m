@@ -81,14 +81,14 @@ Settings_GridVariants = {...
 % ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend 
     1, 'g01_Base_NS_50_Nodes'                           ,[256,256,256]/256, '--'     , 'Basisnetz';...
     2, 'g02_Repalce_OH_Lines_With_Cables'               ,[256,256,256]/256, '-.'     , 'Ersatz Oberleitung';...
-    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstärkung Oberleitung';...
-    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstärkung Kabel';...
+    3, 'g03_Add_Cable_to_First_OH_Line'                 ,[256,256,256]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
+    4, 'g04_Add_Cable_to_Weak_Cables'                   ,[256,256,256]/256, '-'      , 'Verstï¿½rkung Kabel';...
 	}; 
 
 Settings_Datasets = {
 	1, 'Households'  , 'Haushaltslast'   ;...
 	2, 'Solar'       , 'PV Einspeisung'  ;...
-	3, 'El_Mobility' , 'Elektromobilität';...
+	3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -111,8 +111,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -228,23 +228,23 @@ Option_Active_Scenarios = 2:2:10;
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_Active_GridVariants = 3:4;%1:4;     % all grid varaiants
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_x_max_Value  = -1;  % (-1 ... autoscale)
-Option_Number_Bins             = 50;
-Option_Histogramm_x_min_Value  =  0; 
-Option_Histogramm_x_step_Value =  2;
-Option_Histogramm_x_Mark_every =  2;  % label every X bins in plot 
+Option_Bar_x_max_Value  = 100;  % (-1 ... autoscale)
+Option_Number_Bins      = 100;
+Option_Bar_x_min_Value  =   0; 
+Option_Bar_x_Label_Step =  10; % Spacing between label entries
+Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Option_Histogramm_y_max_Value  = -1; % '%' (-1 ... autoscale)
-Option_Histogramm_y_min_Value  =  0; % '%'
-Option_Histogramm_y_step_Value =  4; % '%'
+Option_Bar_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  4; % '%'
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Häufigkeit [%]';
+Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 for i_d = 1 : Option_Number_Datasets_to_Use
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
@@ -401,7 +401,7 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		else
 			Option_Histogramm_Autoscale = false;
 		end
-		Hist_binEdges = linspace(Option_Histogramm_x_min_Value,Option_Histogramm_x_max_Value,Option_Number_Bins+1);
+		Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
 		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;
 
 		for i_s = 1 : numel(Option_Active_Scenarios)
@@ -433,11 +433,12 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 		f_ax = gca;
 		if ~Option_Histogramm_Autoscale
 			set_tick_x_histogramms(...
-				Option_Histogramm_x_min_Value,...
-				Option_Histogramm_x_max_Value,...
-				Option_Histogramm_x_step_Value,...
-				Option_Histogramm_x_Mark_every,...
-				f_ax);
+				Option_Bar_x_min_Value,...
+				Option_Bar_x_max_Value,...
+				Option_Number_Bins,...
+				Option_Bar_x_Label_Step,...
+				Option_Bar_x_Last_GT,...
+				f_ax)
 		end
 		if numel(Option_Active_Scenarios) > 1
 			legend(Labels_Scen_Style, Labels_Scenarios);
