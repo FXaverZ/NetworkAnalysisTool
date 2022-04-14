@@ -18,9 +18,10 @@ addpath([fileparts(fileparts(fileparts(matlab.desktop.editor.getActiveFilename))
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Paths to source files:
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-% Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
-Path_Data_OAT = ['D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\'...
+Path_Data_OAT = ['C:\Dissertation - Daten\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\',...
 	'Results_mean\01_Merged_OAT-Data\'];
+% Path_Data_OAT = ['D:\Dissertation_Neue_zus_Netzanalysen\Simple_Simulation_Campaign\'...
+% 	'Results_mean\01_Merged_OAT-Data\'];
 
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Load OAT Data
@@ -220,7 +221,7 @@ end
 
 clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Voltage Band Violation Histogramm Summary
+%% Voltage Band Violation Histogramm Summary per Scenario
 % = = = = = = = = = = = = = = = = =
 Option_Number_Datasets_to_Use = 15;
 %- - - - - - - - - - - - - - - - - -
@@ -616,7 +617,12 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 		end
 		
 		set_default_plot_properties(f_ax);
-		
+		set_single_plot_properties(f_ax, ...
+			[],...
+			[],...
+			[],...
+			0,...
+			[]);
 		% Set the special properties for this plot
 		f_ax.YDir = 'reverse';
 		f_under_ax.YDir = 'reverse';
@@ -1048,10 +1054,10 @@ end
 
 clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Timeline with affected Nodes variant comparison
+%% Timeline with affected Nodes grid variant comparison
 % = = = = = = = = = = = = = = = = =
 Option_Active_VoltageBand  = 4; % only one can be active here!
-Option_Active_Scenarios    = 1:2; % only one szenario (different seasons)!
+Option_Active_Scenarios    = 7:8; % only one szenario (different seasons)!
 Option_Active_GridVariants = [1,4];
 %- - - - - - - - - - - - - - - - - -
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
@@ -1069,14 +1075,14 @@ Option_Plot_x_step_Value =  60; % minutes
 Option_Plot_x_Label_Step =   1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  40; % '%' (-1 ... autoscale)
+Option_Plot_y_max_Value  =  -1; % '%' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % '%'
 Option_Plot_y_step_Value =   5; % '%'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 Option_Plot_y_Num_Format =  [];
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
-Labels_Y_Direction = 'Spannung [p.u.]';
+Labels_Y_Direction = 'Anteil an Knoten mit Spannungsbandverletzung';
 % = = = = = = = = = = = = = = = = =
 
 for i_d = 1:Saved_Data_OAT.Number_Datasets
