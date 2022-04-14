@@ -3,10 +3,10 @@ function [tick_Positions, tick_Labels] = get_tick(minVal,step,maxVal,label_step,
 unit = '';
 formatstring = [];
 
-if nargin == 5
+if nargin >= 5
 	unit = varargin{1};
 end
-if nargin == 6
+if nargin >= 6
 	formatstring = varargin{2};
 end
 
