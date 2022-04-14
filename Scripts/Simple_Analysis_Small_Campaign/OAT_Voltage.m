@@ -80,7 +80,7 @@ Settings_Scenario = {
 Settings_GridVariants = {...
 	% 1     2                                                 3                 4          5
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
-	1, 'g01_Base_NS_50_Nodes'                           ,[  0,  0,  0]/256, '--'     , 'Basisnetz';...
+	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
 	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
 	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
@@ -121,6 +121,7 @@ Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 	if i_d <= 1
@@ -138,7 +139,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 				end
 			end
 		else
-			Labels_Title = []; %#ok<UNRCH>
+			Labels_Title = []; 
 		end
 		
 		fig_oat_voltage_sum = set_up_tiledlayout(Labels_Title, Labels_X_Direction, Labels_Y_Direction);
@@ -168,24 +169,24 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 			drawnow;
 			if i_g == 1
 				% get the legend entries for the scenarios:
-				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; 
 				f_l = plot(nan, nan);	                         % make an invisible line for legend
 				set(f_l,...
 					'Color', Active_Scenarios{i_s,3},...       % set color of invisible line
 					'LineStyle', Active_Scenarios{i_s,4});         % set linestyle of invisible line
-				Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+				Labels_Scen_Style(end+1) = f_l; 
 			end
 			if i_s <=1
 				figure(fig_oat_voltage_sum); hold on;
 			end
 		end
 		% get the legend entries for the grid variants:
-		Labels_Grid{end+1} = Active_GridVars{i_g,5}; %#ok<SAGROW>
+		Labels_Grid{end+1} = Active_GridVars{i_g,5}; 
 		f_l = plot(nan, nan);	                   % make an invisible line for legend
 		set(f_l,...
 			'Color', 'k',...                       % set color of invisible line
 			'LineStyle', Active_GridVars{i_g,4});    % set linestyle of invisible line
-		Labels_Grid_Style(end+1) = f_l; %#ok<SAGROW>
+		Labels_Grid_Style(end+1) = f_l; 
 	end
 	% Format Diagrams:
 	figure(fig_oat_voltage_sum);
@@ -219,7 +220,7 @@ end
 
 clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Voltage Band Violation Summary
+%% Voltage Band Violation Histogramm Summary
 % = = = = = = = = = = = = = = = = =
 Option_Number_Datasets_to_Use = 15;
 %- - - - - - - - - - - - - - - - - -
@@ -247,6 +248,7 @@ Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
 Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 for i_d = 1 : Option_Number_Datasets_to_Use
 	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -270,7 +272,7 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 				end
 			end
 		else
-			Labels_Title = []; %#ok<UNRCH>
+			Labels_Title = []; 
 		end
 		
 		fig_oat_histogram = set_up_singleplot();
@@ -321,7 +323,7 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 					Data_Recalculate_Scenarios = [];
 					for i_s = 1 : numel(Option_Active_Scenarios)
 						if(~isfield(Data_save.(Active_GridVars{i_g,2}), ['Sc_',num2str(Active_Scenarios{i_s,1})]))
-							Data_Recalculate_Scenarios(end+1) = Active_Scenarios{i_s,1}; %#ok<SAGROW>
+							Data_Recalculate_Scenarios(end+1) = Active_Scenarios{i_s,1}; 
 						end
 					end
 				else
@@ -429,12 +431,12 @@ for i_d = 1 : Option_Number_Datasets_to_Use
 				hold on;
 			end
 			% get the legend entries for the scenarios:
-			Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+			Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; 
 			f_l = plot(nan, nan);	                         % make an invisible line for legend
 			set(f_l,...
 				'Color', Active_Scenarios{i_s,3},...       % set color of invisible line
 				'LineStyle', Active_Scenarios{i_s,4});         % set linestyle of invisible line
-			Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+			Labels_Scen_Style(end+1) = f_l; 
 		end
 		figure(fig_oat_histogram);
 		f_ax = gca;
@@ -549,10 +551,10 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 				Data_Plot_Max = Data_Plot_Max - Data_Plot;
 			case 'Node'
 				Data_Plot = squeeze(sum(Data_Violation_Bus_Numbers,2));
-				Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_name);
-				Data_Plot = Data_Plot * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Number_total_Busses);
+				Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_name);
+				Data_Plot = Data_Plot * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Number_total_Busses);
 				Data_Plot_Max = squeeze(max(Data_Violation_Bus_Numbers,[],2));
-				Data_Plot_Max = Data_Plot_Max * 100 / Number_total_Busses;
+				Data_Plot_Max = Data_Plot_Max * 100 / Data_Number_total_Busses;
 				Data_Plot_Max = Data_Plot_Max - Data_Plot;
 		end
 		
@@ -660,6 +662,7 @@ Option_Plot_y_Label_Step =   1; % Spacing between label entries
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend_Plot   =   4; % determines in which plot should the legend is shown; -1: Show no legend
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
 for i_g = 1:size(Settings_GridVariants,1)
 	if i_g <= 1
 		fig_oat_development_boxplot = set_up_tiledlayout_small([],[],[]);
@@ -731,8 +734,8 @@ for i_g = 1:size(Settings_GridVariants,1)
 			case 'Time'
 				Data_Violation_Development(i_d,:,:) = Data_Violation_Numbers * 100 / Data_Timepoints;
 			case 'Node'
-				Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{i_g,2}).bus_name);
-				Data_Violation_Development(i_d,:,:) = Data_Violation_Bus_Numbers * 100 / Number_total_Busses;
+				Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{i_g,2}).bus_name);
+				Data_Violation_Development(i_d,:,:) = Data_Violation_Bus_Numbers * 100 / Data_Number_total_Busses;
 		end
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %     Plotting Data...
@@ -791,14 +794,14 @@ for i_g = 1:size(Settings_GridVariants,1)
 		hold(f_ax,'on');
 		for i_gg = 1 : size(Settings_GridVariants,1)
 			if ~any(strcmpi(Labels_Scenarios, Settings_GridVariants{i_gg,5}))
-				Labels_Scenarios{end+1} = Settings_GridVariants{i_gg,5}; %#ok<SAGROW>
+				Labels_Scenarios{end+1} = Settings_GridVariants{i_gg,5}; 
 				f_b = bar(f_ax, nan, nan);	                        % make an invisible line for legend
 				f_b.EdgeColor = Settings_GridVariants{i_gg,3};
 				f_b.FaceColor = Settings_GridVariants{i_gg,3};
 				f_b.FaceAlpha = 0.5;
 				f_b.LineStyle = '-'; % set linestyle of invisible line
 				f_b.LineWidth = Option_Default_Line_Width;
-				Labels_Scen_Style(end+1) = f_b; %#ok<SAGROW>
+				Labels_Scen_Style(end+1) = f_b; 
 			end
 		end
 		
@@ -895,6 +898,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 		Labels_Scenarios = {};
 		Labels_Scen_Style = [];
 		
+		% plot the voltage timelines
 		for i_s = 1 : size(Active_Scenarios,1)
 			% Plot the mean value:
 			if Option_Show_Mean_Values
@@ -961,12 +965,12 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 			
 			% get the data for the legend:
 			if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
-				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; %#ok<SAGROW>
+				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; 
 				f_l = plot(nan, nan);	                 % make an invisible line for legend
 				f_l.Color = Active_Scenarios{i_s,3};     % set color of invisible line
 				f_l.LineStyle = Active_Scenarios{i_s,4}; % set linestyle of invisible line
 				f_l.LineWidth = Option_Default_Line_Width;
-				Labels_Scen_Style(end+1) = f_l; %#ok<SAGROW>
+				Labels_Scen_Style(end+1) = f_l; 
 			end
 		end
 		
@@ -984,7 +988,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 			f_po.LineWidth = Option_Default_Line_Width;
 		end
 		
-		% Format the plot:
+		% format the plot:
 		f_ax = gca;
 		
 		if ~Option_Show_Y_Label
@@ -1020,6 +1024,186 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 			if Option_Distinct_Seasons
 				[Labels_Scenarios,Labels_Scen_Style] =...
 					add_season_entry_to_legend(fig_oat_voltage_minmax,...
+					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
+			end
+			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+		end
+		% Configuration
+		set_default_plot_properties(f_ax);
+		f_max_area = set_single_plot_properties(f_ax, ...
+			Labels_Title,...
+			[],...
+			Labels_Y_Direction,...
+			Option_Show_Title,...
+			f_max_area);
+		Settings_Max_Fig_Area = f_max_area;
+		% adjust legend properties a little bit for this kind of graph
+		if Option_Show_Legend
+			f_lg = get(f_ax, 'Legend');
+			f_lg.ItemTokenSize = [17, 6];
+		end
+		hold off
+	end
+end
+
+clear Active_* Data* f_* i_* Labels_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Timeline with affected Nodes variant comparison
+% = = = = = = = = = = = = = = = = =
+Option_Active_VoltageBand  = 4; % only one can be active here!
+Option_Active_Scenarios    = 1:2; % only one szenario (different seasons)!
+Option_Active_GridVariants = [1,4];
+%- - - - - - - - - - - - - - - - - -
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
+Option_Show_Legend        = 1;
+Option_Show_Title         = 0;
+Option_Show_Y_Label       = 1;
+Option_Show_MinMax_Values = 0;
+Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
+Option_Default_Line_Width = 1.5;
+Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
+Option_Plot_x_min_Value  =   0; % x10 minutes
+Option_Plot_x_step_Value =  60; % minutes
+Option_Plot_x_Label_Step =   1; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
+Option_Plot_y_max_Value  =  40; % '%' (-1 ... autoscale)
+Option_Plot_y_min_Value  =   0; % '%'
+Option_Plot_y_step_Value =   5; % '%'
+Option_Plot_y_Label_Step =   2; % Spacing between label entries
+Option_Plot_y_Num_Format =  [];
+% = = = = = = = = = = = = = = = = =
+Labels_Title       = '';
+Labels_Y_Direction = 'Spannung [p.u.]';
+% = = = = = = = = = = = = = = = = =
+
+for i_d = 1:Saved_Data_OAT.Number_Datasets
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_Active_VoltageBand,:);
+		Active_GridVariants = Settings_GridVariants(Option_Active_GridVariants,:);
+		Data_Timepoints = ...
+			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		
+		Option_Umin =  Settings_VoltageBands{Option_Active_VoltageBand,2};
+		Option_Umax =  Settings_VoltageBands{Option_Active_VoltageBand,3};
+		
+		Data_Node_Violations_Mean = zeros(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios));
+		Data_Node_Violations_Min  = ones(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios))*10000; % a big value, which will be overwritten by the min funstion later on
+		Data_Node_Violations_Max  = zeros(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios)); 
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+	for i_g = 1 : numel(Option_Active_GridVariants)
+		Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Active_GridVariants{i_g,2}).bus_name);
+		if Settings_VoltageBands{Option_Active_VoltageBand,1} == 1
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.(Active_GridVariants{i_g,2});
+			Data_Node_Violations = Data.voltage_violations(Option_Active_Scenarios,:,:,:);
+		else
+			Data_Node_Violations = [];
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				Data = Saved_Recalculation_Data.(...
+					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+					['Saved_',num2str(i_d)]).(...
+					Active_GridVariants{i_g,2}).(...
+					['Sc_',num2str(Active_Scenarios{i_s,1})]);
+				if i_s == 1
+					Data_Node_Violations = Data.voltage_violations;
+				else
+					Data_Node_Violations(end+1,:,:,:) = Data.voltage_violations; %#ok<*SAGROW>
+				end
+			end
+		end
+		%[scenario, profileset, timepoint, node]; 1 = violation at node
+		%occured,,,
+		Data_Node_Violations_Sum = sum(Data_Node_Violations,4) * 100 / Data_Number_total_Busses;
+		Data_Node_Violations_tmp_Mean = squeeze(mean(Data_Node_Violations_Sum,2))';
+		Data_Node_Violations_tmp_Min  = squeeze(min(Data_Node_Violations_Sum,[],2))';
+		Data_Node_Violations_tmp_Max  = squeeze(max(Data_Node_Violations_Sum,[],2))';
+		Data_Node_Violations_Min(i_g,:,:) = min(squeeze(Data_Node_Violations_Min(i_g,:,:)),Data_Node_Violations_tmp_Min);
+		Data_Node_Violations_Max(i_g,:,:) = max(squeeze(Data_Node_Violations_Max(i_g,:,:)),Data_Node_Violations_tmp_Max);
+		if i_d <= 1
+			Data_Node_Violations_Mean(i_g,:,:) = Data_Node_Violations_tmp_Mean;
+		else
+			Data_Node_Violations_Mean(i_g,:,:) = 0.5 * (squeeze(Data_Node_Violations_Mean(i_g,:,:)) + Data_Node_Violations_tmp_Mean);
+		end
+	end
+	
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d >= Saved_Data_OAT.Number_Datasets
+		fig_oat_node_timeline = set_up_singleplot(Option_Plot_Size);
+		Labels_Scenarios = {};
+		Labels_Scen_Style = [];
+		
+		for i_g = 1: numel(Option_Active_GridVariants)
+			f_l = plot(squeeze(Data_Node_Violations_Mean(i_g,:,:)));
+			hold on;
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				f_l(i_s).Color = Active_GridVariants{i_g,3};
+				f_l(i_s).LineWidth = Option_Default_Line_Width;
+				if Option_Distinct_Seasons
+					switch Active_Scenarios{i_s, 6}
+						case 'Sommer'
+							f_l(i_s).LineStyle = ':';
+						case 'Winter'
+							f_l(i_s).LineStyle = '-';
+					end
+				end
+			end
+			if ~any(strcmpi(Labels_Scenarios, Active_GridVariants{i_g,5}))
+				Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
+				f_l = plot(nan, nan);	                % make an invisible line for legend
+				f_l.Color = Active_GridVariants{i_g,3}; % set color of invisible line
+				f_l.LineStyle = '-';                    % set linestyle of invisible line
+				f_l.LineWidth = Option_Default_Line_Width;
+				Labels_Scen_Style(end+1) = f_l;
+			end
+		end
+		% Format the plot:
+		f_ax = gca;
+		
+		if ~Option_Show_Y_Label
+			Labels_Y_Direction = [];
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		
+		% X Axis
+		if Option_Plot_x_max_Value > 0
+			set_tick_x_dayprofile(f_ax,...
+				Option_Plot_x_min_Value,...
+				Option_Plot_x_step_Value,...
+				Option_Plot_x_max_Value,...
+				Option_Plot_x_Label_Step);
+		end
+		% Y Axis
+		if Option_Plot_y_max_Value > 0
+			f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Plot_y_min_Value,...
+				Option_Plot_y_step_Value,...
+				Option_Plot_y_max_Value,...
+				Option_Plot_y_Label_Step,...
+				'%',... % no unit
+				Option_Plot_y_Num_Format);
+			f_ax.YAxis.TickValues   = tick_y_Positions;
+			f_ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+		% Legend
+		if Option_Show_Legend
+			if Option_Distinct_Seasons
+				[Labels_Scenarios,Labels_Scen_Style] =...
+					add_season_entry_to_legend(fig_oat_node_timeline,...
 					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
