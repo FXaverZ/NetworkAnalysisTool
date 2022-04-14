@@ -643,8 +643,9 @@ clear Active_* Data* f_* i_* idx_* Option_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Show development profilnumber with boxplots
 % = = = = = = = = = = = = = = = = =
-Option_Active_VoltageBand         = 4; % only one can be active here!
+Option_Active_VoltageBand  = 4; % only one can be active here!
 Option_Active_Scenarios    = 2; % only one can be active here!
+Option_Used_Data           = 'Node'; % 'Time'; 'Node'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  =  15; % (-1 ... autoscale)
 Option_Plot_x_min_Value  =   0; %
@@ -680,6 +681,7 @@ for i_g = 1:size(Settings_GridVariants,1)
 			Data_Violation_Numbers      = NaN(...
 				Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
 				numel(Option_Active_Scenarios));
+			Data_Violation_Bus_Numbers = Data_Violation_Numbers;
 			Data_Violation_Development = NaN(...
 				Saved_Data_OAT.Number_Datasets,...
 				Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
@@ -702,6 +704,8 @@ for i_g = 1:size(Settings_GridVariants,1)
 			% idx == 1 means, default values of OAT analysis can be used
 			Data_Violation_Numbers(idx_datasets,:) = ...
 				Data.(Settings_GridVariants{i_g,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
+			Data_Violation_Bus_Numbers(idx_datasets,:) = ...
+				Data.(Settings_GridVariants{i_g,2}).bus_violated_at_datasets(:,Option_Active_Scenarios);
 		else
 			for i_s = 1 : numel(Option_Active_Scenarios)
 				try
@@ -710,6 +714,11 @@ for i_g = 1:size(Settings_GridVariants,1)
 						['Saved_',num2str(i_d)]).(...
 						Settings_GridVariants{i_g,2}).(...
 						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
+					Data_Violation_Bus_Numbers(idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{i_g,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violated_at_datasets;
 				catch
 					% if this error occurs, the previous cell has to to be run
 					% or the correct data has to be loaded into the
@@ -718,13 +727,18 @@ for i_g = 1:size(Settings_GridVariants,1)
 				end
 			end
 		end
-		Data_Violation_Development(i_d,:,:) = Data_Violation_Numbers;
+		switch Option_Used_Data
+			case 'Time'
+				Data_Violation_Development(i_d,:,:) = Data_Violation_Numbers * 100 / Data_Timepoints;
+			case 'Node'
+				Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{i_g,2}).bus_name);
+				Data_Violation_Development(i_d,:,:) = Data_Violation_Bus_Numbers * 100 / Number_total_Busses;
+		end
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %     Plotting Data...
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		if i_d >= Saved_Data_OAT.Number_Datasets
 			
-			Data_Violation_Development = Data_Violation_Development * 100/ Data_Timepoints;
 			figure(fig_oat_development_boxplot);
 			boxplot(Data_Violation_Development',...
 				'Widths',0.5,...
