@@ -1506,3 +1506,289 @@ end
 
 clear Active_* Data* f_* i_* idx_* Hist_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Histogramm with affected nodes szenario comparison
+% = = = = = = = = = = = = = = = = =
+Option_Active_VoltageBand  = 4; % only one can be active here!
+Option_Active_Scenarios    = 2:2:6; % only szenarios from one season (no distinction!)
+Option_Active_GridVariants = [4,1]; % max. two grid variants! First one '-', second ':' Linestyle
+Option_Used_Data           = 'Time'; % 'Time'; 'Node'
+%- - - - - - - - - - - - - - - - - -
+Option_Distinct_Grids     = 1; % 1 = Plot the two grid variants with different linestyles
+Option_Show_Legend        = 1;
+Option_Show_Title         = 0;
+Option_Show_Y_Label       = 1;
+Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
+Option_Default_Line_Width = 1.5;
+Option_Bar_Width          = 0.6; %0.6... in Word; 1... when small bars
+Option_Grouped_Bar        = 1;
+Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
+%- - - - - - - - - - - - - - - - - -
+%- - - - - - - - - - - - - - - - - -
+Option_Bar_x_max_Value  =  100;  % (-1 ... autoscale)
+Option_Number_Bins      =  20;
+Option_Bar_x_min_Value  =   0;
+Option_Bar_x_Label_Step =   2; % Spacing between label entries
+Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
+%- - - - - - - - - - - - - - - - - -
+Option_Bar_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Bar_y_min_Value  =  0; % '%'
+Option_Bar_y_step_Value =  4; % '%'
+Option_Bar_y_Label_Step =  1; % Spacing between label entries
+% = = = = = = = = = = = = = = = = =
+Labels_Y_Direction = 'rel. H�ufigkeit [%]';
+% = = = = = = = = = = = = = = = = =
+
+for i_d = 1 : Saved_Data_OAT.Number_Datasets
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_Active_VoltageBand,:);
+		Active_GridVariants = Settings_GridVariants(Option_Active_GridVariants,:);
+		Data_Timepoints = ...
+			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		
+		Option_Umin =  Settings_VoltageBands{Option_Active_VoltageBand,2};
+		Option_Umax =  Settings_VoltageBands{Option_Active_VoltageBand,3};
+		
+		Data_Violation_Numbers      = NaN(...
+			numel(Option_Active_GridVariants),...
+			Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
+			numel(Option_Active_Scenarios));
+		Data_Violation_Bus_Numbers = Data_Violation_Numbers;
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
+	% Read out out the needed data...
+	for i_g = 1:size(Settings_GridVariants,1)
+		if Settings_VoltageBands{Option_Active_VoltageBand,1} == 1
+			% when using OAT data directly, use the sorted idxs to have
+			% always the correct order of used data based on the input data
+			% creation time!
+			i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
+			% idx == 1 means, default values of OAT analysis can be used
+			Data_Violation_Numbers(i_g,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{i_g,2}).bus_violations_at_datasets(:,Option_Active_Scenarios) * 100 / Data_Timepoints;
+			Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{i_g,2}).bus_name);
+			Data_Violation_Bus_Numbers(i_g,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{i_g,2}).bus_violated_at_datasets(:,Option_Active_Scenarios) * 100 / Data_Number_total_Busses;
+		else
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				try
+					Data_Violation_Numbers(i_g,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{i_g,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets * 100 / Data_Timepoints;
+					Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{i_g,2}).bus_name);
+					Data_Violation_Bus_Numbers(i_g,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{i_g,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violated_at_datasets * 100 / Data_Number_total_Busses;
+				catch
+					% if this error occurs, the previous cell has to to be run
+					% or the correct data has to be loaded into the
+					% "Saved_Recalculation_Data" structure!
+					error('Error loading data, get sure, the structure "Saved_Recalculation_Data" has all needed data!')
+				end
+			end
+		end
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d >=  Saved_Data_OAT.Number_Datasets
+		fig_oat_histogram_grid_compare = set_up_singleplot(Option_Plot_Size);
+		
+		Option_Histogramm_Autoscale = true;
+		Labels_Scenarios  = {};
+		Labels_Scen_Style = [];
+		
+		switch Option_Used_Data
+			case 'Time'
+				Data_Violation = Data_Violation_Numbers;
+			case 'Node'
+				Data_Violation = Data_Violation_Bus_Numbers;
+		end
+		
+		if Option_Bar_x_max_Value < 0
+			Option_Bar_x_max_Value = max(Data_Violation,[],'all');
+			Option_Bar_x_min_Value = min(Data_Violation,[],'all');
+		else
+			Option_Histogramm_Autoscale = false;
+		end
+		Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
+		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;
+		
+		for i_g = 1 : numel(Option_Active_GridVariants)
+			Data_Plot = [];
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				Hist_Data = Data_Violation(i_g,:,i_s)';
+				[~,Hist_binIdx] = histc(Hist_Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
+				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				
+				% Plot "normal" histogramm
+				if ~Option_Grouped_Bar 
+					figure(fig_oat_histogram_grid_compare);
+					f_ax = gca;
+					f_bb = bar(f_ax, Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+					hold(f_ax,'on');
+					f_bb.EdgeColor = Active_Scenarios{i_s,3};
+					f_bb.LineWidth = Option_Default_Line_Width;
+					f_bb.EdgeAlpha = 1.0;
+					f_bb.FaceColor = Active_Scenarios{i_s,3};
+					f_bb.FaceAlpha = 0.5;
+					if Option_Distinct_Grids 
+						if i_g <= 1
+							f_bb.LineStyle = '-';
+						else
+							f_bb.LineStyle = ':';
+						end
+					end
+				end
+				% prepare the date for maybe grouped plot:
+				if i_s <= 1
+					Data_Plot = 100*Hist_nj/sum(Hist_nj);
+				else
+					Data_Plot(:,end+1) = 100*Hist_nj/sum(Hist_nj);
+				end
+				% get the legend entries for the scenarios:
+				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
+					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+					f_l = bar(nan);	                % make an invisible bar for legend
+					f_l.EdgeColor = Active_Scenarios{i_s,3};
+					f_l.LineWidth = Option_Default_Line_Width;
+					f_l.EdgeAlpha = 1.0;
+					f_l.FaceColor = Active_Scenarios{i_s,3};
+					f_l.FaceAlpha = 0.5;
+					Labels_Scen_Style(end+1) = f_l;
+				end
+			end
+			if Option_Grouped_Bar
+				figure(fig_oat_histogram_grid_compare);
+				if i_g <= 1
+					% crate a axis under the real one for Labeling between the Ticks
+					f_under_ax = cla();
+					% creat the visible axis
+					f_ax = copyobj(f_under_ax, ancestor(f_under_ax,'figure'));
+					hold(f_ax,'on');
+				end
+				% plot the data
+				f_b = bar(f_ax,Hist_cj,Data_Plot,'BarLayout','grouped');
+				for i_s = 1 : numel(Option_Active_Scenarios)
+					f_bb = f_b(i_s);
+					f_bb.EdgeColor = Active_Scenarios{i_s,3};
+					f_bb.LineWidth = 1;
+					f_bb.EdgeAlpha = 1.0;
+					f_bb.FaceColor = Active_Scenarios{i_s,3};
+					f_bb.FaceAlpha = 0.5;
+					f_bb.BarWidth = Option_Bar_Width;
+					if Option_Distinct_Grids 
+						if i_g <= 1
+							f_bb.LineStyle = '-';
+						else
+							f_bb.LineStyle = ':';
+						end
+					end
+				end
+			end
+		end
+		
+		% Format the plot:
+		figure(fig_oat_histogram_grid_compare);
+		
+		% X Axis
+		if ~Option_Histogramm_Autoscale
+			set_tick_x_histogramms(...
+				Option_Bar_x_min_Value,...
+				Option_Bar_x_max_Value,...
+				Option_Number_Bins,...
+				Option_Bar_x_Label_Step,...
+				Option_Bar_x_Last_GT,...
+				f_ax)
+		end
+		% Y Axis
+		if ~Option_Show_Y_Label
+			Labels_Y_Direction = [];
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		if Option_Bar_y_max_Value > 0
+			f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Bar_y_min_Value,...
+				Option_Bar_y_step_Value,...
+				Option_Bar_y_max_Value,...
+				Option_Bar_y_Label_Step,...
+				'%');
+			f_ax.YAxis.TickValues   = tick_y_Positions;
+			f_ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+		% Legend
+		if Option_Show_Legend
+			if Option_Grouped_Bar
+				legend(f_ax, Labels_Scenarios, 'Location','northeast');
+			else
+				if Option_Distinct_Grids
+					for i_g = 1 : numel(Option_Active_GridVariants)
+						f_l = bar(nan);	                % make an invisible bar for legend
+						f_l.EdgeColor = 'k';
+						f_l.LineWidth = Option_Default_Line_Width;
+						f_l.EdgeAlpha = 1.0;
+						f_l.FaceColor = 'k';
+						f_l.FaceAlpha = 0.25;
+						if i_g <= 1
+							f_l.LineStyle = '-';
+						else
+							f_l.LineStyle = ':';
+						end
+						Labels_Scen_Style(end+1) = f_l;
+						Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
+					end
+				end
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+			end
+		end
+		
+		set_default_plot_properties(f_ax);
+		f_max_area = set_single_plot_properties(f_ax, ...
+			[],...
+			[],...
+			Labels_Y_Direction,...
+			0,...
+			f_max_area);
+		Settings_Max_Fig_Area = f_max_area;
+		
+		% reformat the underlying axis if needed
+		if Option_Grouped_Bar
+			% locate the underlying axis according to visible axis
+			f_under_ax.Position = f_ax.Position;
+			f_under_ax.YAxis.Limits = f_ax.YAxis.Limits;
+			f_under_ax.XAxis.Limits = f_ax.XAxis.Limits;
+			% take over all needed values (keep the ticklabels where they are): 
+			f_under_ax.YTickLabel = [];
+			f_under_ax.XTickLabel = f_ax.XTickLabel;
+			f_under_ax.XTick = f_ax.XTick;
+			f_under_ax.XAxis.FontSize = f_ax.XAxis.FontSize;
+			f_under_ax.FontName = f_ax.FontName;
+			% disable the ticklables of the visible axis
+			f_ax.XTickLabel = [];
+			% adjust the ticks + grid of visible axis (to be between the bar groups):
+			f_divider = (Option_Bar_x_max_Value - Option_Bar_x_min_Value)/Option_Number_Bins;
+			f_ax.XTick = (floor(min(xlim(f_ax))) : f_divider : ceil(max(xlim(f_ax)))) + f_divider;
+			f_ax.XMinorGrid = 'off';
+			f_ax.XMinorTick = 'off';
+		end
+		
+		hold off;
+	end
+end
+
+clear Active_* Data* f_* i_* idx_* Hist_* Labels_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
