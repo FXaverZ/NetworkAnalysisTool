@@ -24,7 +24,7 @@ if show_greater_than && marker > 1
 	tick_Positions(end) = [];
 end
 
-ax.XAxis.Limits       = [min_Value max_Value+step_Value/2];
+ax.XAxis.Limits       = [min_Value max_Value+step_Value];
 ax.XAxis.TickValues   = main_tick_Position;
 ax.XAxis.TickLabels   = tick_x_Labels;
 

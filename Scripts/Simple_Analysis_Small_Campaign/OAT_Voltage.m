@@ -83,17 +83,17 @@ Settings_GridVariants = {...
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
 	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
-	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
-	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
+	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
+	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstï¿½rkung Kabel';...
 	};
 
 Settings_VoltageBands = {
 	% 1     2     3      4                 5          6
 	% ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
-	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '±10%';...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '±5%';...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%…2%';...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, '±3%';...
+	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%';...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%';...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½2%';...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, 'ï¿½3%';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -116,8 +116,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -239,11 +239,11 @@ Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 % = = = = = = = = = = = = = = = = =
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Häufigkeit [%]';
+Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Option_Number_Datasets_to_Use
@@ -1259,7 +1259,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
@@ -1355,13 +1355,15 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 				Hist_Data = Data_Violation(i_g,:,i_s)';
 				[~,Hist_binIdx] = histc(Hist_Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
 				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				
 				% Plot "normal" histogramm
 				if ~Option_Grouped_Bar 
 					figure(fig_oat_histogram_grid_compare);
-					f_bb = bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
-					hold on;
+					f_ax = gca;
+					f_bb = bar(f_ax, Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+					hold(f_ax,'on');
 					f_bb.EdgeColor = Active_GridVariants{i_g,3};
-					f_bb.LineWidth = 1;
+					f_bb.LineWidth = Option_Default_Line_Width;
 					f_bb.EdgeAlpha = 1.0;
 					f_bb.FaceColor = Active_GridVariants{i_g,3};
 					f_bb.FaceAlpha = 0.5;
@@ -1374,6 +1376,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 						end
 					end
 				end
+				% prepare the date for maybe grouped plot:
 				if i_g <= 1
 					Data_Plot = 100*Hist_nj/sum(Hist_nj);
 				else
@@ -1382,17 +1385,26 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 				% get the legend entries for the scenarios:
 				if ~any(strcmpi(Labels_Scenarios, Active_GridVariants{i_g,5}))
 					Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
-					f_l = plot(nan, nan);	                % make an invisible line for legend
-					f_l.Color = Active_GridVariants{i_g,3}; % set color of invisible line
+					f_l = bar(nan);	                % make an invisible bar for legend
+					f_l.EdgeColor = Active_GridVariants{i_g,3};
 					f_l.LineWidth = Option_Default_Line_Width;
+					f_l.EdgeAlpha = 1.0;
+					f_l.FaceColor = Active_GridVariants{i_g,3};
+					f_l.FaceAlpha = 0.5;
 					Labels_Scen_Style(end+1) = f_l;
 				end
 			end
 			if Option_Grouped_Bar
 				figure(fig_oat_histogram_grid_compare);
-				f_b = bar(Hist_cj,Data_Plot,'BarLayout','grouped');%'hist');
-				% 			f_b = bar(Hist_cj,Data_Plot,'hist');
-				hold on;
+				if i_s <= 1
+					% crate a axis under the real one for Labeling between the Ticks
+					f_under_ax = cla();
+					% creat the visible axis
+					f_ax = copyobj(f_under_ax, ancestor(f_under_ax,'figure'));
+					hold(f_ax,'on');
+				end
+				% plot the data
+				f_b = bar(f_ax,Hist_cj,Data_Plot,'BarLayout','grouped');
 				for i_g = 1 : numel(Option_Active_GridVariants)
 					f_bb = f_b(i_g);
 					f_bb.EdgeColor = Active_GridVariants{i_g,3};
@@ -1415,7 +1427,6 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 		
 		% Format the plot:
 		figure(fig_oat_histogram_grid_compare);
-		f_ax = gca;
 		
 		% X Axis
 		if ~Option_Histogramm_Autoscale
@@ -1447,12 +1458,16 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 		end
 		% Legend
 		if Option_Show_Legend
-			if Option_Distinct_Seasons
-				[Labels_Scenarios,Labels_Scen_Style] =...
-					add_season_entry_to_legend(fig_oat_histogram_grid_compare,...
-					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
+			if Option_Grouped_Bar
+				legend(f_ax, Labels_Scenarios, 'Location','northeast');
+			else
+				if Option_Distinct_Seasons
+					[Labels_Scenarios,Labels_Scen_Style] =...
+						add_season_entry_to_legend(fig_oat_histogram_grid_compare,...
+						Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'bar');
+				end
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 			end
-			legend(Labels_Scen_Style, Labels_Scenarios);
 		end
 		
 		set_default_plot_properties(f_ax);
@@ -1463,6 +1478,28 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 			0,...
 			f_max_area);
 		Settings_Max_Fig_Area = f_max_area;
+		
+		% reformat the underlying axis if needed
+		if Option_Grouped_Bar
+			% locate the underlying axis according to visible axis
+			f_under_ax.Position = f_ax.Position;
+			f_under_ax.YAxis.Limits = f_ax.YAxis.Limits;
+			f_under_ax.XAxis.Limits = f_ax.XAxis.Limits;
+			% take over all needed values (keep the ticklabels where they are): 
+			f_under_ax.YTickLabel = [];
+			f_under_ax.XTickLabel = f_ax.XTickLabel;
+			f_under_ax.XTick = f_ax.XTick;
+			f_under_ax.XAxis.FontSize = f_ax.XAxis.FontSize;
+			f_under_ax.FontName = f_ax.FontName;
+			% disable the ticklables of the visible axis
+			f_ax.XTickLabel = [];
+			% adjust the ticks + grid of visible axis (to be between the bar groups):
+			f_divider = (Option_Bar_x_max_Value - Option_Bar_x_min_Value)/Option_Number_Bins;
+			f_ax.XTick = (floor(min(xlim(f_ax))) : f_divider : ceil(max(xlim(f_ax)))) + f_divider;
+			f_ax.XMinorGrid = 'off';
+			f_ax.XMinorTick = 'off';
+		end
+		
 		hold off;
 	end
 end
