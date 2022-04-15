@@ -83,17 +83,17 @@ Settings_GridVariants = {...
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
 	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
-	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
-	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
+	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
+	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstï¿½rkung Kabel';...
 	};
 
 Settings_VoltageBands = {
 	% 1     2     3      4                 5          6
 	% ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
-	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '±10%';...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '±5%';...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%…2%';...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, '±3%';...
+	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%';...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%';...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½2%';...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, 'ï¿½3%';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -116,8 +116,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -239,11 +239,11 @@ Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 % = = = = = = = = = = = = = = = = =
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Häufigkeit [%]';
+Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Option_Number_Datasets_to_Use
@@ -1258,7 +1258,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]';
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]';
 % = = = = = = = = = = = = = = = = =
@@ -1551,7 +1551,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]'; 
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]'; 
 % = = = = = = = = = = = = = = = = =
@@ -1839,9 +1839,10 @@ Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
 Option_Default_Line_Width = 1.5;
 Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
-Option_Plot_x_max_Value  =150; % '%' (-1 ... autoscale)
-Option_Plot_x_min_Value  =  0; % '%'
-Option_Plot_x_step_Value =  5; % '%'
+Option_Plot_x_relative   =  1; % 1: plot against share of all profiles [%]
+Option_Plot_x_max_Value  =100; % '-' (-1 ... autoscale)
+Option_Plot_x_min_Value  =  0; % '-'
+Option_Plot_x_step_Value =  5; % '-'
 Option_Plot_x_Label_Step =  5; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 %- - - - - - - - - - - - - - - - - -
@@ -1850,10 +1851,11 @@ Option_Plot_y_min_Value  =  0; % '%'
 Option_Plot_y_step_Value = 10; % '%'
 Option_Plot_y_Label_Step =  2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_X_Direction = 'Anzahl der Profile';
+Labels_X_Direction     = 'Anzahl der Profile';
+Labels_X_Direction_rel = 'Anteil der Profile [-]';
 Labels_Y_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [-]';
 Labels_Y_Node = 'Anteil Knoten mit Spannungsbandverletzung [-]';
-% = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1936,7 +1938,11 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 			for i_g = 1 : numel(Option_Active_GridVariants)
 				Data_Plot = Data_Violation(i_g,:,i_s)';
 				Data_Plot = sort(Data_Plot,'descend'); %#ok<UDIM>
-				f_l = plot(Data_Plot);
+				f_xdiv = 1:(Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles);
+				if Option_Plot_x_relative
+					f_xdiv = 100 * f_xdiv / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles);
+				end
+				f_l = plot(f_xdiv,Data_Plot);
 				hold on;
 				f_l.Color = Active_GridVariants{i_g,3};
 				f_l.LineWidth = Option_Default_Line_Width;
@@ -1966,6 +1972,15 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 		% X Axis
 		if ~Option_Show_X_Label
 			Labels_X_Direction = [];
+		else
+			if Option_Plot_x_relative
+				Labels_X_Direction = Labels_X_Direction_rel;
+			end
+		end
+		if Option_Plot_x_relative
+			f_x_unit = '%';
+		else
+			f_x_unit = [];
 		end
 		if Option_Plot_x_max_Value > 0
 			f_ax.XAxis.Limits  = [Option_Plot_x_min_Value, Option_Plot_x_max_Value];
@@ -1974,7 +1989,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 				Option_Plot_x_step_Value,...
 				Option_Plot_x_max_Value,...
 				Option_Plot_x_Label_Step,...
-				[]);
+				f_x_unit);
 			f_ax.XAxis.TickValues   = tick_x_Positions;
 			f_ax.XAxis.TickLabels   = tick_x_Labels;
 		end
