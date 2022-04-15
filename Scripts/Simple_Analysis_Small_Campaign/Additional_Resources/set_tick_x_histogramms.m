@@ -17,11 +17,11 @@ else
 		tick_x_Labels{end+1} = tick_Positions(i)-step_Value/2; %#ok<*AGROW>
 	end
 end
-if show_greater_than && marker > 1
+if show_greater_than %&& marker > 1
 	% Last Label is different, greater than
-	main_tick_Position(end) = tick_Positions(end-1);
-	tick_x_Labels{end} = ['>',num2str(tick_x_Labels{end})];
-	tick_Positions(end) = [];
+% 	main_tick_Position(end) = tick_Positions(end-1);
+	tick_x_Labels{end} = ['\geq',num2str(tick_x_Labels{end})];
+% 	tick_Positions(end) = [];
 end
 
 ax.XAxis.Limits       = [min_Value max_Value+step_Value];
