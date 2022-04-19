@@ -231,12 +231,8 @@ clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Voltage Band Violation Histogramm Summary per Scenario
 % = = = = = = = = = = = = = = = = =
-Option_Number_Datasets_to_Use = 15;
-%- - - - - - - - - - - - - - - - - -
-Option_Active_VoltageBand = 5:12; % 1: +-10% Default (no recalculations!), 2: +-5%, 3: -2...+7%, 4: +-3%
-%- - - - - - - - - - - - - - - - - -
+Option_Active_VoltageBand = 4; % 1: +-10% Default (no recalculations!), 2: +-5%, 3: -2...+7%, 4: +-3%
 Option_Active_Scenarios = 1:1:10;
-%- - - - - - - - - - - - - - - - - -
 Option_Active_GridVariants = 1:4;     % all grid varaiants
 %- - - - - - - - - - - - - - - - - -
 Option_Bar_x_max_Value  = 100;  % (-1 ... autoscale)
@@ -256,7 +252,7 @@ Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 
 for i_v = 1: numel(Option_Active_VoltageBand)
 	disp(['Displaying voltage band "',Settings_VoltageBands{Option_Active_VoltageBand(i_v),7},'"...'])
-	for i_d = 1 : Option_Number_Datasets_to_Use
+	for i_d = 1 : Saved_Data_OAT.Number_Datasets
 		i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %     Preprocessing...
@@ -287,13 +283,13 @@ for i_v = 1: numel(Option_Active_VoltageBand)
 			% [gridvariant datasets scenarios]:
 			Data_Violation_Numbers      = zeros(...
 				numel(Option_Active_GridVariants),...
-				Option_Number_Datasets_to_Use * Settings_Number_Profiles,...
+				Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
 				numel(Option_Active_Scenarios));
 			Data_Recalculation_Needed = [];
 		end
-		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		%     Prepare Data...
-		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		if isempty(Data_Recalculation_Needed)
 			% Check, if data has to be recalculated...
 			Data_ID = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.ID;
@@ -316,10 +312,10 @@ for i_v = 1: numel(Option_Active_VoltageBand)
 		idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
 		i_recalc_counter = 0;
 		if (Data_Recalculation_Needed)
-			disp(['    Processing profile set ',num2str(i_d),' of ',num2str(Option_Number_Datasets_to_Use)]);
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-			%     Recalculation Voltage Band Violation Analysis
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+			disp(['    Processing profile set ',num2str(i_d),' of ',num2str(Saved_Data_OAT.Number_Datasets)]);
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%     Recalculation Voltage Band Violation Analysis
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 			for i_g = 1:size(Active_GridVariants,1)
 				% First look up, if data is allready present:
 				if(isfield(Saved_Recalculation_Data.(['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]),['Saved_',num2str(i_d)]))
@@ -383,22 +379,22 @@ for i_v = 1: numel(Option_Active_VoltageBand)
 				end
 			end
 			disp(['        Processed ',num2str(i_recalc_counter),' Datasets.'])
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		else
 			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-			%     Data Extraction of Voltage Band Violation Analysis
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%     Data Extraction of Voltage Band Violation Analysis
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 			for i_g = 1:size(Active_GridVariants,1)
 				Data_Violation_Numbers(i_g,idx_datasets,:) = ...
 					Data.(Active_GridVariants{i_g,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
 			end
-			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		end
-		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		%     Plotting Data...
-		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		if i_d >= Option_Number_Datasets_to_Use
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if i_d >= Saved_Data_OAT.Number_Datasets
 			if (Data_Recalculation_Needed)
 				disp('    ... done!');
 			end
@@ -438,7 +434,7 @@ for i_v = 1: numel(Option_Active_VoltageBand)
 					hold on;
 				end
 				% get the legend entries for the scenarios:
-				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+				Labels_Scenarios{end+1} = [Active_Scenarios{i_s,5},' - ',Active_Scenarios{i_s,6}];
 				f_l = plot(nan, nan);	                         % make an invisible line for legend
 				set(f_l,...
 					'Color', Active_Scenarios{i_s,3},...       % set color of invisible line
