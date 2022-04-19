@@ -93,7 +93,7 @@ Settings_VoltageBands = {
 	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '�10%';...
 	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '�5%';...
 	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%�2%';...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.15, '�3%';...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, '�3%';...
 	};
 
 Settings_Number_Profiles = 10;
@@ -823,16 +823,17 @@ clear Active_* Data* f_* i_* Labels_* idx_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Show min-max of voltage
 % = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios    = [1,2,3,4,9,10];%1:10;%10;
-Option_Active_VoltageBand  = 1:4; 
-Option_Active_GridVariants = 4; % only one can be active here!
+Option_Active_Scenarios    = [3,4];%1:10;%10;
+Option_Active_VoltageBand  = [1,2,4]; 
+Option_Active_GridVariants = 1; % only one can be active here!
 %- - - - - - - - - - - - - - - - - -
 Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
 Option_Show_Legend        = 1;
+Option_Show_Legend_Details= 0;
 Option_Show_Title         = 0;
 Option_Show_Y_Label       = 0;
 Option_Show_Mean_Values   = 1;
-Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
+Settings_Max_Fig_Area     = [0.1184    0.1236    0.0364    0.0294];
 Option_Default_Line_Width = 1.5;
 Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
@@ -841,11 +842,11 @@ Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
 Option_Plot_x_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  1.15; % 'kW' (-1 ... autoscale)
-Option_Plot_y_min_Value  =   0.70; % 'kW'
-Option_Plot_y_step_Value = 0.05; % 'kW'
-Option_Plot_y_Label_Step =   2; % Spacing between label entries
-Option_Plot_y_Num_Format = '%1.2f';
+Option_Plot_y_max_Value  =  1.15; % '%' (-1 ... autoscale)
+Option_Plot_y_min_Value  = 0.70; % '%'
+Option_Plot_y_step_Value = 0.05; % '%'
+Option_Plot_y_Label_Step =    2; % Spacing between label entries
+Option_Plot_y_Num_Format = '%1.1f';
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -1023,7 +1024,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 		end
 		% Legend
 		if Option_Show_Legend
-			if Option_Distinct_Seasons
+			if Option_Distinct_Seasons && Option_Show_Legend_Details
 				[Labels_Scenarios,Labels_Scen_Style] =...
 					add_season_entry_to_legend(fig_oat_voltage_minmax,...
 					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
