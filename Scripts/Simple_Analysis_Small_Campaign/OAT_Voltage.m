@@ -2273,8 +2273,8 @@ Option_Active_Scenarios    = 1:2:6; % only szenarios from one season (no distinc
 Option_Active_GridVariants = [4,1]; % max. two grid variants! First one '-', second ':' Linestyle
 Option_Used_Data           = 'Time'; % 'Time'; 'Node'
 %- - - - - - - - - - - - - - - - - -
-Option_Distinct_Grids     = 1; % 1 = Plot the season with different linestyles
-Option_Show_Legend        = 1;
+Option_Distinct_Grids     = 0; % 1 = Plot the grid variants with different linestyles
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
 Option_Show_X_Label       = 1;
 Option_Show_Y_Label       = 1;
 Settings_Max_Fig_Area     = [0.0719    0.0708    0.0208    0.0257];
@@ -2294,8 +2294,8 @@ Option_Plot_y_Label_Step =  2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_X_Direction     = 'Anzahl der Profile';
 Labels_X_Direction_rel = 'Anteil Profile [-]';
-Labels_Y_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [-]';
-Labels_Y_Node = 'Anteil Knoten mit Spannungsbandverletzung [-]';
+Labels_Y_Time = 'Anteil Profilzeit mit Spannungsbandverletzung';
+Labels_Y_Node = 'Anteil Knoten mit Spannungsbandverletzung';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
@@ -2394,6 +2394,14 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 						f_l.LineStyle = ':';
 					end
 				end
+				if Option_Distinct_Seasons 
+					switch Active_Scenarios{i_s, 6}
+						case 'Sommer'
+							f_l.LineStyle = ':';
+						case 'Winter'
+							f_l.LineStyle = '-';
+					end
+				end
 				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
 					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
 					f_l = plot(nan, nan);	                % make an invisible line for legend
@@ -2472,6 +2480,11 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 					Labels_Scen_Style(end+1) = f_l;
 					Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
 				end
+			end
+			if Option_Distinct_Seasons
+				[Labels_Scenarios,Labels_Scen_Style] =...
+					add_season_entry_to_legend(fig_oat_duration_grid_compare,...
+					Option_Default_Line_Width,Labels_Scenarios, Labels_Scen_Style, 'line');
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		end
