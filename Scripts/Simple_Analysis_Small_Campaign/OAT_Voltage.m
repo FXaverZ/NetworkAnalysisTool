@@ -1072,15 +1072,14 @@ Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
 Option_Plot_x_Label_Step =   1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-%- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =  -1; % '%' (-1 ... autoscale)
+Option_Plot_y_max_Value  =  35; % '%' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % '%'
 Option_Plot_y_step_Value =   5; % '%'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
 Option_Plot_y_Num_Format =  [];
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
-Labels_Y_Direction = 'Anteil an Knoten mit Spannungsbandverletzung';
+Labels_Y_Direction = 'Anteil Knoten mit Spannungsbandverletzung [-]';
 % = = = = = = = = = = = = = = = = =
 
 for i_d = 1:Saved_Data_OAT.Number_Datasets
@@ -1243,6 +1242,226 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 				[Labels_Scenarios,Labels_Scen_Style] =...
 					add_season_entry_to_legend(fig_oat_node_timeline,...
 					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
+			end
+			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+		end
+		% Configuration
+		set_default_plot_properties(f_ax);
+		f_max_area = set_single_plot_properties(f_ax, ...
+			Labels_Title,...
+			[],...
+			Labels_Y_Direction,...
+			Option_Show_Title,...
+			f_max_area);
+		Settings_Max_Fig_Area = f_max_area;
+		% adjust legend properties a little bit for this kind of graph
+		if Option_Show_Legend
+			f_lg = get(f_ax, 'Legend');
+			f_lg.ItemTokenSize = [17, 6];
+		end
+		hold off
+	end
+end
+
+clear Active_* Data* f_* i_* Labels_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Timeline with affected Nodes scenario variant comparison
+% = = = = = = = = = = = = = = = = =
+Option_Active_VoltageBand  = 4; % only one can be active here!
+Option_Active_Scenarios    = 1:2:6; % only szenarios from one season (no distinction!)
+Option_Active_GridVariants = 1;%[4,1]; % max. two grid variants! First one '-', second ':' Linestyle
+%- - - - - - - - - - - - - - - - - -
+Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles                --+
+Option_Distinct_Grids     = 0; % 1 = Plot the two grid variants with different linestyles --+-- Only one of them should be 1! 
+Option_Show_Legend        = 1;
+Option_Show_Legend_Details= 1;
+Option_Show_Title         = 0;
+Option_Show_Y_Label       = 1;
+Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
+Option_Default_Line_Width = 1.5;
+Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
+Option_Plot_x_min_Value  =   0; % x10 minutes
+Option_Plot_x_step_Value =  60; % minutes
+Option_Plot_x_Label_Step =   1; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - - 
+%- - - - - - - - - - - - - - - - - - 
+Option_Plot_y_max_Value  =  -1; % '%' (-1 ... autoscale)
+Option_Plot_y_min_Value  =   0; % '%'
+Option_Plot_y_step_Value =   5; % '%'
+Option_Plot_y_Label_Step =   2; % Spacing between label entries
+Option_Plot_y_Num_Format =  [];
+% = = = = = = = = = = = = = = = = =
+Labels_Title       = '';
+Labels_Y_Direction = 'Anteil Knoten mit Spannungsbandverletzung [%]';
+% = = = = = = = = = = = = = = = = =
+
+for i_d = 1:Saved_Data_OAT.Number_Datasets
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_Active_VoltageBand,:);
+		Active_GridVariants = Settings_GridVariants(Option_Active_GridVariants,:);
+		Data_Timepoints = ...
+			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		
+		Option_Umin =  Settings_VoltageBands{Option_Active_VoltageBand,2};
+		Option_Umax =  Settings_VoltageBands{Option_Active_VoltageBand,3};
+		
+		Data_Node_Violations_Mean = zeros(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios));
+		Data_Node_Violations_Min  = ones(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios))*10000; % a big value, which will be overwritten by the min funstion later on
+		Data_Node_Violations_Max  = zeros(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios)); 
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+	for i_g = 1 : numel(Option_Active_GridVariants)
+		Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Active_GridVariants{i_g,2}).bus_name);
+		if Settings_VoltageBands{Option_Active_VoltageBand,1} == 1
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.(Active_GridVariants{i_g,2});
+			Data_Node_Violations = Data.voltage_violations(Option_Active_Scenarios,:,:,:);
+		else
+			Data_Node_Violations = [];
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				Data = Saved_Recalculation_Data.(...
+					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+					['Saved_',num2str(i_d)]).(...
+					Active_GridVariants{i_g,2}).(...
+					['Sc_',num2str(Active_Scenarios{i_s,1})]);
+				if i_s == 1
+					Data_Node_Violations = Data.voltage_violations;
+				else
+					Data_Node_Violations(end+1,:,:,:) = Data.voltage_violations; %#ok<*SAGROW>
+				end
+			end
+		end
+		%[scenario, profileset, timepoint, node]; 1 = violation at node
+		%occured,,,
+		Data_Node_Violations_Sum = sum(Data_Node_Violations,4) * 100 / Data_Number_total_Busses;
+		Data_Node_Violations_tmp_Mean = squeeze(mean(Data_Node_Violations_Sum,2))';
+		Data_Node_Violations_tmp_Min  = squeeze(min(Data_Node_Violations_Sum,[],2))';
+		Data_Node_Violations_tmp_Max  = squeeze(max(Data_Node_Violations_Sum,[],2))';
+		Data_Node_Violations_Min(i_g,:,:) = min(squeeze(Data_Node_Violations_Min(i_g,:,:)),Data_Node_Violations_tmp_Min);
+		Data_Node_Violations_Max(i_g,:,:) = max(squeeze(Data_Node_Violations_Max(i_g,:,:)),Data_Node_Violations_tmp_Max);
+		if i_d <= 1
+			Data_Node_Violations_Mean(i_g,:,:) = Data_Node_Violations_tmp_Mean;
+		else
+			Data_Node_Violations_Mean(i_g,:,:) = 0.5 * (squeeze(Data_Node_Violations_Mean(i_g,:,:)) + Data_Node_Violations_tmp_Mean);
+		end
+	end
+	
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d >= Saved_Data_OAT.Number_Datasets
+		fig_oat_node_timeline = set_up_singleplot(Option_Plot_Size);
+		Labels_Scenarios = {};
+		Labels_Scen_Style = [];
+		
+		for i_g = 1: numel(Option_Active_GridVariants)
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				f_l = plot(squeeze(Data_Node_Violations_Mean(i_g,:,i_s)));
+				hold on;
+				f_l.Color = Active_Scenarios{i_s,3};
+				f_l.LineWidth = Option_Default_Line_Width;
+				if Option_Distinct_Grids
+					if i_g <= 1
+						f_l.LineStyle = '-';
+					else
+						f_l.LineStyle = ':';
+					end
+				end
+				if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
+					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+					f_l = plot(nan, nan);	                % make an invisible line for legend
+					f_l.Color = Active_Scenarios{i_s,3}; % set color of invisible line
+					f_l.LineStyle = '-';                    % set linestyle of invisible line
+					f_l.LineWidth = Option_Default_Line_Width;
+					Labels_Scen_Style(end+1) = f_l;
+				end
+				
+				if Option_Show_Min_Max
+					Data_Plot_Max = squeeze(Data_Node_Violations_Max(i_g,:,i_s))';
+					Data_Plot_Min = squeeze(Data_Node_Violations_Min(i_g,:,i_s))';
+					if numel(Option_Active_GridVariants) <= 1
+						% fill the area between min and max:
+						f_inBetweenRegionX = [1:length(Data_Plot_Max), length(Data_Plot_Min):-1:1];
+						f_inBetweenRegionY = [Data_Plot_Max', fliplr(Data_Plot_Min')];
+						f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
+						f_f.FaceColor = Active_Scenarios{i_s,3};
+						f_f.FaceAlpha = 0.25;
+						f_f.LineStyle = 'none';
+					end
+					% Plot max
+					f_l = plot(Data_Plot_Max);
+					f_l.Color = Active_Scenarios{i_s,3};
+					f_l.LineStyle = '-.';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+					%plot min
+					f_l = plot(Data_Plot_Min);
+					f_l.Color = Active_Scenarios{i_s,3};
+					f_l.LineStyle = ':';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+				end
+			end
+		end
+		% Format the plot:
+		f_ax = gca;
+		
+		if ~Option_Show_Y_Label
+			Labels_Y_Direction = [];
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		
+		% X Axis
+		if Option_Plot_x_max_Value > 0
+			set_tick_x_dayprofile(f_ax,...
+				Option_Plot_x_min_Value,...
+				Option_Plot_x_step_Value,...
+				Option_Plot_x_max_Value,...
+				Option_Plot_x_Label_Step);
+		end
+		% Y Axis
+		if Option_Plot_y_max_Value > 0
+			f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Plot_y_min_Value,...
+				Option_Plot_y_step_Value,...
+				Option_Plot_y_max_Value,...
+				Option_Plot_y_Label_Step,...
+				'%',... % no unit
+				Option_Plot_y_Num_Format);
+			f_ax.YAxis.TickValues   = tick_y_Positions;
+			f_ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+		% Legend
+		if Option_Show_Legend
+			if Option_Show_Min_Max && Option_Show_Legend_Details
+				[Labels_Scenarios,Labels_Scen_Style] =...
+					add_mean_min_max_entry_to_legend(fig_oat_node_timeline,...
+					Labels_Scenarios, Labels_Scen_Style, []);
+			end
+			if Option_Distinct_Grids && Option_Show_Legend_Details
+				for i_g = 1 : numel(Option_Active_GridVariants)
+					f_l = plot(nan);	                % make an invisible bar for legend
+					f_l.Color = 'k';
+					f_l.LineWidth = Option_Default_Line_Width;
+					if i_g <= 1
+						f_l.LineStyle = '-';
+					else
+						f_l.LineStyle = ':';
+					end
+					Labels_Scen_Style(end+1) = f_l;
+					Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
+				end
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		end
