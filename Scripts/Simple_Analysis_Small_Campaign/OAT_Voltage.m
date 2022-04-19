@@ -1053,15 +1053,16 @@ clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Timeline with affected Nodes grid variant comparison
 % = = = = = = = = = = = = = = = = =
-Option_Active_VoltageBand  = 4; % only one can be active here!
-Option_Active_Scenarios    = 7:8; % only one szenario (different seasons)!
+Option_Active_VoltageBand  = 1; % only one can be active here!
+Option_Active_Scenarios    = 7; % only one szenario (different seasons)!
 Option_Active_GridVariants = [1,4];
 %- - - - - - - - - - - - - - - - - -
-Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
+Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
+Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Show_Legend        = 1;
+Option_Show_Legend_Details= 1;
 Option_Show_Title         = 0;
 Option_Show_Y_Label       = 1;
-Option_Show_MinMax_Values = 0;
 Settings_Max_Fig_Area     = [0.1367    0.1236    0.0364    0.0294];
 Option_Default_Line_Width = 1.5;
 Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
@@ -1162,6 +1163,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 					end
 				end
 			end
+			
 			if ~any(strcmpi(Labels_Scenarios, Active_GridVariants{i_g,5}))
 				Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
 				f_l = plot(nan, nan);	                % make an invisible line for legend
@@ -1169,6 +1171,34 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 				f_l.LineStyle = '-';                    % set linestyle of invisible line
 				f_l.LineWidth = Option_Default_Line_Width;
 				Labels_Scen_Style(end+1) = f_l;
+			end
+			
+			if Option_Show_Min_Max
+				for i_s = 1 : numel(Option_Active_Scenarios)
+					Data_Plot_Max = squeeze(Data_Node_Violations_Max(i_g,:,i_s))';
+					Data_Plot_Min = squeeze(Data_Node_Violations_Min(i_g,:,i_s))';
+					if numel(Option_Active_Scenarios) <= 1
+						% fill the area between min and max:
+						f_inBetweenRegionX = [1:length(Data_Plot_Max), length(Data_Plot_Min):-1:1];
+						f_inBetweenRegionY = [Data_Plot_Max', fliplr(Data_Plot_Min')];
+						f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
+						f_f.FaceColor = Active_GridVariants{i_g,3};
+						f_f.FaceAlpha = 0.25;
+						f_f.LineStyle = 'none';
+					end
+					% Plot max
+					f_l = plot(Data_Plot_Max);
+					f_l.Color = Active_GridVariants{i_g,3};
+					f_l.LineStyle = '-.';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+					%plot min
+					f_l = plot(Data_Plot_Min);
+					f_l.Color = Active_GridVariants{i_g,3};
+					f_l.LineStyle = ':';
+					f_l.LineWidth = Option_Default_Line_Width;
+					drawnow;
+				end
 			end
 		end
 		% Format the plot:
@@ -1204,7 +1234,12 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 		end
 		% Legend
 		if Option_Show_Legend
-			if Option_Distinct_Seasons
+			if Option_Show_Min_Max && Option_Show_Legend_Details
+				[Labels_Scenarios,Labels_Scen_Style] =...
+					add_mean_min_max_entry_to_legend(fig_oat_node_timeline,...
+					Labels_Scenarios, Labels_Scen_Style, []);
+			end
+			if Option_Distinct_Seasons && Option_Show_Legend_Details
 				[Labels_Scenarios,Labels_Scen_Style] =...
 					add_season_entry_to_legend(fig_oat_node_timeline,...
 					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
