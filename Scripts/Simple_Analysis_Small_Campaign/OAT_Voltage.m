@@ -1726,6 +1726,7 @@ Option_Active_GridVariants = [4,1]; % max. two grid variants! First one '-', sec
 Option_Used_Data           = 'Node'; % 'Time'; 'Node'
 %- - - - - - - - - - - - - - - - - -
 Option_Distinct_Grids     = 1; % 1 = Plot the two grid variants with different linestyles
+Option_Distinct_Seasons   = 1;
 Option_Show_Legend        = 1;
 Option_Show_Title         = 0;
 Option_Show_X_Label       = 1;
@@ -1741,13 +1742,16 @@ Option_Number_Bins      =  50;
 Option_Bar_x_min_Value  =   0;
 Option_Bar_x_Label_Step =   5; % Spacing between label entries
 Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
+%- - - - - - - - - - - - - - - - - - 
+Option_Bar_y_logScale   =   0;
+Option_Bar_y_logLimits  = [-1, 2]; % 10^x
 %- - - - - - - - - - - - - - - - - -
-Option_Bar_y_max_Value  = -1; % '%' (-1 ... autoscale)
+Option_Bar_y_max_Value  = 16; % '%' (-1 ... autoscale)
 Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. H�ufigkeit [%]';
+Labels_Y_Direction = 'rel. H�ufigkeit';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]'; 
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]'; 
 % = = = = = = = = = = = = = = = = =
@@ -1857,11 +1861,21 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 					f_bb.EdgeAlpha = 1.0;
 					f_bb.FaceColor = Active_Scenarios{i_s,3};
 					f_bb.FaceAlpha = 0.5;
-					if Option_Distinct_Grids 
+					if Option_Distinct_Grids
 						if i_g <= 1
 							f_bb.LineStyle = '-';
 						else
 							f_bb.LineStyle = ':';
+						end
+					end
+					if Option_Distinct_Seasons
+						switch Active_Scenarios{i_s, 6}
+							case 'Sommer'
+								f_bb.LineStyle = ':';
+								f_bb.LineWidth = Option_Default_Line_Width;
+							case 'Winter'
+								f_bb.LineStyle = '-';
+								f_bb.LineWidth = Option_Default_Line_Width;
 						end
 					end
 				end
@@ -1943,7 +1957,12 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 		else
 			f_max_area = [];
 		end
-		if Option_Bar_y_max_Value > 0
+		if Option_Bar_y_logScale
+			f_ax.YAxis.Scale = 'log';
+			f_ax.YAxis.Limits  = 10.^Option_Bar_y_logLimits;
+			f_ax.YAxis.TickValues = 10.^(Option_Bar_y_logLimits(1):Option_Bar_y_logLimits(2));
+		end
+		if Option_Bar_y_max_Value > 0 && ~Option_Bar_y_logScale
 			f_ax.YAxis.Limits  = [Option_Bar_y_min_Value, Option_Bar_y_max_Value];
 			[tick_y_Positions, tick_y_Labels] = get_tick(...
 				Option_Bar_y_min_Value,...
@@ -1959,7 +1978,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 			if Option_Grouped_Bar
 				legend(f_ax, Labels_Scenarios, 'Location','northeast');
 			else
-				if Option_Distinct_Grids
+				if Option_Distinct_Grids && Option_Show_Legend_Details
 					for i_g = 1 : numel(Option_Active_GridVariants)
 						f_l = bar(nan);	                % make an invisible bar for legend
 						f_l.EdgeColor = 'k';
@@ -1975,6 +1994,11 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 						Labels_Scen_Style(end+1) = f_l;
 						Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
 					end
+				end
+				if Option_Distinct_Seasons && Option_Show_Legend_Details
+					[Labels_Scenarios,Labels_Scen_Style] =...
+						add_season_entry_to_legend(fig_oat_histogram_grid_compare,...
+						Option_Default_Line_Width,Labels_Scenarios, Labels_Scen_Style, 'bar');
 				end
 				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 			end
