@@ -1244,12 +1244,21 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 			Data_Node_Violations_tmp_Mean = squeeze(mean(Data_Node_Violations_Sum,2))';
 			Data_Node_Violations_tmp_Min  = squeeze(min(Data_Node_Violations_Sum,[],2))';
 			Data_Node_Violations_tmp_Max  = squeeze(max(Data_Node_Violations_Sum,[],2))';
-			Data_Node_Violations_Min(i_v,i_g,:,:) = min(squeeze(Data_Node_Violations_Min(i_v,i_g,:,:)),Data_Node_Violations_tmp_Min);
-			Data_Node_Violations_Max(i_v,i_g,:,:) = max(squeeze(Data_Node_Violations_Max(i_v,i_g,:,:)),Data_Node_Violations_tmp_Max);
+			if numel(Option_Active_Scenarios) > 1
+				Data_Node_Violations_Min(i_v,i_g,:,:) = min(squeeze(Data_Node_Violations_Min(i_v,i_g,:,:)),Data_Node_Violations_tmp_Min);
+				Data_Node_Violations_Max(i_v,i_g,:,:) = max(squeeze(Data_Node_Violations_Max(i_v,i_g,:,:)),Data_Node_Violations_tmp_Max);
+			else
+				Data_Node_Violations_Min(i_v,i_g,:,:) = min(squeeze(Data_Node_Violations_Min(i_v,i_g,:,:))',Data_Node_Violations_tmp_Min);
+				Data_Node_Violations_Max(i_v,i_g,:,:) = max(squeeze(Data_Node_Violations_Max(i_v,i_g,:,:))',Data_Node_Violations_tmp_Max);
+			end
 			if i_d <= 1
 				Data_Node_Violations_Mean(i_v,i_g,:,:) = Data_Node_Violations_tmp_Mean;
 			else
-				Data_Node_Violations_Mean(i_v,i_g,:,:) = 0.5 * (squeeze(Data_Node_Violations_Mean(i_v,i_g,:,:)) + Data_Node_Violations_tmp_Mean);
+				if numel(Option_Active_Scenarios) > 1
+					Data_Node_Violations_Mean(i_v,i_g,:,:) = 0.5 * (squeeze(Data_Node_Violations_Mean(i_v,i_g,:,:)) + Data_Node_Violations_tmp_Mean);
+				else
+					Data_Node_Violations_Mean(i_v,i_g,:,:) = 0.5 * (squeeze(Data_Node_Violations_Mean(i_v,i_g,:,:))' + Data_Node_Violations_tmp_Mean);
+				end
 			end
 		end
 	end
@@ -1316,7 +1325,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 						if numel(Option_Active_GridVariants) <= 1
 							% fill the area between min and max:
 							f_inBetweenRegionX = [1:length(Data_Plot_Max), length(Data_Plot_Min):-1:1];
-							f_inBetweenRegionY = [Data_Plot_Max', fliplr(Data_Plot_Min')];
+							f_inBetweenRegionY = [Data_Plot_Max, fliplr(Data_Plot_Min)];
 							f_f = fill(f_inBetweenRegionX, f_inBetweenRegionY, 'g');
 							f_f.FaceColor = Active_Scenarios{i_s,3};
 							f_f.FaceAlpha = 0.25;
