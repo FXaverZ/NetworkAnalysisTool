@@ -83,17 +83,17 @@ Settings_GridVariants = {...
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
 	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
-	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
-	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstï¿½rkung Kabel';...
+	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
+	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
 	};
 
 Settings_VoltageBands = {
-	% 1     2     3      4                 5          6
-	% ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
-	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%';...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%';...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½-2%';...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, 'ï¿½3%';...
+% 1     2     3      4                 5          6      7
+% ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend
+	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '±10%';...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '±5%';...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%…-2%';...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, '±3%';...
 	5,    90, 1000, [  0,176, 80]/256, '-'      ,  0.25, '-10%';...
 	6,     0,  110, [  0,176, 80]/256, '-'      ,  0.25, '+10%';...
 	7,    95, 1000, [255,  0,  0]/256, '-'      ,  0.25, '-5%';...
@@ -124,8 +124,8 @@ Option_y_step_Value = 0.02; % -1 ... autostep
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 % Label and title strings:
 Labels_Title_full_Comparison =  'Mittlerer Verlauf Spannung'; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
-Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
+Labels_Title_one_Variant     = ['Mittlerer Verlauf Spannung für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,2},'"'];
+Labels_Title_one_Scenario    = ['Mittlerer Verlauf Spannung für Szenario "',Settings_Scenario{Option_Active_Scenarios,2},'"'];
 Option_show_Title  = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_X_Direction = 'Tageszeit [h]';
 Labels_Y_Direction = 'Spannung [p.u.]';
@@ -233,11 +233,11 @@ clear Active_* Data* f_* i_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = =
 Option_Number_Datasets_to_Use = 15;
 %- - - - - - - - - - - - - - - - - -
-Option_Active_VoltageBand = 3; % 1: +-10% Default (no recalculations!), 2: +-5%, 3: -2...+7%, 4: +-3%
+Option_Active_VoltageBand = 5:12; % 1: +-10% Default (no recalculations!), 2: +-5%, 3: -2...+7%, 4: +-3%
 %- - - - - - - - - - - - - - - - - -
-Option_Active_Scenarios = 1;%1:1:10;
+Option_Active_Scenarios = 1:1:10;
 %- - - - - - - - - - - - - - - - - -
-Option_Active_GridVariants = 2;%1:4;     % all grid varaiants
+Option_Active_GridVariants = 1:4;     % all grid varaiants
 %- - - - - - - - - - - - - - - - - -
 Option_Bar_x_max_Value  = 100;  % (-1 ... autoscale)
 Option_Number_Bins      = 100;
@@ -247,219 +247,222 @@ Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 % = = = = = = = = = = = = = = = = =
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
+Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
-for i_d = 1 : Option_Number_Datasets_to_Use
-	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	%     Preprocessing...
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	if i_d <= 1
-		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
-		Active_GridVariants  = Settings_GridVariants(Option_Active_GridVariants,:);
-		
-		Option_Umin =  Settings_VoltageBands{Option_Active_VoltageBand,2};
-		Option_Umax =  Settings_VoltageBands{Option_Active_VoltageBand,3};
-		
-		if Option_show_Title
-			if numel(Option_Active_GridVariants) < 2
-				Labels_Title = Labels_Title_one_Variant;
-			else
-				if numel(Option_Active_Scenarios) > 1
-					Labels_Title = Labels_Title_full_Comparison;
+for i_v = 1: numel(Option_Active_VoltageBand)
+	disp(['Displaying voltage band "',Settings_VoltageBands{Option_Active_VoltageBand(i_v),7},'"...'])
+	for i_d = 1 : Option_Number_Datasets_to_Use
+		i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if i_d <= 1
+			Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+			Active_GridVariants  = Settings_GridVariants(Option_Active_GridVariants,:);
+			
+			Option_Umin =  Settings_VoltageBands{Option_Active_VoltageBand(i_v),2};
+			Option_Umax =  Settings_VoltageBands{Option_Active_VoltageBand(i_v),3};
+			
+			if Option_show_Title
+				if numel(Option_Active_GridVariants) < 2
+					Labels_Title = Labels_Title_one_Variant;
 				else
-					Labels_Title = Labels_Title_one_Scenario;
+					if numel(Option_Active_Scenarios) > 1
+						Labels_Title = Labels_Title_full_Comparison;
+					else
+						Labels_Title = Labels_Title_one_Scenario;
+					end
 				end
+			else
+				Labels_Title = [];
 			end
-		else
-			Labels_Title = []; 
+			
+			fig_oat_histogram = set_up_singleplot();
+			
+			% [gridvariant datasets scenarios]:
+			Data_Violation_Numbers      = zeros(...
+				numel(Option_Active_GridVariants),...
+				Option_Number_Datasets_to_Use * Settings_Number_Profiles,...
+				numel(Option_Active_Scenarios));
+			Data_Recalculation_Needed = [];
 		end
-		
-		fig_oat_histogram = set_up_singleplot();
-		
-		% [gridvariant datasets scenarios]:
-		Data_Violation_Numbers      = zeros(...
-			numel(Option_Active_GridVariants),...
-			Option_Number_Datasets_to_Use * Settings_Number_Profiles,...
-			numel(Option_Active_Scenarios));
-		Data_Recalculation_Needed = [];
-	end
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	%     Prepare Data...
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	if isempty(Data_Recalculation_Needed)
-		% Check, if data has to be recalculated...
-		Data_ID = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.ID;
-		Data_Timepoints = ...
-			Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
-		Data_IDs = split(Data_ID,'_');
-		Data_Umin = str2double(Data_IDs{4})/100;
-		Data_Umax = str2double(Data_IDs{5})/100;
-		if (abs(Data_Umin - Option_Umin/100) > 0.001) || (abs(Data_Umax - Option_Umax/100) > 0.001)
-			Data_Recalculation_Needed = true;
-			disp('Recalculation of OAT Data...');
-			if(~isfield(Saved_Recalculation_Data,['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]))
-				Saved_Recalculation_Data.(...
-					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]) = [];
+		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		%     Prepare Data...
+		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if isempty(Data_Recalculation_Needed)
+			% Check, if data has to be recalculated...
+			Data_ID = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.ID;
+			Data_Timepoints = ...
+				Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+			Data_IDs = split(Data_ID,'_');
+			Data_Umin = str2double(Data_IDs{4})/100;
+			Data_Umax = str2double(Data_IDs{5})/100;
+			if (abs(Data_Umin - Option_Umin/100) > 0.001) || (abs(Data_Umax - Option_Umax/100) > 0.001)
+				Data_Recalculation_Needed = true;
+				disp('Recalculation of OAT Data...');
+				if(~isfield(Saved_Recalculation_Data,['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]))
+					Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]) = [];
+				end
+			else
+				Data_Recalculation_Needed = false;
 			end
-		else
-			Data_Recalculation_Needed = false;
 		end
-	end
-	idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
-	i_recalc_counter = 0;
-	if (Data_Recalculation_Needed)
-		disp(['    Processing profile set ',num2str(i_d),' of ',num2str(Option_Number_Datasets_to_Use)]);
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-		%     Recalculation Voltage Band Violation Analysis
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-		for i_g = 1:size(Active_GridVariants,1)
-			% First look up, if data is allready present:
-			if(isfield(Saved_Recalculation_Data.(['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]),['Saved_',num2str(i_d)]))
-				% Data for this dataset is present
-				Data_save = Saved_Recalculation_Data.(['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(['Saved_',num2str(i_d)]);
-				if(isfield(Data_save,Active_GridVariants{i_g,2}))
-					% Data for this grid variant is present
-					Data_Recalculate_Scenarios = [];
-					for i_s = 1 : numel(Option_Active_Scenarios)
-						if(~isfield(Data_save.(Active_GridVariants{i_g,2}), ['Sc_',num2str(Active_Scenarios{i_s,1})]))
-							Data_Recalculate_Scenarios(end+1) = Active_Scenarios{i_s,1}; 
+		idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
+		i_recalc_counter = 0;
+		if (Data_Recalculation_Needed)
+			disp(['    Processing profile set ',num2str(i_d),' of ',num2str(Option_Number_Datasets_to_Use)]);
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+			%     Recalculation Voltage Band Violation Analysis
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+			for i_g = 1:size(Active_GridVariants,1)
+				% First look up, if data is allready present:
+				if(isfield(Saved_Recalculation_Data.(['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]),['Saved_',num2str(i_d)]))
+					% Data for this dataset is present
+					Data_save = Saved_Recalculation_Data.(['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(['Saved_',num2str(i_d)]);
+					if(isfield(Data_save,Active_GridVariants{i_g,2}))
+						% Data for this grid variant is present
+						Data_Recalculate_Scenarios = [];
+						for i_s = 1 : numel(Option_Active_Scenarios)
+							if(~isfield(Data_save.(Active_GridVariants{i_g,2}), ['Sc_',num2str(Active_Scenarios{i_s,1})]))
+								Data_Recalculate_Scenarios(end+1) = Active_Scenarios{i_s,1};
+							end
 						end
+					else
+						% Grid-Data is missing
+						Data_Recalculate_Scenarios = Option_Active_Scenarios;
 					end
 				else
-					% Grid-Data is missing
+					% Datafile-Data is missing
 					Data_Recalculate_Scenarios = Option_Active_Scenarios;
 				end
-			else
-				% Datafile-Data is missing
-				Data_Recalculate_Scenarios = Option_Active_Scenarios;
-			end
-			i_recalc_counter = i_recalc_counter + numel(Data_Recalculate_Scenarios);
-			% Recalculate needed data...
-			Data_bus_voltages_raw = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVariants{i_g,2}).bus_voltages;
-			Data_bus_voltages_raw = Data_bus_voltages_raw(Data_Recalculate_Scenarios,:,:,:,:);
-			Data_bus_info     = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVariants{i_g,2}).bus;
-			[...
-				Data_voltage_violations,...
-				Data_bus_violations,...
-				Data_bus_statistics,...
-				Data_bus_violations_at_datasets, ...
-				Data_bus_violated_at_datasets, ...
-				Data_bus_deviations, ...
-				Data_bus_voltages...
-				] = analysis_voltage (Data_bus_voltages_raw, Data_bus_info, Data_Timepoints, Settings_Number_Profiles, Option_Umin/100, Option_Umax/100);
-			
-			% Save the values for later use...
-			Data_res = [];
-			for i_s = 1 : numel(Data_Recalculate_Scenarios)
-				Data_res.voltage_violations         = Data_voltage_violations(i_s,:,:,:);
-				Data_res.bus_violations             = Data_bus_violations(:,i_s);
-				Data_res.bus_statistics             = Data_bus_statistics(:,i_s);
-				Data_res.bus_violations_at_datasets = Data_bus_violations_at_datasets(:,i_s);
-				Data_res.bus_violated_at_datasets   = Data_bus_violated_at_datasets(:,i_s);
-				Data_res.bus_deviations             = Data_bus_deviations(i_s,:,:);
-				Data_res.bus_voltages               = Data_bus_voltages(i_s,:,:,:,:);
-				Saved_Recalculation_Data.(...
-					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
-					['Saved_',num2str(i_d)]).(...
-					Active_GridVariants{i_g,2}).(...
-					['Sc_',num2str(Settings_Scenario{Data_Recalculate_Scenarios(i_s),1})]) = Data_res;
-			end
-			
-			% Read out out the needed data...
-			for i_s = 1 : numel(Option_Active_Scenarios)
-				Data_Violation_Numbers(i_g,idx_datasets,i_s) = Saved_Recalculation_Data.(...
-					['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
-					['Saved_',num2str(i_d)]).(...
-					Active_GridVariants{i_g,2}).(...
-					['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
-			end
-		end
-		disp(['        Processed ',num2str(i_recalc_counter),' Datasets.'])
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	else
-		Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-		%     Data Extraction of Voltage Band Violation Analysis
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-		for i_g = 1:size(Active_GridVariants,1)
-			Data_Violation_Numbers(i_g,idx_datasets,:) = ...
-				Data.(Active_GridVariants{i_g,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
-		end
-		% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-	end
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	%     Plotting Data...
-	%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	if i_d >= Option_Number_Datasets_to_Use
-		if (Data_Recalculation_Needed)
-			disp('    ... done!');
-		end
-		Option_Histogramm_Autoscale = true;
-		
-		Labels_Scenarios  = {};
-		Labels_Scen_Style = [];
-		
-		% Convert from Number of Timepoints voilation occured to % of
-		% profile time:
-		Data_Violation_Numbers = Data_Violation_Numbers * 100 ./ Data_Timepoints;
-		
-		if Option_Bar_x_max_Value < 0
-			Option_Bar_x_max_Value = max(Data_Violation_Numbers,[],'all');
-			Option_Bar_x_min_Value = min(Data_Violation_Numbers,[],'all');
-		else
-			Option_Histogramm_Autoscale = false;
-		end
-		Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
-		Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;
-		
-		for i_s = 1 : numel(Option_Active_Scenarios)
-			for i_g = 1 : numel(Option_Active_GridVariants)
-				Hist_Data = Data_Violation_Numbers(i_g,:,i_s)';
-				[~,Hist_binIdx] = histc(Hist_Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
-				Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+				i_recalc_counter = i_recalc_counter + numel(Data_Recalculate_Scenarios);
+				% Recalculate needed data...
+				Data_bus_voltages_raw = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVariants{i_g,2}).bus_voltages;
+				Data_bus_voltages_raw = Data_bus_voltages_raw(Data_Recalculate_Scenarios,:,:,:,:);
+				Data_bus_info     = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Results.(Active_GridVariants{i_g,2}).bus;
+				[...
+					Data_voltage_violations,...
+					Data_bus_violations,...
+					Data_bus_statistics,...
+					Data_bus_violations_at_datasets, ...
+					Data_bus_violated_at_datasets, ...
+					Data_bus_deviations, ...
+					Data_bus_voltages...
+					] = analysis_voltage (Data_bus_voltages_raw, Data_bus_info, Data_Timepoints, Settings_Number_Profiles, Option_Umin/100, Option_Umax/100);
 				
-				figure(fig_oat_histogram);
-				f_b = bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
-				set(f_b,...
-					'EdgeColor',Active_Scenarios{i_s,3},...
-					'LineStyle',Active_GridVariants{i_g,4},...
-					'LineWidth',1.0,...
-					'EdgeAlpha',1.0,...
-					'FaceColor',Active_Scenarios{i_s,3},...
-					'FaceAlpha',0.5);
-				hold on;
+				% Save the values for later use...
+				Data_res = [];
+				for i_s = 1 : numel(Data_Recalculate_Scenarios)
+					Data_res.voltage_violations         = Data_voltage_violations(i_s,:,:,:);
+					Data_res.bus_violations             = Data_bus_violations(:,i_s);
+					Data_res.bus_statistics             = Data_bus_statistics(:,i_s);
+					Data_res.bus_violations_at_datasets = Data_bus_violations_at_datasets(:,i_s);
+					Data_res.bus_violated_at_datasets   = Data_bus_violated_at_datasets(:,i_s);
+					Data_res.bus_deviations             = Data_bus_deviations(i_s,:,:);
+					Data_res.bus_voltages               = Data_bus_voltages(i_s,:,:,:,:);
+					Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Active_GridVariants{i_g,2}).(...
+						['Sc_',num2str(Settings_Scenario{Data_Recalculate_Scenarios(i_s),1})]) = Data_res;
+				end
+				
+				% Read out out the needed data...
+				for i_s = 1 : numel(Option_Active_Scenarios)
+					Data_Violation_Numbers(i_g,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Active_GridVariants{i_g,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
+				end
 			end
-			% get the legend entries for the scenarios:
-			Labels_Scenarios{end+1} = Active_Scenarios{i_s,5}; 
-			f_l = plot(nan, nan);	                         % make an invisible line for legend
-			set(f_l,...
-				'Color', Active_Scenarios{i_s,3},...       % set color of invisible line
-				'LineStyle', Active_Scenarios{i_s,4});         % set linestyle of invisible line
-			Labels_Scen_Style(end+1) = f_l; 
+			disp(['        Processed ',num2str(i_recalc_counter),' Datasets.'])
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+		else
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+			%     Data Extraction of Voltage Band Violation Analysis
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+			for i_g = 1:size(Active_GridVariants,1)
+				Data_Violation_Numbers(i_g,idx_datasets,:) = ...
+					Data.(Active_GridVariants{i_g,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
+			end
+			% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 		end
-		figure(fig_oat_histogram);
-		f_ax = gca;
-		if ~Option_Histogramm_Autoscale
-			set_tick_x_histogramms(...
-				Option_Bar_x_min_Value,...
-				Option_Bar_x_max_Value,...
-				Option_Number_Bins,...
-				Option_Bar_x_Label_Step,...
-				Option_Bar_x_Last_GT,...
-				f_ax)
+		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		%     Plotting Data...
+		%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if i_d >= Option_Number_Datasets_to_Use
+			if (Data_Recalculation_Needed)
+				disp('    ... done!');
+			end
+			Option_Histogramm_Autoscale = true;
+			
+			Labels_Scenarios  = {};
+			Labels_Scen_Style = [];
+			
+			% Convert from Number of Timepoints voilation occured to % of
+			% profile time:
+			Data_Violation_Numbers = Data_Violation_Numbers * 100 ./ Data_Timepoints;
+			
+			if Option_Bar_x_max_Value < 0
+				Option_Bar_x_max_Value = max(Data_Violation_Numbers,[],'all');
+				Option_Bar_x_min_Value = min(Data_Violation_Numbers,[],'all');
+			else
+				Option_Histogramm_Autoscale = false;
+			end
+			Hist_binEdges = linspace(Option_Bar_x_min_Value,Option_Bar_x_max_Value,Option_Number_Bins+1);
+			Hist_cj = (Hist_binEdges(1:end-1)+Hist_binEdges(2:end))./2;
+			
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				for i_g = 1 : numel(Option_Active_GridVariants)
+					Hist_Data = Data_Violation_Numbers(i_g,:,i_s)';
+					[~,Hist_binIdx] = histc(Hist_Data,[Hist_binEdges(1:end-1),Inf]); %#ok<HISTC>
+					Hist_nj = accumarray(Hist_binIdx,1,[Option_Number_Bins,1], @sum);
+					
+					figure(fig_oat_histogram);
+					f_b = bar(Hist_cj,100*Hist_nj/sum(Hist_nj),'hist');
+					set(f_b,...
+						'EdgeColor',Active_Scenarios{i_s,3},...
+						'LineStyle',Active_GridVariants{i_g,4},...
+						'LineWidth',1.0,...
+						'EdgeAlpha',1.0,...
+						'FaceColor',Active_Scenarios{i_s,3},...
+						'FaceAlpha',0.5);
+					hold on;
+				end
+				% get the legend entries for the scenarios:
+				Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+				f_l = plot(nan, nan);	                         % make an invisible line for legend
+				set(f_l,...
+					'Color', Active_Scenarios{i_s,3},...       % set color of invisible line
+					'LineStyle', Active_Scenarios{i_s,4});         % set linestyle of invisible line
+				Labels_Scen_Style(end+1) = f_l;
+			end
+			figure(fig_oat_histogram);
+			f_ax = gca;
+			if ~Option_Histogramm_Autoscale
+				set_tick_x_histogramms(...
+					Option_Bar_x_min_Value,...
+					Option_Bar_x_max_Value,...
+					Option_Number_Bins,...
+					Option_Bar_x_Label_Step,...
+					Option_Bar_x_Last_GT,...
+					f_ax)
+			end
+			if numel(Option_Active_Scenarios) > 1
+				legend(Labels_Scen_Style, Labels_Scenarios);
+			end
+			set_default_plot_properties(f_ax);
+			set_single_plot_properties(f_ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_show_Title);
+			hold off;
 		end
-		if numel(Option_Active_Scenarios) > 1
-			legend(Labels_Scen_Style, Labels_Scenarios);
-		end
-		set_default_plot_properties(f_ax);
-		set_single_plot_properties(f_ax, Labels_Title, Labels_X_Direction, Labels_Y_Direction, Option_show_Title);
-		hold off;
 	end
 end
 
@@ -1521,7 +1524,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
+Labels_Y_Direction = 'rel. Häufigkeit [%]';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]';
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]';
 % = = = = = = = = = = = = = = = = =
@@ -1814,7 +1817,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
+Labels_Y_Direction = 'rel. Häufigkeit [%]';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]'; 
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]'; 
 % = = = = = = = = = = = = = = = = =
