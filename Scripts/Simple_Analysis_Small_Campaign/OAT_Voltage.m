@@ -345,8 +345,8 @@ clear Active_* Data* f_* Hist_* i_* idx_* Labels_* Option_* tick_*
 % = = = = = = = = = = = = = = = = =
 Option_Active_VoltageBand  = 1:4; %[1,2,4];%1:4; %
 Option_Active_Scenarios    = 1:1:10;
-Option_Active_GridVariants = 1; % only one can be active here!
-Option_Used_Data           = 'Time'; % 'Time'; 'Node'
+Option_Active_GridVariants = 4; % only one can be active here!
+Option_Used_Data           = 'Node'; % 'Time'; 'Node'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 100; % (-1 ... autoscale)
 Option_Plot_x_min_Value  =   0; %
@@ -357,7 +357,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 Option_Scen_Divider = 2;       % Divider every X scenarios
 Option_Show_Legend  = 1;
 Option_Show_X_Label = 1;
-Option_Show_Max_Marker = 1; % 1 = a marker indicates the maximum value occuring in the datasets
+Option_Show_Max_Marker = 0; % 1 = a marker indicates the maximum value occuring in the datasets
 % = = = = = = = = = = = = = = = = =
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung';
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung';
@@ -536,6 +536,220 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 		f_under_ax.FontName   = 'Palatino Linotype';
 		f_under_ax.FontSize   = 16; %Fontsize_normal  = 16; in "set_default_plot_properties"
 		
+		if Option_Show_Legend
+			legend(f_ax, flip(Active_Voltagebands(:,7)));
+		end
+	end
+end
+
+clear Active_* Data* f_* i_* idx_* Option_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Plot violation difference summary over all scenarios
+% = = = = = = = = = = = = = = = = =
+Option_Active_VoltageBand  = 1:4; %[1,2,4];%1:4; %
+Option_Active_Scenarios    = 1:1:10;
+Option_Active_GridVariants = 1; % only one can be active here!
+Option_Compare_GridVariant = 4; % only one can be active here!
+Option_Used_Data           = 'Time'; % 'Time'; 'Node'
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  =  3; % (-1 ... autoscale)
+Option_Plot_x_min_Value  =  0; %
+Option_Plot_x_step_Value =0.5; %
+Option_Plot_x_Label_Step =  2; % Spacing between label entries
+Option_Sign_x_Labels     = -1; % sign of the label numbers
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
+Settings_Max_Fig_Area = [0.0759    0.1316    0.0585    0.0102];
+Option_Scen_Divider = 2;       % Divider every X scenarios
+Option_Show_Legend  = 1;
+Option_Show_X_Label = 0;
+Option_Show_Y_Ticks = 1;
+% = = = = = = = = = = = = = = = = =
+Labels_X_Time = 'Differenz Anteil Profilzeit mit Spannungsbandverletzung';
+Labels_X_Node = 'Differenz Anteil Knoten mit Spannungsbandverletzung';
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+for i_v = 1:numel(Option_Active_VoltageBand)
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_v <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_Active_VoltageBand,:);
+		% get the Timepointsnumber from the first saved Dataset
+		Data_Timepoints = ...
+			Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		% [voltagebands datasets scenarios]:
+		Data_Violation_Numbers      = zeros(...
+			numel(Option_Active_VoltageBand),...
+			Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles,...
+			numel(Option_Active_Scenarios));
+		Data_Violation_Bus_Numbers         = Data_Violation_Numbers;
+		Data_Violation_Compare_Numbers     = Data_Violation_Numbers;
+		Data_Violation_Compare_Bus_Numbers = Data_Violation_Numbers;
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	Option_Umin =  Settings_VoltageBands{i_v,2};
+	Option_Umax =  Settings_VoltageBands{i_v,3};
+	for i_d = 1 : Saved_Data_OAT.Number_Datasets
+		idx_datasets = (i_d-1)*Settings_Number_Profiles+1:i_d*Settings_Number_Profiles;
+		% Read out out the needed data...
+		if Settings_VoltageBands{i_v,1} == 1
+			% when using OAT data directly, use the sorted idxs to have
+			% always the correct order of used data based on the input data
+			% creation time!
+			i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+			Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed;
+			% idx == 1 means, default values of OAT analysis can be used
+			Data_Violation_Numbers(i_v,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
+			Data_Violation_Bus_Numbers(i_v,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_violated_at_datasets(:,Option_Active_Scenarios);
+			Data_Violation_Compare_Numbers(i_v,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{Option_Compare_GridVariant,2}).bus_violations_at_datasets(:,Option_Active_Scenarios);
+			Data_Violation_Bus_Compare_Numbers(i_v,idx_datasets,:) = ...
+				Data.(Settings_GridVariants{Option_Compare_GridVariant,2}).bus_violated_at_datasets(:,Option_Active_Scenarios);
+		else
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				try
+					Data_Violation_Numbers(i_v,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{Option_Active_GridVariants,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
+					Data_Violation_Bus_Numbers(i_v,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{Option_Active_GridVariants,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violated_at_datasets;
+					Data_Violation_Compare_Numbers(i_v,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{Option_Compare_GridVariant,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violations_at_datasets;
+					Data_Violation_Bus_Compare_Numbers(i_v,idx_datasets,i_s) = Saved_Recalculation_Data.(...
+						['U_',num2str(Option_Umin),'_',num2str(Option_Umax)]).(...
+						['Saved_',num2str(i_d)]).(...
+						Settings_GridVariants{Option_Compare_GridVariant,2}).(...
+						['Sc_',num2str(Active_Scenarios{i_s,1})]).bus_violated_at_datasets;
+				catch
+					% if this error occurs, the previous cell has to to be run
+					% or the correct data has to be loaded into the
+					% "Saved_Recalculation_Data" structure!
+					error('Error loading data, get sure, the structure "Saved_Recalculation_Data" has all needed data!')
+				end
+			end
+		end
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_v >= numel(Option_Active_VoltageBand)
+		% rearrange data for plot
+		
+		switch Option_Used_Data
+			case 'Time'
+				Data = squeeze(sum(Data_Violation_Numbers,2));
+				Data = Data * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Timepoints);
+				Data_Compare = squeeze(sum(Data_Violation_Compare_Numbers,2));
+				Data_Compare = Data_Compare * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Timepoints);
+			case 'Node'
+				Data = squeeze(sum(Data_Violation_Bus_Numbers,2));
+				Data_Number_total_Busses = numel(Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.(Settings_GridVariants{Option_Active_GridVariants,2}).bus_name);
+				Data = Data * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Number_total_Busses);
+				Data_Compare = squeeze(sum(Data_Violation_Bus_Compare_Numbers,2));
+				Data_Compare = Data_Compare * 100 / (Saved_Data_OAT.Number_Datasets * Settings_Number_Profiles * Data_Number_total_Busses);
+		end
+		Data_Plot = Data - Data_Compare;
+		% Reverse order
+		Data_Plot     = flip(Data_Plot',2);
+		
+		fig_oat_summary_violation = set_up_singleplot(Option_Plot_Size);
+		% crate a axis under the real one for Labeling between the Ticks
+		f_under_ax = cla();
+		% creat the visible axis
+		f_ax = copyobj(f_under_ax, ancestor(f_under_ax,'figure'));
+		
+		% plot the data
+		f_b = barh(f_ax, cell2mat(Active_Scenarios(:,1)),Data_Plot,'BarLayout','grouped');
+		% plot invisible data to underlying axis:
+		f_under_b = barh(f_under_ax, cell2mat(Active_Scenarios(:,1)),nan);
+		% format the bars:
+		idx_fliped = flip(1 : numel(Option_Active_VoltageBand));
+		for i_vb = 1 : numel(Option_Active_VoltageBand)
+			f_bb = f_b(i_vb);
+			f_bb.LineStyle = 'none';
+			f_bb.FaceColor = Active_Voltagebands{idx_fliped(i_vb),4};
+			f_bb.FaceAlpha = Active_Voltagebands{idx_fliped(i_vb),6};
+			f_bb.BarWidth = 1;
+		end
+		
+		figure(fig_oat_summary_violation);
+		% X Axis
+		if ~Option_Show_X_Label
+			Labels_X_Direction = [];
+		else
+			switch Option_Used_Data
+				case 'Time'
+					Labels_X_Direction = Labels_X_Time;
+				case 'Node'
+					Labels_X_Direction = Labels_X_Node;
+			end
+		end
+		if Option_Plot_x_max_Value > 0
+			f_ax.XAxis.Limits = [Option_Plot_x_min_Value, Option_Plot_x_max_Value];
+			[tick_x_Positions, tick_x_Labels] = get_tick(...
+				Option_Plot_x_min_Value,...
+				Option_Plot_x_step_Value,...
+				Option_Plot_x_max_Value,...
+				Option_Plot_x_Label_Step,...
+				'%',...
+				[],...
+				Option_Sign_x_Labels);
+			f_ax.XAxis.TickValues   = tick_x_Positions;
+			f_ax.XAxis.TickLabels   = tick_x_Labels;
+		end
+		if ~Option_Show_Y_Ticks
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		% Legend
+		if Option_Show_Legend
+			legend(f_ax, Active_Voltagebands(:,7));
+		end
+		
+		set_default_plot_properties(f_ax);
+		f_max_area = set_single_plot_properties(f_ax, ...
+			[],...
+			Labels_X_Direction,...
+			[],...
+			0,...
+			f_max_area);
+			Settings_Max_Fig_Area = f_max_area;
+		% Set the special properties for this plot
+		f_ax.YDir = 'reverse';
+		f_under_ax.YDir = 'reverse';
+		% Set y tick to 1/2 way between bar groups
+		f_ax.YTick = (floor(min(ylim(f_ax))) : Option_Scen_Divider : ceil(max(ylim(f_ax)))) + 0.5;
+		f_ax.YTickLabel = [];
+		f_under_ax.XTickLabel = [];
+		f_under_ax.YAxis.Limits = f_ax.YAxis.Limits;
+		f_under_ax.Position = f_ax.Position;
+		% Generate the labels:
+		if Option_Show_Y_Ticks
+			YTickLabel = cell(1,numel(Option_Active_Scenarios));
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				YTickLabel{i_s} = num2str(Active_Scenarios{i_s,1},'%02.0f');
+			end
+			f_under_ax.YTickLabel = YTickLabel;
+			f_under_ax.FontName   = 'Palatino Linotype';
+			f_under_ax.FontSize   = 16; %Fontsize_normal  = 16; in "set_default_plot_properties"
+		else
+			f_under_ax.YTickLabel = [];
+		end
 		if Option_Show_Legend
 			legend(f_ax, flip(Active_Voltagebands(:,7)));
 		end

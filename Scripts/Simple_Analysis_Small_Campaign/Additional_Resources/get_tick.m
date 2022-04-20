@@ -2,12 +2,16 @@ function [tick_Positions, tick_Labels] = get_tick(minVal,step,maxVal,label_step,
 
 unit = '';
 formatstring = [];
+signLabels = 1;
 
 if nargin >= 5
 	unit = varargin{1};
 end
 if nargin >= 6
 	formatstring = varargin{2};
+end
+if nargin >= 7
+	signLabels = varargin{3};
 end
 
 tick_Positions = minVal:step:maxVal;
@@ -17,9 +21,9 @@ if label_step > 1
 	for i = 1 : numel(tick_Positions)
 		if mod(i,label_step) == 1
 			if isempty(formatstring)
-				tick_Labels{i} = [num2str(tick_Positions(i)),unit];
+				tick_Labels{i} = [num2str(tick_Positions(i)*signLabels),unit];
 			else
-				tick_Labels{i} = [num2str(tick_Positions(i),formatstring),unit];
+				tick_Labels{i} = [num2str(tick_Positions(i)*signLabels,formatstring),unit];
 			end
 		else
 			tick_Labels{i} = '';
@@ -28,9 +32,9 @@ if label_step > 1
 else
 	for i = 1 : numel(tick_Positions)
 		if isempty(formatstring)
-			tick_Labels{i} = [num2str(tick_Positions(i)),unit];
+			tick_Labels{i} = [num2str(tick_Positions(i)*signLabels),unit];
 		else
-			tick_Labels{i} = [num2str(tick_Positions(i),formatstring),unit];
+			tick_Labels{i} = [num2str(tick_Positions(i)*signLabels,formatstring),unit];
 		end
 	end
 end
