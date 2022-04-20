@@ -83,17 +83,17 @@ Settings_GridVariants = {...
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
 	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
-	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
-	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
+	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
+	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstï¿½rkung Kabel';...
 	};
 
 Settings_VoltageBands = {
 % 1     2     3      4                 5          6      7                , 8 
 % ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend, Color after alpha 
-	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '±10%'           , [191,235,211]/256;...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '±5%'            , [255,191,192]/256;...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%…-2%'       , [255,239,191]/256;...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, '±3%'            , [210,210,210]/256;...
+	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%'           , [191,235,211]/256;...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%'            , [255,191,192]/256;...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½-2%'       , [255,239,191]/256;...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, 'ï¿½3%'            , [210,210,210]/256;...
 	5,    90, 1000, [  0,176, 80]/256, '-'      ,  0.25, '-10%'           , [191,235,211]/256;...
 	6,     0,  110, [  0,176, 80]/256, '-'      ,  0.25, '+10%'           , [191,235,211]/256;...
 	7,    95, 1000, [255,  0,  0]/256, '-'      ,  0.25, '-5%'            , [255,191,192]/256;...
@@ -120,11 +120,11 @@ Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 % = = = = = = = = = = = = = = = = =
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Häufigkeit [%]';
+Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_v = 1: numel(Option_Active_VoltageBand)
@@ -776,6 +776,7 @@ Option_Plot_y_Label_Step =   1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - -
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend_Plot   =   4; % determines in which plot should the legend is shown; -1: Show no legend
+Option_Legend_Pos = 'northeast'; 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_g = 1:size(Settings_GridVariants,1)
@@ -881,7 +882,7 @@ for i_g = 1:size(Settings_GridVariants,1)
 					Option_Plot_x_min_Value,...
 					Option_Plot_x_step_Value,...
 					Option_Plot_x_max_Value,...
-					Option_Plot_x_Label_Step);
+					Option_Plot_x_Label_Step,[],[],10);
 				f_ax.XAxis.TickValues   = tick_x_Positions;
 				f_ax.XAxis.TickLabels   = tick_x_Labels;
 			end
@@ -920,7 +921,7 @@ for i_g = 1:size(Settings_GridVariants,1)
 			end
 		end
 		
-		legend(f_ax, Labels_Scenarios, 'Location','northeast');
+		legend(f_ax, Labels_Scenarios, 'Location',Option_Legend_Pos);
 		set_default_plot_properties(f_ax);
 		f_ax.XMinorGrid = 'on';
 		f_ax.XAxis.MinorTick = 'on';
@@ -1192,7 +1193,7 @@ Option_Plot_y_Label_Step =   2; % Spacing between label entries
 Option_Plot_y_Num_Format =  [];
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
-Labels_Y_Direction = 'Anteil Knoten mit Spannungsbandverletzung [-]';
+Labels_Y_Direction = 'Anteil Knoten mit Spannungsbandverletzung';
 % = = = = = = = = = = = = = = = = =
 
 for i_d = 1:Saved_Data_OAT.Number_Datasets
@@ -1359,7 +1360,7 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		end
 		% Configuration
-		set_default_plot_properties(f_ax);
+		set_default_plot_properties(f_ax,'axes_on_top');
 		f_max_area = set_single_plot_properties(f_ax, ...
 			Labels_Title,...
 			[],...
@@ -1668,7 +1669,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]';
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]';
 % = = = = = = = = = = = = = = = = =
@@ -1965,7 +1966,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Häufigkeit';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]'; 
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]'; 
 % = = = = = = = = = = = = = = = = =
@@ -2286,9 +2287,9 @@ Option_Plot_y_step_Value = 10; % '%'
 Option_Plot_y_Label_Step =  2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_X_Direction     = 'Anzahl der Profile';
-Labels_X_Direction_rel = 'Anteil der Profile [-]';
-Labels_Y_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [-]';
-Labels_Y_Node = 'Anteil Knoten mit Spannungsbandverletzung [-]';
+Labels_X_Direction_rel = 'Anteil der Profile';
+Labels_Y_Time = 'Anteil Profilzeit mit Spannungsbandverletzung';
+Labels_Y_Node = 'Anteil Knoten mit Spannungsbandverletzung';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_OAT.Number_Datasets
@@ -2928,14 +2929,6 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 							f_l.LineStyle = ':';
 						end
 					end
-					if ~any(strcmpi(Labels_Scenarios, Active_Scenarios{i_s,5}))
-						Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
-						f_l = plot(nan, nan);	                % make an invisible line for legend
-						f_l.Color = Active_Scenarios{i_s,3}; % set color of invisible line
-						f_l.LineStyle = '-';                    % set linestyle of invisible line
-						f_l.LineWidth = Option_Default_Line_Width;
-						Labels_Scen_Style(end+1) = f_l;
-					end
 				end
 			end
 			
@@ -2975,10 +2968,20 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 				f_ax.YAxis.TickLabels   = tick_y_Labels;
 			end
 			% Legend
-			if Option_Show_Legend && i_dd == 1
-				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+			if Option_Show_Legend && i_dd == 13
+				Labels_Scen_Style = [];
+				Labels_Scenarios  = {};
+				for i_s = 1 : numel(Option_Active_Scenarios)
+					Labels_Scenarios{end+1} = Active_Scenarios{i_s,5};
+					f_l = plot(nan, nan);	                % make an invisible line for legend
+					f_l.Color = Active_Scenarios{i_s,3}; % set color of invisible line
+					f_l.LineStyle = '-';                    % set linestyle of invisible line
+					f_l.LineWidth = Option_Default_Line_Width;
+					Labels_Scen_Style(end+1) = f_l;
+				end
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','southwest');
 			end
-			if Option_Show_Legend && i_dd == 2
+			if Option_Show_Legend && i_dd == 14
 				Labels_Scen_Style = [];
 				Labels_Scenarios  = {};
 				for i_s = 1 : numel(Option_Active_Scenarios)
@@ -2991,9 +2994,9 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 					Labels_Scen_Style(end+1) = f_b;
 					Labels_Scenarios{end+1}  = ['Abw. ',Active_Scenarios{i_s,5}];
 				end
-				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','southwest');
 			end
-			if Option_Show_Legend && Option_Distinct_Grids && i_dd == 3
+			if Option_Show_Legend && Option_Distinct_Grids && i_dd == 15
 				Labels_Scen_Style = [];
 				Labels_Scenarios  = {};
 				for i_g = 1 : numel(Option_Active_GridVariants)
@@ -3008,7 +3011,7 @@ for i_d = 1 : Saved_Data_OAT.Number_Datasets
 					Labels_Scen_Style(end+1) = f_l;
 					Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
 				end
-				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','southwest');
 			end
 			% Configuration
 			set_default_plot_properties(f_ax);
