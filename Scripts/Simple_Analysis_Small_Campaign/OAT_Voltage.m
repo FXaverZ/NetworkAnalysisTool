@@ -83,17 +83,17 @@ Settings_GridVariants = {...
 	% ID ,  Sub-Structure Name                              , Color           , LineStyle, String for legend
 	1, 'g01_Base_NS_50_Nodes'                           ,[ 72, 72, 72]/256, '--'     , 'Basisnetz';...
 	2, 'g02_Repalce_OH_Lines_With_Cables'               ,[153,102, 51]/256, '-.'     , 'Ersatz Oberleitung';...
-	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstï¿½rkung Oberleitung';...
-	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstï¿½rkung Kabel';...
+	3, 'g03_Add_Cable_to_First_OH_Line'                 ,[128,100,162]/256, ':'      , 'Verstärkung Oberleitung';...
+	4, 'g04_Add_Cable_to_Weak_Cables'                   ,[  0,153,153]/256, '-'      , 'Verstärkung Kabel';...
 	};
 
 Settings_VoltageBands = {
 % 1     2     3      4                 5          6      7                , 8 
 % ID ,  Umin, Umax,  Color           , LineStyle, Alpha, String for legend, Color after alpha 
-	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, 'ï¿½10%'           , [191,235,211]/256;...
-	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, 'ï¿½5%'            , [255,191,192]/256;...
-	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%ï¿½-2%'       , [255,239,191]/256;...
-	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, 'ï¿½3%'            , [210,210,210]/256;...
+	1,    90,  110, [  0,176, 80]/256, '-'      ,  0.25, '±10%'           , [191,235,211]/256;...
+	2,    95,  105, [255,  0,  0]/256, '-'      ,  0.25, '±5%'            , [255,191,192]/256;...
+	3,    98,  107, [255,192,  0]/256, '-'      ,  0.25, '+7%…-2%'       , [255,239,191]/256;...
+	4,    97,  103, [  0,  0,  0]/256, '-'      ,  0.35, '±3%'            , [210,210,210]/256;...
 	5,    90, 1000, [  0,176, 80]/256, '-'      ,  0.25, '-10%'           , [191,235,211]/256;...
 	6,     0,  110, [  0,176, 80]/256, '-'      ,  0.25, '+10%'           , [191,235,211]/256;...
 	7,    95, 1000, [255,  0,  0]/256, '-'      ,  0.25, '-5%'            , [255,191,192]/256;...
@@ -120,11 +120,11 @@ Option_Bar_x_Last_GT    =   0; % 1 = show last label with leading ">" sign
 % = = = = = = = = = = = = = = = = =
 Option_show_Title            = 1; % 1 ... show Title, 0 ... no Title for export to Word...
 Labels_Title_full_Comparison =  'Histogramm '; % Title, if > 1 scenario and > 1 grid variant...
-Labels_Title_one_Variant     = ['Histogramm fï¿½r Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
-Labels_Title_one_Scenario    = ['Histogramm fï¿½r Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
+Labels_Title_one_Variant     = ['Histogramm für Netzvariante "',Settings_GridVariants{Option_Active_GridVariants,5},'"'];
+Labels_Title_one_Scenario    = ['Histogramm für Szenario "',Settings_Scenario{Option_Active_Scenarios,5},'"'];
 Labels_Title                 = 'Spannungsbandverletzungen';
 Labels_X_Direction           = 'Spannungsbandverletzung in % der Profilzeit';
-Labels_Y_Direction           = 'Relative Hï¿½ufigkeit [%]';
+Labels_Y_Direction           = 'Relative Häufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_v = 1: numel(Option_Active_VoltageBand)
@@ -935,9 +935,9 @@ end
 
 clear Active_* Data* f_* i_* Labels_* idx_* Option_* tick_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-%% Show min-max of voltage
+%% Show min-max of voltage scenario comparison
 % = = = = = = = = = = = = = = = = =
-Option_Active_Scenarios    = [3,4];%1:10;%10;
+Option_Active_Scenarios    = [1,4];%1:10;%10;
 Option_Active_VoltageBand  = [1,2,4]; 
 Option_Active_GridVariants = 1; % only one can be active here!
 %- - - - - - - - - - - - - - - - - -
@@ -1144,6 +1144,241 @@ for i_d = 1:Saved_Data_OAT.Number_Datasets
 					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+		end
+		% Configuration
+		set_default_plot_properties(f_ax);
+		f_max_area = set_single_plot_properties(f_ax, ...
+			Labels_Title,...
+			[],...
+			Labels_Y_Direction,...
+			Option_Show_Title,...
+			f_max_area);
+		Settings_Max_Fig_Area = f_max_area;
+		% adjust legend properties a little bit for this kind of graph
+		if Option_Show_Legend
+			f_lg = get(f_ax, 'Legend');
+			f_lg.ItemTokenSize = [17, 6];
+		end
+		hold off
+	end
+end
+
+clear Active_* Data* f_* i_* Labels_* Option_* tick_*
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%% Show min-max of voltage grid variant comparison
+% = = = = = = = = = = = = = = = = =
+Option_Active_Scenarios    = [3,4]; % only one scenario (differnent seasons) can be active here!
+Option_Active_VoltageBand  = [1,2,4];  
+Option_Active_GridVariants = [1,3,4]; 
+%- - - - - - - - - - - - - - - - - -
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyles
+Option_Show_Legend        = 1;
+Option_Show_Legend_Details= 1;
+Option_Show_Title         = 0;
+Option_Show_Y_Label       = 0;
+Option_Show_Mean_Values   = 1;
+Settings_Max_Fig_Area     = [0.1184    0.1236    0.0364    0.0294];
+Option_Default_Line_Width = 1.5;
+Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
+%- - - - - - - - - - - - - - - - - -
+Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
+Option_Plot_x_min_Value  =   0; % x10 minutes
+Option_Plot_x_step_Value =  60; % minutes
+Option_Plot_x_Label_Step =   2; % Spacing between label entries
+%- - - - - - - - - - - - - - - - - - 
+Option_Plot_y_max_Value  =  1.15; % '%' (-1 ... autoscale)
+Option_Plot_y_min_Value  = 0.70; % '%'
+Option_Plot_y_step_Value = 0.05; % '%'
+Option_Plot_y_Label_Step =    2; % Spacing between label entries
+Option_Plot_y_Num_Format = '%1.1f';
+% = = = = = = = = = = = = = = = = =
+Labels_Title       = '';
+Labels_Y_Direction = 'Spannung [p.u.]';
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+for i_d = 1:Saved_Data_OAT.Number_Datasets
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Preprocessing...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if i_d <= 1
+		Active_Scenarios = Settings_Scenario(Option_Active_Scenarios,:);
+		Active_Voltagebands = Settings_VoltageBands(Option_Active_VoltageBand,:);
+		Active_GridVariants = Settings_GridVariants(Option_Active_GridVariants,:);
+		Data_Timepoints = ...
+				Saved_Data_OAT.(['Saved_',num2str(1)]).NVIEW_Processed.Control.Simulation_Options.Timepoints_per_dataset;
+		Data_Voltage_max  = zeros(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios));
+		Data_Voltage_min  = ones(numel(Option_Active_GridVariants),Data_Timepoints,numel(Option_Active_Scenarios))*100; % a big value, which will be overwritten by the min funstion later on
+		Data_Voltage_mean = Data_Voltage_max;
+		
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Prepare Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+	i_d_sorted = Saved_Data_OAT.Sorting_Idxs(i_d);
+	for i_g = 1 : numel(Option_Active_GridVariants)
+		Data = Saved_Data_OAT.(['Saved_',num2str(i_d_sorted)]).NVIEW_Processed.(Active_GridVariants{i_g,2});
+		%[scenario, profileset, timepoint, node, phase]
+		Data_Voltages = Data.bus_voltages(Option_Active_Scenarios,:,:,:,:);
+		% over all phases
+		Data_Voltages_tmp_max = max(Data_Voltages,[],5);
+		Data_Voltages_tmp_min = min(Data_Voltages,[],5);
+		Data_Voltages_tmp_mean= mean(Data_Voltages,5);
+		% over all nodes
+		Data_Voltages_tmp_max = max(Data_Voltages_tmp_max,[],4);
+		Data_Voltages_tmp_min = min(Data_Voltages_tmp_min,[],4);
+		Data_Voltages_tmp_mean= mean(Data_Voltages_tmp_mean,4);
+		% over all profilesets
+		Data_Voltages_tmp_max = squeeze(max(Data_Voltages_tmp_max,[],2))';
+		Data_Voltages_tmp_min = squeeze(min(Data_Voltages_tmp_min,[],2))';
+		Data_Voltages_tmp_mean= squeeze(mean(Data_Voltages_tmp_mean,2))';
+		% save the values:
+		Data_Voltage_max(i_g,:,:) = max(squeeze(Data_Voltage_max(i_g,:,:)), Data_Voltages_tmp_max);
+		Data_Voltage_min(i_g,:,:) = min(squeeze(Data_Voltage_min(i_g,:,:)), Data_Voltages_tmp_min);
+		if i_d <= 1
+			Data_Voltage_mean(i_g,:,:) = Data_Voltages_tmp_mean;
+		else
+			Data_Voltage_mean(i_g,:,:) = 0.5 * (squeeze(Data_Voltage_mean(i_g,:,:)) + Data_Voltages_tmp_mean);
+		end
+	end
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+%     Plotting Data...
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
+	if i_d >= Saved_Data_OAT.Number_Datasets
+		fig_oat_voltage_minmax = set_up_singleplot(Option_Plot_Size);
+		Labels_Scenarios = {};
+		Labels_Scen_Style = [];
+		
+		% plot the voltage timelines
+		for i_g = 1 : numel(Option_Active_GridVariants)
+			for i_s = 1 : size(Active_Scenarios,1)
+				% Plot the mean value:
+				if Option_Show_Mean_Values
+					f_l = plot(Data_Voltage_mean(i_g,:,i_s)); %#ok<*UNRCH>
+					f_l.Color = Active_GridVariants{i_g,3};
+					f_l.LineStyle = '-';
+					f_l.LineWidth = Option_Default_Line_Width;
+					if Option_Distinct_Seasons
+						switch Active_Scenarios{i_s, 6}
+							case 'Sommer'
+								f_l.LineStyle = ':';
+							case 'Winter'
+								f_l.LineStyle = '-';
+						end
+					end
+				end
+				
+				% Plot the max value, first a black line as background:
+				f_pu = patchline(1:Data_Timepoints,Data_Voltage_max(i_g,:,i_s));
+				f_pu.LineWidth = Option_Default_Line_Width;
+				f_pu.EdgeColor = 'k';
+				% now a patchline with alpha in the foreground (color, but
+				% darker):
+				f_p = patchline(1:Data_Timepoints,Data_Voltage_max(i_g,:,i_s));
+				f_p.EdgeColor = Active_GridVariants{i_g,3};
+				f_p.EdgeAlpha = 0.60;
+				f_p.LineStyle = '-';
+				f_p.LineWidth = Option_Default_Line_Width;
+				if Option_Distinct_Seasons
+					switch Active_Scenarios{i_s, 6}
+						case 'Sommer'
+							f_p.LineStyle = ':';
+							f_pu.LineStyle = ':';
+						case 'Winter'
+							f_p.LineStyle = '-';
+							f_pu.LineStyle = '-';
+					end
+				end
+				drawnow;
+				hold on;
+				
+				% Plot the min value, first a white line as background:
+				f_pu = patchline(1:Data_Timepoints,Data_Voltage_min(i_g,:,i_s));
+				f_pu.LineWidth = Option_Default_Line_Width;
+				f_pu.EdgeColor = 'w';
+				% now a patchline with alpha in the foreground (color, now
+				% brighter):
+				f_p = patchline(1:Data_Timepoints,Data_Voltage_min(i_g,:,i_s));
+				f_p.EdgeColor = Active_GridVariants{i_g,3};
+				f_p.EdgeAlpha = 0.8;
+				f_p.LineStyle = '-';
+				f_p.LineWidth = Option_Default_Line_Width;
+				if Option_Distinct_Seasons
+					switch Active_Scenarios{i_s, 6}
+						case 'Sommer'
+							f_p.LineStyle = ':';
+							f_pu.LineStyle = ':';
+						case 'Winter'
+							f_p.LineStyle = '-';
+							f_pu.LineStyle = '-';
+					end
+				end
+				drawnow;
+				
+				% get the data for the legend:
+				if ~any(strcmpi(Labels_Scenarios, Active_GridVariants{i_g,5}))
+					Labels_Scenarios{end+1} = Active_GridVariants{i_g,5};
+					f_l = plot(nan, nan);	                 % make an invisible line for legend
+					f_l.Color = Active_GridVariants{i_g,3};     % set color of invisible line
+					f_l.LineStyle = '-'; % set linestyle of invisible line
+					f_l.LineWidth = Option_Default_Line_Width;
+					Labels_Scen_Style(end+1) = f_l;
+				end
+			end
+		end
+		
+		% plot the voltage bands:
+		for i_v = 1:numel(Option_Active_VoltageBand)
+			Data_Umin =  ones(Data_Timepoints,1)*Active_Voltagebands{i_v,2}/100;
+			Data_Umax =  ones(Data_Timepoints,1)*Active_Voltagebands{i_v,3}/100;
+			f_pu = patchline(1:Data_Timepoints,Data_Umin);
+			f_po = patchline(1:Data_Timepoints,Data_Umax);
+			f_pu.EdgeColor = Active_Voltagebands{i_v,4};
+			f_po.EdgeColor = Active_Voltagebands{i_v,4};
+			f_pu.EdgeAlpha = Active_Voltagebands{i_v,6};
+			f_po.EdgeAlpha = Active_Voltagebands{i_v,6};
+			f_pu.LineWidth = Option_Default_Line_Width;
+			f_po.LineWidth = Option_Default_Line_Width;
+		end
+		
+		% format the plot:
+		f_ax = gca;
+		
+		if ~Option_Show_Y_Label
+			Labels_Y_Direction = [];
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
+		
+		% X Axis
+		if Option_Plot_x_max_Value > 0
+			set_tick_x_dayprofile(f_ax,...
+				Option_Plot_x_min_Value,...
+				Option_Plot_x_step_Value,...
+				Option_Plot_x_max_Value,...
+				Option_Plot_x_Label_Step);
+		end
+		% Y Axis
+		if Option_Plot_y_max_Value > 0
+			f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+			[tick_y_Positions, tick_y_Labels] = get_tick(...
+				Option_Plot_y_min_Value,...
+				Option_Plot_y_step_Value,...
+				Option_Plot_y_max_Value,...
+				Option_Plot_y_Label_Step,...
+				'',... % no unit
+				Option_Plot_y_Num_Format);
+			f_ax.YAxis.TickValues   = tick_y_Positions;
+			f_ax.YAxis.TickLabels   = tick_y_Labels;
+		end
+		% Legend
+		if Option_Show_Legend
+			if Option_Distinct_Seasons && Option_Show_Legend_Details
+				[Labels_Scenarios,Labels_Scen_Style] =...
+					add_season_entry_to_legend(fig_oat_voltage_minmax,...
+					Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
+			end
+			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','southwest');
 		end
 		% Configuration
 		set_default_plot_properties(f_ax);
@@ -1669,7 +1904,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit';
+Labels_Y_Direction = 'rel. Häufigkeit';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]';
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]';
 % = = = = = = = = = = = = = = = = =
@@ -1966,7 +2201,7 @@ Option_Bar_y_min_Value  =  0; % '%'
 Option_Bar_y_step_Value =  4; % '%'
 Option_Bar_y_Label_Step =  1; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
-Labels_Y_Direction = 'rel. Hï¿½ufigkeit';
+Labels_Y_Direction = 'rel. Häufigkeit';
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung [%]'; 
 Labels_X_Node = 'Anteil Knoten mit Spannungsbandverletzung [%]'; 
 % = = = = = = = = = = = = = = = = =
