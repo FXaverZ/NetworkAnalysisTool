@@ -354,9 +354,11 @@ Option_Plot_x_step_Value =  10; %
 Option_Plot_x_Label_Step =   2; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
+Settings_Max_Fig_Area = [0.0519    0.1378    0.0415    0.0000];
 Option_Scen_Divider = 2;       % Divider every X scenarios
 Option_Show_Legend  = 1;
 Option_Show_X_Label = 1;
+Option_Show_Y_Ticks = 1;
 Option_Show_Max_Marker = 0; % 1 = a marker indicates the maximum value occuring in the datasets
 % = = = = = = = = = = = = = = = = =
 Labels_X_Time = 'Anteil Profilzeit mit Spannungsbandverletzung';
@@ -506,18 +508,25 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 			f_ax.XAxis.TickValues   = tick_x_Positions;
 			f_ax.XAxis.TickLabels   = tick_x_Labels;
 		end
+		% Y Axis
+		if ~Option_Show_Y_Ticks
+			f_max_area         = Settings_Max_Fig_Area;
+		else
+			f_max_area = [];
+		end
 		% Legend
 		if Option_Show_Legend
 			legend(f_ax, Active_Voltagebands(:,7));
 		end
 		
 		set_default_plot_properties(f_ax);
-		set_single_plot_properties(f_ax, ...
+		f_max_area = set_single_plot_properties(f_ax, ...
 			[],...
 			Labels_X_Direction,...
 			[],...
 			0,...
-			[]);
+			f_max_area);
+		Settings_Max_Fig_Area = f_max_area;
 		% Set the special properties for this plot
 		f_ax.YDir = 'reverse';
 		f_under_ax.YDir = 'reverse';
@@ -527,14 +536,17 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 		f_under_ax.XTickLabel = [];
 		f_under_ax.YAxis.Limits = f_ax.YAxis.Limits;
 		f_under_ax.Position = f_ax.Position;
-		% Generate the labels:
-		YTickLabel = cell(1,numel(Option_Active_Scenarios));
-		for i_s = 1 : numel(Option_Active_Scenarios)
-			YTickLabel{i_s} = num2str(Active_Scenarios{i_s,1},'%02.0f');
+		if Option_Show_Y_Ticks
+			YTickLabel = cell(1,numel(Option_Active_Scenarios));
+			for i_s = 1 : numel(Option_Active_Scenarios)
+				YTickLabel{i_s} = num2str(Active_Scenarios{i_s,1},'%02.0f');
+			end
+			f_under_ax.YTickLabel = YTickLabel;
+			f_under_ax.FontName   = 'Palatino Linotype';
+			f_under_ax.FontSize   = 16; %Fontsize_normal  = 16; in "set_default_plot_properties"
+		else
+			f_under_ax.YTickLabel = [];
 		end
-		f_under_ax.YTickLabel = YTickLabel;
-		f_under_ax.FontName   = 'Palatino Linotype';
-		f_under_ax.FontSize   = 16; %Fontsize_normal  = 16; in "set_default_plot_properties"
 		
 		if Option_Show_Legend
 			legend(f_ax, flip(Active_Voltagebands(:,7)));
@@ -728,7 +740,7 @@ for i_v = 1:numel(Option_Active_VoltageBand)
 			[],...
 			0,...
 			f_max_area);
-			Settings_Max_Fig_Area = f_max_area;
+		Settings_Max_Fig_Area = f_max_area;
 		% Set the special properties for this plot
 		f_ax.YDir = 'reverse';
 		f_under_ax.YDir = 'reverse';
