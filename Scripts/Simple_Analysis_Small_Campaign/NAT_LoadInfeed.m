@@ -47,7 +47,7 @@ Settings_Loadtype = {
 % ID  ,  Data Set ID  ,  Legendstr. 
 	 1, 'Households'  , 'Haushaltslast'   ;...
 	 2, 'Solar'       , 'PV Einspeisung'  ;...
-	 3, 'El_Mobility' , 'Elektromobilität';...
+	 3, 'El_Mobility' , 'Elektromobilitï¿½t';...
 	};
 
 Settings_Datatype = {
@@ -226,6 +226,7 @@ Option_Plot_y_max_Value  =   5; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
 Option_Plot_y_step_Value = 0.5; % 'kW'
 Option_Plot_y_Label_Step =   2; % Spacing between label entries
+Option_Plot_y_Num_Format = '%1.1f'; % Number Format of 
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_Y_Direction = 'Leistung [kW]';
@@ -245,12 +246,6 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		if ~isfield(Saved_Data_Profiles, ['Loadtype_',Active_LoadType])
 			Saved_Data_Profiles.(['Loadtype_',Active_LoadType])= [];
 		end
-		
-		[tick_y_Positions, tick_y_Labels] = get_tick(...
-			Option_Plot_y_min_Value,...
-			Option_Plot_y_step_Value,...
-			Option_Plot_y_max_Value,...
-			Option_Plot_y_Label_Step);
 	end
 %- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 %     Prepare Data...
@@ -404,6 +399,13 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			% Y Axis
 			if Option_Plot_y_max_Value > 0
 				f_ax.YAxis.Limits  = [Option_Plot_y_min_Value, Option_Plot_y_max_Value];
+				[tick_y_Positions, tick_y_Labels] = get_tick(...
+					Option_Plot_y_min_Value,...
+					Option_Plot_y_step_Value,...
+					Option_Plot_y_max_Value,...
+					Option_Plot_y_Label_Step,...
+					'',... % no unit
+					Option_Plot_y_Num_Format);
 				f_ax.YAxis.TickValues   = tick_y_Positions;
 				f_ax.YAxis.TickLabels   = tick_y_Labels;
 			end
@@ -482,7 +484,7 @@ Option_Bar_y_Label_Step =   2; % Spacing between label entries
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = 'rel. Häufigkeit [%]';
+Labels_Y_Direction = 'rel. Hï¿½ufigkeit [%]';
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 for i_d = 1 : Saved_Data_Input.Number_Datasets
@@ -789,7 +791,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber Szenarien fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -946,7 +948,7 @@ Option_Plot_Size =   'compact'; % 'compact', 'medium', 'large'
 % = = = = = = = = = = = = = = = = = 
 % Labels_Title = ['Histogramme ï¿½ber die Einzelprofile fï¿½r Datensatz "',Settings_Datasets{Option_Type_Load,3},'"'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title       = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1059,7 +1061,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Summe)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
@@ -1236,7 +1238,7 @@ Option_Plot_Size =   'medium'; % 'compact', 'medium', 'large'
 % Labels_Title = ['Entwicklung der Histogramme mit anwachsender Profilzahl fï¿½r Datensatz "',...
 % 	Settings_Datasets{Option_Type_Load,3},'" (Einzelprofile)'];
 Labels_X_Direction = 'Leistung [kW]';
-Labels_Y_Direction = '% rel. Häufigkeit';
+Labels_Y_Direction = '% rel. Hï¿½ufigkeit';
 Labels_Title = []; % No title for Word output
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
