@@ -1659,7 +1659,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 		end
 		if Option_Show_Legend
 			if Option_Show_Area && Option_Show_Legend_Detail
-				[Labels_Scenarios,Labels_Scen_Style] = add_mean_min_max_entry_to_legend(fig_profiledevelopment,Labels_Scenarios,Labels_Scen_Style);
+				[Labels_Scenarios,Labels_Scen_Style] = add_mean_min_max_entry_to_legend(fig_profiledevelopment,Labels_Scenarios,Labels_Scen_Style,[]);
 			end
 			legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
 		end
@@ -1672,7 +1672,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			f_max_area);
 		if Option_Show_Legend
 			f_lg = get(f_ax, 'Legend');
-			f_lg.ItemTokenSize = [8, 8];
+			f_lg.ItemTokenSize = [16, 16];
 		end
 	end
 end
