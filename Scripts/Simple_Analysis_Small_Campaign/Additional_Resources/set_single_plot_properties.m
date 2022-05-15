@@ -6,13 +6,16 @@ function max_area = set_single_plot_properties(ax, titlestr, xlabelstr, ylabelst
 if ~isempty(xlabelstr)
 	ax.XLabel.String = xlabelstr;
 	ax.XLabel.FontWeight = 'bold';
+	ax.XLabel.Color = 'k';
 end
 if ~isempty(ylabelstr)
 	ax.YLabel.String = ylabelstr;
 	ax.YLabel.FontWeight = 'bold';
+	ax.YLabel.Color = 'k';
 end
 if show_title && ~isempty(titlestr)
 	ax.Title.String = titlestr;
+	ax.Title.Color = 'k';
 end
 
 % Set the area of the plot axes:
