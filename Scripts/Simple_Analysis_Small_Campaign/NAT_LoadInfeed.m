@@ -1,10 +1,13 @@
 %%= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % clear();
-Saved_Data_Input = [];
-Saved_Data_Profiles = [];
-Saved_Data_Shuffeld = [];
+Saved_Data_Input       = [];
+Saved_Data_Profiles    = [];
+Saved_Data_Shuffeld    = [];
+Saved_Data_Loadprofile = [];
 % Add folder with help functions / needed classes to path:
 addpath([fileparts(matlab.desktop.editor.getActiveFilename), filesep, 'Additional_Resources']);
+Path_Data_Loadprofile = [fileparts(matlab.desktop.editor.getActiveFilename), filesep,...
+	'Additional_Resources', filesep, 'H0-Standardlastprofil-Werktag.csv'];
 %#ok<*UNRCH>
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 %% Initial Set Up
@@ -82,6 +85,13 @@ for i_d = 1: numel(folders)
 end
 disp('... done!');
 Saved_Data_Input.Number_Datasets = numel(folders);
+
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+% Load the Loadprofile data
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if isempty(Saved_Data_Loadprofile)
+	Saved_Data_Loadprofile = readtable(Path_Data_Loadprofile);
+end
 
 clear folders i_*
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -199,33 +209,35 @@ clear Active_* Option_* Labels_* Data* tick_* i j k l f_* i_*
 %% Plot timeline summary figures 
 % = = = = = = = = = = = = = = = = =
 % Option_Active_Scenarios = 2:2:10; % Sommer
-% Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
+Option_Active_Scenarios = 1:10;%[4, 6, 8, 10];
 % Option_Active_Scenarios = 1:2:10; % Winter
-Option_Active_Scenarios = 3; %and 4
+% Option_Active_Scenarios = 3; %and 4
 %- - - - - - - - - - - - - - - - - -
-Option_Type_Load      = 2; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
+Option_Type_Load      = 1; % 1 = 'Households', 2 = 'Solar', 3 = El_Mobility
 Option_Type_Data      = 2; % 2 ='Mean', 3 ='min', 4 ='max', 5 ='5%q', 6='95%q' 
-Option_Use_GridSum    = 1; % 1 = Use the sum over all single profiles per grid
-Option_Show_Mean_Grid = 1; % 1 = Calulculate mean profile over all grid connection points
+Option_Use_GridSum    = 0; % 1 = Use the sum over all single profiles per grid
+Option_Show_Mean_Grid = 0; % 1 = Calulculate mean profile over all grid connection points
+Option_Show_Comp_H0LP = 1; % 1 = Show the H0 standardized profile for comparison
 %- - - - - - - - - - - - - - - - - -
 Option_Show_Title         = 0; % 1 = Show Plot Title
-Option_Show_Min_Max       = 1; % 1 = Plot also min and max of the profiles    --+
-Option_Distinct_Seasons   = 0; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
+Option_Show_Min_Max       = 0; % 1 = Plot also min and max of the profiles    --+
+Option_Distinct_Seasons   = 1; % 1 = Plot the season with different linestyle --+-- Only one of them should be 1! 
 Option_Default_Line_Width = 1.5;
 Option_Show_Legend        = 1; %and 0
+Option_Legend_Position    = 'northwest'; % 'northeast'
 Option_Show_Y_Label       = 1; %and 0
 Settings_Max_Fig_Area     = [0.0918    0.1236    0.0364    0.0294];
-Option_Plot_Size          = 'medium'; % 'compact', 'medium', 'large'
+Option_Plot_Size          = 'large'; % 'compact', 'medium', 'large'
 %- - - - - - - - - - - - - - - - - -
 Option_Plot_x_max_Value  = 144; % x10 minutes (-1 ... autoscale)
 Option_Plot_x_min_Value  =   0; % x10 minutes
 Option_Plot_x_step_Value =  60; % minutes
-Option_Plot_x_Label_Step =   2; % Spacing between label entries
+Option_Plot_x_Label_Step =   1; % Spacing between label entries
 %- - - - - - - - - - - - - - - - - - 
-Option_Plot_y_max_Value  =   5; % 'kW' (-1 ... autoscale)
+Option_Plot_y_max_Value  = 1.2; % 'kW' (-1 ... autoscale)
 Option_Plot_y_min_Value  =   0; % 'kW'
-Option_Plot_y_step_Value = 0.5; % 'kW'
-Option_Plot_y_Label_Step =   2; % Spacing between label entries
+Option_Plot_y_step_Value = 0.2; % 'kW'
+Option_Plot_y_Label_Step =   1; % Spacing between label entries
 Option_Plot_y_Num_Format = '%1.1f'; % Number Format of 
 % = = = = = = = = = = = = = = = = =
 Labels_Title       = '';
@@ -294,7 +306,26 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 			fig_profilesummary.(Active_Datatype{i_t,2}) = set_up_singleplot(Option_Plot_Size);
 			Labels_Scenarios = {};
 			Labels_Scen_Style = [];
+			
 			for i_s = 1 : size(Active_Scenarios,1)
+				if Option_Show_Comp_H0LP && i_s <= 1
+					% plot the H0-Profile
+					f_time = (0:96)*144/96;
+					f_time_plot = 0:144;
+					f_plot_winter = interp1(f_time, Saved_Data_Loadprofile.Winter/1000, f_time_plot)';
+					f_plot_winter = [f_plot_winter(5:144);f_plot_winter(1:4)];
+					f_l = plot(f_plot_winter);
+					hold on;
+					f_l.Color = [127,127,127]/256;
+					f_l.LineWidth = Option_Default_Line_Width + 1;
+					f_plot_summer = interp1(f_time, Saved_Data_Loadprofile.Sommer/1000, f_time_plot)';
+					f_plot_summer = [f_plot_summer(5:144);f_plot_summer(1:4)];
+					f_l = plot(f_plot_summer);
+					f_l.Color = [127,127,127]/256;
+					f_l.LineWidth = Option_Default_Line_Width + 1;
+					f_l.LineStyle = ':';
+				end
+				
 				Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).([Active_Datatype{i_t,2},'_complete']) = 1;
 				Data_Stored = Saved_Data_Profiles.(['Loadtype_',Active_LoadType]).(['Saved_',num2str(Active_Scenarios{i_s,1})]).(Active_Datatype{i_t,2});
 				if isempty(Data_Stored)
@@ -371,6 +402,14 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 					f_l.LineWidth = Option_Default_Line_Width;
 					drawnow;
 				end
+				if Option_Show_Comp_H0LP && (i_s == size(Active_Scenarios,1))
+					% Add H0-Profile entry to legend
+					f_l = plot(nan, nan);
+					f_l.Color = [100,100,100]/256;
+					f_l.LineWidth = Option_Default_Line_Width + 1;
+					Labels_Scenarios{end+1} = 'H0 Profil'; %#ok<SAGROW>
+					Labels_Scen_Style(end+1) = f_l;        %#ok<SAGROW>
+				end
 			end
 			
 			% Disable y-label and legend in subsequent plots
@@ -421,7 +460,7 @@ for i_d = 1 : Saved_Data_Input.Number_Datasets
 						add_season_entry_to_legend(fig_profilesummary.(Active_Datatype{i_t,2}),...
 						Option_Default_Line_Width, Labels_Scenarios, Labels_Scen_Style, 'line');
 				end
-				legend(Labels_Scen_Style, Labels_Scenarios, 'Location','northeast');
+				legend(Labels_Scen_Style, Labels_Scenarios, 'Location',Option_Legend_Position);
 			end
 			% Configuration
 			set_default_plot_properties(f_ax);
