@@ -36,15 +36,15 @@ t = tiledlayout(5,3,'TileSpacing', 'none', 'Padding', 'none');
 
 if ~isempty(titlestr)
 	title(t,titlestr,...
-		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold')
+		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold','Color','k')
 end
 if ~isempty(xlabelstr)
 	xlabel(t,xlabelstr,...
-		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold')
+		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold','Color','k')
 end
 if ~isempty(ylabelstr)
 	ylabel(t,ylabelstr,...
-		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold')
+		'FontName','Palatino Linotype', 'FontSize', Fontsize_big,'FontWeight','bold','Color','k')
 end
 end
 
