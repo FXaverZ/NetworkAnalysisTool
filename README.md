@@ -3,6 +3,8 @@ Detailed description under [Wiki](https://github.com/FXaverZ/NetworkAnalysisTool
 
 Link to [Datenstructuredocument](https://docs.google.com/spreadsheets/d/1t5LASSJUTRudgFsh8Z0A3TpSzqCkcQceqHsrnVQB8Hk/edit?usp=sharing) (Google Tabellen).
 
+For more information see also my [Phd Thesis](https://www.researchgate.net/publication/364322051_Methodik_zur_Bewertung_und_zum_Vergleich_von_Verteilnetz-Management-Konzepten#fullTextFileContent) (in German, Chapter 4).
+
 ## System Requirements
 
 Needed Software:
